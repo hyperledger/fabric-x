@@ -80,7 +80,7 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 - [Fabric-X Orderer](https://github.com/hyperledger/fabric-x-orderer) Github repository
 - [Fabric-X Endorser](https://github.com/hyperledger/fabric-x-endorser)
 - [Fabric-Token-SDK](https://github.com/hyperledger-labs/fabric-token-sdk) and [Fabric-Smart-Client](https://github.com/hyperledger-labs/fabric-smart-client) Github repositories
-- [Fabrix-X Common](https://github.com/hyperledger/fabric-x-common) Github repository - contains new CLIs and protobufs
+- [Fabrix-X](https://github.com/hyperledger/fabric-x) Github repository - contains new CLIs and protobufs
 - [Sample deployment scripts](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection)
 
 ## Coming soon...
