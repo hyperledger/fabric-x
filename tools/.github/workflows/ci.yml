@@ -1,0 +1,48 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+
+  lint:
+    name: Lint and Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: scripts/install-dev-dependencies.sh
+
+      - name: Lint
+        run: |
+          # Apply automatic formatting.
+          gofmt -w .
+          goimports -local "github.com/hyperledger/fabric-x" -w .
+          # Check if original code changed due to formatting.
+          git diff --exit-code
+          # Fetch main to only show new lint issues.
+          git fetch -u origin main:main
+          make lint
+
+      - name: Build tools
+        run: make tools
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: scripts/install-dev-dependencies.sh
+      - run: make test
