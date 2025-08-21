@@ -65,18 +65,47 @@ lint: FORCE
 	@echo "Running License Header Linters..."
 	scripts/license-lint.sh
 
+# ---------------------------------------------------------------------
+# Container image build settings
+# ---------------------------------------------------------------------
+IMAGE_NAME ?= docker.io/hyperledger/fabric-x-tools
+IMAGE_TAG  ?= latest
+DOCKERFILE ?= ./tools/images/Dockerfile
+PLATFORMS  ?= linux/amd64,linux/arm64,linux/s390x
+PROJECT_DIR := $(shell dirname $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST)))))
+
+# Detect available container runtime (docker preferred, fallback podman)
+CONTAINER_RUNTIME ?= $(shell command -v docker 2>/dev/null || command -v podman 2>/dev/null)
+
 # Build the fabric-x-tools image for the current machine platform.
 .PHONY: build-fabric-x-tools-image
-build-fabric-x-tools-image:
-	./tools/images/build_image.sh --tag docker.io/hyperledger/fabric-x-tools:$(IMAGE_TAG) -f ./tools/images/Dockerfile
+build-fabric-x-tools-image: ## Build the fabric-x-tools image for the current machine platform
+	$(CONTAINER_RUNTIME) build -f $(DOCKERFILE) \
+		-t $(IMAGE_NAME):$(IMAGE_TAG) \
+		--load \
+		$(PROJECT_DIR)
 
 # Build the fabric-x-tools image for multiple platforms.
 .PHONY: build-fabric-x-tools-multiplatform-image
-build-fabric-x-tools-multiplatform-image:
-	./tools/images/build_image.sh --tag docker.io/hyperledger/fabric-x-tools:$(IMAGE_TAG) -f ./tools/images/Dockerfile --multiplatform --push
+build-fabric-x-tools-multiplatform-image: ## Build the fabric-x-tools image for multiple platforms
+ifeq ($(CONTAINER_RUNTIME),docker)
+	$(CONTAINER_RUNTIME) buildx build \
+		-f $(DOCKERFILE) \
+		--platform $(PLATFORMS) \
+		-t $(IMAGE_NAME):$(IMAGE_TAG) \
+		--push \
+		$(PROJECT_DIR)
+else ifeq ($(CONTAINER_RUNTIME),podman)
+	$(CONTAINER_RUNTIME) manifest create $(IMAGE_NAME):$(IMAGE_TAG) || true
+	$(CONTAINER_RUNTIME) build \
+		-f $(DOCKERFILE) \
+		--platform $(PLATFORMS) \
+		--manifest $(IMAGE_NAME):$(IMAGE_TAG) \
+		$(PROJECT_DIR)
+	$(CONTAINER_RUNTIME) manifest push $(IMAGE_NAME):$(IMAGE_TAG)
+else
+	@echo "Error: Neither Docker nor Podman is installed."
+	@exit 1
+endif
 
-# https://www.gnu.org/software/make/manual/html_node/Force-Targets.html
-# If a rule has no prerequisites or recipe, and the target of the rule is a nonexistent file,
-# then make imagines this target to have been updated whenever its rule is run.
-# This implies that all targets depending on this one will always have their recipe run.
 FORCE:
