@@ -20,6 +20,9 @@ jobs:
   lint:
     name: Lint and Build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -28,6 +31,7 @@ jobs:
       - run: scripts/install-dev-dependencies.sh
 
       - name: Lint
+        working-directory: tools
         run: |
           gofmt -w .
           goimports -local "github.com/hyperledger/fabric-x" -w .
@@ -41,6 +45,9 @@ jobs:
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -75,10 +82,15 @@ jobs:
            echo "IMAGE_PREFIX=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
           fi
 
-      - name: Build single-platform image (local load)
-        run: |
-          IMAGE_TAG=${GITHUB_SHA::8}
-          make build-fabric-x-tools-image IMAGE_TAG=$IMAGE_TAG
+      - name: Build and Push Single-Platform Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./tools
+          file: ./tools/images/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:latest
 
   docker-release:
     name: Docker Release (Multi-Platform Push)
@@ -116,7 +128,7 @@ jobs:
       - name: Build and Push Multi-Platform Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./tools
           file: ./tools/images/Dockerfile
           platforms: linux/amd64,linux/arm64,linux/s390x
           push: true
