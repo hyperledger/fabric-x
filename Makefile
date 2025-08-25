@@ -44,7 +44,8 @@ GO_TEST_FMT_FLAGS := -hide empty-packages
 ## Run all tests
 .PHONY: test
 test: FORCE
-	@$(go_test) ./... | gotestfmt ${GO_TEST_FMT_FLAGS}
+	@echo "Running Go unit tests..."
+	cd tools && $(go_test) ./... | gotestfmt ${GO_TEST_FMT_FLAGS}
 
 .PHONY: $(TOOLS_EXES)
 $(TOOLS_EXES): %: $(BUILD_DIR)/% ## Builds a native binary
@@ -63,7 +64,7 @@ clean: ## Cleans the build area
 .PHONY: lint
 lint: FORCE
 	@echo "Running Go Linters..."
-	golangci-lint run --color=always --new-from-rev=main --timeout=4m
+	cd tools && golangci-lint run --color=always --new-from-rev=main --timeout=4m ./...
 	@echo "Running License Header Linters..."
 	scripts/license-lint.sh
 
