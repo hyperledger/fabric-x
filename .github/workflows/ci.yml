@@ -25,9 +25,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: tools/go.mod
-
-      - name: Install goimports
-        run: go install golang.org/x/tools/cmd/goimports@latest
+      - run: scripts/install-dev-dependencies.sh
 
       - name: Lint
         run: |
@@ -48,6 +46,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: tools/go.mod
+      - run: scripts/install-dev-dependencies.sh
       - run: make test
 
   docker-build:
