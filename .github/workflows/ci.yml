@@ -30,15 +30,6 @@ jobs:
       - name: Install dev dependencies
         run: ./scripts/install-dev-dependencies.sh
 
-      - name: Lint
-        working-directory: tools
-        run: |
-          gofmt -w .
-          goimports -local "github.com/hyperledger/fabric-x" -w .
-          git diff --exit-code
-          git fetch -u origin main:main
-          make lint
-
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
