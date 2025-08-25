@@ -63,7 +63,6 @@ clean: ## Cleans the build area
 
 .PHONY: lint
 lint: FORCE
-	lint: FORCE
 	@echo "Running Go Linters..."
 	cd tools && golangci-lint run --disable=errcheck,staticcheck --timeout=4m ./...
 	@echo "Running License Header Linters..."
