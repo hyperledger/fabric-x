@@ -42,6 +42,7 @@ tools: $(TOOLS_EXES) ## Builds all tools
 GO_TEST_FMT_FLAGS := -hide empty-packages
 
 ## Run all tests
+.PHONY: test
 test: FORCE
 	@$(go_test) ./... | gotestfmt ${GO_TEST_FMT_FLAGS}
 
@@ -59,6 +60,7 @@ $(BUILD_DIR)/%:
 clean: ## Cleans the build area
 	-@rm -rf $(BUILD_DIR)
 
+.PHONY: lint
 lint: FORCE
 	@echo "Running Go Linters..."
 	golangci-lint run --color=always --new-from-rev=main --timeout=4m
