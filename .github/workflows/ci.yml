@@ -31,7 +31,6 @@ jobs:
         run: ./scripts/install-dev-dependencies.sh
 
       - name: Lint
-        working-directory: tools
         run: |
           gofmt -w .
           goimports -local "github.com/hyperledger/fabric-x" -w .
@@ -52,7 +51,6 @@ jobs:
         run: ./scripts/install-dev-dependencies.sh
 
       - name: Run unit tests
-        working-directory: tools
         run: make test
         
   docker-build:
