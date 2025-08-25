@@ -20,15 +20,15 @@ jobs:
   lint:
     name: Lint and Build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tools
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-go@v5
         with:
           go-version-file: tools/go.mod
-      - run: scripts/install-dev-dependencies.sh
+
+      - name: Install dev dependencies
+        run: ./scripts/install-dev-dependencies.sh
 
       - name: Lint
         working-directory: tools
@@ -39,23 +39,22 @@ jobs:
           git fetch -u origin main:main
           make lint
 
-      - name: Build tools
-        run: make tools
-
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tools
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version-file: tools/go.mod
-      - run: scripts/install-dev-dependencies.sh
-      - run: make test
 
+      - name: Install dev dependencies
+        run: ./scripts/install-dev-dependencies.sh
+
+      - name: Run unit tests
+        working-directory: tools
+        run: make test
+        
   docker-build:
     name: Docker Build (Single Platform)
     runs-on: ubuntu-latest
