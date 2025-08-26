@@ -78,7 +78,7 @@ jobs:
           else
            echo "IMAGE_PREFIX=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
           fi
-          echo "REPO_PATH=github.com/${IMAGE_PREFIX}" >> $GITHUB_ENV
+          echo "REPO_PATH=github.com/${IMAGE_PREFIX}/fabric-x" >> $GITHUB_ENV
 
       - name: Build and Push Single-Platform Docker Image
         uses: docker/build-push-action@v6
@@ -125,7 +125,7 @@ jobs:
           else
            echo "IMAGE_PREFIX=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
           fi
-          echo "REPO_PATH=github.com/${IMAGE_PREFIX}" >> $GITHUB_ENV
+          echo "REPO_PATH=github.com/${IMAGE_PREFIX}/fabric-x" >> $GITHUB_ENV
 
       - name: Build and Push Multi-Platform Docker Image
         uses: docker/build-push-action@v6
