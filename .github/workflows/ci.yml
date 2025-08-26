@@ -1,0 +1,142 @@
+# Copyright Contributors
+# SPDX-License-Identifier: Apache-2.0
+
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+    tags:
+      - "v*"   # Also trigger on version tags (e.g. v0.1.0)
+  pull_request:
+    branches: [ "**" ]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+
+  lint:
+    name: Lint and Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/go.mod
+
+      - name: Install dev dependencies
+        run: ./scripts/install-dev-dependencies.sh
+
+      - name: Lint
+        run: |
+          gofmt -w .
+          goimports -local "github.com/hyperledger/fabric-x" -w .
+          git diff --exit-code
+          git fetch -u origin main:main
+          make lint
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/go.mod
+
+      - name: Install dev dependencies
+        run: ./scripts/install-dev-dependencies.sh
+
+      - name: Run unit tests
+        run: make test
+        
+  docker-build:
+    name: Docker Build (Single Platform)
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set image prefix
+        run: |
+          if [ "$GITHUB_REPOSITORY_OWNER" == "hyperledger" ]; then
+           echo "IMAGE_PREFIX=hyperledger"  >> $GITHUB_ENV
+          else
+           echo "IMAGE_PREFIX=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+          fi
+          echo "REPO_PATH=github.com/${IMAGE_PREFIX}/fabric-x" >> $GITHUB_ENV
+
+      - name: Build and Push Single-Platform Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./tools
+          file: ./tools/images/Dockerfile
+          platforms: linux/amd64
+          push: true
+          build-args: |
+            FABRIC_X_VERSION=${{ github.ref_name }}
+            REPO_PATH=${{ env.REPO_PATH }}
+          tags: |
+            docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:latest
+
+  docker-release:
+    name: Docker Release (Multi-Platform Push)
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU (for cross-platform builds)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract version from tag (if release)
+        id: extract
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      
+      - name: Set image prefix
+        run: |
+          if [ "$GITHUB_REPOSITORY_OWNER" == "hyperledger" ]; then
+           echo "IMAGE_PREFIX=hyperledger"  >> $GITHUB_ENV
+          else
+           echo "IMAGE_PREFIX=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+          fi
+          echo "REPO_PATH=github.com/${IMAGE_PREFIX}/fabric-x" >> $GITHUB_ENV
+
+      - name: Build and Push Multi-Platform Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./tools
+          file: ./tools/images/Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/s390x
+          push: true
+          build-args: |
+            FABRIC_X_VERSION=${{ github.ref_name }}
+            REPO_PATH=${{ env.REPO_PATH }}
+          tags: |
+            docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:latest
+            docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:${{ env.VERSION }}
