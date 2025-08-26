@@ -80,10 +80,16 @@ PROJECT_DIR := $(shell dirname $(shell dirname $(realpath $(lastword $(MAKEFILE_
 # Detect available container runtime (docker preferred, fallback podman)
 CONTAINER_RUNTIME ?= $(shell command -v docker 2>/dev/null || command -v podman 2>/dev/null)
 
+# Default values (can be overridden at runtime: make build-fabric-x-tools-image FABRIC_X_VERSION=main REPO_PATH=github.com/<your-fork>/fabric-x)
+FABRIC_X_VERSION ?= latest
+REPO_PATH ?= github.com/hyperledger/fabric-x
+
 # Build the fabric-x-tools image for the current machine platform.
 .PHONY: build-fabric-x-tools-image
 build-fabric-x-tools-image: ## Build the fabric-x-tools image for the current machine platform
 	$(CONTAINER_RUNTIME) build -f $(DOCKERFILE) \
+		--build-arg FABRIC_X_VERSION=$(FABRIC_X_VERSION) \
+		--build-arg REPO_PATH=$(REPO_PATH) \
 		-t $(IMAGE_NAME):$(IMAGE_TAG) \
 		--load \
 		$(PROJECT_DIR)
@@ -94,6 +100,8 @@ build-fabric-x-tools-multiplatform-image: ## Build the fabric-x-tools image for 
 ifeq ($(CONTAINER_RUNTIME),docker)
 	$(CONTAINER_RUNTIME) buildx build \
 		-f $(DOCKERFILE) \
+		--build-arg FABRIC_X_VERSION=$(FABRIC_X_VERSION) \
+		--build-arg REPO_PATH=$(REPO_PATH) \
 		--platform $(PLATFORMS) \
 		-t $(IMAGE_NAME):$(IMAGE_TAG) \
 		--push \
@@ -102,6 +110,8 @@ else ifeq ($(CONTAINER_RUNTIME),podman)
 	$(CONTAINER_RUNTIME) manifest create $(IMAGE_NAME):$(IMAGE_TAG) || true
 	$(CONTAINER_RUNTIME) build \
 		-f $(DOCKERFILE) \
+		--build-arg FABRIC_X_VERSION=$(FABRIC_X_VERSION) \
+		--build-arg REPO_PATH=$(REPO_PATH) \
 		--platform $(PLATFORMS) \
 		--manifest $(IMAGE_NAME):$(IMAGE_TAG) \
 		$(PROJECT_DIR)

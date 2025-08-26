@@ -78,6 +78,7 @@ jobs:
           else
            echo "IMAGE_PREFIX=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
           fi
+          echo "REPO_PATH=github.com/${IMAGE_PREFIX}" >> $GITHUB_ENV
 
       - name: Build and Push Single-Platform Docker Image
         uses: docker/build-push-action@v6
@@ -86,6 +87,9 @@ jobs:
           file: ./tools/images/Dockerfile
           platforms: linux/amd64
           push: true
+          build-args: |
+            FABRIC_X_VERSION=${{ github.ref_name }}
+            REPO_PATH=${{ env.REPO_PATH }}
           tags: |
             docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:latest
 
@@ -121,6 +125,7 @@ jobs:
           else
            echo "IMAGE_PREFIX=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
           fi
+          echo "REPO_PATH=github.com/${IMAGE_PREFIX}" >> $GITHUB_ENV
 
       - name: Build and Push Multi-Platform Docker Image
         uses: docker/build-push-action@v6
@@ -129,6 +134,9 @@ jobs:
           file: ./tools/images/Dockerfile
           platforms: linux/amd64,linux/arm64,linux/s390x
           push: true
+          build-args: |
+            FABRIC_X_VERSION=${{ github.ref_name }}
+            REPO_PATH=${{ env.REPO_PATH }}
           tags: |
             docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:latest
             docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:${{ env.VERSION }}
