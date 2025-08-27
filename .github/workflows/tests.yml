@@ -25,6 +25,6 @@ jobs:
           go-version-file: tools/go.mod
       - name: Install tests utilities
         run: |
-          go install "github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@v2.5.0"
+          go install "github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest"
       - name: Run unit tests
         run: make test
