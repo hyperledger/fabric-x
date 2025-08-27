@@ -30,6 +30,8 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Extract version from tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
       - name: Build and Push Multi-Platform Docker Image
         uses: docker/build-push-action@v6
         with:
@@ -38,7 +40,7 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/s390x
           push: true
           build-args: |
-            FABRIC_X_VERSION=${GITHUB_REF#refs/tags/v}
+            FABRIC_X_VERSION=${{ env.VERSION }}
           tags: |
-            docker.io/hyperledger/fabric-x-tools:${GITHUB_REF#refs/tags/v}
+            docker.io/hyperledger/fabric-x-tools:${{ env.VERSION }}
             docker.io/hyperledger/fabric-x-tools:latest
