@@ -62,11 +62,11 @@ clean: ## Cleans the build area
 	-@rm -rf $(BUILD_DIR)
 
 # Run lint
-# TODO: fix existing lint issues (to find them, remove --new-from-rev=main option)
+# TODO: fix existing lint issues (to find them, remove --new-from-rev=origin/main option)
 .PHONY: lint
 lint: FORCE
 	@echo "Running Go Linters..."
-	cd tools && golangci-lint run --new-from-rev=main --color=always --max-same-issues 0
+	cd tools && golangci-lint run --new-from-rev=origin/main --color=always --max-same-issues 0
 	@echo "Running License Header Linters..."
 	scripts/license-lint.sh
 
