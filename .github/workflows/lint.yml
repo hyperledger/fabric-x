@@ -24,11 +24,7 @@ jobs:
         with:
           go-version-file: tools/go.mod
       - name: Install lint utilities
-        run: ./scripts/install-dev-dependencies.sh
-      - name: Lint
         run: |
-          gofmt -w .
-          goimports -local "github.com/hyperledger/fabric-x" -w .
-          git diff --exit-code
-          git fetch -u origin main:main
-          make lint
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+      - name: Run lint
+        run: make lint

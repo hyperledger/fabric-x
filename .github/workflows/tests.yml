@@ -17,13 +17,14 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: tools/go.mod
-
-      - name: Install dev dependencies
-        run: ./scripts/install-dev-dependencies.sh
-
+      - name: Install tests utilities
+        run: |
+          go install "github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@v2.5.0"
       - name: Run unit tests
         run: make test
