@@ -1,0 +1,30 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: Tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/go.mod
+      - name: Install tests utilities
+        run: |
+          go install "github.com/gotesttools/gotestfmt/v2/cmd/gotestfmt@latest"
+      - name: Run unit tests
+        run: make test

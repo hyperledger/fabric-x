@@ -8,14 +8,13 @@ FROM golang:1.24 AS builder
 
 
 ARG FABRIC_X_VERSION=latest
-ARG REPO_PATH=github.com/hyperledger/fabric-x
 
 # Install binaries directly from GitHub into /tmp/bin
 ENV GOBIN=/tmp/bin
 
-RUN go install ${REPO_PATH}/tools/configtxgen@$FABRIC_X_VERSION
-RUN go install ${REPO_PATH}/tools/cryptogen@$FABRIC_X_VERSION
-RUN go install ${REPO_PATH}/tools/configtxlator@$FABRIC_X_VERSION
+RUN go install github.com/hyperledger/fabric-x/tools/configtxgen@$FABRIC_X_VERSION
+RUN go install github.com/hyperledger/fabric-x/tools/cryptogen@$FABRIC_X_VERSION
+RUN go install github.com/hyperledger/fabric-x/tools/configtxlator@$FABRIC_X_VERSION
 
 FROM registry.access.redhat.com/ubi9/ubi-micro:9.5 AS prod
 WORKDIR /

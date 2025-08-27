@@ -1,9 +1,11 @@
 #!/bin/bash
+
 #
 # Copyright IBM Corp. All Rights Reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+
 REQUIRED_HEADER="SPDX-License-Identifier: Apache-2.0"
 IGNORE_REGEXP="(.+\.(json|pem|yaml|go|pbbin|png)|go.sum|testdata/.*|LICENSE)$"
 
