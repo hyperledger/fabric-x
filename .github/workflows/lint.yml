@@ -1,0 +1,34 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: Lint
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: tools/go.mod
+      - name: Install lint utilities
+        run: ./scripts/install-dev-dependencies.sh
+      - name: Lint
+        run: |
+          gofmt -w .
+          goimports -local "github.com/hyperledger/fabric-x" -w .
+          git diff --exit-code
+          git fetch -u origin main:main
+          make lint
