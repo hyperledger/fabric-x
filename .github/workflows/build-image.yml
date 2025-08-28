@@ -32,7 +32,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Extract version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
-      - name: Build and Push Multi-Platform Docker Image
+      - name: Build and push the fabric-x-tools image
         uses: docker/build-push-action@v6
         with:
           context: ./tools
