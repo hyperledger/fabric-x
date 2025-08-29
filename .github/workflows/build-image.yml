@@ -21,17 +21,46 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up QEMU for cross-platform builds
         uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Extract version from tag
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract and Validate Version from Tag
+        id: extract
+        run: |
+          if [[ "${GITHUB_REF}" =~ ^refs/tags/v([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            echo "✅ Tag validated: $VERSION"
+          else
+            echo "❌ Invalid tag format: ${GITHUB_REF}. Expected format: refs/tags/v<semver>"
+            exit 1
+          fi
+
+      - name: Set image prefix
+        run: |
+          if [ "$GITHUB_REPOSITORY_OWNER" == "hyperledger" ]; then
+           echo "IMAGE_PREFIX=hyperledger" >> $GITHUB_ENV
+          else
+           echo "IMAGE_PREFIX=${{ secrets.DOCKERHUB_USERNAME }}" >> $GITHUB_ENV
+          fi
+
       - name: Build and push the fabric-x-tools image
         uses: docker/build-push-action@v6
         with:
@@ -42,5 +71,7 @@ jobs:
           build-args: |
             FABRIC_X_VERSION=${{ github.ref_name }}
           tags: |
-            docker.io/hyperledger/fabric-x-tools:${{ env.VERSION }}
-            docker.io/hyperledger/fabric-x-tools:latest
+            docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:${{ env.VERSION }}
+            docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:latest
+            ghcr.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:${{ env.VERSION }}
+            ghcr.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:latest
