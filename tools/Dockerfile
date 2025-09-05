@@ -25,4 +25,3 @@ WORKDIR /
 COPY --from=builder /tmp/bin/* /usr/local/bin/
 
 CMD ["bash"]
-
