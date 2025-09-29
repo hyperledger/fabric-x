@@ -20,11 +20,12 @@ GO_TAGS ?=
 go_cmd          ?= go
 go_test         ?= $(go_cmd) test -json -v -timeout 30m
 
-TOOLS_EXES = configtxgen configtxlator cryptogen
+TOOLS_EXES = configtxgen configtxlator cryptogen fxconfig
 
 pkgmap.configtxgen    := $(PKGNAME2)/configtxgen
 pkgmap.configtxlator  := $(PKGNAME2)/configtxlator
 pkgmap.cryptogen      := $(PKGNAME2)/cryptogen
+pkgmap.fxconfig		  := $(PKGNAME2)/fxconfig
 
 .DEFAULT_GOAL := help
 

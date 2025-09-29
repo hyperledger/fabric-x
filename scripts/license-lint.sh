@@ -7,7 +7,7 @@
 #
 
 REQUIRED_HEADER="SPDX-License-Identifier: Apache-2.0"
-IGNORE_REGEXP="(.+\.(json|pem|yaml|go|pbbin|png)|go.sum|testdata/.*|LICENSE)$"
+IGNORE_REGEXP="(.+\.(json|pem|yaml|go|pbbin|png)|go.sum|testdata/.*|LICENSE|gitignore)$"
 
 missing=$(git ls-files | sort -u | grep -vE "${IGNORE_REGEXP}"| xargs grep -L "${REQUIRED_HEADER}")
 
