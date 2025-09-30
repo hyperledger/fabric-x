@@ -46,7 +46,7 @@ GO_TEST_FMT_FLAGS := -hide empty-packages
 .PHONY: test
 test: FORCE
 	@echo "Running Go unit tests..."
-	cd tools && $(go_test) ./... | gotestfmt ${GO_TEST_FMT_FLAGS}
+	cd tools && $(go_test) ./... | go tool gotestfmt ${GO_TEST_FMT_FLAGS}
 
 .PHONY: $(TOOLS_EXES)
 $(TOOLS_EXES): %: $(BUILD_DIR)/% ## Builds a native binary
