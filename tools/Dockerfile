@@ -16,6 +16,7 @@ ENV GOBIN=/tmp/bin
 RUN go install github.com/hyperledger/fabric-x/tools/configtxgen@$FABRIC_X_VERSION
 RUN go install github.com/hyperledger/fabric-x/tools/cryptogen@$FABRIC_X_VERSION
 RUN go install github.com/hyperledger/fabric-x/tools/configtxlator@$FABRIC_X_VERSION
+RUN go install github.com/hyperledger/fabric-x/tools/fxconfig@$FABRIC_X_VERSION
 RUN go install github.com/hyperledger/fabric-x-orderer/cmd/armageddon@$ARMAGEDDON_VERSION
 
 FROM registry.access.redhat.com/ubi9/ubi-micro:9.5 AS prod
