@@ -27,7 +27,7 @@ func TestCreate(t *testing.T) {
 		rootCmd := setupCreate(t)
 		rootCmd.SetArgs([]string{
 			"create",
-			"someNamespaceID",
+			"1",
 			"--channel", "mychannel",
 			"--orderer", "localhost:1234",
 			"--mspConfigPath", "/tmp/msp/",
