@@ -9,6 +9,7 @@ package namespace
 import (
 	"time"
 
+	"github.com/hyperledger/fabric-x-committer/service/verifier/policy"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 )
 
@@ -33,4 +34,11 @@ type NsConfig struct {
 	NamespaceID         string
 	Version             int
 	VerificationKeyPath string
+}
+
+func validateConfig(nsCfg NsConfig) error {
+	if err := policy.ValidateNamespaceID(nsCfg.NamespaceID); err != nil {
+		return err
+	}
+	return nil
 }
