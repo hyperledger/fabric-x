@@ -9,8 +9,9 @@ package namespace
 import (
 	"time"
 
-	"github.com/hyperledger/fabric-x-committer/service/verifier/policy"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
+
+	"github.com/hyperledger/fabric-x-committer/service/verifier/policy"
 )
 
 // DefaultTimeout for gRPC connections.
