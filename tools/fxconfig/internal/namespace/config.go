@@ -37,8 +37,5 @@ type NsConfig struct {
 }
 
 func validateConfig(nsCfg NsConfig) error {
-	if err := policy.ValidateNamespaceID(nsCfg.NamespaceID); err != nil {
-		return err
-	}
-	return nil
+	return policy.ValidateNamespaceID(nsCfg.NamespaceID)
 }
