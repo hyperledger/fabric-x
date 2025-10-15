@@ -20,6 +20,7 @@ import (
 	"github.com/hyperledger/fabric-x-committer/api/protoblocktx"
 	"github.com/hyperledger/fabric-x-committer/api/types"
 	"github.com/hyperledger/fabric-x-committer/utils/signature"
+	"github.com/hyperledger/fabric-x-committer/service/verifier/policy"
 
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 	"github.com/hyperledger/fabric-x-common/internaltools/configtxgen/encoder"
@@ -30,6 +31,11 @@ import (
 
 // DeployNamespace creates a namespace transactions and submits it to the ordering service.
 func DeployNamespace(nsCfg NsConfig, ordererCfg OrdererConfig, mspCfg MSPConfig) error {
+	err := validateConfig(nsCfg)
+	if err != nil {
+		return err
+	}
+	
 	thisMSP, err := setupMSP(mspCfg)
 	if err != nil {
 		return fmt.Errorf("msp setup error: %w", err)
@@ -67,6 +73,13 @@ func DeployNamespace(nsCfg NsConfig, ordererCfg OrdererConfig, mspCfg MSPConfig)
 	}
 
 	return broadcast(ordererCfg, env)
+}
+
+func validateConfig(nsCfg NsConfig) error {
+	if err := policy.ValidateNamespaceID(nsCfg.NamespaceID); err != nil {
+		return err
+	}
+	return nil
 }
 
 // setupMSP instantiates a MSP based on the provided MSPConfig.

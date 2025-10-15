@@ -9,7 +9,6 @@ package namespace
 import (
 	"errors"
 
-	"github.com/hyperledger/fabric-x-committer/service/verifier/policy"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/namespace"
 	"github.com/spf13/cobra"
 )
@@ -42,11 +41,6 @@ func newCreateCommand(deployNamespace deployF) *cobra.Command {
 			}
 
 			nsCfg.VerificationKeyPath, err = cmd.Flags().GetString("pk")
-			if err != nil {
-				return err
-			}
-
-			err := policy.ValidateNamespaceID(nsCfg.NamespaceID)
 			if err != nil {
 				return err
 			}
