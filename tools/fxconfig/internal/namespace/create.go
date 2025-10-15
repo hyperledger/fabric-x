@@ -30,6 +30,11 @@ import (
 
 // DeployNamespace creates a namespace transactions and submits it to the ordering service.
 func DeployNamespace(nsCfg NsConfig, ordererCfg OrdererConfig, mspCfg MSPConfig) error {
+	err := validateConfig(nsCfg)
+	if err != nil {
+		return err
+	}
+
 	thisMSP, err := setupMSP(mspCfg)
 	if err != nil {
 		return fmt.Errorf("msp setup error: %w", err)

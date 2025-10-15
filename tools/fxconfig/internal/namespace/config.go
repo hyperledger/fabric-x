@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
+
+	"github.com/hyperledger/fabric-x-committer/service/verifier/policy"
 )
 
 // DefaultTimeout for gRPC connections.
@@ -33,4 +35,8 @@ type NsConfig struct {
 	NamespaceID         string
 	Version             int
 	VerificationKeyPath string
+}
+
+func validateConfig(nsCfg NsConfig) error {
+	return policy.ValidateNamespaceID(nsCfg.NamespaceID)
 }
