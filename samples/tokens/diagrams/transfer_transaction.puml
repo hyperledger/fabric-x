@@ -1,0 +1,58 @@
+@startuml
+title Transfer transaction
+
+actor "Alice" as a
+participant "Owner 1\n\nTransferView" as tv #CBEFFD
+participant "Owner 2\n\nAcceptCashView" as bi #CBEFFD
+
+entity "Endorsers" as peers #D4FDCE
+entity "Fabric(X) Orderers" as orderers #D4FDCE
+
+== Create transaction ==
+a -> tv : transfer 100 TOK\nto dan on Owner 2
+activate tv #CBEFFD
+activate bi #CBEFFD
+tv -> bi : request recipient identity
+
+activate tv
+
+activate bi
+bi -> bi : create anonymous\n(one-time-use) key
+bi -> bi : generate secret for\nZKP commitments
+return public key, secret
+deactivate tv
+
+tv -> tv : select input tokens
+activate tv
+tv -> tv : create token transaction\n(input, output, proofs, signature)
+tv -> bi : share transaction
+activate bi
+bi -> bi : open commitments,\nverify, sign, store\nPending transaction
+return signed response
+deactivate tv
+
+== Get endorsements ==
+tv -> peers : request endorsement
+activate peers #D4FDCE
+peers -> peers : validate transaction using\n the token validation logic
+return endorsed (signed) Fabric(X) transaction
+deactivate tv
+
+== Commit transaction ==
+tv -> orderers : submit Fabric(X) transaction
+activate tv
+activate orderers #D4FDCE
+orderers -> orderers : verify transaction,\ncreate block
+orderers --> peers : broadcast new block
+deactivate orderers
+peers --> tv
+tv -> tv : commit
+tv --> a : OK
+deactivate tv
+deactivate tv
+
+peers --> bi
+bi -> bi : commit
+deactivate bi
+
+@enduml
