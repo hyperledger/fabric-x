@@ -1,3 +1,8 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 FROM golang:1.24.5-bookworm AS builder
 
 ENV GOCACHE=/go-cache \

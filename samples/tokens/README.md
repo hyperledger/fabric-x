@@ -1,3 +1,6 @@
+<!--
+SPDX-License-Identifier: Apache-2.0
+-->
 # Token SDK Sample
 
 The **Token SDK Sample** demonstrates how to:

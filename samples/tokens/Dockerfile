@@ -1,3 +1,8 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 # build stage
 FROM golang:1.25.2 AS builder
 WORKDIR /go/src/app
