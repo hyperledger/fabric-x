@@ -97,7 +97,7 @@ Ensure Fabric binaries are in your `PATH` and Docker images are available. If no
 ```shell
 curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh && chmod +x install-fabric.sh
 ./install-fabric.sh --fabric-version 3.1.1
-export $PATH=$(pwd)/fabric-samples/bin:$PATH
+export PATH=$(pwd)/fabric-samples/bin:$PATH
 ```
 
 > [!TIP]
