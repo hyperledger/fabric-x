@@ -1,0 +1,151 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FX Endorser 1",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/samples/tokens/endorser",
+            "cwd": "${workspaceFolder}/samples/tokens/conf/endorser1",
+            "buildFlags": [
+                "-tags=fabricx"
+            ],
+            "args": [
+                "--port",
+                "9300"
+            ],
+        },
+        {
+            "name": "FX Owner 1",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/samples/tokens/owner",
+            "cwd": "${workspaceFolder}/samples/tokens/conf/owner1",
+            "buildFlags": [
+                "-tags=fabricx"
+            ],
+            "args": [
+                "--port",
+                "9500"
+            ],
+        },
+        {
+            "name": "FX Owner 2",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/samples/tokens/owner",
+            "cwd": "${workspaceFolder}/samples/tokens/conf/owner2",
+            "buildFlags": [
+                "-tags=fabricx"
+            ],
+            "args": [
+                "--port",
+                "9600"
+            ],
+        },
+        {
+            "name": "F3 Issuer",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/samples/tokens/issuer",
+            "cwd": "${workspaceFolder}/samples/tokens/conf-f3/issuer",
+            "args": [
+                "--port",
+                "9100"
+            ],
+        },
+        {
+            "name": "F3 Endorser 1",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/samples/tokens/endorser",
+            "cwd": "${workspaceFolder}/samples/tokens/conf-f3/endorser1",
+            "args": [
+                "--port",
+                "9300"
+            ],
+        },
+        {
+            "name": "F3 Endorser 2",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/samples/tokens/endorser",
+            "cwd": "${workspaceFolder}/samples/tokens/conf-f3/endorser2",
+            "args": [
+                "--port",
+                "9400"
+            ],
+        },
+        {
+            "name": "F3 Owner 1",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/samples/tokens/owner",
+            "cwd": "${workspaceFolder}/samples/tokens/conf-f3/owner1",
+            "args": [
+                "--port",
+                "9500"
+            ],
+        },
+        {
+            "name": "F3 Owner 2",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/samples/tokens/owner",
+            "cwd": "${workspaceFolder}/samples/tokens/conf-f3/owner2",
+            "args": [
+                "--port",
+                "9600"
+            ],
+        },
+        {
+            "name": "FX Issuer",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/samples/tokens/issuer",
+            "cwd": "${workspaceFolder}/samples/tokens/conf/issuer",
+            "buildFlags": [
+                "-tags=fabricx"
+            ],
+            "args": [
+                "--port",
+                "9100"
+            ],
+        },
+    ],
+    "compounds": [
+        {
+            "name": "Fabric-X: Run all",
+            "stopAll": true,
+            "configurations": [
+                "FX Issuer",
+                "FX Endorser 1",
+                "FX Owner 1",
+                "FX Owner 2"
+            ],
+        },
+        {
+            "name": "Fabric 3: Run all",
+            "stopAll": true,
+            "configurations": [
+                "F3 Issuer",
+                "F3 Endorser 1",
+                "F3 Endorser 2",
+                "F3 Owner 1",
+                "F3 Owner 2"
+            ],
+        },
+    ]
+}

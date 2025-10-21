@@ -1,0 +1,96 @@
+logging:
+  spec: info
+  format: '%{color}%{time:15:04:05.000} [%{module}] %{shortfunc} %{level:.4s}%{color:reset} %{message}'
+
+fsc:
+  id: endorser1 # CORE_FSC_ID
+  identity:
+    cert:
+      file: ./keys/node.crt
+    key:
+      file: ./keys/node.key
+  p2p:
+    listenAddress: /ip4/0.0.0.0/tcp/9301 # CORE_P2P_LISTENADDRESS
+    type: websocket
+    opts:
+      routing:
+        path: ./routing-config.yaml
+  persistences:
+    default:
+      type: sqlite
+      opts:
+        dataSource: file:./data/fts.sqlite # CORE_FSC_PERSISTENCES_OPTS_DATASOURCE
+  endpoint:
+    resolvers:
+      - name: issuer
+        identity:
+          id: issuer
+          path: ./keys/nodes/issuer.crt
+        addresses:
+          P2P: issuer.example.com:9101
+      - name: endorser1
+        identity:
+          id: endorser1
+          path: ./keys/nodes/endorser1.crt
+        addresses:
+          P2P: endorser1.example.com:9301
+      - name: endorser2
+        identity:
+          id: endorser2
+          path: ./keys/nodes/endorser2.crt
+        addresses:
+          P2P: endorser2.example.com:9401
+      - name: owner1
+        identity:
+          id: owner1
+          path: ./keys/nodes/owner1.crt
+        addresses:
+          P2P: owner1.example.com:9501
+      - name: owner2
+        identity:
+          id: owner2
+          path: ./keys/nodes/owner2.crt
+        addresses:
+          P2P: owner2.example.com:9601
+
+fabric:
+  enabled: true
+  default:
+    # mspConfigPath: ./keys/fabric/user
+    msps:
+      - id: user
+        mspType: bccsp
+        mspID: Org1MSP
+        path: ./keys/fabric/user
+      - id: endorser
+        mspType: bccsp
+        mspID: Org1MSP
+        path: ./keys/fabric/endorser
+    tls:
+      enabled: true
+    peers:
+      - address: peer0.org1.example.com:7051
+        tlsRootCertFile: ./keys/fabric/peer-tls-ca.crt
+    channels:
+      - name: mychannel
+        default: true
+
+token:
+  enabled: true
+  tms:
+    mytms:
+      network: default
+      channel: mychannel
+      namespace: token_namespace
+      driver: zkatdlog
+      services:
+        network:
+          fabric:
+            fsc_endorsement:
+              endorser: true
+              id: endorser
+              policy:
+                type: all
+              endorsers:
+                - endorser1
+                - endorser2

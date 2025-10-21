@@ -1,0 +1,17 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+- name: Stop Loadgen
+  ansible.builtin.import_playbook: hyperledger.fabricx.loadgen.stop
+
+- name: Stop Monitoring
+  ansible.builtin.import_playbook: hyperledger.fabricx.monitoring.stop
+
+- name: Stop Fabric-X Committer
+  ansible.builtin.import_playbook: hyperledger.fabricx.committer.stop
+
+- name: Stop Fabric-X Orderer
+  ansible.builtin.import_playbook: hyperledger.fabricx.orderer.stop

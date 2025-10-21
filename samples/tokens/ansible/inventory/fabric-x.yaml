@@ -1,0 +1,148 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+all:
+  vars:
+    ansible_connection: local
+    ansible_user: "{{ lookup('env', 'USER') }}"
+    ansible_host: "{{ lookup('env', 'LOCAL_ANSIBLE_HOST') or 'localhost' }}"
+    project_dir: "{{ lookup('env', 'PROJECT_DIR') or '.' }}"
+    out_dir: "{{ lookup('env', 'OUT_DIR') or project_dir + '/out' }}"
+    out_build_dir: "{{ out_dir }}/build"
+    out_log_dir: "{{ out_dir }}/logs"
+    config_build_dir: "{{ out_build_dir }}/config"
+    deploy_dir: "{{ out_dir }}/local-deployment"
+    remote_config_dir: "{{ deploy_dir }}/{{ inventory_hostname }}/config"
+    source_code_dir: "{{ out_build_dir }}/code"
+    cli_bin_dir: "{{ out_build_dir }}/cli"
+    channel_id: arma
+    node_exporter_port: 9111
+    container_client: docker
+  children:
+    fabric-x:
+      children:
+        fabric-x-orderers:
+          vars:
+            container_network:
+              name: fabric_test
+            organization:
+              name: "OrdererOrg{{ orderer_group }}"
+              domain: "ordererorg{{ orderer_group }}.example.com"
+              role: orderer
+          children:
+            fabric-x-orderer-1:
+              vars:
+                orderer_group: 1
+              hosts:
+                orderer-router-1:
+                  orderer_component_type: router
+                  orderer_rpc_port: 7050
+                orderer-batcher-1:
+                  orderer_shard_id: 1
+                  orderer_component_type: batcher
+                  orderer_rpc_port: 7051
+                orderer-consenter-1:
+                  orderer_component_type: consenter
+                  orderer_rpc_port: 7052
+                orderer-assembler-1:
+                  orderer_component_type: assembler
+                  orderer_rpc_port: 7053
+            fabric-x-orderer-2:
+              vars:
+                orderer_group: 2
+              hosts:
+                orderer-router-2:
+                  orderer_component_type: router
+                  orderer_rpc_port: 7150
+                orderer-batcher-2:
+                  orderer_shard_id: 1
+                  orderer_component_type: batcher
+                  orderer_rpc_port: 7151
+                orderer-consenter-2:
+                  orderer_component_type: consenter
+                  orderer_rpc_port: 7152
+                orderer-assembler-2:
+                  orderer_component_type: assembler
+                  orderer_rpc_port: 7153
+            fabric-x-orderer-3:
+              vars:
+                orderer_group: 3
+              hosts:
+                orderer-router-3:
+                  orderer_component_type: router
+                  orderer_rpc_port: 7250
+                orderer-batcher-3:
+                  orderer_shard_id: 1
+                  orderer_component_type: batcher
+                  orderer_rpc_port: 7251
+                orderer-consenter-3:
+                  orderer_component_type: consenter
+                  orderer_rpc_port: 7252
+                orderer-assembler-3:
+                  orderer_component_type: assembler
+                  orderer_rpc_port: 7253
+            fabric-x-orderer-4:
+              vars:
+                orderer_group: 4
+              hosts:
+                orderer-router-4:
+                  orderer_component_type: router
+                  orderer_rpc_port: 7350
+                orderer-batcher-4:
+                  orderer_shard_id: 1
+                  orderer_component_type: batcher
+                  orderer_rpc_port: 7351
+                orderer-consenter-4:
+                  orderer_component_type: consenter
+                  orderer_rpc_port: 7352
+                orderer-assembler-4:
+                  orderer_component_type: assembler
+                  orderer_rpc_port: 7353
+
+        fabric-x-committer:
+          vars:
+            # committer_log_level: DEBUG
+            container_network:
+              name: fabric_test
+            committer_use_postgres: true
+          hosts:
+            committer-db:
+              committer_component_type: db
+              postgres_user: sc_user
+              postgres_password: sc_secret_pwd
+              postgres_db: sc_db
+              postgres_port: 5435
+              postgres_exporter_port: 2110
+            committer-validator:
+              committer_component_type: validator
+              committer_rpc_port: 5100
+              prometheus_exporter_port: 2120
+            committer-verifier:
+              committer_component_type: verifier
+              committer_rpc_port: 5200
+              prometheus_exporter_port: 2130
+            committer-coordinator:
+              committer_component_type: coordinator
+              committer_rpc_port: 5300
+              prometheus_exporter_port: 2140
+            committer-sidecar:
+              committer_component_type: sidecar
+              committer_rpc_port: 5400
+              prometheus_exporter_port: 2150
+            committer-query-service:
+              committer_component_type: query-service
+              committer_rpc_port: 5500
+              prometheus_exporter_port: 2160
+              organization:
+                name: Org1MSP
+                domain: org1.example.com
+                users:
+                  - name: channel_admin
+                    meta_namespace_admin: true
+                  - name: endorser
+
+    load-generators:
+    monitoring:

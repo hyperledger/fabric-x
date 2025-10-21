@@ -1,0 +1,32 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+services:
+  endorser2:
+    restart: unless-stopped
+    extra_hosts:
+      - "committer-sidecar:host-gateway"
+      - "committer-queryservice:host-gateway"
+    networks:
+      - test
+    hostname: endorser2.example.com
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_TYPE: endorser
+        PLATFORM: "${PLATFORM:-fabricx}"
+    volumes:
+      - ./${CONF_ROOT:-conf}/endorser2:/conf
+    expose:
+      - 9401:9001
+    ports:
+      - 9400:9000/tcp
+
+networks:
+  test:
+    name: fabric_test
+    external: true
