@@ -74,9 +74,17 @@ Code and more details can be found under [Fabric-X-Committer Github repository](
 
 To set up the network yourself, follow the tutorial in the [sample deployment scripts](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection) repository. It provides Ansible scripts with predefined inventories and playbooks for both local and remote cluster deployments. Support for deploying a sample application will be added soon.
 
+## Fabric-X workshop series
+
+  - [Introduction into Fabric-X](https://www.youtube.com/live/gdQh-mNKSKA)
+  - [Programming model and app deployment](https://www.youtube.com/live/D086vrb9GeU)
+  - [Fabric-Token-SDK](https://www.youtube.com/watch?v=PX9SDva97vQ)
+  - [Orderer overview, November 19 - register](https://www.meetup.com/lfdt-sf/events/310510263/)
+  - [Committer overview, December 9 - register](https://www.meetup.com/lfdt-sf/events/310510523/)
+
 ## Useful links
 
-- [Yotube webinar](https://www.youtube.com/live/gdQh-mNKSKA?si=dJT8jU9M4NO6csRq) - introduction into Fabric-X
+- [Sample token application](https://github.com/iliecirciumaru/fabric-x/tree/main/samples/tokens)
 - [Fabric-X Blog](https://www.lfdecentralizedtrust.org/blog/new-major-contribution-to-hyperledger-fabric-purpose-built-implementation-for-next-gen-digital-assets)
 - [Fabric-X whitepaper](https://eprint.iacr.org/2023/1717.pdf) - detailed description of the Fabric-X. Explains motivation,implementation details and presents performance benchmarks
 - [Fabric-X Committer](https://github.com/hyperledger/fabric-x-committer) Github repository
@@ -88,5 +96,5 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 
 ## Coming soon...
 
-- [ ] Sample application on top of Fabric-X
+- [x] Sample token application on top of Fabric-X
 - [ ] Fabric-X Kubernetes Operator
