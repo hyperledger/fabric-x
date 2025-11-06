@@ -96,5 +96,5 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 
 ## Coming soon...
 
-- [ ] Sample application on top of Fabric-X
+- [x] Sample token application on top of Fabric-X
 - [ ] Fabric-X Kubernetes Operator
