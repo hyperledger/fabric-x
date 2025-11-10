@@ -1,0 +1,44 @@
+' Copyright IBM Corp. All Rights Reserved.
+'
+' SPDX-License-Identifier: Apache-2.0
+'
+
+@startuml
+title Token transfer data flow (alice -> dan)
+
+skinparam componentStyle rectangle
+skinparam rectangle {
+  BorderColor Black
+  FontStyle bold
+  FontSize 12
+  RoundCorner 10
+}
+skinparam package {
+  BackgroundColor #F9F9F9
+  BorderColor #999999
+  FontColor #333333
+}
+
+package "Token nodes" as Applications {
+    component "Issuer\n* token issuer" as issuer #LightBlue
+    component "Owner 1\n* alice\n* bob" as owner1 #LightBlue
+    component "Owner 2\n* carlos\n* dan" as owner2 #LightBlue
+}
+
+[Endorser] #LightBlue
+package "Fabric (x)" {
+    component Committer
+    component Orderers
+}
+
+component "CA\n*Idemix credential issuer"
+
+issuer --> owner1
+owner1 --> owner2 : 1. request identity\nshare pending tx
+owner1 -r-> Endorser : 2. token tx for endorsement
+owner1 -r-> Orderers : 3. endorsed tx
+Orderers --> Committer : 4. ordered blocks
+Committer -> owner1 : 5. committed tx
+Committer -> owner2 : 5. committed tx
+
+@enduml
