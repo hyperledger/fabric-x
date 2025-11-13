@@ -36,6 +36,12 @@ This sample helps you get familiar with Token SDK features and serves as a start
 - Configuration for a **Fabric-X** test network.
 - Configuration for a **Fabric v3** test network.
 
+Below is a high level overview of the components and how data flows in a token transfer transaction.
+The sequence diagram later in this readme provides more details about the token transaction.
+For a specification of the Fabric-X components and their interactions, refer to the main [README.md](../../README.md).
+
+![transfer: high level](./diagrams/components.png)
+
 ## Architecture Overview
 
 From now on, we’ll refer to the issuer, endorser, and owner services collectively as nodes (not to be confused with Fabric peer nodes).
@@ -105,18 +111,18 @@ export PATH=$(pwd)/fabric-samples/bin:$PATH
 
 > [!TIP]
 > The scripts assume you have run the script from the directory of this README. If you have them somewhere else,
-> just make sure to `export FABRIC_SAMPLES=/path/to/fabric-samples"` so the scripts can start the test network.
+> just make sure to `export FABRIC_SAMPLES="/path/to/fabric-samples"` so the scripts can start the test network.
 
 ## Getting Started
 
-The sample uses Fabric-X as the default network.
-If you want to run the application on Fabric v3, just set the PLATFORM to fabric3.
-
-```bash
-export PLATFORM=fabric3
-```
-
 > [!NOTE]
+> The sample uses Fabric-X as the default network.
+> If you want to run the application on Fabric v3, just set the PLATFORM to fabric3.
+>
+> ```bash
+> export PLATFORM=fabric3
+> ```
+> 
 > When switching between platforms, always make sure to *first* (before changing the platform) clean up all artifacts:
 > ```shell
 > make teardown
@@ -130,6 +136,22 @@ Create the configurations and crypto material for the network:
 ```shell
 make setup
 ```
+
+This creates:
+
+- Fabric
+  - config files and identities for the orderers and committers
+  - a genesis block
+  - users that can submit or query transactions
+  - endorser identity
+- Fabric Smart Client
+  - identities for the nodes (issuer, owner1, owner2, endorser)
+- Fabric Token SDK
+  - an idemix issuer for the token accounts
+  - idemix credentials signed by this issuer
+  - cryptographic parameters and configuration for the token network (see: `go tool tokengen pp print -i conf/namespace/zkatdlognoghv1_pp.json`).
+
+The relevant crypto material is copied to the folders in the conf/* directories.
 
 ### Start the Network and Application
 
@@ -156,7 +178,7 @@ They also communicate over P2P websockets as shown below:
 | -------- | ---- | --------------------------- |
 | 8080     |      | API documentation (web)     |
 | 9100     | 9101 | Issuer                      |
-| 9300     | 9301 | Endorer 1                   |
+| 9300     | 9301 | Endorser 1                  |
 | 9400     | 9401 | Endorser 2 (Fabric v3 only) |
 | 9500     | 9501 | Owner 1 (alice and bob)     |
 | 9600     | 9601 | Owner 2 (carlos and dan)    |

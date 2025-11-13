@@ -22,18 +22,17 @@ all:
     node_exporter_port: 9111
     container_client: docker
   children:
-    fabric-x:
+    fabric_x:
       children:
-        fabric-x-orderers:
+        fabric_x_orderers:
           vars:
-            container_network:
-              name: fabric_test
+            container_network: fabric_test
             organization:
               name: "OrdererOrg{{ orderer_group }}"
               domain: "ordererorg{{ orderer_group }}.example.com"
               role: orderer
           children:
-            fabric-x-orderer-1:
+            fabric_x_orderer_1:
               vars:
                 orderer_group: 1
               hosts:
@@ -50,7 +49,7 @@ all:
                 orderer-assembler-1:
                   orderer_component_type: assembler
                   orderer_rpc_port: 7053
-            fabric-x-orderer-2:
+            fabric_x_orderer_2:
               vars:
                 orderer_group: 2
               hosts:
@@ -67,7 +66,7 @@ all:
                 orderer-assembler-2:
                   orderer_component_type: assembler
                   orderer_rpc_port: 7153
-            fabric-x-orderer-3:
+            fabric_x_orderer_3:
               vars:
                 orderer_group: 3
               hosts:
@@ -84,7 +83,7 @@ all:
                 orderer-assembler-3:
                   orderer_component_type: assembler
                   orderer_rpc_port: 7253
-            fabric-x-orderer-4:
+            fabric_x_orderer_4:
               vars:
                 orderer_group: 4
               hosts:
@@ -102,11 +101,10 @@ all:
                   orderer_component_type: assembler
                   orderer_rpc_port: 7353
 
-        fabric-x-committer:
+        fabric_x_committer:
           vars:
             # committer_log_level: DEBUG
-            container_network:
-              name: fabric_test
+            container_network: fabric_test
             committer_use_postgres: true
           hosts:
             committer-db:
@@ -115,7 +113,6 @@ all:
               postgres_password: sc_secret_pwd
               postgres_db: sc_db
               postgres_port: 5435
-              postgres_exporter_port: 2110
             committer-validator:
               committer_component_type: validator
               committer_rpc_port: 5100
