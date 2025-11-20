@@ -79,7 +79,7 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
   - [Introduction into Fabric-X](https://www.youtube.com/live/gdQh-mNKSKA)
   - [Programming model and app deployment](https://www.youtube.com/live/D086vrb9GeU)
   - [Fabric-Token-SDK](https://www.youtube.com/watch?v=PX9SDva97vQ)
-  - [Orderer overview, November 19 - register](https://www.meetup.com/lfdt-sf/events/310510263/)
+  - [Orderer overview](https://www.youtube.com/live/1ikYNjDnqXw?t=200s)
   - [Committer overview, December 9 - register](https://www.meetup.com/lfdt-sf/events/310510523/)
 
 ## Useful links
