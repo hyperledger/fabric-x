@@ -20,7 +20,6 @@ import (
 	"github.com/hyperledger/fabric-x-committer/api/protoblocktx"
 	"github.com/hyperledger/fabric-x-committer/api/types"
 	"github.com/hyperledger/fabric-x-committer/utils/signature"
-
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 	"github.com/hyperledger/fabric-x-common/internaltools/configtxgen/encoder"
 	"github.com/hyperledger/fabric-x-common/internaltools/pkg/identity"
@@ -186,12 +185,12 @@ func createNamespacesTx(policyScheme string, policy []byte, nsID string, nsVersi
 func createSignedEnvelope(signer identity.SignerSerializer, channel string, tx *protoblocktx.Tx) (*cb.Envelope, error) {
 	signatureHdr := protoutil.NewSignatureHeaderOrPanic(signer)
 
-	tx.Id = protoutil.ComputeTxID(signatureHdr.Nonce, signatureHdr.Creator)
+	txID := protoutil.ComputeTxID(signatureHdr.Nonce, signatureHdr.Creator)
 	tx.Signatures = make([][]byte, len(tx.GetNamespaces()))
-	for idx := range tx.GetNamespaces() {
+	for idx, ns := range tx.GetNamespaces() {
 		// Note that a default msp signer hash the msg before signing.
 		// For that reason we use the TxNamespace message as ASN1 encoded msg
-		msg, err := signature.ASN1MarshalTxNamespace(tx, idx)
+		msg, err := signature.ASN1MarshalTxNamespace(txID, ns)
 		if err != nil {
 			return nil, fmt.Errorf("failed asn1 marshal tx: %w", err)
 		}
@@ -204,7 +203,7 @@ func createSignedEnvelope(signer identity.SignerSerializer, channel string, tx *
 	}
 
 	channelHdr := protoutil.MakeChannelHeader(cb.HeaderType_MESSAGE, 0, channel, 0)
-	channelHdr.TxId = tx.Id
+	channelHdr.TxId = txID
 
 	payloadHdr := protoutil.MakePayloadHeader(channelHdr, signatureHdr)
 	txBytes := protoutil.MarshalOrPanic(tx)
