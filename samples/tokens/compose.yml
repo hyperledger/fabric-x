@@ -24,7 +24,8 @@ services:
     volumes:
       - ./${CONF_ROOT:-conf}/issuer:/conf
     expose:
-      - 9101:9001
+      - 9001
+      - 9101
     ports:
       - 9100:9000/tcp
 
@@ -41,7 +42,8 @@ services:
       - ./${CONF_ROOT:-conf}/endorser1:/conf
       - ./${CONF_ROOT:-conf}/namespace/zkatdlognoghv1_pp.json:/namespace/zkatdlognoghv1_pp.json
     expose:
-      - 9301:9001
+      - 9001
+      - 9301
     ports:
       - 9300:9000/tcp
 
@@ -57,7 +59,8 @@ services:
     volumes:
       - ./${CONF_ROOT:-conf}/owner1:/conf
     expose:
-      - 9501:9001
+      - 9001
+      - 9501
     ports:
       - 9500:9000/tcp
 
@@ -73,7 +76,8 @@ services:
     volumes:
       - ./${CONF_ROOT:-conf}/owner2:/conf
     expose:
-      - 9601:9001
+      - 9001
+      - 9601
     ports:
       - 9600:9000/tcp
 
