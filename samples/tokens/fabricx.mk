@@ -4,28 +4,30 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# exported vars
-ANSIBLE_CONFIG ?= ./ansible/ansible.cfg
-export ANSIBLE_CONFIG
-PROJECT_DIR := $(CURDIR)
-export PROJECT_DIR
-
-CONF_ROOT=conf
-export CONF_ROOT
-
 # Makefile vars
-PLAYBOOK_PATH := $(CURDIR)/ansible/playbooks
+PROJECT_DIR := $(CURDIR)
+ANSIBLE_PATH := $(PROJECT_DIR)/ansible
+PLAYBOOK_PATH := $(ANSIBLE_PATH)/playbooks
 TARGET_HOSTS ?= all
+ANSIBLE_CONFIG ?= $(ANSIBLE_PATH)/ansible.cfg
+CONF_ROOT=conf
+
+# exported vars
+export ANSIBLE_CONFIG
+export PROJECT_DIR
+export CONF_ROOT
 
 # Install the utilities needed to run the components on the targeted remote hosts (e.g. make install-prerequisites).
 .PHONY: install-prerequisites-fabric
 install-prerequisites-fabric:
-	ansible-playbook hyperledger.fabricx.install_prerequisites
+	ansible-galaxy collection install -r $(ANSIBLE_PATH)/requirements.yml
+	ansible-playbook "$(PLAYBOOK_PATH)/01-install-control-node-prerequisites.yaml"
+	ansible-playbook hyperledger.fabricx.install_prerequisites --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
 
 # Build all the artifacts, the binaries and transfer them to the remote hosts (e.g. make setup).
 .PHONY: setup-fabric
 setup-fabric:
-	ansible-playbook "$(PLAYBOOK_PATH)/20-build.yaml"
+	ansible-playbook "$(PLAYBOOK_PATH)/20-setup.yaml" --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
 	./scripts/cp_fabricx.sh
 
 # Clean all the artifacts (configs and bins) built on the controller node (e.g. make clean).
@@ -40,28 +42,21 @@ clean-fabric:
 .PHONY: start-fabric
 start-fabric:
 	@docker network inspect fabric_test >/dev/null 2>&1 || docker network create fabric_test
-	ansible-playbook "$(PLAYBOOK_PATH)/60-start.yaml"
+	ansible-playbook "$(PLAYBOOK_PATH)/60-start.yaml" --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
 
 # Create a namespace in fabric-x for the tokens.
 .PHONY: create-namespace
-create-namespace:
-	@echo "install namespace:"
-	go tool fxconfig namespace create token_namespace --channel=arma --orderer=localhost:7050 --mspID=Org1MSP  --mspConfigPath=conf/endorser1/keys/fabric/admin --pk=conf/endorser1/keys/fabric/endorser/signcerts/endorser@org1.example.com-cert.pem 2> /dev/null
-	@until go tool fxconfig namespace list --endpoint=localhost:5500 | grep -q token_namespace; do \
-		sleep 2; \
-		echo "waiting for namespace to be created..."; \
-	done
-	go tool fxconfig namespace list --endpoint=localhost:5500
+create-namespace: # empty target for backward-compatibility
 
 # Stop the targeted hosts (e.g. make fabric-x stop).
 .PHONY: stop-fabric
 stop-fabric:
-	ansible-playbook "$(PLAYBOOK_PATH)/70-stop.yaml"
+	ansible-playbook "$(PLAYBOOK_PATH)/70-stop.yaml" --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
 
 # Teardown the targeted hosts (e.g. make fabric-x teardown).
 .PHONY: teardown-fabric
 teardown-fabric:
-	ansible-playbook "$(PLAYBOOK_PATH)/80-teardown.yaml"
+	ansible-playbook "$(PLAYBOOK_PATH)/80-teardown.yaml" --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
 	@docker network inspect fabric_test >/dev/null 2>&1 && docker network rm fabric_test || true
 
 # Restart the targeted hosts (e.g. make fabric-x restart).
