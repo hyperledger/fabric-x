@@ -1,0 +1,56 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# ==================================================
+# Crypto material for Hyperledger Fabric-X
+# ==================================================
+- name: Generate crypto material with cryptogen
+  ansible.builtin.import_playbook: hyperledger.fabricx.artifacts.build_crypto_material
+
+- name: Setup Hyperledger Fabric-X Orderers crypto
+  ansible.builtin.import_playbook: hyperledger.fabricx.orderer.generate_crypto
+
+- name: Setup Hyperledger Fabric-X Committers crypto
+  ansible.builtin.import_playbook: hyperledger.fabricx.committer.generate_crypto
+
+- name: Setup Hyperledger Fabric-X Loadgen crypto
+  ansible.builtin.import_playbook: hyperledger.fabricx.loadgen.generate_crypto
+
+# ==================================================
+# Genesis Block
+# ==================================================
+- name: Generate genesis block
+  ansible.builtin.import_playbook: hyperledger.fabricx.artifacts.build_genesis_block
+
+# ==================================================
+# Build Binaries for components running with bins
+# ==================================================
+- name: Build Fabric-X Orderer binaries
+  ansible.builtin.import_playbook: hyperledger.fabricx.orderer.build_binaries
+
+- name: Build Fabric-X Committer binaries
+  ansible.builtin.import_playbook: hyperledger.fabricx.committer.build_binaries
+
+# ==================================================
+# Transfer configuration files to remote nodes
+# ==================================================
+- name: Transfer Fabric-X Orderer configs
+  ansible.builtin.import_playbook: hyperledger.fabricx.orderer.transfer_configs
+
+- name: Transfer Fabric-X Committer configs
+  ansible.builtin.import_playbook: hyperledger.fabricx.committer.transfer_configs
+
+- name: Transfer fxconfig configs
+  ansible.builtin.import_playbook: hyperledger.fabricx.fxconfig.transfer_configs
+
+# ==================================================
+# Transfer binaries to remote nodes
+# ==================================================
+- name: Transfer Fabric-X Orderer binaries
+  ansible.builtin.import_playbook: hyperledger.fabricx.orderer.transfer_binaries
+
+- name: Transfer Fabric-X Committer binaries
+  ansible.builtin.import_playbook: hyperledger.fabricx.committer.transfer_binaries

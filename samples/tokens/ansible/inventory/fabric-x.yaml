@@ -6,34 +6,19 @@
 
 all:
   vars:
-    ansible_connection: local
-    ansible_user: "{{ lookup('env', 'USER') }}"
-    ansible_host: "{{ lookup('env', 'LOCAL_ANSIBLE_HOST') or 'localhost' }}"
-    project_dir: "{{ lookup('env', 'PROJECT_DIR') or '.' }}"
-    out_dir: "{{ lookup('env', 'OUT_DIR') or project_dir + '/out' }}"
-    out_build_dir: "{{ out_dir }}/build"
-    out_log_dir: "{{ out_dir }}/logs"
-    config_build_dir: "{{ out_build_dir }}/config"
-    deploy_dir: "{{ out_dir }}/local-deployment"
-    remote_config_dir: "{{ deploy_dir }}/{{ inventory_hostname }}/config"
-    source_code_dir: "{{ out_build_dir }}/code"
-    cli_bin_dir: "{{ out_build_dir }}/cli"
-    channel_id: arma
-    node_exporter_port: 9111
     container_client: docker
+    container_network: fabric_test
   children:
     fabric_x:
       children:
         fabric_x_orderers:
-          vars:
-            container_network: fabric_test
-            organization:
-              name: "OrdererOrg{{ orderer_group }}"
-              domain: "ordererorg{{ orderer_group }}.example.com"
-              role: orderer
           children:
             fabric_x_orderer_1:
               vars:
+                organization:
+                  name: OrdererOrg1
+                  domain: ordererorg1.example.com
+                  role: orderer
                 orderer_group: 1
               hosts:
                 orderer-router-1:
@@ -51,6 +36,10 @@ all:
                   orderer_rpc_port: 7053
             fabric_x_orderer_2:
               vars:
+                organization:
+                  name: OrdererOrg2
+                  domain: ordererorg2.example.com
+                  role: orderer
                 orderer_group: 2
               hosts:
                 orderer-router-2:
@@ -68,6 +57,10 @@ all:
                   orderer_rpc_port: 7153
             fabric_x_orderer_3:
               vars:
+                organization:
+                  name: OrdererOrg3
+                  domain: ordererorg3.example.com
+                  role: orderer
                 orderer_group: 3
               hosts:
                 orderer-router-3:
@@ -85,6 +78,10 @@ all:
                   orderer_rpc_port: 7253
             fabric_x_orderer_4:
               vars:
+                organization:
+                  name: OrdererOrg4
+                  domain: ordererorg4.example.com
+                  role: orderer
                 orderer_group: 4
               hosts:
                 orderer-router-4:
@@ -102,10 +99,6 @@ all:
                   orderer_rpc_port: 7353
 
         fabric_x_committer:
-          vars:
-            # committer_log_level: DEBUG
-            container_network: fabric_test
-            committer_use_postgres: true
           hosts:
             committer-db:
               committer_component_type: db
@@ -117,6 +110,7 @@ all:
               committer_component_type: validator
               committer_rpc_port: 5100
               prometheus_exporter_port: 2120
+              postgres_db_host: committer-db
             committer-verifier:
               committer_component_type: verifier
               committer_rpc_port: 5200
@@ -133,13 +127,19 @@ all:
               committer_component_type: query-service
               committer_rpc_port: 5500
               prometheus_exporter_port: 2160
-              organization:
-                name: Org1MSP
-                domain: org1.example.com
-                users:
-                  - name: channel_admin
-                    meta_namespace_admin: true
-                  - name: endorser
+              postgres_db_host: committer-db
 
-    load-generators:
-    monitoring:
+    # Load generators are used only to generate the crypto material
+    # for the users and set the certificates in the right place
+    # to build the genesis block successfully.
+    load_generators:
+      hosts:
+        orderer-loadgen:
+          organization:
+            name: Org1MSP
+            domain: org1.example.com
+            users:
+              - name: channel_admin
+                meta_namespace_admin: true
+              - name: endorser
+                namespace: token_namespace

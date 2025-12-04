@@ -1,0 +1,30 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# =========================
+# Control Node Paths
+# =========================
+project_dir: "{{ lookup('env', 'PROJECT_DIR') or '~/.ansible/collections/ansible_collections/hyperledger/fabricx' }}"
+out_dir: "{{ project_dir }}/out"
+control_node_dir: "{{ out_dir }}/control-node"
+source_code_dir: "{{ control_node_dir }}/code"
+cli_bin_dir: "{{ control_node_dir }}/cli"
+
+# =========================
+# Shared Paths:
+# Paths on the control node where material is generated
+# or collected to be shared with other nodes.
+# =========================
+fetched_artifacts_dir: "{{ control_node_dir }}/fetched"
+config_build_dir: "{{ control_node_dir }}/config"
+cryptogen_artifacts_dir: "{{ config_build_dir }}/cryptogen-artifacts"
+armageddon_artifacts_dir: "{{ config_build_dir }}/armageddon-artifacts"
+configtxgen_artifacts_dir: "{{ config_build_dir }}/configtxgen-artifacts"
+
+# =========================
+# Miscellaneous
+# =========================
+channel_id: arma

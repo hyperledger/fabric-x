@@ -3,14 +3,14 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-- name: Start Fabric-X Orderer
+- name: Create necessary container networks
+  ansible.builtin.import_playbook: hyperledger.fabricx.create_container_networks
+
+- name: Start Hyperledger Fabric-X Orderer
   ansible.builtin.import_playbook: hyperledger.fabricx.orderer.start
 
-- name: Start Fabric-X Committer
+- name: Start Hyperledger Fabric-X Committer
   ansible.builtin.import_playbook: hyperledger.fabricx.committer.start
 
-- name: Start Monitoring
-  ansible.builtin.import_playbook: hyperledger.fabricx.monitoring.start
-
-- name: Start Loadgen
-  ansible.builtin.import_playbook: hyperledger.fabricx.loadgen.start
+- name: Create namespaces on Hyperledger Fabric-X Committer
+  ansible.builtin.import_playbook: hyperledger.fabricx.fxconfig.create_namespaces

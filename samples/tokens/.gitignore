@@ -1,9 +1,18 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# Ansible
+ansible/collections
+out/
+
+# Misc
 bin/
 keys/
 data/
 **/namespace/*.json
 fabric-samples/
-
-out/
 
 __debug_bin*
