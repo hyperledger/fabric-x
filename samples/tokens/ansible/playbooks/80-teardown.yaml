@@ -4,25 +4,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-- name: Teardown Loadgen
-  ansible.builtin.import_playbook: hyperledger.fabricx.loadgen.teardown
-
-- name: Teardown Monitoring
-  ansible.builtin.import_playbook: hyperledger.fabricx.monitoring.teardown
-
-- name: Teardown Fabric-X Committer
+- name: Teardown Hyperledger Fabric-X Committer
   ansible.builtin.import_playbook: hyperledger.fabricx.committer.teardown
 
-- name: Teardown Fabric-X Orderers
+- name: Teardown Hyperledger Fabric-X Orderers
   ansible.builtin.import_playbook: hyperledger.fabricx.orderer.teardown
 
-# TODO: rm network with fabricx ansible roles
-- name: Remove docker network
-  hosts: localhost
-  tasks:
-    - name: Remove docker network
-      community.docker.docker_network:
-        name: "{{ create_network }}"
-        driver: "{{ container_network_driver | default('bridge') }}"
-        state: absent
-      when: create_network is defined
+- name: Remove container networks
+  ansible.builtin.import_playbook: hyperledger.fabricx.remove_container_networks

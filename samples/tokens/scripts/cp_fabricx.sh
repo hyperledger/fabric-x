@@ -22,16 +22,16 @@ for node in "${nodes[@]}"; do
     mkdir -p "${CONF_ROOT}/${node}/data"
     mkdir -p "$dir"
 
-    cp -r "./out/build/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp" "$dir/user"
+    cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp" "$dir/user"
 done
 
 # Endorser (see: https://github.com/hyperledger-labs/fabric-token-sdk/blob/main/docs/core-token.md?plain=1#L109).
 dir="${CONF_ROOT}/endorser1/keys/fabric" 
 mkdir -p "$dir"
-cp -r "./out/build/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/endorser@org1.example.com/msp" "${dir}/endorser"
-cp -r "./out/build/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp" "${dir}/admin"
+cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/endorser@org1.example.com/msp" "${dir}/endorser"
+cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp" "${dir}/admin"
 
 dir="${CONF_ROOT}/endorser2/keys/fabric" 
 mkdir -p "$dir"
-cp -r "./out/build/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/endorser@org1.example.com/msp" "${dir}/endorser"
-cp -r "./out/build/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp" "${dir}/admin"
+cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/endorser@org1.example.com/msp" "${dir}/endorser"
+cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp" "${dir}/admin"
