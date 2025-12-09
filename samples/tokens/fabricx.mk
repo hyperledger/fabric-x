@@ -17,6 +17,11 @@ export ANSIBLE_CONFIG
 export PROJECT_DIR
 export CONF_ROOT
 
+# Makefile vars
+PLAYBOOK_PATH := $(CURDIR)/ansible/playbooks
+TARGET_HOSTS ?= all
+CONTAINER_CLI ?= docker
+
 # Install the utilities needed to run the components on the targeted remote hosts (e.g. make install-prerequisites).
 .PHONY: install-prerequisites-fabric
 install-prerequisites-fabric:
@@ -41,7 +46,6 @@ clean-fabric:
 # Start fabric-x on the targeted hosts.
 .PHONY: start-fabric
 start-fabric:
-	@docker network inspect fabric_test >/dev/null 2>&1 || docker network create fabric_test
 	ansible-playbook "$(PLAYBOOK_PATH)/60-start.yaml" --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
 
 # Create a namespace in fabric-x for the tokens.
@@ -57,7 +61,6 @@ stop-fabric:
 .PHONY: teardown-fabric
 teardown-fabric:
 	ansible-playbook "$(PLAYBOOK_PATH)/80-teardown.yaml" --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
-	@docker network inspect fabric_test >/dev/null 2>&1 && docker network rm fabric_test || true
 
 # Restart the targeted hosts (e.g. make fabric-x restart).
 .PHONY: restart-fabric
