@@ -14,4 +14,4 @@ collections:
   - name: containers.podman
     version: ">=1.16.2"
   - name: hyperledger.fabricx
-    version: "0.4.5"
+    version: "0.4.6"
