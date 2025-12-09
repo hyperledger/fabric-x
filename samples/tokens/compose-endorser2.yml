@@ -22,7 +22,8 @@ services:
     volumes:
       - ./${CONF_ROOT:-conf}/endorser2:/conf
     expose:
-      - 9401:9001
+      - 9401
+      - 9001
     ports:
       - 9400:9000/tcp
 

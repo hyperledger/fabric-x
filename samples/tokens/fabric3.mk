@@ -14,6 +14,7 @@ export CONF_ROOT
 # Makefile vars
 PLAYBOOK_PATH := $(CURDIR)/ansible/playbooks
 TARGET_HOSTS ?= all
+CONTAINER_CLI ?= docker
 
 # Install the utilities needed to run the components on the targeted remote hosts (e.g. make install-prerequisites).
 .PHONY: install-prerequisites-fabric
@@ -55,11 +56,11 @@ stop-fabric:
 .PHONY: teardown-fabric
 teardown-fabric:
 	@"$(FABRIC_SAMPLES)/test-network/network.sh" down
-	@docker rm -f peer0org1_token_namespace_ccaas peer0org2_token_namespace_ccaas
+	@$(CONTAINER_CLI) rm -f peer0org1_token_namespace_ccaas peer0org2_token_namespace_ccaas
 	@for d in "$(CONF_ROOT)"/*/ ; do \
 		rm -rf "$$d/keys/fabric" "$$d/data"; \
 	done
-	@docker network inspect fabric_test >/dev/null 2>&1 && docker network rm fabric_test || true
+	@$(CONTAINER_CLI) network inspect fabric_test >/dev/null 2>&1 && $(CONTAINER_CLI) network rm fabric_test || true
 
 # Restart the targeted hosts (e.g. make fabric-x restart).
 .PHONY: restart-fabric
