@@ -1,0 +1,25 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+- name: Install dependencies on the Ansible control node
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Install python package "requests" via pip
+      ansible.builtin.pip:
+        name: requests
+        state: present
+      register: check_requests
+      failed_when: false
+    - name: Fail if requests is missing
+      ansible.builtin.fail:
+        msg: >
+          The Python package 'requests' is not installed in the Python environment Ansible is using.
+          Run the following to install it:
+
+            python3 -m pip install -r requirements.txt
+      when:
+        - check_requests is failed

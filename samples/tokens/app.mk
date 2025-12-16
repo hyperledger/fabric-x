@@ -8,6 +8,7 @@ export PLATFORM
 ifneq ($(PLATFORM),fabricx)
 	COMPOSE_ARGS := -f compose.yml -f compose-endorser2.yml
 endif
+CONTAINER_CLI ?= docker
 
 # Setup application
 .PHONY: setup-app
@@ -17,28 +18,28 @@ setup-app: build-app
 # Setup application
 .PHONY: build-app
 build-app:
-	docker-compose $(COMPOSE_ARGS) build
+	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) build
 
 # Start application
 .PHONY: start-app
 start-app:
-	docker-compose $(COMPOSE_ARGS) up -d
+	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) up -d
 
 # Restart application
 .PHONY: restart-app
 restart-app:
-	docker-compose $(COMPOSE_ARGS) down
-	docker-compose $(COMPOSE_ARGS) up -d
+	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) down
+	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) up -d
 
 # Stop application
 .PHONY: stop-app
 stop-app:
-	PLATFORM=$(PLATFORM) docker-compose $(COMPOSE_ARGS) stop
+	PLATFORM=$(PLATFORM) $(CONTAINER_CLI)-compose $(COMPOSE_ARGS) stop
 
 # Teardown application
 .PHONY: teardown-app
 teardown-app:
-	docker-compose $(COMPOSE_ARGS) down
+	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) down
 	rm -rf "$(CONF_ROOT)"/*/data
 
 # Clean just the databases.
