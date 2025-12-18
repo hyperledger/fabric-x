@@ -19,8 +19,10 @@ import (
 )
 
 // List calls the committer query service and shows all installed namespace policies.
-func List(out io.Writer, endpoint string) error {
-	cl, err := comm.NewClient(comm.Config{})
+func List(out io.Writer, endpoint, cacert string) error {
+	cl, err := comm.NewClient(comm.Config{
+		PeerCACertPath: cacert,
+	})
 	if err != nil {
 		return fmt.Errorf("cannot get grpc client: %w", err)
 	}

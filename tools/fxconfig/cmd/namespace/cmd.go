@@ -43,7 +43,7 @@ func ordererFlags(cmd *cobra.Command, ordererCfg *namespace.OrdererConfig) {
 		"",
 		"Ordering service endpoint",
 	)
-	cmd.PersistentFlags().StringVarP(&ordererCfg.Config.CertPath,
+	cmd.PersistentFlags().StringVarP(&ordererCfg.Config.PeerCACertPath,
 		"cafile",
 		"",
 		"",
