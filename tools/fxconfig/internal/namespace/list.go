@@ -13,13 +13,16 @@ import (
 
 	"github.com/hyperledger/fabric-x-committer/api/protoblocktx"
 	"github.com/hyperledger/fabric-x-committer/api/protoqueryservice"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 )
 
 // List calls the committer query service and shows all installed namespace policies.
-func List(out io.Writer, endpoint string) error {
-	cl, err := comm.NewClient(comm.Config{})
+func List(out io.Writer, endpoint, cacert string) error {
+	cl, err := comm.NewClient(comm.Config{
+		PeerCACertPath: cacert,
+	})
 	if err != nil {
 		return fmt.Errorf("cannot get grpc client: %w", err)
 	}
@@ -37,7 +40,7 @@ func List(out io.Writer, endpoint string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 	defer cancel()
 
-	res, err := client.GetNamespacePolicies(ctx, &protoqueryservice.Empty{})
+	res, err := client.GetNamespacePolicies(ctx, &emptypb.Empty{})
 	if err != nil {
 		return fmt.Errorf("cannot query existing namespaces: %w", err)
 	}

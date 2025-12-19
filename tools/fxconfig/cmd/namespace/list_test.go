@@ -38,7 +38,7 @@ func setupList(t *testing.T) *cobra.Command {
 	return rootCmd
 }
 
-var fakeList = func(_ io.Writer, _ string) error {
+var fakeList = func(_ io.Writer, _, _ string) error {
 	// don't do anything
 	return nil
 }
