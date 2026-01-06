@@ -47,11 +47,11 @@ COPY --from=builder /tmp/bin/* /usr/local/bin/
 
 # OCI metadata labels
 LABEL name="fabric-x-tools" \
-    maintainer="IBM Research ZRL Decentralized Trust Group" \
+    maintainer="IBM Research Decentralized Trust Group" \
     version="${VERSION}" \
     description="Fabric-X CLI tools (configtxgen, cryptogen, configtxlator, fxconfig, armageddon) packaged in a UBI image" \
     license="Apache-2.0" \
-    vendor="IBM Research"
+    vendor="IBM"
 
 # Use non-root user
 USER 10001

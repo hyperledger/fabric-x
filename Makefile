@@ -69,15 +69,4 @@ lint: FORCE
 	cd tools && golangci-lint run --new-from-rev=origin/main --color=always --max-same-issues 0
 	@echo "Running License Header Linters..."
 	scripts/license-lint.sh
-
-
-###########################################
-# Docker image build
-###########################################
-
-# Build the fabric-x-tools image for the current machine platform.
-.PHONY: build-fabric-x-tools-image
-build-fabric-x-tools-image:
-	./tools/build_image.sh --tag docker.io/hyperledger/fabric-x-tools:$(IMAGE_TAG) -f ./tools/Dockerfile
-
 FORCE:
