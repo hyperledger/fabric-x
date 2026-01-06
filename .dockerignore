@@ -1,0 +1,17 @@
+# git
+.github
+.gitignore
+
+#docs
+README.md
+MAINTAINERS.md
+
+# docker/podman
+Dockerfile
+
+# lint
+.golangci.yml
+
+# misc
+Makefile
+
