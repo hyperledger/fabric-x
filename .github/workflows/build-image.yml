@@ -64,12 +64,12 @@ jobs:
       - name: Build and push the fabric-x-tools image
         uses: docker/build-push-action@v6
         with:
-          context: ./tools
-          file: ./tools/Dockerfile
+          context: .
+          file: ./Dockerfile
           platforms: linux/amd64,linux/arm64,linux/s390x
           push: true
           build-args: |
-            FABRIC_X_VERSION=${{ github.ref_name }}
+            FABRIC_X_VERSION=${{ env.VERSION }}
           tags: |
             docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:${{ env.VERSION }}
             docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:latest
