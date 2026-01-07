@@ -8,7 +8,10 @@
 ###########################################
 # Stage 1: Build image
 ###########################################
-FROM public.ecr.aws/docker/library/golang:1.24 AS builder
+FROM golang:1.25 AS builder
+
+# List of CLI tools to build
+ARG FABRICX_TOOLS="configtxgen cryptogen configtxlator fxconfig"
 
 # Build environment variables
 ENV CGO_ENABLED=1
@@ -16,14 +19,17 @@ ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
 
 WORKDIR /go/src/github.com/hyperledger/fabric-x
 
+# Copy dependency files first (cache optimization)
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Copy the rest of the source code
 COPY . .
 
+# Build the binaries
 RUN mkdir -p /tmp/bin && \
-    for tool in configtxgen cryptogen configtxlator fxconfig; do \
-        go build -o /tmp/bin/$tool ./tools/$tool; \
+    for tool in $FABRICX_TOOLS; do \
+    go build -o /tmp/bin/$tool ./tools/$tool; \
     done
 
 ###########################################
@@ -35,7 +41,7 @@ ARG VERSION=1.0
 
 # Add non-root user (UID 10001) without installing extra packages
 RUN /usr/sbin/useradd -u 10001 -r -g root -s /sbin/nologin \
-        -c "Fabric-X tools user" fabricx && \
+    -c "Fabric-X tools user" fabricx && \
     mkdir -p /home/fabricx && \
     chown -R 10001:0 /home/fabricx && \
     chmod 0755 /home/fabricx
