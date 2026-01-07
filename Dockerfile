@@ -13,20 +13,18 @@ FROM public.ecr.aws/docker/library/golang:1.24 AS builder
 # Build environment variables
 ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
-ENV GOBIN=/tmp/bin
 
-ARG FABRIC_X_VERSION=latest
-ARG ARMAGEDDON_VERSION=latest
+WORKDIR /go/src/github.com/hyperledger/fabric-x
 
-WORKDIR /go/src/github.com/hyperledger/fabric-x-tools
+COPY go.mod go.sum ./
+RUN go mod download
 
-# Install Fabric-X tooling
-RUN go install github.com/hyperledger/fabric-x/tools/configtxgen@${FABRIC_X_VERSION} && \
-    go install github.com/hyperledger/fabric-x/tools/cryptogen@${FABRIC_X_VERSION} && \
-    go install github.com/hyperledger/fabric-x/tools/configtxlator@${FABRIC_X_VERSION} && \
-    go install github.com/hyperledger/fabric-x/tools/fxconfig@${FABRIC_X_VERSION} && \
-    go install github.com/hyperledger/fabric-x-orderer/cmd/armageddon@${ARMAGEDDON_VERSION}
+COPY . .
 
+RUN mkdir -p /tmp/bin && \
+    for tool in configtxgen cryptogen configtxlator fxconfig; do \
+        go build -o /tmp/bin/$tool ./tools/$tool; \
+    done
 
 ###########################################
 # Stage 2: Production runtime image
@@ -49,7 +47,7 @@ COPY --from=builder /tmp/bin/* /usr/local/bin/
 LABEL name="fabric-x-tools" \
     maintainer="IBM Research Decentralized Trust Group" \
     version="${VERSION}" \
-    description="Fabric-X CLI tools (configtxgen, cryptogen, configtxlator, fxconfig, armageddon) packaged in a UBI image" \
+    description="Fabric-X CLI tools (configtxgen, cryptogen, configtxlator, fxconfig) packaged in a UBI image" \
     license="Apache-2.0" \
     vendor="IBM"
 
