@@ -8,7 +8,7 @@
 ###########################################
 # Stage 1: Build image
 ###########################################
-FROM golang:1.24 AS builder
+FROM golang:1.25 AS builder
 
 # List of CLI tools to build
 ARG FABRICX_TOOLS="configtxgen cryptogen configtxlator fxconfig"
