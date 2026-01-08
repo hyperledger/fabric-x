@@ -61,5 +61,5 @@ LABEL name="fabric-x-tools" \
 USER 10001
 WORKDIR /home/fabricx
 
-# Default Entrypoint
-ENTRYPOINT ["/bin/sh"]
+# Define default CMD
+CMD ["/bin/sh"]
