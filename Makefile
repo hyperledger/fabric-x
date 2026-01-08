@@ -1,5 +1,4 @@
 # Copyright IBM Corp All Rights Reserved.
-# Copyright London Stock Exchange Group All Rights Reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -70,5 +69,4 @@ lint: FORCE
 	cd tools && golangci-lint run --new-from-rev=origin/main --color=always --max-same-issues 0
 	@echo "Running License Header Linters..."
 	scripts/license-lint.sh
-
 FORCE:

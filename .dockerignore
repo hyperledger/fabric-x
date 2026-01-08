@@ -1,0 +1,33 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# git
+.git
+.github
+.gitignore
+
+# docs
+README.md
+MAINTAINERS.md
+LICENSE
+
+# docker/podman
+Dockerfile
+
+# lint
+.golangci.yml
+
+# IDE
+.vscode
+.idea
+
+# misc
+Makefile
+samples
+scripts
+diagrams
+.ansible
+
