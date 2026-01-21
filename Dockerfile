@@ -38,6 +38,8 @@ RUN mkdir -p /tmp/bin && \
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.6 AS prod
 
 ARG VERSION=1.0
+ARG CREATED
+ARG REVISION=1.0
 
 # Add non-root user (UID 10001) without installing extra packages
 RUN /usr/sbin/useradd -u 10001 -r -g root -s /sbin/nologin \
@@ -50,12 +52,15 @@ RUN /usr/sbin/useradd -u 10001 -r -g root -s /sbin/nologin \
 COPY --from=builder /tmp/bin/* /usr/local/bin/
 
 # OCI metadata labels
-LABEL name="fabric-x-tools" \
-    maintainer="IBM Research Decentralized Trust Group" \
-    version="${VERSION}" \
-    description="Fabric-X CLI tools (configtxgen, cryptogen, configtxlator, fxconfig) packaged in a UBI image" \
-    license="Apache-2.0" \
-    vendor="IBM"
+LABEL org.opencontainers.image.created="${CREATED}" \
+    org.opencontainers.image.description="Fabric-X CLI tools (configtxgen, cryptogen, configtxlator, fxconfig) packaged in a UBI image." \
+    org.opencontainers.image.licenses="Apache-2.0" \
+    org.opencontainers.image.ref.name="ubi9/ubi-minimal" \
+    org.opencontainers.image.revision="${REVISION}" \
+    org.opencontainers.image.source="https://github.com/hyperledger/fabric-x" \
+    org.opencontainers.image.title="fabric-x" \
+    org.opencontainers.image.url="https://github.com/hyperledger/fabric-x" \
+    org.opencontainers.image.version="${VERSION}"
 
 # Use non-root user
 USER 10001
