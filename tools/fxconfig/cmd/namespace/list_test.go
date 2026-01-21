@@ -10,6 +10,8 @@ import (
 	"io"
 	"testing"
 
+	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
+
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 )
@@ -38,7 +40,7 @@ func setupList(t *testing.T) *cobra.Command {
 	return rootCmd
 }
 
-var fakeList = func(_ io.Writer, _, _ string) error {
+var fakeList = func(_ io.Writer, _ string, _ comm.Config) error {
 	// don't do anything
 	return nil
 }
