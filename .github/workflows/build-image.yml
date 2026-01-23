@@ -53,6 +53,11 @@ jobs:
             exit 1
           fi
 
+      - name: Set OCI metadata
+        run: |
+          echo "CREATED=$(date -u +'%Y-%m-%dT%H:%M:%S.%3NZ')" >> $GITHUB_ENV
+          echo "REVISION=${GITHUB_SHA}" >> $GITHUB_ENV
+
       - name: Set image prefix
         run: |
           if [ "$GITHUB_REPOSITORY_OWNER" == "hyperledger" ]; then
@@ -70,6 +75,8 @@ jobs:
           push: true
           build-args: |
             VERSION=${{ env.VERSION }}
+            CREATED=${{ env.CREATED }}
+            REVISION=${{ env.REVISION }}
           tags: |
             docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:${{ env.VERSION }}
             docker.io/${{ env.IMAGE_PREFIX }}/fabric-x-tools:latest
