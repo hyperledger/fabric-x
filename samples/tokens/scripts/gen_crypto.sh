@@ -33,7 +33,7 @@ gen_parameters() {
     openssl req -new -x509 -key "${dir}/keystore/priv_sk" -out "${dir}/signcerts/cert.pem" -days 3650 -subj "/CN=Digital Currency Issuer"
 
     # encode the ca and issuer identities, and generate the cryptographic parameters needed for the endorsers to validate transactions
-    go tool tokengen gen zkatdlognogh.v1 --base 300 --exponent 5 --issuers "${dir}" --idemix "${CONF_ROOT}/ca/keys" --output "${CONF_ROOT}/namespace"
+    go tool tokengen gen zkatdlognogh.v1 --issuers "${dir}" --idemix "${CONF_ROOT}/ca/keys" --output "${CONF_ROOT}/namespace"
 }
 
 # Enroll idemix identities for owners at the CA

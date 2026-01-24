@@ -7,11 +7,13 @@
 all:
   vars:
     container_client: docker
-    container_network: fabric_test
+    channel_id: mychannel
   children:
     fabric_x:
       children:
         fabric_x_orderers:
+          vars:
+            container_network: fabric_test
           children:
             fabric_x_orderer_1:
               vars:
@@ -99,6 +101,8 @@ all:
                   orderer_rpc_port: 7353
 
         fabric_x_committer:
+          vars:
+            container_network: fabric_test
           hosts:
             committer-db:
               committer_component_type: db
@@ -121,11 +125,11 @@ all:
               prometheus_exporter_port: 2140
             committer-sidecar:
               committer_component_type: sidecar
-              committer_rpc_port: 5400
+              committer_rpc_port: 4001 # changed from 5400 to align with testcontainer
               prometheus_exporter_port: 2150
             committer-query-service:
               committer_component_type: query-service
-              committer_rpc_port: 5500
+              committer_rpc_port: 7001 # changed from 5500 to align with testcontainer
               prometheus_exporter_port: 2160
               postgres_db_host: committer-db
 

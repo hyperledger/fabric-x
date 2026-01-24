@@ -38,7 +38,7 @@ setup-fabric:
 # Clean all the artifacts (configs and bins) built on the controller node (e.g. make clean).
 .PHONY: clean-fabric
 clean-fabric:
-	rm -rf ./out
+	@rm -rf ./out
 	@for d in "$(CONF_ROOT)"/*/ ; do \
 		rm -rf "$$d/keys/fabric" "$$d/data"; \
 	done
@@ -46,11 +46,8 @@ clean-fabric:
 # Start fabric-x on the targeted hosts.
 .PHONY: start-fabric
 start-fabric:
+	@$(CONTAINER_CLI) network inspect fabric_test >/dev/null 2>&1 || $(CONTAINER_CLI) network create fabric_test
 	ansible-playbook "$(PLAYBOOK_PATH)/60-start.yaml" --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
-
-# Create a namespace in fabric-x for the tokens.
-.PHONY: create-namespace
-create-namespace: # empty target for backward-compatibility
 
 # Stop the targeted hosts (e.g. make fabric-x stop).
 .PHONY: stop-fabric

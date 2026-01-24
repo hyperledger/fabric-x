@@ -5,7 +5,7 @@
 #
 
 export PLATFORM
-ifneq ($(PLATFORM),fabricx)
+ifeq ($(PLATFORM),fabric3)
 	COMPOSE_ARGS := -f compose.yml -f compose-endorser2.yml
 endif
 CONTAINER_CLI ?= docker
@@ -27,7 +27,7 @@ start-app:
 
 # Restart application
 .PHONY: restart-app
-restart-app:
+restart-app: build-app
 	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) down
 	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) up -d
 

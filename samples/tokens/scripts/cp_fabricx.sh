@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -exo pipefail
+
 #
 # Copyright IBM Corp. All Rights Reserved.
 #
@@ -7,6 +9,9 @@
 #
 
 CONF_ROOT=$(realpath "${CONF_ROOT:-$(pwd)/conf}")
+CRYPTO_DIR="${CRYPTO_DIR:-./out/control-node/config/cryptogen-artifacts/crypto}"
+
+echo "$CRYPTO_DIR"
 
 for d in "${CONF_ROOT}"/*/ ; do
     rm -rf "$d/keys/fabric"
@@ -22,16 +27,16 @@ for node in "${nodes[@]}"; do
     mkdir -p "${CONF_ROOT}/${node}/data"
     mkdir -p "$dir"
 
-    cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp" "$dir/user"
+    cp -r "${CRYPTO_DIR}/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp" "$dir/user"
 done
 
 # Endorser (see: https://github.com/hyperledger-labs/fabric-token-sdk/blob/main/docs/core-token.md?plain=1#L109).
 dir="${CONF_ROOT}/endorser1/keys/fabric" 
 mkdir -p "$dir"
-cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/endorser@org1.example.com/msp" "${dir}/endorser"
-cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp" "${dir}/admin"
+cp -r "${CRYPTO_DIR}/peerOrganizations/org1.example.com/users/endorser@org1.example.com/msp" "${dir}/endorser"
+cp -r "${CRYPTO_DIR}/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp" "${dir}/admin"
 
 dir="${CONF_ROOT}/endorser2/keys/fabric" 
 mkdir -p "$dir"
-cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/endorser@org1.example.com/msp" "${dir}/endorser"
-cp -r "./out/control-node/config/cryptogen-artifacts/crypto/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp" "${dir}/admin"
+cp -r "${CRYPTO_DIR}/peerOrganizations/org1.example.com/users/endorser@org1.example.com/msp" "${dir}/endorser"
+cp -r "${CRYPTO_DIR}/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp" "${dir}/admin"

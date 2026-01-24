@@ -13,5 +13,6 @@ collections:
     version: ">=4.3.1"
   - name: containers.podman
     version: ">=1.16.2"
-  - name: hyperledger.fabricx
-    version: "0.4.6"
+  - name: https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection.git
+    type: git
+    version: 0.5.2

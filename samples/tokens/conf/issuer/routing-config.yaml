@@ -1,0 +1,13 @@
+routes:
+  issuer:
+    - issuer.example.com:9101
+  auditor:
+    - auditor.example.com:9201
+  endorser1:
+    - endorser1.example.com:9301
+  endorser2:
+    - endorser2.example.com:9401
+  owner1:
+    - owner1.example.com:9501
+  owner2:
+    - owner2.example.com:9601

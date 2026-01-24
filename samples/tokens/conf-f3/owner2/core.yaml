@@ -56,7 +56,6 @@ fsc:
 fabric:
   enabled: true
   default:
-    mspConfigPath: ./keys/fabric/user
     defaultMSP: user
     msps:
       - id: user

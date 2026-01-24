@@ -20,9 +20,9 @@ import (
 	viewregistry "github.com/hyperledger-labs/fabric-smart-client/platform/view/services/view"
 	"github.com/hyperledger-labs/fabric-smart-client/platform/view/view"
 	"github.com/hyperledger-labs/fabric-token-sdk/token"
-	"github.com/hyperledger-labs/fabric-token-sdk/token/services/db/driver"
+	"github.com/hyperledger-labs/fabric-token-sdk/token/services/storage/db/driver"
+	"github.com/hyperledger-labs/fabric-token-sdk/token/services/storage/ttxdb"
 	"github.com/hyperledger-labs/fabric-token-sdk/token/services/ttx"
-	"github.com/hyperledger-labs/fabric-token-sdk/token/services/ttxdb"
 	tok "github.com/hyperledger-labs/fabric-token-sdk/token/token"
 )
 
@@ -57,8 +57,12 @@ var (
 )
 
 func (f FabricSmartClient) Balances(ctx context.Context, wallet string) ([]Amount, error) {
-	wm := token.GetManagementService(f.node).WalletManager()
-	wal := wm.OwnerWallet(ctx, wallet)
+	mgmt, err := token.GetManagementService(f.node)
+	if err != nil {
+		panic("configuration error, check the logs")
+	}
+
+	wal := mgmt.WalletManager().OwnerWallet(ctx, wallet)
 	if wal == nil {
 		return nil, ErrWalletNotFound
 	}
@@ -84,8 +88,11 @@ func (f FabricSmartClient) Balances(ctx context.Context, wallet string) ([]Amoun
 }
 
 func (f FabricSmartClient) Balance(ctx context.Context, wallet, code string) (Amount, error) {
-	wm := token.GetManagementService(f.node).WalletManager()
-	wal := wm.OwnerWallet(ctx, wallet)
+	mgmt, err := token.GetManagementService(f.node)
+	if err != nil {
+		panic("configuration error, check the logs")
+	}
+	wal := mgmt.WalletManager().OwnerWallet(ctx, wallet)
 	if wal == nil {
 		return Amount{}, ErrWalletNotFound
 	}
@@ -140,9 +147,13 @@ func (f FabricSmartClient) GetTransactions(ctx context.Context, wallet string) (
 		Statuses:        []driver.TxStatus{driver.Confirmed, driver.Pending},
 		ExcludeToSelf:   true,
 	}
-	owner := ttx.NewOwner(f.node, token.GetManagementService(f.node))
+	mgmt, err := token.GetManagementService(f.node)
+	if err != nil {
+		panic("configuration error, check the logs")
+	}
+	owner := ttx.NewOwner(f.node, mgmt)
 	if owner == nil {
-		return txs, errors.New("")
+		panic("configuration error, check the logs")
 	}
 
 	it, err := owner.Transactions(ctx, params, pagination.None())

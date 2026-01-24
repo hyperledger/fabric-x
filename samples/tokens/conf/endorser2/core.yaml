@@ -3,15 +3,18 @@ logging:
   format: '%{color}%{time:15:04:05.000} [%{module}] %{shortfunc} %{level:.4s}%{color:reset} %{message}'
 
 fsc:
-  id: endorser1 # CORE_FSC_ID
+  id: endorser2 # CORE_FSC_ID
   identity:
     cert:
       file: ./keys/node.crt
     key:
       file: ./keys/node.key
   p2p:
-    listenAddress: /ip4/0.0.0.0/tcp/9401
+    listenAddress: /ip4/0.0.0.0/tcp/9401 # CORE_P2P_LISTENADDRESS
     type: websocket
+    opts:
+      routing:
+        path: ./routing-config.yaml
   persistences:
     default:
       type: sqlite
@@ -57,17 +60,17 @@ fabric:
     msps:
       - id: endorser
         mspType: bccsp
-        mspID: Org1
+        mspID: Org2MSP
         path: ./keys/fabric/endorser
     tls:
       enabled: false
     peers:
-      - address: committer-sidecar:5400
+      - address: committer-sidecar:4001
         usage: delivery
     queryService:
-      - address: committer-queryservice:5500
+      - address: committer-queryservice:7001
     channels:
-      - name: arma
+      - name: mychannel
         default: true
 
 token:
@@ -75,10 +78,9 @@ token:
   tms:
     mytms:
       network: default
-      channel: arma
+      channel: mychannel
       namespace: token_namespace
       driver: zkatdlog
-      wallets:
       services:
         network:
           fabric:

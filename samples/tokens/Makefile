@@ -3,11 +3,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-PLATFORM ?= fabricx
+PLATFORM ?= xdev
 CONF_ROOT=conf
 
 ifeq ($(PLATFORM),fabricx)
-include ./fabricx.mk
+include ./fabricx_ansible.mk
+else ifeq ($(PLATFORM),xdev)
+include ./fabricx_dev.mk
 else
 include ./fabric3.mk
 endif
@@ -17,6 +19,7 @@ include ./app.mk
 # Install the utilities needed to run the components on the targeted remote hosts (e.g. make install-prerequisites).
 .PHONY: install-prerequisites
 install-prerequisites: install-prerequisites-fabric
+	./install-fabric.sh --fabric-version 3.1.1
 	go mod tidy
 
 # Build all the artifacts and binaries, and copy them to the application folders
@@ -25,7 +28,7 @@ setup: clean setup-fabric setup-app
 
 # Start a Fabric and token network.
 .PHONY: start
-start: start-fabric create-namespace start-app
+start: start-fabric start-app
 
 # Teardown Fabric and the token network.
 .PHONY: teardown
@@ -35,7 +38,7 @@ teardown: teardown-app teardown-fabric
 .PHONY: stop
 stop: stop-app stop-fabric
 
-# Remove all generated crypto.
+# Remove all generated crypto. Requires a `make setup` to restore.
 .PHONY: clean
 clean: clean-app clean-fabric
 

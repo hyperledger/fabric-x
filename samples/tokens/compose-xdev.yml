@@ -1,0 +1,50 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+services:
+  fabric-x-committer-test-node:
+    image: ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.7
+    container_name: test-committer
+    networks:
+      - test
+    environment:
+      - SC_SIDECAR_ORDERER_IDENTITY_MSP_DIR=/root/config/crypto/peerOrganizations/org1.example.com/peers/SC.org1.example.com/msp
+      - SC_SIDECAR_ORDERER_IDENTITY_MSP_ID=Org1MSP
+      - SC_SIDECAR_ORDERER_CHANNEL_ID=mychannel
+      - SC_SIDECAR_ORDERER_SIGNED_ENVELOPES=true
+      - SC_QUERY_SERVICE_SERVER_ENDPOINT=:7001
+      - SC_ORDERER_BLOCK_SIZE=1
+      - SC_SIDECAR_LOGGING_LEVEL=DEBUG
+      - SC_QUERY_SERVICE_LOGGING_LEVEL=DEBUG
+      - SC_COORDINATOR_LOGGING_LEVEL=DEBUG
+      - SC_ORDERER_LOGGING_LEVEL=DEBUG
+      - SC_VC_LOGGING_LEVEL=DEBUG
+      - SC_VERIFIER_LOGGING_LEVEL=INFO
+    ports:
+      - "4001:4001"
+      - "2110:2110"
+      - "2114:2114"
+      - "2117:2117"
+      - "7001:7001"
+      - "7050:7050"
+      - "5433:5433"
+    expose:
+      - "4001"
+      - "2110"
+      - "2114"
+      - "2117"
+      - "7001"
+      - "7050"
+      - "5433"
+    volumes:
+      - "./crypto:/root/config/crypto"
+      - "./crypto/sc-genesis-block.proto.bin:/root/config/sc-genesis-block.proto.bin"
+    command: run db orderer committer
+
+networks:
+  test:
+    name: fabric_test
+    external: true

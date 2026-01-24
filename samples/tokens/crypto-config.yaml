@@ -1,0 +1,125 @@
+---
+OrdererOrgs:
+  - Name: OrdererOrg
+    Domain: example.com
+    EnableNodeOUs: false
+    CA:
+      Hostname: ca
+    Specs:
+      - Hostname: orderer
+        SANS:
+          - 127.0.0.1
+          - 0.0.0.0
+          - localhost
+          - 127.0.0.1
+          - host.docker.internal
+          - fabric
+          - ::1
+
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.example.com
+    EnableNodeOUs: false
+    CA:
+      hostname: ca
+      SANS:
+        - 0.0.0.0
+        - localhost
+        - 127.0.0.1
+        - ::1
+    Users:
+      Count: 1
+      Specs:
+        - Name: endorser
+          HSM: false
+        - Name: channel_admin
+          HSM: false
+    Specs:
+      - Hostname: endorser
+        SANS:
+          - 0.0.0.0
+          - localhost
+          - 127.0.0.1
+          - ::1
+          - fabric
+          - host.docker.internal
+      - Hostname: SC
+        SANS:
+          - 0.0.0.0
+          - localhost
+          - 127.0.0.1
+          - ::1
+          - fabric
+          - host.docker.internal
+  - Name: Org2
+    Domain: org2.example.com
+    EnableNodeOUs: false
+    CA:
+      hostname: ca
+      SANS:
+        - 0.0.0.0
+        - localhost
+        - 127.0.0.1
+        - ::1
+    Users:
+      Count: 1
+      Specs:
+        - Name: endorser
+          HSM: false
+        - Name: User1
+          HSM: false
+        - Name: User2
+          HSM: false
+    Specs:
+      - Hostname: endorser
+        SANS:
+          - 0.0.0.0
+          - localhost
+          - 127.0.0.1
+          - ::1
+          - fabric
+          - host.docker.internal
+      - Hostname: SC
+        SANS:
+          - 0.0.0.0
+          - localhost
+          - 127.0.0.1
+          - ::1
+          - fabric
+          - host.docker.internal
+  - Name: Org3
+    Domain: org3.example.com
+    EnableNodeOUs: false
+    CA:
+      hostname: ca
+      SANS:
+        - 0.0.0.0
+        - localhost
+        - 127.0.0.1
+        - ::1
+    Users:
+      Count: 1
+      Specs:
+        - Name: lender
+          HSM: false
+        - Name: User1
+          HSM: false
+        - Name: User2
+          HSM: false
+    Specs:
+      - Hostname: lender
+        SANS:
+          - 0.0.0.0
+          - localhost
+          - 127.0.0.1
+          - ::1
+          - fabric
+          - host.docker.internal
+      - Hostname: SC
+        SANS:
+          - 0.0.0.0
+          - localhost
+          - 127.0.0.1
+          - ::1
+          - fabric
+          - host.docker.internal

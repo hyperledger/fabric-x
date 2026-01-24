@@ -1,0 +1,157 @@
+---
+Organizations:
+  - &Org1MSP
+    Name: Org1
+    ID: Org1MSP
+    MSPDir: ./crypto/peerOrganizations/org1.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: OR('Org1MSP.member')
+      Writers:
+        Type: Signature
+        Rule: OR('Org1MSP.member')
+      Endorsement:
+        Type: Signature
+        Rule: OR('Org1MSP.member')
+      Admins:
+        Type: Signature
+        Rule: OR('Org1MSP.admin')
+    AnchorPeers:
+      - Host:
+        Port: 5417
+  - &Org2MSP
+    Name: Org2
+    ID: Org2MSP
+    MSPDir: ./crypto/peerOrganizations/org2.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: OR('Org2MSP.member')
+      Writers:
+        Type: Signature
+        Rule: OR('Org2MSP.member')
+      Endorsement:
+        Type: Signature
+        Rule: OR('Org2MSP.member')
+      Admins:
+        Type: Signature
+        Rule: OR('Org2MSP.admin')
+    AnchorPeers:
+      - Host:
+        Port: 5417
+  - &Org3MSP
+    Name: Org3
+    ID: Org3MSP
+    MSPDir: ./crypto/peerOrganizations/org3.example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: OR('Org3MSP.member')
+      Writers:
+        Type: Signature
+        Rule: OR('Org3MSP.member')
+      Endorsement:
+        Type: Signature
+        Rule: OR('Org3MSP.member')
+      Admins:
+        Type: Signature
+        Rule: OR('Org3MSP.admin')
+    AnchorPeers:
+      - Host:
+        Port: 5417
+  - &OrdererMSP
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: ./crypto/ordererOrganizations/example.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: OR('OrdererMSP.member')
+      Writers:
+        Type: Signature
+        Rule: OR('OrdererMSP.member')
+      Admins:
+        Type: Signature
+        Rule: OR('OrdererMSP.admin')
+    OrdererEndpoints:
+      # - id=0,broadcast,127.0.0.1:7050
+      # - id=0,deliver,127.0.0.1:7050
+      - id=0,broadcast,orderer.example.com:7050
+      - id=0,deliver,orderer.example.com:7050
+
+Channel: &ChannelDefaults
+  Capabilities:
+    V2_0: true
+  Policies: &DefaultPolicies
+    Readers:
+      Type: ImplicitMeta
+      Rule: ANY Readers
+    Writers:
+      Type: ImplicitMeta
+      Rule: ANY Writers
+    Admins:
+      Type: ImplicitMeta
+      Rule: MAJORITY Admins
+
+Profiles:
+  OrgsChannel:
+    <<: *ChannelDefaults
+    Orderer:
+      OrdererType: etcdraft
+      BatchTimeout: 1s
+      BatchSize:
+        MaxMessageCount: 500
+        AbsoluteMaxBytes: 98 MB
+        PreferredMaxBytes: 2 KB
+      Capabilities:
+        V2_0: true
+      EtcdRaft:
+        Options:
+          TickInterval: 500ms
+          SnapshotIntervalSize: 1 KB
+        Consenters:
+          - Host: 127.0.0.1
+            Port: 5427
+            ClientTLSCert: ./crypto/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+            ServerTLSCert: ./crypto/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+      Organizations:
+        - *OrdererMSP
+      Policies:
+        Readers:
+          Type: ImplicitMeta
+          Rule: ANY Readers
+        Writers:
+          Type: ImplicitMeta
+          Rule: ANY Writers
+        Admins:
+          Type: ImplicitMeta
+          Rule: MAJORITY Admins
+        BlockValidation:
+          Type: ImplicitMeta
+          Rule: ANY Writers
+    Application:
+      Capabilities:
+        V2_5: true
+      Organizations:
+        - *Org1MSP
+        - *Org2MSP
+        - *Org3MSP
+      MetaNamespaceVerificationKeyPath: ./crypto/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp/signcerts/channel_admin@org1.example.com-cert.pem
+      Policies:
+        Readers:
+          Type: ImplicitMeta
+          Rule: ANY Readers
+        Writers:
+          Type: ImplicitMeta
+          Rule: ANY Writers
+        Admins:
+          Type: ImplicitMeta
+          Rule: ANY Admins
+        LifecycleEndorsement:
+          Type: Signature
+          Rule: AND ('Org1MSP.member')
+        Endorsement:
+          Type: ImplicitMeta
+          Rule: ANY Endorsement
+    Consortium: SampleConsortium

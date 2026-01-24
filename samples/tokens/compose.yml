@@ -8,6 +8,7 @@ x-service-template: &service-template
   extra_hosts:
     - "committer-sidecar:host-gateway"
     - "committer-queryservice:host-gateway"
+    - "orderer.example.com:host-gateway"
   networks:
     - test
 

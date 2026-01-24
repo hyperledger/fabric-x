@@ -56,8 +56,6 @@ fsc:
 fabric:
   enabled: true
   default:
-    # mspConfigPath: ./keys/fabric/user
-    defaultMSP: user
     msps:
       - id: user
         mspType: bccsp
@@ -81,7 +79,6 @@ token:
       namespace: token_namespace
       driver: zkatdlog
       wallets:
-        defaultCacheSize: 3
         issuers:
           - id: iss
             path: ./keys/wallet/iss

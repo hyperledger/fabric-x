@@ -10,7 +10,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hyperledger-labs/fabric-token-sdk/token/services/db/driver"
+	"github.com/hyperledger-labs/fabric-token-sdk/token/services/storage/db/driver"
 	"github.com/hyperledger/fabric-samples/token-sdk/owner/service"
 )
 
