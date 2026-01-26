@@ -85,7 +85,7 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 ## Useful links
 
 - [Sample token application](https://github.com/iliecirciumaru/fabric-x/tree/main/samples/tokens)
-- [Fabric-X monthly calls on the 1st Wed of the month](https://zoom-lfx.platform.linuxfoundation.org/meetings/fabric?view=week)
+- [Fabric/Fabric-X monthly calls on the 3rd Wed of the month](https://zoom-lfx.platform.linuxfoundation.org/meetings/fabric?view=month)
 - [Fabric-X Blog](https://www.lfdecentralizedtrust.org/blog/new-major-contribution-to-hyperledger-fabric-purpose-built-implementation-for-next-gen-digital-assets)
 - [Fabric-X whitepaper](https://eprint.iacr.org/2023/1717.pdf) - detailed description of the Fabric-X. Explains motivation,implementation details and presents performance benchmarks
 - [Fabric-X Committer](https://github.com/hyperledger/fabric-x-committer) Github repository
@@ -98,4 +98,6 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 ## Coming soon...
 
 - [x] Sample token application on top of Fabric-X
-- [ ] Fabric-X Kubernetes Operator
+- [ ] Fabric-X Kubernetes operator
+- [ ] Fabric-x blockchain explorer
+- [ ] Fabric meets EVM
