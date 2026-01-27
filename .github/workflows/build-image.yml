@@ -53,13 +53,10 @@ jobs:
             exit 1
           fi
 
-      - name: Set OCI metadata
+      - name: Set image build prefix and metadata
         run: |
-          echo "CREATED=$(date -u +'%Y-%m-%dT%H:%M:%S.%3NZ')" >> $GITHUB_ENV
-          echo "REVISION=${GITHUB_SHA}" >> $GITHUB_ENV
-
-      - name: Set image prefix
-        run: |
+          echo "CREATED=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
+          echo "REVISION=$(git rev-parse HEAD)" >> $GITHUB_ENV        
           if [ "$GITHUB_REPOSITORY_OWNER" == "hyperledger" ]; then
            echo "IMAGE_PREFIX=hyperledger" >> $GITHUB_ENV
           else
