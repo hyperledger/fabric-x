@@ -3,9 +3,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-- name: Create necessary container networks
-  ansible.builtin.import_playbook: hyperledger.fabricx.create_container_networks
-
 - name: Start Hyperledger Fabric-X Orderer
   ansible.builtin.import_playbook: hyperledger.fabricx.orderer.start
 

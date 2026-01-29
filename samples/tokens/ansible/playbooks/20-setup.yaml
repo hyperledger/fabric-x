@@ -7,6 +7,9 @@
 # ==================================================
 # Crypto material for Hyperledger Fabric-X
 # ==================================================
+- name: Create necessary container networks
+  ansible.builtin.import_playbook: hyperledger.fabricx.create_container_networks
+
 - name: Generate crypto material with cryptogen
   ansible.builtin.import_playbook: hyperledger.fabricx.artifacts.build_crypto_material
 
