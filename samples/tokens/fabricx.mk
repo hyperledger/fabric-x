@@ -38,7 +38,8 @@ setup-fabric:
 # Clean all the artifacts (configs and bins) built on the controller node (e.g. make clean).
 .PHONY: clean-fabric
 clean-fabric:
-	rm -rf ./out
+	@ansible-playbook hyperledger.fabricx.remove_container_networks
+	@rm -rf ./out
 	@for d in "$(CONF_ROOT)"/*/ ; do \
 		rm -rf "$$d/keys/fabric" "$$d/data"; \
 	done

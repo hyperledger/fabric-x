@@ -60,7 +60,6 @@ $(BUILD_DIR)/%:
 .PHONY: clean
 clean: ## Cleans the build area
 	-@rm -rf $(BUILD_DIR)
-	ansible-playbook hyperledger.fabricx.remove_container_networks
 
 # Run lint
 # TODO: fix existing lint issues (to find them, remove --new-from-rev=origin/main option)
