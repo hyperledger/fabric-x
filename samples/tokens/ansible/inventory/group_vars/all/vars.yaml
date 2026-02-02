@@ -28,3 +28,4 @@ configtxgen_artifacts_dir: "{{ config_build_dir }}/configtxgen-artifacts"
 # Miscellaneous
 # =========================
 channel_id: arma
+actual_host: "{{ 'localhost' if ansible_connection == 'local' else ansible_host }}"

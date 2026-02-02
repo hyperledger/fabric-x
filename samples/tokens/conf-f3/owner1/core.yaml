@@ -1,6 +1,6 @@
 logging:
   spec: info
-  format: '%{color}%{time:15:04:05.000} [%{module}] %{shortfunc} %{level:.4s}%{color:reset} %{message}'
+  format: "%{color}%{time:15:04:05.000} [%{module}] %{shortfunc} %{level:.4s}%{color:reset} %{message}"
 
 fsc:
   id: owner1 # CORE_FSC_ID
@@ -67,7 +67,7 @@ fabric:
       - address: peer0.org1.example.com:7051
         tlsRootCertFile: ./keys/fabric/peer-tls-ca.crt
     channels:
-      - name: mychannel
+      - name: arma
         default: true
 
 token:
@@ -75,7 +75,7 @@ token:
   tms:
     mytms:
       network: default
-      channel: mychannel
+      channel: arma
       namespace: token_namespace
       driver: zkatdlog
       wallets:

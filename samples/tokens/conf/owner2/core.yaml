@@ -1,6 +1,6 @@
 logging:
   spec: info
-  format: '%{color}%{time:15:04:05.000} [%{module}] %{shortfunc} %{level:.4s}%{color:reset} %{message}'
+  format: "%{color}%{time:15:04:05.000} [%{module}] %{shortfunc} %{level:.4s}%{color:reset} %{message}"
 
 fsc:
   id: owner2 # CORE_FSC_ID
@@ -71,7 +71,7 @@ fabric:
     queryService:
       - address: committer-queryservice:7001
     channels:
-      - name: mychannel
+      - name: arma
         default: true
 
 token:
@@ -79,7 +79,7 @@ token:
   tms:
     mytms:
       network: default
-      channel: mychannel
+      channel: arma
       namespace: token_namespace
       driver: zkatdlog
       wallets:

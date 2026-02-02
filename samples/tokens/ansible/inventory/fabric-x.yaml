@@ -7,7 +7,6 @@
 all:
   vars:
     container_client: docker
-    channel_id: mychannel
   children:
     fabric_x:
       children:

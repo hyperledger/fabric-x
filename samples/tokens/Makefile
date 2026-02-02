@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-PLATFORM ?= xdev
+PLATFORM ?= fabricx
 CONF_ROOT=conf
 
 ifeq ($(PLATFORM),fabricx)
