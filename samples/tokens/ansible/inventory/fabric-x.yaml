@@ -9,10 +9,10 @@ all:
     container_client: docker
   children:
     fabric_x:
+      vars:
+        container_network: fabric_test
       children:
         fabric_x_orderers:
-          vars:
-            container_network: fabric_test
           children:
             fabric_x_orderer_1:
               vars:
@@ -100,8 +100,6 @@ all:
                   orderer_rpc_port: 7353
 
         fabric_x_committer:
-          vars:
-            container_network: fabric_test
           hosts:
             committer-db:
               committer_component_type: db
@@ -136,6 +134,8 @@ all:
     # for the users and set the certificates in the right place
     # to build the genesis block successfully.
     load_generators:
+      vars:
+        container_network: fabric_test
       hosts:
         orderer-loadgen:
           organization:
