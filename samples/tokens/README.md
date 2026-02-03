@@ -1,6 +1,7 @@
 <!--
 SPDX-License-Identifier: Apache-2.0
 -->
+
 # Token SDK Sample
 
 The **Token SDK Sample** demonstrates how to:
@@ -11,40 +12,40 @@ The **Token SDK Sample** demonstrates how to:
 
 ## Table of Contents
 
-- [Token SDK Sample](#token-sdk-sample)
-  - [Table of Contents](#table-of-contents)
-  - [About the Sample](#about-the-sample)
-    - [Application](#application)
-    - [UTXO Model](#utxo-model)
-    - [Deep Dive: What Happens During a Transfer?](#deep-dive-what-happens-during-a-transfer)
-  - [Running the sample](#running-the-sample)
-  - [Prerequisites](#prerequisites)
-  - [Default option: Fabric-X test container](#default-option-fabric-x-test-container)
-  - [Option 2: Fabric-X with Ansible](#option-2-fabric-x-with-ansible)
-    - [Requirements](#requirements)
-    - [Installation](#installation)
-    - [Setup](#setup)
-  - [Option 3: Fabric v3](#option-3-fabric-v3)
-    - [Installation](#installation-1)
-    - [Setup](#setup-1)
-    - [Start the Network and Application](#start-the-network-and-application)
-  - [Interacting with the Application](#interacting-with-the-application)
-  - [Example: Issue tokens](#example-issue-tokens)
-  - [Example: Transfer tokens](#example-transfer-tokens)
-  - [Teardown and cleanup](#teardown-and-cleanup)
-  - [Development](#development)
-  - [Debug mode](#debug-mode)
-    - [VSCode](#vscode)
-    - [Running the binaries](#running-the-binaries)
-  - [Troubleshooting](#troubleshooting)
-
+- [Table of Contents](#table-of-contents)
+- [About the Sample](#about-the-sample)
+  - [Components](#components)
+    - [Application services](#application-services)
+    - [Fabric(x) Blockchain Network](#fabricx-blockchain-network)
+  - [Application](#application)
+  - [UTXO Model](#utxo-model)
+  - [Deep Dive: What Happens During a Transfer?](#deep-dive-what-happens-during-a-transfer)
+- [Running the sample](#running-the-sample)
+- [Prerequisites](#prerequisites)
+- [Default option: Fabric-X with Ansible](#default-option-fabric-x-with-ansible)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [Setup Fabric-X](#setup-fabric-x)
+- [Option 2: Fabric-X test container](#option-2-fabric-x-test-container)
+- [Option 3: Fabric v3](#option-3-fabric-v3)
+  - [Setup Fabric v3](#setup-fabric-v3)
+  - [Start the Network and Application](#start-the-network-and-application)
+- [Interacting with the Application](#interacting-with-the-application)
+- [Example: Issue tokens](#example-issue-tokens)
+- [Example: Transfer tokens](#example-transfer-tokens)
+- [Teardown and cleanup](#teardown-and-cleanup)
+- [Development](#development)
+- [Debug mode](#debug-mode)
+  - [VSCode](#vscode)
+  - [Running the binaries](#running-the-binaries)
+- [Troubleshooting](#troubleshooting)
 
 ## About the Sample
 
 This demo provides a set of services exposing REST APIs that integrate with the [Token SDK](https://github.com/hyperledger-labs/fabric-token-sdk)
 to issue, transfer, and redeem tokens backed by a **Hyperledger Fabric(x)** network for validation and settlement.
 
-Together, these services form a *Layer 2 network* capable of transacting privately among participants.
+Together, these services form a _Layer 2 network_ capable of transacting privately among participants.
 The ledger data does not reveal balances, transaction amounts, or participant identities.
 Tokens are represented as UTXOs owned by pseudonymous keys, with details hidden through **Zero-Knowledge Proofs (ZKPs)**.
 
@@ -53,15 +54,16 @@ Note that the [Token SDK](https://github.com/hyperledger-labs/fabric-token-sdk) 
 
 This sample helps you get familiar with Token SDK features and serves as a starting point for your own proof of concept.
 
-**Components**
+### Components
 
-**Application services**
+#### Application services
+
 - **Issuer service** - creates (issues) tokens.
 - **Owner services** - host user wallets.
 - **Endorser service** - validates and approves token transactions.
 
+#### Fabric(x) Blockchain Network
 
-**Fabric(x) Blockchain Network**
 - An offline Certificate Authority (CA).
 - Configuration for a **Fabric-X** test network.
 - Configuration for a **Fabric v3** test network.
@@ -82,7 +84,7 @@ Each node runs as a separate application with:
 - The FSC node runtime
 - The Token SDK
 
-Nodes communicate via *websockets* to construct token transactions.
+Nodes communicate via _websockets_ to construct token transactions.
 Each node also acts as a Fabric user, submitting transactions to the settlement layer — any Fabric or Fabric-X network.
 
 A namespace (`token_namespace`) is deployed, along with a committed transaction containing the identities of the issuer, endorsers, and CA, enabling transaction validation.
@@ -90,11 +92,12 @@ A namespace (`token_namespace`) is deployed, along with a committed transaction 
 ### UTXO Model
 
 Note that the application uses the UTXO model (like bitcoin).
+
 - The issuer creates a token of `1000 TOK` owned by `alice`.
 - When `alice` transfers `100 TOK` to `dan`, her `1000 TOK` token becomes the **input**.
 - Two **outputs** are created:
-  1) `100 TOK` owned by `dan`
-  2) `900 TOK` owned by `alice`
+  1. `100 TOK` owned by `dan`
+  2. `900 TOK` owned by `alice`
 
 Every transfer consumes existing outputs and creates new ones, ensuring balance consistency.
 
@@ -106,21 +109,20 @@ Let’s examine how a private token transfer works between `alice` (Owner 1) and
 
 1. **Create Transaction:**
 
-    Alice requests an anonymous key from Dan, creates commitments that can be verified by anyone, but can _only_ be opened (read) by Dan.
-    The commitments contain the value, sender and recipient of each of the in- and output tokens.
+   Alice requests an anonymous key from Dan, creates commitments that can be verified by anyone, but can _only_ be opened (read) by Dan.
+   The commitments contain the value, sender and recipient of each of the in- and output tokens.
 
 2. **Get Endorsements:**
 
-    Alice submits the transaction to the endorser which validates the transaction using the token validation logic.
-    In detail, it verifies that all the proofs are valid and all the necessary signatures are there.
-    Note that the endorser cannot see the actual transfer details thanks to the zero knowledge proofs.
+   Alice submits the transaction to the endorser which validates the transaction using the token validation logic.
+   In detail, it verifies that all the proofs are valid and all the necessary signatures are there.
+   Note that the endorser cannot see the actual transfer details thanks to the zero knowledge proofs.
 
 3. **Commit Transaction:**
 
-    Alice submits the endorsed fabric(x) transaction to the ordering service.
-    Once committed, all involved nodes (Owner 1, Owner 2) receive events and update the transaction status to `Confirmed.`
-    The transaction is now final; Dan now officially owns the `100 TOK`.
-
+   Alice submits the endorsed fabric(x) transaction to the ordering service.
+   Once committed, all involved nodes (Owner 1, Owner 2) receive events and update the transaction status to `Confirmed.`
+   The transaction is now final; Dan now officially owns the `100 TOK`.
 
 ![transfer](diagrams/transfer_transaction.png)
 
@@ -142,7 +144,41 @@ Make sure the CA binaries are accessible in your $PATH (add it to your .bashrc o
 export PATH="$PATH:$(pwd)/fabric-samples/bin"
 ```
 
-## Default option: Fabric-X test container
+## Default option: Fabric-X with Ansible
+
+Use ansible scripts to deploy real distributed networks. For the sake of this sample, we included a simple network that runs on your laptop, but there is a wealth of options to deploy to separate VMs with ease. Checkout the [Fabric-x Ansible Collection](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection?tab=readme-ov-file#option-2-install-from-source) to learn more.
+
+### Requirements
+
+- `python`;
+- [`ansible`](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) >= **2.16**;
+
+### Installation
+
+```shell
+make install-prerequisites
+python3 -m pip install -r ansible/requirements.txt
+```
+
+### Setup Fabric-X
+
+Make sure that the crypto is cleared and let the scripts know you want to use ansible:
+
+```shell
+make teardown
+make clean
+export PLATFORM=fabricx
+make setup
+```
+
+Then, like with the test container:
+
+```shell
+make start
+curl -X POST http://localhost:9300/endorser/init
+```
+
+## Option 2: Fabric-X test container
 
 The quickest way to get going: a test version of Fabric-X in a single docker container! Even if you want to use different backends, we suggest to start here.
 
@@ -166,7 +202,7 @@ This creates:
   - idemix credentials signed by this issuer
   - cryptographic parameters and configuration for the token network (see: `go tool tokengen pp print -i conf/namespace/zkatdlognoghv1_pp.json`).
 
-The relevant crypto material is copied to the folders in the conf/* directories. 
+The relevant crypto material is copied to the folders in the conf/\* directories.
 
 The following first command starts the Fabric-X test container, creates a namespace, and runs the application in docker containers. The second command ensures that the parameters for the network (cryptographic material, the idemix issuer identity for the accounts, the token issuer certificate) are registered on the ledger.
 
@@ -175,67 +211,20 @@ make start
 curl -X POST http://localhost:9300/endorser/init
 ```
 
-Now open http://localhost:8080 in your browser to see the other API endpoints, or scroll down to follow some `curl` commands. 
-
-## Option 2: Fabric-X with Ansible
-
-Use ansible scripts to deploy real distributed networks. For the sake of this sample, we included a simple network that runs on your laptop, but there is a wealth of options to deploy to separate VMs with ease. Checkout the [Fabric-x Ansible Collection](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection?tab=readme-ov-file#option-2-install-from-source) to learn more.
-
-### Requirements
-
-- `python`;
-- [`ansible`](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) >= **2.16**;
-
-### Installation
-
-```shell
-make install-prerequisites
-python3 -m pip install -r ansible/requirements.txt
-```
-
-> [!NOTE]
-> Mac users: Fabric-X components must communicate via host.docker.internal instead of localhost.
-> ```shell
-> export LOCAL_ANSIBLE_HOST="host.docker.internal"
-> ```
-
-### Setup
-
-Make sure that the crypto is cleared and let the scripts know you want to use ansible:
-
-```shell
-make teardown
-make clean
-export PLATFORM=fabricx
-make setup
-```
-
-Then, like with the test container:
-
-```shell
-make start
-curl -X POST http://localhost:9300/endorser/init
-```
+Now open <http://localhost:8080> in your browser to see the other API endpoints, or scroll down to follow some `curl` commands.
 
 ## Option 3: Fabric v3
 
 Run the same application against a classic Fabric v3 network.
 
-First, clean up any previous state:
+### Setup Fabric v3
+
+First, clean up any previous state and set Fabric v3:
 
 ```shell
 make teardown
 make clean
 export PLATFORM=fabric3
-```
-
-### Installation
-
-Already done under "Prerequisites".
-
-### Setup
-
-```shell
 make setup
 ```
 
@@ -321,7 +310,6 @@ make help
 
 for a list of available commands.
 
-
 ## Development
 
 ## Debug mode
@@ -330,7 +318,7 @@ For faster development, you can run the services outside Docker.
 
 First, add the following to `/etc/hosts`:
 
-```
+```text
 127.0.0.1 peer0.org1.example.com
 127.0.0.1 peer0.org2.example.com
 127.0.0.1 orderer.example.com
