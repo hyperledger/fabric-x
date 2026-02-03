@@ -68,7 +68,7 @@ fabric:
       - address: peer0.org1.example.com:7051
         tlsRootCertFile: ./keys/fabric/peer-tls-ca.crt
     channels:
-      - name: arma
+      - name: mychannel
         default: true
 
 token:
@@ -76,7 +76,7 @@ token:
   tms:
     mytms:
       network: default
-      channel: arma
+      channel: mychannel
       namespace: token_namespace
       driver: zkatdlog
       wallets:
