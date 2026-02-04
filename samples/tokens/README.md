@@ -157,7 +157,6 @@ Use ansible scripts to deploy real distributed networks. For the sake of this sa
 
 ```shell
 make install-prerequisites
-python3 -m pip install -r ansible/requirements.txt
 ```
 
 ### Setup Fabric-X
