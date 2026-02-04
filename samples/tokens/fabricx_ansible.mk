@@ -6,10 +6,16 @@
 
 # Makefile vars
 PROJECT_DIR := $(CURDIR)
+
+# Ansible
 ANSIBLE_PATH := $(PROJECT_DIR)/ansible
+VENV_DIR := ${ANSIBLE_PATH}/.venv
+ANSIBLE_PYTHON_INTERPRETER := ${VENV_DIR}/bin/python
 PLAYBOOK_PATH := $(ANSIBLE_PATH)/playbooks
 TARGET_HOSTS ?= all
 ANSIBLE_CONFIG ?= $(ANSIBLE_PATH)/ansible.cfg
+
+# app
 CONF_ROOT=conf
 
 # exported vars
@@ -25,7 +31,9 @@ CONTAINER_CLI ?= docker
 # Install the utilities needed to run the components on the targeted remote hosts (e.g. make install-prerequisites).
 .PHONY: install-prerequisites-fabric
 install-prerequisites-fabric:
-	python3 -m pip install -r $(ANSIBLE_PATH)/requirements.txt
+	python3 -m venv $(VENV_DIR)
+	$(VENV_DIR)/bin/python -m pip install --upgrade pip
+	$(VENV_DIR)/bin/pip install -r $(ANSIBLE_PATH)/requirements.txt
 	ansible-galaxy collection install -r $(ANSIBLE_PATH)/requirements.yml
 	ansible-playbook "$(PLAYBOOK_PATH)/01-install-control-node-prerequisites.yaml"
 	ansible-playbook hyperledger.fabricx.install_prerequisites --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
@@ -59,11 +67,6 @@ stop-fabric:
 .PHONY: teardown-fabric
 teardown-fabric:
 	ansible-playbook "$(PLAYBOOK_PATH)/80-teardown.yaml" --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
-
-# Test the network by performing some transactions
-.PHONY: test-fabric
-test-fabric:
-	curl -X POST http://localhost:9300/endorser/init
 
 # Restart the targeted hosts (e.g. make fabric-x restart).
 .PHONY: restart-fabric

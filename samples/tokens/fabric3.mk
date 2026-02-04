@@ -56,10 +56,6 @@ teardown-fabric:
 	done
 	@$(CONTAINER_CLI) network inspect fabric_test >/dev/null 2>&1 && $(CONTAINER_CLI) network rm fabric_test || true
 
-# Test the network by performing some transactions
-.PHONY: test-fabric
-test-fabric:
-
 # Restart the targeted hosts (e.g. make fabric-x restart).
 .PHONY: restart-fabric
 restart-fabric: teardown-fabric start-fabric

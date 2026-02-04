@@ -5,3 +5,6 @@
 
 # Ansible
 .ansible
+
+# python
+.venv

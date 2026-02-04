@@ -260,7 +260,7 @@ We begin with initializing the token namespace (commit the parameters for the ne
 ```bash
 curl -X POST http://localhost:9300/endorser/init  # Fabric-X only
 
-curl http://localhost:9100/issuer/issue --json '{
+curl http://localhost:9100/issuer/issue -d '{
     "amount": {"code": "TOK","value": 1000},
     "counterparty": {"node": "owner1","account": "alice"},
     "message": "hello world!"
@@ -275,7 +275,7 @@ curl http://localhost:9600/owner/accounts/dan | jq
 Now `alice` transfers `100 TOK` to `dan`.
 
 ```bash
-curl http://localhost:9500/owner/accounts/alice/transfer --json '{
+curl http://localhost:9500/owner/accounts/alice/transfer -d '{
     "amount": {"code": "TOK","value": 100},
     "counterparty": {"node": "owner2","account": "dan"},
     "message": "hello dan!"
