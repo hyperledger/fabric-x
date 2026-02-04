@@ -35,7 +35,6 @@ clean-fabric:
 		rm -rf "$$d/keys/fabric" "$$d/data"; \
 	done
 
-
 # Start the targeted hosts (e.g. make fabric-fabric start).
 .PHONY: start-fabric
 start-fabric:
@@ -58,14 +57,8 @@ teardown-fabric:
 	@$(CONTAINER_CLI) network inspect fabric_test >/dev/null 2>&1 && $(CONTAINER_CLI) network rm fabric_test || true
 
 # Test the network by performing some transactions
-.PHONY: test
-test:
-	curl http://localhost:9100/issuer/issue --json '{"amount": {"code": "TOK","value": 1000},"counterparty": {"node": "owner1","account": "alice"},"message": "hello world!"}'
-	curl http://localhost:9500/owner/accounts/alice | jq
-	curl http://localhost:9600/owner/accounts/dan | jq
-	curl http://localhost:9500/owner/accounts/alice/transfer --json '{"amount": {"code": "TOK","value": 100}, "counterparty": {"node": "owner2","account": "dan"}, "message": "hello dan!"}'
-	curl -X GET http://localhost:9600/owner/accounts/dan/transactions | jq
-	curl -X GET http://localhost:9500/owner/accounts/alice/transactions | jq
+.PHONY: test-fabric
+test-fabric:
 
 # Restart the targeted hosts (e.g. make fabric-x restart).
 .PHONY: restart-fabric

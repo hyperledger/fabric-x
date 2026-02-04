@@ -34,6 +34,10 @@ start: start-fabric start-app
 .PHONY: teardown
 teardown: teardown-app teardown-fabric
 
+# Test Fabric and the token network.
+.PHONY: test
+test: test-fabric test-app
+
 # Stop Fabric and the token network.
 .PHONY: stop
 stop: stop-app stop-fabric
