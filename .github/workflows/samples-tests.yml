@@ -11,11 +11,18 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  # Enable manual triggering
+  workflow_dispatch:
 
 jobs:
   test:
-    name: Sample Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platform: "fabricx"
+          - platform: "fabric3"
+      fail-fast: false
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,24 +44,21 @@ jobs:
           echo "GOROOT: $GOROOT"
 
       - name: Set up Python
+        if: ${{ matrix.platform == 'fabricx' }}
         uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
       - name: Install Ansible
+        if: ${{ matrix.platform == 'fabricx' }}
         run: |
           python -m pip install --upgrade pip
           pip install ansible ansible-core
           ansible --version
 
-      - name: Run samples tests on Fabric v3
+      - name: Run samples tests on ${{ matrix.platform }}
+        env:
+          PLATFORM: ${{ matrix.platform }}
         run: |
           cd samples/tokens
-          export PLATFORM=fabric3
-          make install-prerequisites setup start test teardown
-
-      - name: Run samples tests on Fabric-X
-        run: |
-          cd samples/tokens
-          export PLATFORM=fabricx
           make install-prerequisites setup start test teardown
