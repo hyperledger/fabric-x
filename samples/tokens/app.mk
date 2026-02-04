@@ -18,28 +18,28 @@ setup-app: build-app
 # Setup application
 .PHONY: build-app
 build-app:
-	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) build
+	$(CONTAINER_CLI) compose $(COMPOSE_ARGS) build
 
 # Start application
 .PHONY: start-app
 start-app:
-	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) up -d
+	$(CONTAINER_CLI) compose $(COMPOSE_ARGS) up -d
 
 # Restart application
 .PHONY: restart-app
 restart-app: build-app
-	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) down
-	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) up -d
+	$(CONTAINER_CLI) compose $(COMPOSE_ARGS) down
+	$(CONTAINER_CLI) compose $(COMPOSE_ARGS) up -d
 
 # Stop application
 .PHONY: stop-app
 stop-app:
-	PLATFORM=$(PLATFORM) $(CONTAINER_CLI)-compose $(COMPOSE_ARGS) stop
+	PLATFORM=$(PLATFORM) $(CONTAINER_CLI) compose $(COMPOSE_ARGS) stop
 
 # Teardown application
 .PHONY: teardown-app
 teardown-app:
-	$(CONTAINER_CLI)-compose $(COMPOSE_ARGS) down
+	$(CONTAINER_CLI) compose $(COMPOSE_ARGS) down
 	rm -rf "$(CONF_ROOT)"/*/data
 
 # Clean just the databases.
