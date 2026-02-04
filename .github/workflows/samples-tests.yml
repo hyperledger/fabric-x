@@ -62,4 +62,6 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
         run: |
           cd samples/tokens
-          make install-prerequisites setup start test teardown
+          make install-prerequisites setup start
+          sleep 10
+          make test teardown
