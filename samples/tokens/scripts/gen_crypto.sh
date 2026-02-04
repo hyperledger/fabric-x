@@ -8,20 +8,21 @@
 
 set -e
 CONF_ROOT=$(realpath "${CONF_ROOT:-$(pwd)/conf}")
+FAB_BINS=$(realpath "${FAB_BINS:-$(pwd)/fabric-samples/bin}")
 
-fabric-ca-client version || (echo "install fabric binaries and make sure they're in your \$PATH"; exit 1)
+"${FAB_BINS}/fabric-ca-client" version || (echo "install fabric binaries and make sure they're in your \$PATH"; exit 1)
 
 # Start the fabric CA and enroll the admin user. We keep it running in the background until the script exits.
 setup_fabric_ca() {
     # start CA to issue idemix certificates for owners (idemix) and nodes (tls).
     export FABRIC_CA_HOME="${CONF_ROOT}/ca/keys/msp"
     mkdir -p "$FABRIC_CA_HOME"
-    fabric-ca-server start -b "admin:adminpw" --idemix.curve gurvy.Bn254 & pid=$!
+    "${FAB_BINS}/fabric-ca-server" start -b "admin:adminpw" --idemix.curve gurvy.Bn254 & pid=$!
     trap 'kill "$pid"' EXIT SIGINT SIGTERM SIGHUP SIGQUIT
-    while ! fabric-ca-client getcainfo -u localhost:7054 2>/dev/null; do echo "waiting for CA to start..." && sleep 1; done
+    while ! "${FAB_BINS}/fabric-ca-client" getcainfo -u localhost:7054 2>/dev/null; do echo "waiting for CA to start..." && sleep 1; done
 
     # ca admin
-    fabric-ca-client enroll -u "http://admin:adminpw@localhost:7054" -M "${CONF_ROOT}/ca/keys/ca-admin"
+    "${FAB_BINS}/fabric-ca-client" enroll -u "http://admin:adminpw@localhost:7054" -M "${CONF_ROOT}/ca/keys/ca-admin"
 }
 
 # generate an elliptic curve keypair for the issuer, and the parameters for the dlog verifications.
@@ -41,8 +42,8 @@ enroll_token_users() {
     node=$1; shift
     owners=("$@")
     for owner in "${owners[@]}"; do
-        fabric-ca-client register -u http://localhost:7054 --id.name "${owner}" --id.secret password --id.type client --enrollment.type idemix --idemix.curve gurvy.Bn254
-        fabric-ca-client enroll -u "http://${owner}:password@localhost:7054"  -M "${CONF_ROOT}/${node}/keys/wallet/${owner}/msp" --enrollment.type idemix --idemix.curve gurvy.Bn254
+        "${FAB_BINS}/fabric-ca-client" register -u http://localhost:7054 --id.name "${owner}" --id.secret password --id.type client --enrollment.type idemix --idemix.curve gurvy.Bn254
+        "${FAB_BINS}/fabric-ca-client" enroll -u "http://${owner}:password@localhost:7054"  -M "${CONF_ROOT}/${node}/keys/wallet/${owner}/msp" --enrollment.type idemix --idemix.curve gurvy.Bn254
     done
 }
 
@@ -55,7 +56,7 @@ gen_node_crypto() {
         mkdir -p "$dir/node"
 
         # we use the shared CA for mTLS certificates. The certificate chain is currently not verified so we could also use self-signed certificates.
-        fabric-ca-client enroll -u "http://admin:adminpw@localhost:7054" -m "${node}.example.com" --enrollment.profile tls -M "${dir}/node"
+        "${FAB_BINS}/fabric-ca-client" enroll -u "http://admin:adminpw@localhost:7054" -m "${node}.example.com" --enrollment.profile tls -M "${dir}/node"
         cp "${dir}"/node/keystore/* "${dir}/node.key"
         cp "${dir}/node/signcerts/cert.pem" "${dir}/node.crt"
 
