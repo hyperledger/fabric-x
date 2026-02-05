@@ -37,7 +37,7 @@ teardown: teardown-app teardown-fabric
 # Test Fabric and the token network.
 .PHONY: test
 test:
-	./scripts/test.sh
+	@./scripts/test.sh
 
 # Stop Fabric and the token network.
 .PHONY: stop
