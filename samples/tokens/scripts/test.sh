@@ -25,10 +25,6 @@ function cleanup() {
 function run_network() {
     print_section_header "Setup and start the network..."
     make setup start
-    
-    if [[ "$PLATFORM" == "fabricx" ]]; then
-        init_fabricx
-    fi
 }
 
 ## Stop and clean up the network
@@ -40,7 +36,7 @@ function stop_network() {
 ## Initialize FabricX if needed
 function init_fabricx() {
     print_section_header "Initializing ${PLATFORM}..."
-    curl -X POST http://localhost:9300/endorser/init
+    curl -f -X POST http://localhost:9300/endorser/init
 }
 
 ## Run tests to verify the network
@@ -48,28 +44,33 @@ function run_test() {
     # test application
     print_section_header "Run tests"
 
-    # currently we wait manually with a sleep.
-    # TODO: add an healthcheck within the `docker-compose`
-    sleep 10
-    curl http://localhost:9100/issuer/issue -d '{
+    curl -f -X POST http://localhost:9100/issuer/issue -d '{
         "amount": {"code": "TOK","value": 1000},
         "counterparty": {"node": "owner1","account": "alice"},
         "message": "hello world!"
     }'
-    curl http://localhost:9500/owner/accounts/alice | jq
-    curl http://localhost:9600/owner/accounts/dan | jq
-    curl http://localhost:9500/owner/accounts/alice/transfer -d '{
+    curl -f -X GET http://localhost:9500/owner/accounts/alice | jq
+    curl -f -X GET http://localhost:9600/owner/accounts/dan | jq
+    curl -f -X POST http://localhost:9500/owner/accounts/alice/transfer -d '{
         "amount": {"code": "TOK","value": 100},
         "counterparty": {"node": "owner2","account": "dan"},
         "message": "hello dan!"
     }'
-    curl -X GET http://localhost:9600/owner/accounts/dan/transactions | jq
-    curl -X GET http://localhost:9500/owner/accounts/alice/transactions | jq
+    curl -f -X GET http://localhost:9600/owner/accounts/dan/transactions | jq
+    curl -f -X GET http://localhost:9500/owner/accounts/alice/transactions | jq
 }
 
 # Script Start
-trap cleanup INT TERM
+set +e
+set -o pipefail
+trap exit 1 INT
 
 run_network
+# # currently we wait manually with a sleep.
+# # TODO: add an healthcheck within the `docker-compose`
+sleep 10
+if [[ "$PLATFORM" == "fabricx" ]]; then
+    init_fabricx
+fi
 run_test
 stop_network
