@@ -56,7 +56,5 @@ jobs:
         env:
           PLATFORM: ${{ matrix.platform }}
         run: |
-          cd samples/tokens
-          make install-prerequisites setup start
-          sleep 10
-          make test teardown
+          make install-prerequisites
+          ./samples/tokens/scripts/test.sh
