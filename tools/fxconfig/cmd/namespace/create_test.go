@@ -32,7 +32,7 @@ func TestCreate(t *testing.T) {
 			"--orderer", "localhost:1234",
 			"--mspConfigPath", "/tmp/msp/",
 			"--mspID", "Org1MSP",
-			"--pk", "/tmp/some/path/pk.pem",
+			"--policy-ecdsa-threshold", "/tmp/some/path/pk.pem",
 		})
 		require.NoError(t, rootCmd.Execute())
 	})

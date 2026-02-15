@@ -9,9 +9,9 @@ package namespace
 import (
 	"io"
 
-	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
-
 	"github.com/spf13/cobra"
+
+	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 )
 
 type listFunc func(out io.Writer, endpoint string, tlsConfig comm.Config) error
