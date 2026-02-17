@@ -275,7 +275,7 @@ func TestEndorse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			result, err := endorse(tt.signer, tt.tx, tt.txID)
+			result, err := endorse(tt.signer, tt.txID, tt.tx)
 
 			if tt.expectError {
 				require.Error(t, err, tt.description)
@@ -284,18 +284,15 @@ func TestEndorse(t *testing.T) {
 				require.NotNil(t, result)
 
 				// Verify endorsements structure
-				require.Len(t, result.Endorsements, 1, "Should have one endorsement set")
-				endorsementSet := result.Endorsements[0]
-				require.NotNil(t, endorsementSet)
-
-				// Verify signature count matches namespace count
-				require.Len(t, endorsementSet.EndorsementsWithIdentity, len(tt.tx.Namespaces),
-					"Signature count should match namespace count")
+				require.Len(t, result.Endorsements, len(tt.tx.Namespaces), "Should have one endorsement per namespace")
+				nsEndorsements := result.Endorsements
 
 				// Verify each endorsement has signature and identity
-				for i, eid := range endorsementSet.EndorsementsWithIdentity {
-					require.NotNil(t, eid.Endorsement, "Endorsement %d should have signature", i)
-					require.NotNil(t, eid.Identity, "Endorsement %d should have identity", i)
+				for i, endorsementSet := range nsEndorsements {
+					require.Equal(t, len(endorsementSet.EndorsementsWithIdentity), 1, "Endorsement set must have one endorsement")
+					eid := endorsementSet.EndorsementsWithIdentity[0]
+					require.NotNil(t, eid, "Endorsement should exist")
+					require.NotNil(t, eid.Identity, "Endorsement should have identity")
 					require.Equal(t, tt.signer.mspID, eid.Identity.MspId,
 						"Endorsement %d should have correct MSP ID", i)
 				}

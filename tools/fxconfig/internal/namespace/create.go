@@ -167,7 +167,7 @@ func createSignedEnvelope(signer msp.SigningIdentity, channel string, tx *applic
 	signatureHdr := protoutil.NewSignatureHeaderOrPanic(signer)
 	txID := protoutil.ComputeTxID(signatureHdr.Nonce, signatureHdr.Creator)
 
-	tx, err := endorse(signer, tx, txID)
+	tx, err := endorse(signer, txID, tx)
 	if err != nil {
 		return nil, err
 	}
@@ -180,9 +180,23 @@ func createSignedEnvelope(signer msp.SigningIdentity, channel string, tx *applic
 	return createEnvelope(signer, payloadHdr, txBytes)
 }
 
-func endorse(signer msp.SigningIdentity, tx *applicationpb.Tx, txID string) (*applicationpb.Tx, error) {
+func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error) {
+	if tx == nil {
+		return nil, errors.New("nil transaction")
+	}
+
+	// check that tx does not yet carry any endorsements
+	if tx.Endorsements == nil {
+		tx.Endorsements = make([]*applicationpb.Endorsements, len(tx.GetNamespaces()))
+	}
+
+	// get signer signerCert
+	signerID, err := getSignerID(signer)
+	if err != nil {
+		return nil, err
+	}
+
 	// create signature for each namespace in transaction
-	signatures := make([][]byte, len(tx.GetNamespaces()))
 	for idx := range tx.GetNamespaces() {
 		// Note that a default msp signer hash the msg before signing.
 		// For that reason we use the TxNamespace message as ASN1 encoded msg
@@ -196,32 +210,32 @@ func endorse(signer msp.SigningIdentity, tx *applicationpb.Tx, txID string) (*ap
 		if err != nil {
 			return nil, fmt.Errorf("failed signing tx: %w", err)
 		}
-		signatures[idx] = sig
-	}
 
-	// get signer signerCert
-	signerID, err := getSignerID(signer)
-	if err != nil {
-		return nil, err
-	}
-
-	// next, prepare endorsement message to attach at the transaction
-	set := &applicationpb.Endorsements{
-		EndorsementsWithIdentity: make([]*applicationpb.EndorsementWithIdentity, 0, len(signatures)),
-	}
-	for _, sig := range signatures {
+		// store signature as endorsementWithIdentity
 		eid := &applicationpb.EndorsementWithIdentity{
 			Endorsement: sig,
 			Identity:    signerID,
 		}
-		set.EndorsementsWithIdentity = append(set.EndorsementsWithIdentity, eid)
+
+		// check if there is already an endorsement for this namespace, so we can append the new endorsement
+		// if not we create an empty endorser set
+		if tx.Endorsements[idx] == nil {
+			tx.Endorsements[idx] = &applicationpb.Endorsements{
+				EndorsementsWithIdentity: []*applicationpb.EndorsementWithIdentity{},
+			}
+		}
+
+		tx.Endorsements[idx].EndorsementsWithIdentity = append(tx.Endorsements[idx].EndorsementsWithIdentity, eid)
 	}
-	tx.Endorsements = []*applicationpb.Endorsements{set}
 
 	return tx, nil
 }
 
 func getSignerID(signer msp.SigningIdentity) (*msppb.Identity, error) {
+	if signer == nil {
+		return nil, errors.New("nil signer")
+	}
+
 	signerCert, err := signer.GetCertificatePEM()
 	if err != nil {
 		return nil, err
