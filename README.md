@@ -11,6 +11,7 @@ The adoption of Distributed Ledger Technology (DLT) for critical financial infra
 
 Fabric-X proves that permissioned DLTs can be engineered for national-scale payment systems, providing a resilient and highly performant foundation for practical digital assets and currencies deployments and the integration of advanced, computationally intensive features. 
 
+
 ## Architecture Overview
 
 Figure below shows the high-level architecture differences between `Fabric Classic` and `Fabric-X`.
@@ -73,6 +74,13 @@ Code and more details can be found under [Fabric-X-Committer Github repository](
 ## Run the network
 
 To set up the network yourself, follow the tutorial in the [sample deployment scripts](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection) repository. It provides Ansible scripts with predefined inventories and playbooks for both local and remote cluster deployments. Support for deploying a sample application will be added soon.
+
+### Version compatibility matrix
+
+| Orderer | Commiter | Ansible collection | Fabric CA | Fabric Smart Client | Sample Application |
+|  :----: |  :----:  |       :----:       |   :----:  |       :----:        |       :----:       |
+| v0.0.21 |  v0.1.7  |       v0.5.5       |  v1.5.15  |       v0.8.2        |       v0.0.8       |
+
 
 ## Fabric-X workshop series
 
