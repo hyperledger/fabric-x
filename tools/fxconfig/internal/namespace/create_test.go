@@ -252,23 +252,6 @@ func TestEndorse(t *testing.T) {
 			expectError: true,
 			description: "Should error when signing fails",
 		},
-		{
-			name: "certificate retrieval failure",
-			tx: &applicationpb.Tx{
-				Namespaces: []*applicationpb.TxNamespace{
-					{NsId: "test-ns", NsVersion: 0},
-				},
-			},
-			signer: &mockSigningIdentity{
-				mspID: "Org1MSP",
-				certPEMFunc: func() ([]byte, error) {
-					return nil, errors.New("cert retrieval failed")
-				},
-			},
-			txID:        "tx-999",
-			expectError: true,
-			description: "Should error when certificate retrieval fails",
-		},
 	}
 
 	for _, tt := range tests {
@@ -287,68 +270,12 @@ func TestEndorse(t *testing.T) {
 				require.Len(t, result.Endorsements, len(tt.tx.Namespaces), "Should have one endorsement per namespace")
 				nsEndorsements := result.Endorsements
 
-				// Verify each endorsement has signature and identity
-				for i, endorsementSet := range nsEndorsements {
+				// Verify each endorsement has signature
+				for _, endorsementSet := range nsEndorsements {
 					require.Equal(t, len(endorsementSet.EndorsementsWithIdentity), 1, "Endorsement set must have one endorsement")
 					eid := endorsementSet.EndorsementsWithIdentity[0]
 					require.NotNil(t, eid, "Endorsement should exist")
-					require.NotNil(t, eid.Identity, "Endorsement should have identity")
-					require.Equal(t, tt.signer.mspID, eid.Identity.MspId,
-						"Endorsement %d should have correct MSP ID", i)
 				}
-			}
-		})
-	}
-}
-
-// TestGetSignerID tests the getSignerID function
-func TestGetSignerID(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name        string
-		signer      *mockSigningIdentity
-		expectError bool
-		description string
-	}{
-		{
-			name: "valid signer with certificate",
-			signer: &mockSigningIdentity{
-				mspID: "Org1MSP",
-				certPEMFunc: func() ([]byte, error) {
-					return []byte("-----BEGIN CERTIFICATE-----\nTEST\n-----END CERTIFICATE-----"), nil
-				},
-			},
-			expectError: false,
-			description: "Should successfully get signer ID",
-		},
-		{
-			name: "certificate retrieval failure",
-			signer: &mockSigningIdentity{
-				mspID: "Org1MSP",
-				certPEMFunc: func() ([]byte, error) {
-					return nil, errors.New("failed to get certificate")
-				},
-			},
-			expectError: true,
-			description: "Should error when certificate retrieval fails",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			result, err := getSignerID(tt.signer)
-
-			if tt.expectError {
-				require.Error(t, err, tt.description)
-				require.Nil(t, result)
-			} else {
-				require.NoError(t, err, tt.description)
-				require.NotNil(t, result)
-				require.Equal(t, tt.signer.mspID, result.MspId, "Should have correct MSP ID")
-				require.NotNil(t, result.GetCertificate(), "Should have certificate")
 			}
 		})
 	}
