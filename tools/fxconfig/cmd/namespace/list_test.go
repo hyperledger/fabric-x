@@ -20,6 +20,8 @@ import (
 )
 
 func TestListCommand(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name          string
 		args          []string
@@ -47,8 +49,14 @@ func TestListCommand(t *testing.T) {
 			expectError: false,
 		},
 		{
-			name:        "successful list with all TLS options",
-			args:        []string{"list", "--endpoint=localhost:7050", "--cafile=/opt/tls/ca.crt", "--certfile=/opt/tls/client.crt", "--keyfile=/opt/tls/client.key"},
+			name: "successful list with all TLS options",
+			args: []string{
+				"list",
+				"--endpoint=localhost:7050",
+				"--cafile=/opt/tls/ca.crt",
+				"--certfile=/opt/tls/client.crt",
+				"--keyfile=/opt/tls/client.key",
+			},
 			listFunc:    fakeListSuccess,
 			expectError: false,
 		},

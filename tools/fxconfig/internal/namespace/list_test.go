@@ -18,6 +18,8 @@ import (
 )
 
 func TestPrintResult(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name           string
 		policies       *applicationpb.NamespacePolicies
@@ -104,13 +106,13 @@ func TestPrintResult(t *testing.T) {
 					{
 						Namespace: "longpolicy",
 						Version:   5,
-						Policy:    []byte{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff},
+						Policy:    []byte{0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99},
 					},
 				},
 			},
 			expectedOutput: []string{
 				"Installed namespaces (1 total):",
-				"0) longpolicy: version 5 policy: 00112233445566778899aabbccddeeff",
+				"0) longpolicy: version 5 policy: 00112233445566778899",
 			},
 			expectedLines: 2,
 		},
@@ -130,7 +132,7 @@ func TestPrintResult(t *testing.T) {
 			output := buf.String()
 			lines := strings.Split(strings.TrimRight(output, "\n"), "\n")
 
-			assert.Equal(t, tt.expectedLines, len(lines), "output should have expected number of lines")
+			assert.Len(t, lines, tt.expectedLines, "output should have expected number of lines")
 
 			for _, expected := range tt.expectedOutput {
 				assert.Contains(t, output, expected, "output should contain expected text")
@@ -180,7 +182,7 @@ func TestPrintResult_OutputFormat(t *testing.T) {
 	}
 
 	// Verify last line is a namespace entry (no trailing empty line)
-	assert.True(t, strings.Contains(lines[len(lines)-1], "version"), "last line should be a namespace entry")
+	assert.Contains(t, lines[len(lines)-1], "version", "last line should be a namespace entry")
 }
 
 func TestPrintResult_NilPolicies(t *testing.T) {
@@ -200,6 +202,8 @@ func TestPrintResult_NilPolicies(t *testing.T) {
 }
 
 func TestPrintResult_PolicyHexEncoding(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		policy      []byte

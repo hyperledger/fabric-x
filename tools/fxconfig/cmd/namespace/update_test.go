@@ -16,6 +16,8 @@ import (
 )
 
 func TestUpdateCommand(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name          string
 		args          []string
@@ -145,6 +147,8 @@ func TestUpdateCommand(t *testing.T) {
 }
 
 func TestUpdateCommand_VersionValidation(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		version     string

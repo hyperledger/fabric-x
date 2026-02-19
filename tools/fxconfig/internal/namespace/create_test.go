@@ -23,7 +23,7 @@ import (
 	fxmsp "github.com/hyperledger/fabric-x-common/msp"
 )
 
-// Mock signing identity for testing
+// mockSigningIdentity is a mock signing identity for testing.
 type mockSigningIdentity struct {
 	signFunc    func([]byte) ([]byte, error)
 	certPEMFunc func() ([]byte, error)
@@ -51,31 +51,31 @@ func (m *mockSigningIdentity) GetIdentifier() *fxmsp.IdentityIdentifier {
 	}
 }
 
-func (m *mockSigningIdentity) Serialize() ([]byte, error) {
+func (*mockSigningIdentity) Serialize() ([]byte, error) {
 	return []byte("serialized-identity"), nil
 }
 
-func (m *mockSigningIdentity) SerializeWithIDOfCert() ([]byte, error) {
+func (*mockSigningIdentity) SerializeWithIDOfCert() ([]byte, error) {
 	return []byte("serialized-identity-with-cert-id"), nil
 }
 
-func (m *mockSigningIdentity) GetPublicVersion() fxmsp.Identity {
+func (*mockSigningIdentity) GetPublicVersion() fxmsp.Identity { //nolint:ireturn
 	return nil
 }
 
-func (m *mockSigningIdentity) Verify(msg, sig []byte) error {
+func (*mockSigningIdentity) Verify(_, _ []byte) error {
 	return nil
 }
 
-func (m *mockSigningIdentity) GetOrganizationalUnits() []*fxmsp.OUIdentifier {
+func (*mockSigningIdentity) GetOrganizationalUnits() []*fxmsp.OUIdentifier {
 	return nil
 }
 
-func (m *mockSigningIdentity) Anonymous() bool {
+func (*mockSigningIdentity) Anonymous() bool {
 	return false
 }
 
-func (m *mockSigningIdentity) ExpiresAt() time.Time {
+func (*mockSigningIdentity) ExpiresAt() time.Time {
 	return time.Time{}
 }
 
@@ -83,11 +83,11 @@ func (m *mockSigningIdentity) GetMSPIdentifier() string {
 	return m.mspID
 }
 
-func (m *mockSigningIdentity) Validate() error {
+func (*mockSigningIdentity) Validate() error {
 	return nil
 }
 
-func (m *mockSigningIdentity) SatisfiesPrincipal(principal *msp.MSPPrincipal) error {
+func (*mockSigningIdentity) SatisfiesPrincipal(_ *msp.MSPPrincipal) error {
 	return nil
 }
 
@@ -268,11 +268,13 @@ func TestEndorse(t *testing.T) {
 				require.NotNil(t, result)
 
 				// Verify endorsements structure
-				require.Len(t, result.Endorsements, len(tt.tx.Namespaces), "Should have one endorsement per namespace")
+				require.Len(t, result.Endorsements, len(tt.tx.Namespaces),
+					"Should have one endorsement per namespace")
 
 				// Verify each endorsement has signature
 				for _, endorsementSet := range result.Endorsements {
-					require.Len(t, endorsementSet.EndorsementsWithIdentity, 1, "Endorsement set must have one endorsement")
+					require.Len(t, endorsementSet.EndorsementsWithIdentity, 1,
+						"Endorsement set must have one endorsement")
 				}
 			}
 		})

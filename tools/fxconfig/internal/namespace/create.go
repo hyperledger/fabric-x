@@ -35,6 +35,9 @@ func DeployNamespace(nsCfg NsConfig, ordererCfg OrdererConfig, mspCfg MSPConfig)
 	}
 
 	sid, err := getSignerIdentityFromMSP(mspCfg)
+	if err != nil {
+		return err
+	}
 
 	// we use the serialized public key as our namespace endorsement policy
 	pkData, err := os.ReadFile(nsCfg.ThresholdPolicyVerificationKeyPath)
@@ -60,7 +63,10 @@ func DeployNamespace(nsCfg NsConfig, ordererCfg OrdererConfig, mspCfg MSPConfig)
 	}
 
 	// create signed envelope
-	env, err := createSignedEnvelope(sid, nsCfg.Channel, txID, tx, signatureHdr)
+	channelHdr := protoutil.MakeChannelHeader(cb.HeaderType_MESSAGE, 0, nsCfg.Channel, 0)
+	channelHdr.TxId = txID
+
+	env, err := createSignedEnvelope(sid, tx, channelHdr, signatureHdr)
 	if err != nil {
 		return err
 	}
@@ -68,7 +74,7 @@ func DeployNamespace(nsCfg NsConfig, ordererCfg OrdererConfig, mspCfg MSPConfig)
 	return broadcast(ordererCfg, env)
 }
 
-func getSignerIdentityFromMSP(config MSPConfig) (msp.SigningIdentity, error) {
+func getSignerIdentityFromMSP(config MSPConfig) (msp.SigningIdentity, error) { //nolint:ireturn
 	thisMSP, err := setupMSP(config)
 	if err != nil {
 		return nil, fmt.Errorf("msp setup error: %w", err)
@@ -190,8 +196,8 @@ func createNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, ns
 	return tx
 }
 
-// endorse creates a threshold endorsement
-// TODO we will refactor this method later and introduce MSP-based endorsement
+// endorse creates a threshold endorsement.
+// TODO we will refactor this method later and introduce MSP-based endorsement.
 func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error) {
 	if tx == nil {
 		return nil, errors.New("nil transaction")
@@ -204,7 +210,7 @@ func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 		tx.Endorsements = make([]*applicationpb.Endorsements, len(tx.GetNamespaces()))
 	}
 
-	// TODO for MSP-based endorsements we need either singerID or the hashed singerID to be attached on the Endorsement
+	// TODO for MSP-based endorsements we need either singerID or the hashed singerID to be attached on the Endorsement.
 	// get signer signerCert
 	// signerID, err := getSignerID(signer)
 	// if err != nil {
@@ -229,7 +235,7 @@ func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 		// store signature as endorsementWithIdentity
 		eid := &applicationpb.EndorsementWithIdentity{
 			Endorsement: sig,
-			// TODO MSP-based endorsements will attach either the signerID or just a hash
+			// TODO MSP-based endorsements will attach either the signerID or just a hash.
 			// Identity:    signerID,
 		}
 
@@ -247,9 +253,9 @@ func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 	return tx, nil
 }
 
-// TODO we keep this for later when we come back for the MSP-based endorsement implementation
-//func getSignerID(signer msp.SigningIdentity) (*msppb.Identity, error) {
-//	if signer == nil {
+// TODO we keep this for later when we come back for the MSP-based endorsement implementation.
+// func getSignerID(signer msp.SigningIdentity) (*msppb.Identity, error) {
+//  if signer == nil {
 //		return nil, errors.New("nil signer")
 //	}
 //
@@ -258,12 +264,14 @@ func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 //		return nil, err
 //	}
 //	return msppb.NewIdentity(signer.GetIdentifier().Mspid, signerCert), nil
-//}
+// }
 
-func createSignedEnvelope(signer msp.SigningIdentity, channel, txID string, tx *applicationpb.Tx, signatureHdr *cb.SignatureHeader) (*cb.Envelope, error) {
-	channelHdr := protoutil.MakeChannelHeader(cb.HeaderType_MESSAGE, 0, channel, 0)
-	channelHdr.TxId = txID
-
+func createSignedEnvelope(
+	signer msp.SigningIdentity,
+	tx *applicationpb.Tx,
+	channelHdr *cb.ChannelHeader,
+	signatureHdr *cb.SignatureHeader,
+) (*cb.Envelope, error) {
 	payloadHdr := protoutil.MakePayloadHeader(channelHdr, signatureHdr)
 	txBytes := protoutil.MarshalOrPanic(tx)
 

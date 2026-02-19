@@ -51,9 +51,9 @@ func main() {
 	case ext.FullCommand():
 		err = extend()
 	case showtemplate.FullCommand():
-		fmt.Print(sampleconfig.DefaultCryptoConfig)
+		_, _ = fmt.Print(sampleconfig.DefaultCryptoConfig)
 	case versionCmd.FullCommand():
-		fmt.Println(getVersionInfo())
+		_, _ = fmt.Println(getVersionInfo())
 	default:
 		panic("programming error")
 	}
