@@ -7,8 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 package namespace
 
 import (
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/namespace"
 	"github.com/spf13/cobra"
+
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/namespace"
 )
 
 // NewNamespaceCommand returns a namespace command. It collects all namespace related commands.

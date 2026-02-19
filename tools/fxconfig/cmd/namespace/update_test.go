@@ -108,9 +108,9 @@ func TestUpdateCommand(t *testing.T) {
 			errorContains: "deployment failed",
 		},
 		{
-			name: "help flag displays usage",
-			args: []string{"update", "--help"},
-			deployFunc: fakeDeploySuccess,
+			name:        "help flag displays usage",
+			args:        []string{"update", "--help"},
+			deployFunc:  fakeDeploySuccess,
 			expectError: false,
 		},
 	}
@@ -121,7 +121,7 @@ func TestUpdateCommand(t *testing.T) {
 
 			// Setup
 			rootCmd := setupUpdateCommand(t, tt.deployFunc)
-			
+
 			var outBuf, errBuf bytes.Buffer
 			rootCmd.SetOut(&outBuf)
 			rootCmd.SetErr(&errBuf)
@@ -218,23 +218,23 @@ func TestNewUpdateCommand(t *testing.T) {
 	assert.Equal(t, "update NAMESPACE_NAME", cmd.Use, "command use should be 'update NAMESPACE_NAME'")
 	assert.NotEmpty(t, cmd.Short, "command should have a short description")
 	assert.NotNil(t, cmd.RunE, "command should have a RunE function")
-	
+
 	// Verify required flags are marked as required
 	versionFlag := cmd.Flag("version")
 	require.NotNil(t, versionFlag, "version flag should exist")
-	
+
 	channelFlag := cmd.Flag("channel")
 	require.NotNil(t, channelFlag, "channel flag should exist")
-	
+
 	ordererFlag := cmd.Flag("orderer")
 	require.NotNil(t, ordererFlag, "orderer flag should exist")
-	
+
 	mspConfigFlag := cmd.Flag("mspConfigPath")
 	require.NotNil(t, mspConfigFlag, "mspConfigPath flag should exist")
-	
+
 	mspIDFlag := cmd.Flag("mspID")
 	require.NotNil(t, mspIDFlag, "mspID flag should exist")
-	
+
 	policyFlag := cmd.Flag("policy-ecdsa-threshold")
 	require.NotNil(t, policyFlag, "policy-ecdsa-threshold flag should exist")
 }

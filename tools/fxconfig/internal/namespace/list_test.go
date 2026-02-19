@@ -11,9 +11,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 )
 
 func TestPrintResult(t *testing.T) {

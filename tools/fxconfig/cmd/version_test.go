@@ -50,7 +50,7 @@ func TestVersionCommand(t *testing.T) {
 			// Setup
 			rootCmd := &cobra.Command{Use: "fxconfig"}
 			rootCmd.AddCommand(NewVersionCommand())
-			
+
 			var outBuf, errBuf bytes.Buffer
 			rootCmd.SetOut(&outBuf)
 			rootCmd.SetErr(&errBuf)
@@ -83,7 +83,7 @@ func TestVersionCommand_OutputFormat(t *testing.T) {
 	// Setup
 	rootCmd := &cobra.Command{Use: "fxconfig"}
 	rootCmd.AddCommand(NewVersionCommand())
-	
+
 	var outBuf bytes.Buffer
 	rootCmd.SetOut(&outBuf)
 	rootCmd.SetArgs([]string{"version"})
@@ -95,10 +95,10 @@ func TestVersionCommand_OutputFormat(t *testing.T) {
 	// Assert output format
 	output := outBuf.String()
 	lines := strings.Split(strings.TrimSpace(output), "\n")
-	
+
 	assert.GreaterOrEqual(t, len(lines), 5, "version output should have at least 5 lines")
 	assert.Equal(t, "fxconfig", lines[0], "first line should be 'fxconfig'")
-	
+
 	// Verify subsequent lines have the expected format (key: value)
 	for i := 1; i < len(lines); i++ {
 		line := lines[i]

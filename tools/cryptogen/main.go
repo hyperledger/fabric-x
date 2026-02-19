@@ -54,6 +54,8 @@ func main() {
 		fmt.Print(sampleconfig.DefaultCryptoConfig)
 	case versionCmd.FullCommand():
 		fmt.Println(getVersionInfo())
+	default:
+		panic("programming error")
 	}
 
 	if err != nil {

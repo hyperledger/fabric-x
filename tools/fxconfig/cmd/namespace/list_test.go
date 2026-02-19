@@ -12,10 +12,11 @@ import (
 	"io"
 	"testing"
 
-	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 )
 
 func TestListCommand(t *testing.T) {
@@ -72,7 +73,7 @@ func TestListCommand(t *testing.T) {
 
 			// Setup
 			rootCmd := setupListCommand(t, tt.listFunc)
-			
+
 			var outBuf, errBuf bytes.Buffer
 			rootCmd.SetOut(&outBuf)
 			rootCmd.SetErr(&errBuf)
@@ -129,18 +130,18 @@ func TestNewListCommand(t *testing.T) {
 	assert.Equal(t, "list", cmd.Use, "command use should be 'list'")
 	assert.NotEmpty(t, cmd.Short, "command should have a short description")
 	assert.NotNil(t, cmd.RunE, "command should have a RunE function")
-	
+
 	// Verify required flags
 	endpointFlag := cmd.Flag("endpoint")
 	require.NotNil(t, endpointFlag, "endpoint flag should exist")
-	
+
 	// Verify optional TLS flags exist
 	cafileFlag := cmd.Flag("cafile")
 	require.NotNil(t, cafileFlag, "cafile flag should exist")
-	
+
 	certfileFlag := cmd.Flag("certfile")
 	require.NotNil(t, certfileFlag, "certfile flag should exist")
-	
+
 	keyfileFlag := cmd.Flag("keyfile")
 	require.NotNil(t, keyfileFlag, "keyfile flag should exist")
 }

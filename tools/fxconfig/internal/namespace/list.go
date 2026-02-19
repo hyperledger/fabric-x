@@ -11,10 +11,11 @@ import (
 	"fmt"
 	"io"
 
+	"google.golang.org/protobuf/types/known/emptypb"
+
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // List calls the committer query service and shows all installed namespace policies.

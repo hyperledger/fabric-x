@@ -17,6 +17,8 @@ import (
 	"github.com/hyperledger/fabric-lib-go/bccsp/sw"
 	cb "github.com/hyperledger/fabric-protos-go-apiv2/common"
 	ab "github.com/hyperledger/fabric-protos-go-apiv2/orderer"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
@@ -188,21 +190,26 @@ func createNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, ns
 	return tx
 }
 
+// endorse creates a threshold endorsement
+// TODO we will refactor this method later and introduce MSP-based endorsement
 func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error) {
 	if tx == nil {
 		return nil, errors.New("nil transaction")
 	}
+
+	tx = proto.CloneOf(tx)
 
 	// check that tx does not yet carry any endorsements
 	if tx.Endorsements == nil {
 		tx.Endorsements = make([]*applicationpb.Endorsements, len(tx.GetNamespaces()))
 	}
 
+	// TODO for MSP-based endorsements we need either singerID or the hashed singerID to be attached on the Endorsement
 	// get signer signerCert
-	//signerID, err := getSignerID(signer)
-	//if err != nil {
-	//	return nil, err
-	//}
+	// signerID, err := getSignerID(signer)
+	// if err != nil {
+	//	 return nil, err
+	// }
 
 	// create signature for each namespace in transaction
 	for nsIdx := range tx.GetNamespaces() {
@@ -222,14 +229,15 @@ func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 		// store signature as endorsementWithIdentity
 		eid := &applicationpb.EndorsementWithIdentity{
 			Endorsement: sig,
-			//Identity:    signerID,
+			// TODO MSP-based endorsements will attach either the signerID or just a hash
+			// Identity:    signerID,
 		}
 
 		// check if there is already an endorsement for this namespace, so we can append the new endorsement
 		// if not we create an empty endorser set
 		if tx.Endorsements[nsIdx] == nil {
 			tx.Endorsements[nsIdx] = &applicationpb.Endorsements{
-				EndorsementsWithIdentity: []*applicationpb.EndorsementWithIdentity{{Endorsement: sig}},
+				EndorsementsWithIdentity: []*applicationpb.EndorsementWithIdentity{},
 			}
 		}
 
@@ -239,6 +247,7 @@ func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 	return tx, nil
 }
 
+// TODO we keep this for later when we come back for the MSP-based endorsement implementation
 //func getSignerID(signer msp.SigningIdentity) (*msppb.Identity, error) {
 //	if signer == nil {
 //		return nil, errors.New("nil signer")
@@ -251,7 +260,7 @@ func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 //	return msppb.NewIdentity(signer.GetIdentifier().Mspid, signerCert), nil
 //}
 
-func createSignedEnvelope(signer msp.SigningIdentity, channel string, txID string, tx *applicationpb.Tx, signatureHdr *cb.SignatureHeader) (*cb.Envelope, error) {
+func createSignedEnvelope(signer msp.SigningIdentity, channel, txID string, tx *applicationpb.Tx, signatureHdr *cb.SignatureHeader) (*cb.Envelope, error) {
 	channelHdr := protoutil.MakeChannelHeader(cb.HeaderType_MESSAGE, 0, channel, 0)
 	channelHdr.TxId = txID
 

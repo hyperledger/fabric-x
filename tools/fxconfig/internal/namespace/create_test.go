@@ -17,9 +17,10 @@ import (
 	"time"
 
 	"github.com/hyperledger/fabric-protos-go-apiv2/msp"
+	"github.com/stretchr/testify/require"
+
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	fxmsp "github.com/hyperledger/fabric-x-common/msp"
-	"github.com/stretchr/testify/require"
 )
 
 // Mock signing identity for testing
@@ -62,7 +63,7 @@ func (m *mockSigningIdentity) GetPublicVersion() fxmsp.Identity {
 	return nil
 }
 
-func (m *mockSigningIdentity) Verify(msg []byte, sig []byte) error {
+func (m *mockSigningIdentity) Verify(msg, sig []byte) error {
 	return nil
 }
 
@@ -90,7 +91,7 @@ func (m *mockSigningIdentity) SatisfiesPrincipal(principal *msp.MSPPrincipal) er
 	return nil
 }
 
-// TestGetPubKeyFromPemData tests the getPubKeyFromPemData function
+// TestGetPubKeyFromPemData tests the getPubKeyFromPemData function.
 func TestGetPubKeyFromPemData(t *testing.T) {
 	t.Parallel()
 
@@ -190,7 +191,7 @@ MIIBogIBAAJBALRiMLAA
 	}
 }
 
-// TestEndorse tests the endorse function
+// TestEndorse tests the endorse function.
 func TestEndorse(t *testing.T) {
 	t.Parallel()
 
@@ -268,20 +269,17 @@ func TestEndorse(t *testing.T) {
 
 				// Verify endorsements structure
 				require.Len(t, result.Endorsements, len(tt.tx.Namespaces), "Should have one endorsement per namespace")
-				nsEndorsements := result.Endorsements
 
 				// Verify each endorsement has signature
-				for _, endorsementSet := range nsEndorsements {
-					require.Equal(t, len(endorsementSet.EndorsementsWithIdentity), 1, "Endorsement set must have one endorsement")
-					eid := endorsementSet.EndorsementsWithIdentity[0]
-					require.NotNil(t, eid, "Endorsement should exist")
+				for _, endorsementSet := range result.Endorsements {
+					require.Len(t, endorsementSet.EndorsementsWithIdentity, 1, "Endorsement set must have one endorsement")
 				}
 			}
 		})
 	}
 }
 
-// TestCreateNamespacesTx tests the createNamespacesTx function
+// TestCreateNamespacesTx tests the createNamespacesTx function.
 func TestCreateNamespacesTx(t *testing.T) {
 	t.Parallel()
 
@@ -353,7 +351,7 @@ func TestCreateNamespacesTx(t *testing.T) {
 	}
 }
 
-// TestValidateVersion tests the validateVersion function
+// TestValidateVersion tests the validateVersion function.
 func TestValidateVersion(t *testing.T) {
 	t.Parallel()
 
@@ -420,7 +418,7 @@ func TestValidateVersion(t *testing.T) {
 	}
 }
 
-// TestMustHavePolicy tests the mustHavePolicy function
+// TestMustHavePolicy tests the mustHavePolicy function.
 func TestMustHavePolicy(t *testing.T) {
 	t.Parallel()
 
@@ -475,7 +473,7 @@ func TestMustHavePolicy(t *testing.T) {
 	}
 }
 
-// TestIsEmpty tests the isEmpty helper function
+// TestIsEmpty tests the isEmpty helper function.
 func TestIsEmpty(t *testing.T) {
 	t.Parallel()
 
