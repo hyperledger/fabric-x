@@ -25,5 +25,8 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Generate test artifacts
+        run: make generate
+
       - name: Run unit tests
         run: make test
