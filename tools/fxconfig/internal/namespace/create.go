@@ -143,6 +143,11 @@ func createThresholdPolicyFromPemData(pkData []byte) (*applicationpb.NamespacePo
 	return nsPolicy, nil
 }
 
+// GetPubKeyFromPemData extracts a public key from a given pem block.
+func GetPubKeyFromPemData(pemContent []byte) ([]byte, error) {
+	return getPubKeyFromPemData(pemContent)
+}
+
 // getPubKeyFromPemData looks for ECDSA public key in pemContent, and returns pem content only with the public key.
 func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 	for {
