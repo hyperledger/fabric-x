@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hyperledger/fabric-x-common/core/config/configtest"
-	"github.com/hyperledger/fabric-x-common/internaltools/configtxgen/genesisconfig"
+	"github.com/hyperledger/fabric-x-common/tools/configtxgen"
 )
 
 func TestConfigTxFlags(t *testing.T) {
@@ -34,10 +34,10 @@ func TestConfigTxFlags(t *testing.T) {
 		"cmd",
 		"-channelID=testchannelid",
 		"-outputCreateChannelTx=" + configTxDest,
-		"-profile=" + genesisconfig.SampleSingleMSPChannelProfile,
+		"-profile=" + configtxgen.SampleSingleMSPChannelProfile,
 		"-configPath=" + devConfigDir,
 		"-inspectChannelCreateTx=" + configTxDest,
-		"-asOrg=" + genesisconfig.SampleOrgName,
+		"-asOrg=" + configtxgen.SampleOrgName,
 	}
 
 	main()
@@ -56,7 +56,7 @@ func TestBlockFlags(t *testing.T) {
 	os.Args = []string{
 		"cmd",
 		"-channelID=testchannelid",
-		"-profile=" + genesisconfig.SampleSingleMSPSoloProfile,
+		"-profile=" + configtxgen.SampleSingleMSPSoloProfile,
 		"-outputBlock=" + blockDest,
 		"-inspectBlock=" + blockDest,
 	}

@@ -11,10 +11,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/hyperledger/fabric-x-committer/api/protoblocktx"
-	"github.com/hyperledger/fabric-x-committer/api/protoqueryservice"
 	"google.golang.org/protobuf/types/known/emptypb"
 
+	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 )
 
@@ -33,7 +33,7 @@ func List(out io.Writer, endpoint string, tlsConfig comm.Config) error {
 		_ = conn.Close()
 	}()
 
-	client := protoqueryservice.NewQueryServiceClient(conn)
+	client := committerpb.NewQueryServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
 	defer cancel()
@@ -49,7 +49,7 @@ func List(out io.Writer, endpoint string, tlsConfig comm.Config) error {
 }
 
 //nolint:errcheck
-func printResult(out io.Writer, res *protoblocktx.NamespacePolicies) {
+func printResult(out io.Writer, res *applicationpb.NamespacePolicies) {
 	fmt.Fprintf(out, "Installed namespaces (%d total):\n", len(res.GetPolicies()))
 	for i, p := range res.GetPolicies() {
 		fmt.Fprintf(out, "%d) %v: version %d policy: %x\n", i, p.GetNamespace(), p.GetVersion(), p.GetPolicy())

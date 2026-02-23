@@ -10,17 +10,24 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/hyperledger/fabric-lib-go/bccsp/factory"
 
+	"github.com/hyperledger/fabric-x-common/common/metadata"
 	"github.com/hyperledger/fabric-x-common/common/util"
-	"github.com/hyperledger/fabric-x-common/internaltools/configtxgen"
-	"github.com/hyperledger/fabric-x-common/internaltools/configtxgen/genesisconfig"
-	"github.com/hyperledger/fabric-x-common/internaltools/configtxgen/metadata"
+	"github.com/hyperledger/fabric-x-common/tools/configtxgen"
 )
 
 var logger = util.MustGetLogger("common.tools.configtxgen")
+
+const programName = "configtxgen"
+
+var (
+	commitSHA = metadata.CommitSHA
+	version   = metadata.Version
+)
 
 func main() {
 	var outputBlock, outputChannelCreateTx, channelCreateTxBaseProfile, profile, configPath, channelID, inspectBlock, inspectChannelCreateTx, asOrg, printOrg string
@@ -36,7 +43,7 @@ func main() {
 	flag.StringVar(&asOrg, "asOrg", "", "Performs the config generation as a particular organization (by name), only including values in the write set that org (likely) has privilege to set")
 	flag.StringVar(&printOrg, "printOrg", "", "Prints the definition of an organization as JSON. (useful for adding an org to a channel manually)")
 
-	version := flag.Bool("version", false, "Show version information")
+	versionCmd := flag.Bool("version", false, "Show version information")
 
 	flag.Parse()
 
@@ -45,8 +52,8 @@ func main() {
 	}
 
 	// show version
-	if *version {
-		printVersion()
+	if *versionCmd {
+		fmt.Println(getVersionInfo())
 		os.Exit(0)
 	}
 
@@ -74,28 +81,28 @@ func main() {
 	if err != nil {
 		logger.Fatalf("Error on initFactories: %s", err)
 	}
-	var profileConfig *genesisconfig.Profile
+	var profileConfig *configtxgen.Profile
 	if outputBlock != "" || outputChannelCreateTx != "" {
 		if profile == "" {
 			logger.Fatalf("The '-profile' is required when '-outputBlock', '-outputChannelCreateTx' is specified")
 		}
 
 		if configPath != "" {
-			profileConfig = genesisconfig.Load(profile, configPath)
+			profileConfig = configtxgen.Load(profile, configPath)
 		} else {
-			profileConfig = genesisconfig.Load(profile)
+			profileConfig = configtxgen.Load(profile)
 		}
 	}
 
-	var baseProfile *genesisconfig.Profile
+	var baseProfile *configtxgen.Profile
 	if channelCreateTxBaseProfile != "" {
 		if outputChannelCreateTx == "" {
 			logger.Warning("Specified 'channelCreateTxBaseProfile', but did not specify 'outputChannelCreateTx', 'channelCreateTxBaseProfile' will not affect output.")
 		}
 		if configPath != "" {
-			baseProfile = genesisconfig.Load(channelCreateTxBaseProfile, configPath)
+			baseProfile = configtxgen.Load(channelCreateTxBaseProfile, configPath)
 		} else {
-			baseProfile = genesisconfig.Load(channelCreateTxBaseProfile)
+			baseProfile = configtxgen.Load(channelCreateTxBaseProfile)
 		}
 	}
 
@@ -124,11 +131,11 @@ func main() {
 	}
 
 	if printOrg != "" {
-		var topLevelConfig *genesisconfig.TopLevel
+		var topLevelConfig *configtxgen.TopLevel
 		if configPath != "" {
-			topLevelConfig = genesisconfig.LoadTopLevel(configPath)
+			topLevelConfig = configtxgen.LoadTopLevel(configPath)
 		} else {
-			topLevelConfig = genesisconfig.LoadTopLevel()
+			topLevelConfig = configtxgen.LoadTopLevel()
 		}
 
 		if err := configtxgen.DoPrintOrg(topLevelConfig, printOrg); err != nil {
@@ -137,6 +144,8 @@ func main() {
 	}
 }
 
-func printVersion() {
-	fmt.Println(metadata.GetVersionInfo())
+func getVersionInfo() string {
+	return fmt.Sprintf("%s:\n Version: %s\n Commit SHA: %s\n Go version: %s\n OS/Arch: %s",
+		programName, version, commitSHA, runtime.Version(),
+		fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH))
 }

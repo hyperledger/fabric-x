@@ -12,6 +12,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	validChannelName                        = "mychannel"
+	validNamespaceID                        = "1"
+	validVersion                            = 0
+	validThresholdPolicyVerificationKeyPath = "/path/to/key"
+)
+
 func TestValidateConfig(t *testing.T) {
 	t.Parallel()
 
@@ -21,18 +28,73 @@ func TestValidateConfig(t *testing.T) {
 		expectError bool
 	}{
 		{
-			name:        "valid namespace ID",
-			nsCfg:       NsConfig{NamespaceID: "1"},
+			name: "valid config",
+			nsCfg: NsConfig{
+				Channel:                            validChannelName,
+				NamespaceID:                        validNamespaceID,
+				Version:                            validVersion,
+				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+			},
 			expectError: false,
 		},
 		{
-			name:        "empty namespace ID",
-			nsCfg:       NsConfig{NamespaceID: ""},
+			name: "empty namespace ID",
+			nsCfg: NsConfig{
+				Channel:                            validChannelName,
+				NamespaceID:                        "",
+				Version:                            validVersion,
+				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+			},
 			expectError: true,
 		},
 		{
-			name:        "invalid namespace ID",
-			nsCfg:       NsConfig{NamespaceID: "invalid namespace"},
+			name: "invalid namespace ID",
+			nsCfg: NsConfig{
+				Channel:                            validChannelName,
+				NamespaceID:                        "invalid namespace",
+				Version:                            validVersion,
+				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+			},
+			expectError: true,
+		},
+		{
+			name: "invalid version",
+			nsCfg: NsConfig{
+				Channel:                            validChannelName,
+				NamespaceID:                        validNamespaceID,
+				Version:                            -2,
+				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+			},
+			expectError: true,
+		},
+		{
+			name: "empty threshold policy verification key path",
+			nsCfg: NsConfig{
+				Channel:                            validChannelName,
+				NamespaceID:                        validNamespaceID,
+				Version:                            validVersion,
+				ThresholdPolicyVerificationKeyPath: "",
+			},
+			expectError: true,
+		},
+		{
+			name: "invalid threshold policy verification key path",
+			nsCfg: NsConfig{
+				Channel:                            validChannelName,
+				NamespaceID:                        validNamespaceID,
+				Version:                            validVersion,
+				ThresholdPolicyVerificationKeyPath: " ",
+			},
+			expectError: true,
+		},
+		{
+			name: "invalid channel name",
+			nsCfg: NsConfig{
+				Channel:                            "",
+				NamespaceID:                        validNamespaceID,
+				Version:                            validVersion,
+				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+			},
 			expectError: true,
 		},
 	}

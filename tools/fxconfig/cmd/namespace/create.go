@@ -7,10 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 package namespace
 
 import (
-	"errors"
+	"github.com/spf13/cobra"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/namespace"
-	"github.com/spf13/cobra"
 )
 
 type deployF func(nsCfg namespace.NsConfig, ordererCfg namespace.OrdererConfig, mspCfg namespace.MSPConfig) error
@@ -20,7 +19,6 @@ func newCreateCommand(deployNamespace deployF) *cobra.Command {
 		ordererCfg namespace.OrdererConfig
 		mspCfg     namespace.MSPConfig
 		nsCfg      namespace.NsConfig
-		err        error
 	)
 
 	cmd := &cobra.Command{
@@ -32,19 +30,6 @@ func newCreateCommand(deployNamespace deployF) *cobra.Command {
 			nsCfg.NamespaceID = args[0]
 			nsCfg.Version = -1
 
-			nsCfg.Channel, err = cmd.Flags().GetString("channel")
-			if err != nil {
-				return err
-			}
-			if nsCfg.Channel == "" {
-				return errors.New("you must specify a channel name '--channel channelName'")
-			}
-
-			nsCfg.VerificationKeyPath, err = cmd.Flags().GetString("pk")
-			if err != nil {
-				return err
-			}
-
 			return deployNamespace(nsCfg, ordererCfg, mspCfg)
 		},
 	}
@@ -53,15 +38,19 @@ func newCreateCommand(deployNamespace deployF) *cobra.Command {
 	mspFlags(cmd, &mspCfg)
 
 	// adds flags related to namespaces
-	cmd.PersistentFlags().String(
-		"pk",
+	cmd.PersistentFlags().StringVar(&nsCfg.ThresholdPolicyVerificationKeyPath,
+		"policy-ecdsa-threshold",
 		"",
-		"The path to the public key of the endorser",
+		"The path to the ecdsa threshold verification key",
 	)
-	_ = cmd.PersistentFlags().MarkDeprecated(
-		"pk",
-		"This flag is deprecated and will be removed in future versions",
+	_ = cmd.MarkFlagRequired("policy-ecdsa-threshold")
+
+	cmd.Flags().StringVar(&nsCfg.Channel,
+		"channel",
+		"",
+		"The channel",
 	)
+	_ = cmd.MarkFlagRequired("channel")
 
 	return cmd
 }

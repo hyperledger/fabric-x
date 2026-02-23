@@ -7,10 +7,9 @@ SPDX-License-Identifier: Apache-2.0
 package namespace
 
 import (
-	"errors"
+	"github.com/spf13/cobra"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/namespace"
-	"github.com/spf13/cobra"
 )
 
 func newUpdateCommand(deployNamespace deployF) *cobra.Command {
@@ -18,7 +17,6 @@ func newUpdateCommand(deployNamespace deployF) *cobra.Command {
 		ordererCfg namespace.OrdererConfig
 		mspCfg     namespace.MSPConfig
 		nsCfg      namespace.NsConfig
-		err        error
 	)
 
 	cmd := &cobra.Command{
@@ -29,24 +27,6 @@ func newUpdateCommand(deployNamespace deployF) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			nsCfg.NamespaceID = args[0]
 
-			nsCfg.Channel, err = cmd.Flags().GetString("channel")
-			if err != nil {
-				return err
-			}
-			if nsCfg.Channel == "" {
-				return errors.New("you must specify a channel name '--channel channelName'")
-			}
-
-			nsCfg.VerificationKeyPath, err = cmd.Flags().GetString("pk")
-			if err != nil {
-				return err
-			}
-
-			nsCfg.Version, err = cmd.Flags().GetInt("version")
-			if err != nil {
-				return err
-			}
-
 			return deployNamespace(nsCfg, ordererCfg, mspCfg)
 		},
 	}
@@ -55,21 +35,26 @@ func newUpdateCommand(deployNamespace deployF) *cobra.Command {
 	mspFlags(cmd, &mspCfg)
 
 	// adds flags related to namespaces
-	cmd.PersistentFlags().String(
-		"pk",
-		"",
-		"The path to the public key of the endorser",
-	)
-	_ = cmd.PersistentFlags().MarkDeprecated(
-		"pk",
-		"This flag is deprecated and will be removed in future versions",
-	)
-
-	cmd.PersistentFlags().Int(
+	cmd.Flags().IntVar(&nsCfg.Version,
 		"version",
 		0,
-		"The version of this namespace definition",
+		"The version",
 	)
+	_ = cmd.MarkFlagRequired("version")
+
+	cmd.PersistentFlags().StringVar(&nsCfg.ThresholdPolicyVerificationKeyPath,
+		"policy-ecdsa-threshold",
+		"",
+		"The path to the ecdsa threshold verification key",
+	)
+	_ = cmd.MarkFlagRequired("policy-ecdsa-threshold")
+
+	cmd.Flags().StringVar(&nsCfg.Channel,
+		"channel",
+		"",
+		"The channel name",
+	)
+	_ = cmd.MarkFlagRequired("channel")
 
 	return cmd
 }

@@ -7,6 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 package namespace
 
 import (
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
@@ -31,12 +33,42 @@ type MSPConfig struct {
 
 // NsConfig is a helper struct to deal with namespace related arguments.
 type NsConfig struct {
-	Channel             string
-	NamespaceID         string
-	Version             int
-	VerificationKeyPath string
+	Channel                            string
+	NamespaceID                        string
+	Version                            int
+	ThresholdPolicyVerificationKeyPath string
 }
 
 func validateConfig(nsCfg NsConfig) error {
-	return policy.ValidateNamespaceID(nsCfg.NamespaceID)
+	return errors.Join(
+		validateChannel(nsCfg),
+		policy.ValidateNamespaceID(nsCfg.NamespaceID),
+		validateVersion(nsCfg),
+		mustHavePolicy(nsCfg),
+	)
+}
+
+func validateChannel(nsCfg NsConfig) error {
+	if isEmpty(nsCfg.Channel) {
+		return errors.New("channel name must be specified")
+	}
+	return nil
+}
+
+func validateVersion(nsCfg NsConfig) error {
+	if nsCfg.Version < -1 {
+		return errors.New("invalid version: must be -1 (create) or >= 0 (update)")
+	}
+	return nil
+}
+
+func mustHavePolicy(nsCfg NsConfig) error {
+	if isEmpty(nsCfg.ThresholdPolicyVerificationKeyPath) {
+		return errors.New("policy verification key path must be specified")
+	}
+	return nil
+}
+
+func isEmpty(s string) bool {
+	return strings.TrimSpace(s) == ""
 }

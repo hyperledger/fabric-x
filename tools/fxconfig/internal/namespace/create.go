@@ -17,15 +17,14 @@ import (
 	"github.com/hyperledger/fabric-lib-go/bccsp/sw"
 	cb "github.com/hyperledger/fabric-protos-go-apiv2/common"
 	ab "github.com/hyperledger/fabric-protos-go-apiv2/orderer"
-	"github.com/hyperledger/fabric-x-committer/api/protoblocktx"
-	"github.com/hyperledger/fabric-x-committer/api/types"
-	"github.com/hyperledger/fabric-x-committer/utils/signature"
+	"google.golang.org/protobuf/proto"
 
+	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
-	"github.com/hyperledger/fabric-x-common/internaltools/configtxgen/encoder"
-	"github.com/hyperledger/fabric-x-common/internaltools/pkg/identity"
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x-common/protoutil"
+	"github.com/hyperledger/fabric-x-common/tools/configtxgen"
 )
 
 // DeployNamespace creates a namespace transactions and submits it to the ordering service.
@@ -35,43 +34,58 @@ func DeployNamespace(nsCfg NsConfig, ordererCfg OrdererConfig, mspCfg MSPConfig)
 		return err
 	}
 
-	thisMSP, err := setupMSP(mspCfg)
-	if err != nil {
-		return fmt.Errorf("msp setup error: %w", err)
-	}
-
-	sid, err := thisMSP.GetDefaultSigningIdentity()
-	if err != nil {
-		return fmt.Errorf("get signer identity error: %w", err)
-	}
-
-	var pkData []byte
-	if nsCfg.VerificationKeyPath != "" {
-		pkData, err = os.ReadFile(nsCfg.VerificationKeyPath)
-		if err != nil {
-			return err
-		}
-	} else {
-		// if `VerificationKeyPath` isn't set, use the default MSP signer as namespace EP
-		pkData, err = extractPublicPem(sid)
-		if err != nil {
-			return err
-		}
-	}
-
-	// we use the serialized public key as our namespace endorsement policy
-	serializedPublicKey, err := getPubKeyFromPemData(pkData)
+	sid, err := getSignerIdentityFromMSP(mspCfg)
 	if err != nil {
 		return err
 	}
 
-	tx := createNamespacesTx("ECDSA", serializedPublicKey, nsCfg.NamespaceID, nsCfg.Version)
-	env, err := createSignedEnvelope(sid, nsCfg.Channel, tx)
+	// we use the serialized public key as our namespace endorsement policy
+	pkData, err := os.ReadFile(nsCfg.ThresholdPolicyVerificationKeyPath)
+	if err != nil {
+		return err
+	}
+
+	nsPolicy, err := createThresholdPolicyFromPemData(pkData)
+	if err != nil {
+		return err
+	}
+
+	signatureHdr := protoutil.NewSignatureHeaderOrPanic(sid)
+	txID := protoutil.ComputeTxID(signatureHdr.Nonce, signatureHdr.Creator)
+
+	// create transaction
+	tx := createNamespacesTx(nsPolicy, nsCfg.NamespaceID, nsCfg.Version)
+
+	// endorse transaction
+	tx, err = endorse(sid, txID, tx)
+	if err != nil {
+		return err
+	}
+
+	// create signed envelope
+	channelHdr := protoutil.MakeChannelHeader(cb.HeaderType_MESSAGE, 0, nsCfg.Channel, 0)
+	channelHdr.TxId = txID
+
+	env, err := createSignedEnvelope(sid, tx, channelHdr, signatureHdr)
 	if err != nil {
 		return err
 	}
 
 	return broadcast(ordererCfg, env)
+}
+
+func getSignerIdentityFromMSP(config MSPConfig) (msp.SigningIdentity, error) { //nolint:ireturn
+	thisMSP, err := setupMSP(config)
+	if err != nil {
+		return nil, fmt.Errorf("msp setup error: %w", err)
+	}
+
+	sid, err := thisMSP.GetDefaultSigningIdentity()
+	if err != nil {
+		return nil, fmt.Errorf("get signer identity error: %w", err)
+	}
+
+	return sid, nil
 }
 
 // setupMSP instantiates a MSP based on the provided MSPConfig.
@@ -111,18 +125,27 @@ func setupMSP(mspCfg MSPConfig) (msp.MSP, error) { //nolint:ireturn
 	return thisMSP, nil
 }
 
-func extractPublicPem(sid msp.SigningIdentity) ([]byte, error) {
-	sidBytes, err := sid.Serialize()
+func createThresholdPolicyFromPemData(pkData []byte) (*applicationpb.NamespacePolicy, error) {
+	serializedPublicKey, err := getPubKeyFromPemData(pkData)
 	if err != nil {
 		return nil, err
 	}
 
-	mspSI, err := protoutil.UnmarshalSerializedIdentity(sidBytes)
-	if err != nil {
-		return nil, err
+	nsPolicy := &applicationpb.NamespacePolicy{
+		Rule: &applicationpb.NamespacePolicy_ThresholdRule{
+			ThresholdRule: &applicationpb.ThresholdRule{
+				Scheme:    "ECDSA",
+				PublicKey: serializedPublicKey,
+			},
+		},
 	}
 
-	return mspSI.IdBytes, nil
+	return nsPolicy, nil
+}
+
+// GetPubKeyFromPemData extracts a public key from a given pem block.
+func GetPubKeyFromPemData(pemContent []byte) ([]byte, error) {
+	return getPubKeyFromPemData(pemContent)
 }
 
 // getPubKeyFromPemData looks for ECDSA public key in pemContent, and returns pem content only with the public key.
@@ -134,7 +157,7 @@ func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 		}
 		pemContent = rest
 
-		key, err := encoder.ParseCertificateOrPublicKey(block.Bytes)
+		key, err := configtxgen.ParseCertificateOrPublicKey(block.Bytes)
 		if err != nil {
 			continue
 		}
@@ -148,34 +171,29 @@ func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 	return nil, errors.New("no ECDSA public key in pem file")
 }
 
-func createNamespacesTx(policyScheme string, policy []byte, nsID string, nsVersion int) *protoblocktx.Tx {
-	writeToMetaNs := &protoblocktx.TxNamespace{
-		NsId: types.MetaNamespaceID,
+func createNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, nsVersion int) *applicationpb.Tx {
+	writeToMetaNs := &applicationpb.TxNamespace{
+		NsId: committerpb.MetaNamespaceID,
 		// TODO we need the correct version of the metaNamespaceID
-		NsVersion:  uint64(0),
-		ReadWrites: make([]*protoblocktx.ReadWrite, 0, 1),
-	}
-
-	nsPolicy := &protoblocktx.NamespacePolicy{
-		Scheme:    policyScheme,
-		PublicKey: policy,
+		NsVersion:  0,
+		ReadWrites: make([]*applicationpb.ReadWrite, 0, 1),
 	}
 
 	policyBytes := protoutil.MarshalOrPanic(nsPolicy)
-	rw := &protoblocktx.ReadWrite{
+	rw := &applicationpb.ReadWrite{
 		Key:   []byte(nsID),
 		Value: policyBytes,
 	}
 
 	// note that we only set the version if we update a namespace policy
 	if nsVersion >= 0 {
-		rw.Version = types.Version(uint64(nsVersion))
+		rw.Version = applicationpb.NewVersion(uint64(nsVersion))
 	}
 
 	writeToMetaNs.ReadWrites = append(writeToMetaNs.ReadWrites, rw)
 
-	tx := &protoblocktx.Tx{
-		Namespaces: []*protoblocktx.TxNamespace{
+	tx := &applicationpb.Tx{
+		Namespaces: []*applicationpb.TxNamespace{
 			writeToMetaNs,
 		},
 	}
@@ -183,15 +201,33 @@ func createNamespacesTx(policyScheme string, policy []byte, nsID string, nsVersi
 	return tx
 }
 
-func createSignedEnvelope(signer identity.SignerSerializer, channel string, tx *protoblocktx.Tx) (*cb.Envelope, error) {
-	signatureHdr := protoutil.NewSignatureHeaderOrPanic(signer)
+// endorse creates a threshold endorsement.
+// TODO we will refactor this method later and introduce MSP-based endorsement.
+func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error) {
+	if tx == nil {
+		return nil, errors.New("nil transaction")
+	}
 
-	txID := protoutil.ComputeTxID(signatureHdr.Nonce, signatureHdr.Creator)
-	tx.Signatures = make([][]byte, len(tx.GetNamespaces()))
-	for idx, ns := range tx.GetNamespaces() {
+	tx = proto.CloneOf(tx)
+
+	// check that tx does not yet carry any endorsements
+	if tx.Endorsements == nil {
+		tx.Endorsements = make([]*applicationpb.Endorsements, len(tx.GetNamespaces()))
+	}
+
+	// TODO for MSP-based endorsements we need either singerID or the hashed singerID to be attached on the Endorsement.
+	// get signer signerCert
+	// signerID, err := getSignerID(signer)
+	// if err != nil {
+	//	 return nil, err
+	// }
+
+	// create signature for each namespace in transaction
+	for nsIdx := range tx.GetNamespaces() {
 		// Note that a default msp signer hash the msg before signing.
 		// For that reason we use the TxNamespace message as ASN1 encoded msg
-		msg, err := signature.ASN1MarshalTxNamespace(txID, ns)
+
+		msg, err := tx.Namespaces[nsIdx].ASN1Marshal(txID)
 		if err != nil {
 			return nil, fmt.Errorf("failed asn1 marshal tx: %w", err)
 		}
@@ -200,23 +236,54 @@ func createSignedEnvelope(signer identity.SignerSerializer, channel string, tx *
 		if err != nil {
 			return nil, fmt.Errorf("failed signing tx: %w", err)
 		}
-		tx.Signatures[idx] = sig
+
+		// store signature as endorsementWithIdentity
+		eid := &applicationpb.EndorsementWithIdentity{
+			Endorsement: sig,
+			// TODO MSP-based endorsements will attach either the signerID or just a hash.
+			// Identity:    signerID,
+		}
+
+		// check if there is already an endorsement for this namespace, so we can append the new endorsement
+		// if not we create an empty endorser set
+		if tx.Endorsements[nsIdx] == nil {
+			tx.Endorsements[nsIdx] = &applicationpb.Endorsements{
+				EndorsementsWithIdentity: []*applicationpb.EndorsementWithIdentity{},
+			}
+		}
+
+		tx.Endorsements[nsIdx].EndorsementsWithIdentity = append(tx.Endorsements[nsIdx].EndorsementsWithIdentity, eid)
 	}
 
-	channelHdr := protoutil.MakeChannelHeader(cb.HeaderType_MESSAGE, 0, channel, 0)
-	channelHdr.TxId = txID
-
-	payloadHdr := protoutil.MakePayloadHeader(channelHdr, signatureHdr)
-	txBytes := protoutil.MarshalOrPanic(tx)
-	return createEnvelope(signer, payloadHdr, txBytes)
+	return tx, nil
 }
 
-// createEnvelope creates a signed envelope from the passed header and data.
-func createEnvelope(signer identity.SignerSerializer, hdr *cb.Header, data []byte) (*cb.Envelope, error) {
+// TODO we keep this for later when we come back for the MSP-based endorsement implementation.
+// func getSignerID(signer msp.SigningIdentity) (*msppb.Identity, error) {
+//  if signer == nil {
+//		return nil, errors.New("nil signer")
+//	}
+//
+//	signerCert, err := signer.GetCertificatePEM()
+//	if err != nil {
+//		return nil, err
+//	}
+//	return msppb.NewIdentity(signer.GetIdentifier().Mspid, signerCert), nil
+// }
+
+func createSignedEnvelope(
+	signer msp.SigningIdentity,
+	tx *applicationpb.Tx,
+	channelHdr *cb.ChannelHeader,
+	signatureHdr *cb.SignatureHeader,
+) (*cb.Envelope, error) {
+	payloadHdr := protoutil.MakePayloadHeader(channelHdr, signatureHdr)
+	txBytes := protoutil.MarshalOrPanic(tx)
+
 	payloadBytes := protoutil.MarshalOrPanic(
 		&cb.Payload{
-			Header: hdr,
-			Data:   data,
+			Header: payloadHdr,
+			Data:   txBytes,
 		},
 	)
 
@@ -229,12 +296,10 @@ func createEnvelope(signer identity.SignerSerializer, hdr *cb.Header, data []byt
 		}
 	}
 
-	env := &cb.Envelope{
+	return &cb.Envelope{
 		Payload:   payloadBytes,
 		Signature: sig,
-	}
-
-	return env, nil
+	}, nil
 }
 
 func broadcast(odererCfg OrdererConfig, env *cb.Envelope) error {
