@@ -4,7 +4,7 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package main_test
+package integration_test
 
 import (
 	"fmt"
@@ -17,6 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+//nolint:revive
 //go:generate go tool cryptogen generate --config testdata/crypto-config.yaml --output testdata/crypto
 //go:generate go tool configtxgen --configPath testdata --channelID mychannel --profile OrgsChannel --outputBlock testdata/crypto/config-block.pb.bin
 

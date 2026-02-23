@@ -4,7 +4,7 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package main_test
+package integration_test
 
 import (
 	"bytes"
@@ -27,7 +27,7 @@ const (
 	channelID        = "mychannel"
 )
 
-// setup spawns a committer test container and returns a map containing the endpoints of the committers services
+// setup spawns a committer test container and returns a map containing the endpoints of the committers services.
 func setup(t *testing.T) map[string]string {
 	t.Helper()
 
