@@ -4,6 +4,8 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
+// Package namespace provides functionality for namespace lifecycle operations.
+// It handles creating, updating, and listing namespaces in Fabric-X.
 package namespace
 
 import (
@@ -25,11 +27,12 @@ import (
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x-common/protoutil"
 	"github.com/hyperledger/fabric-x-common/tools/configtxgen"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
-// DeployNamespace creates a namespace transactions and submits it to the ordering service.
-func DeployNamespace(nsCfg NsConfig, ordererCfg OrdererConfig, mspCfg MSPConfig) error {
-	err := validateConfig(nsCfg)
+// DeployNamespace creates a namespace transaction and submits it to the ordering service.
+func DeployNamespace(nsCfg config.NsConfig, ordererCfg config.OrdererConfig, mspCfg config.MSPConfig) error {
+	err := config.ValidateNsConfig(nsCfg)
 	if err != nil {
 		return err
 	}
@@ -74,8 +77,9 @@ func DeployNamespace(nsCfg NsConfig, ordererCfg OrdererConfig, mspCfg MSPConfig)
 	return broadcast(ordererCfg, env)
 }
 
-func getSignerIdentityFromMSP(config MSPConfig) (msp.SigningIdentity, error) { //nolint:ireturn
-	thisMSP, err := setupMSP(config)
+// getSignerIdentityFromMSP retrieves the default signing identity from the MSP configuration.
+func getSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error) { //nolint:ireturn
+	thisMSP, err := setupMSP(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("msp setup error: %w", err)
 	}
@@ -88,14 +92,15 @@ func getSignerIdentityFromMSP(config MSPConfig) (msp.SigningIdentity, error) { /
 	return sid, nil
 }
 
-// setupMSP instantiates a MSP based on the provided MSPConfig.
-func setupMSP(mspCfg MSPConfig) (msp.MSP, error) { //nolint:ireturn
-	conf, err := msp.GetLocalMspConfig(mspCfg.MSPConfigPath, nil, mspCfg.MSPID)
+// setupMSP instantiates an MSP instance from the provided configuration.
+// It configures the BCCSP (Blockchain Crypto Service Provider) with a file-based keystore.
+func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) { //nolint:ireturn
+	conf, err := msp.GetLocalMspConfig(mspCfg.ConfigPath, nil, mspCfg.LocalMspID)
 	if err != nil {
-		return nil, fmt.Errorf("error getting local msp config from %v: %w", mspCfg.MSPConfigPath, err)
+		return nil, fmt.Errorf("error getting local msp config from %v: %w", mspCfg.ConfigPath, err)
 	}
 
-	dir := path.Join(mspCfg.MSPConfigPath, "keystore")
+	dir := path.Join(mspCfg.ConfigPath, "keystore")
 	ks, err := sw.NewFileBasedKeyStore(nil, dir, true)
 	if err != nil {
 		return nil, err
@@ -125,6 +130,7 @@ func setupMSP(mspCfg MSPConfig) (msp.MSP, error) { //nolint:ireturn
 	return thisMSP, nil
 }
 
+// createThresholdPolicyFromPemData creates a threshold ECDSA namespace policy from PEM-encoded key data.
 func createThresholdPolicyFromPemData(pkData []byte) (*applicationpb.NamespacePolicy, error) {
 	serializedPublicKey, err := getPubKeyFromPemData(pkData)
 	if err != nil {
@@ -143,12 +149,8 @@ func createThresholdPolicyFromPemData(pkData []byte) (*applicationpb.NamespacePo
 	return nsPolicy, nil
 }
 
-// GetPubKeyFromPemData extracts a public key from a given pem block.
-func GetPubKeyFromPemData(pemContent []byte) ([]byte, error) {
-	return getPubKeyFromPemData(pemContent)
-}
-
-// getPubKeyFromPemData looks for ECDSA public key in pemContent, and returns pem content only with the public key.
+// getPubKeyFromPemData extracts an ECDSA public key from PEM-encoded content.
+// It searches through multiple PEM blocks and returns the first valid ECDSA public key found.
 func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 	for {
 		block, rest := pem.Decode(pemContent)
@@ -171,6 +173,9 @@ func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 	return nil, errors.New("no ECDSA public key in pem file")
 }
 
+// createNamespacesTx constructs a transaction for creating or updating a namespace.
+// The transaction writes to the meta-namespace with the namespace policy.
+// Version -1 indicates a create operation; >= 0 indicates an update.
 func createNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, nsVersion int) *applicationpb.Tx {
 	writeToMetaNs := &applicationpb.TxNamespace{
 		NsId: committerpb.MetaNamespaceID,
@@ -201,8 +206,9 @@ func createNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, ns
 	return tx
 }
 
-// endorse creates a threshold endorsement.
-// TODO we will refactor this method later and introduce MSP-based endorsement.
+// endorse signs the transaction with the provided identity.
+// It creates endorsements for each namespace in the transaction.
+// Currently uses threshold ECDSA signatures; MSP-based endorsement will be added later.
 func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error) {
 	if tx == nil {
 		return nil, errors.New("nil transaction")
@@ -271,6 +277,8 @@ func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 //	return msppb.NewIdentity(signer.GetIdentifier().Mspid, signerCert), nil
 // }
 
+// createSignedEnvelope wraps the transaction in a signed envelope for submission to the orderer.
+// The envelope contains the channel header, signature header, and transaction payload.
 func createSignedEnvelope(
 	signer msp.SigningIdentity,
 	tx *applicationpb.Tx,
@@ -302,13 +310,26 @@ func createSignedEnvelope(
 	}, nil
 }
 
-func broadcast(odererCfg OrdererConfig, env *cb.Envelope) error {
-	cl, err := comm.NewClient(odererCfg.Config)
+// broadcast sends the signed envelope to the ordering service.
+// It establishes a gRPC connection, sends the envelope, and waits for acknowledgment.
+func broadcast(cfg config.OrdererConfig, env *cb.Envelope) error {
+	clientCfg := comm.Config{
+		Timeout: cfg.ConnectionTimeout,
+	}
+
+	// TLS config
+	if cfg.TLS.IsEnabled() {
+		clientCfg.CertPath = cfg.TLS.ClientCertPath
+		clientCfg.KeyPath = cfg.TLS.ClientKeyPath
+		clientCfg.PeerCACertPath = cfg.TLS.RootCertPaths[0]
+	}
+
+	cl, err := comm.NewClient(clientCfg)
 	if err != nil {
 		return fmt.Errorf("cannot get grpc client: %w", err)
 	}
 
-	conn, err := cl.NewDialer(odererCfg.OrderingEndpoint)()
+	conn, err := cl.NewDialer(cfg.Address)()
 	if err != nil {
 		return fmt.Errorf("cannot get grpc client: %w", err)
 	}

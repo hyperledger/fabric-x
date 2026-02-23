@@ -8,6 +8,7 @@ package integration_test
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -22,7 +23,7 @@ import (
 //go:generate go tool configtxgen --configPath testdata --channelID mychannel --profile OrgsChannel --outputBlock testdata/crypto/config-block.pb.bin
 
 const (
-	eventuallyTimeout = 30 * time.Second
+	eventuallyTimeout = 10 * time.Second
 	eventuallyTick    = 100 * time.Millisecond
 
 	scaleTestNamespaceCount = 50 // test with many namespaces
@@ -38,10 +39,12 @@ func TestScenarios(t *testing.T) {
 	// setup committer test container
 	endpoints := setup(t)
 
+	t.Logf("endpoints: %v", endpoints)
+
 	testdata, err := filepath.Abs(filepath.Join(".", "testdata"))
 	require.NoError(t, err)
 
-	mspID := "Org1"
+	localMspID := "Org1"
 	mspConfigPath := filepath.Join(
 		testdata,
 		"crypto",
@@ -64,14 +67,32 @@ func TestScenarios(t *testing.T) {
 		"endorser@org1.example.com-cert.pem",
 	)
 
-	var (
-		endpointArg = "--endpoint=" + endpoints["query"]
-		ordererArg  = "--orderer=" + endpoints["orderer"]
-		channelArg  = "--channel=" + channelID
+	// Setup - Create temporary config file
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	configContent := `
+msp:
+  localMspID: ` + localMspID + `
+  configPath: ` + mspConfigPath + `
 
-		// msp identity that is used by fxconfig
-		mspIDArg         = "--mspID=" + mspID
-		mspConfigPathArg = "--mspConfigPath=" + mspConfigPath
+orderer:
+  address: ` + endpoints["orderer"] + `
+  connectionTimeout: 45s
+
+queries:
+  address: ` + endpoints["query"] + `
+  connectionTimeout: 60s
+
+notifications:
+  address: ` + endpoints["sidecar"] + `
+  connectionTimeout: 90s
+`
+	err = os.WriteFile(configPath, []byte(configContent), 0o600)
+	require.NoError(t, err)
+
+	var (
+		configArg  = "--config=" + configPath
+		channelArg = "--channel=" + channelID
 
 		// policy
 		thresholdKeyPathArg = "--policy-ecdsa-threshold=" + thresholdKeyPath
@@ -83,20 +104,20 @@ func TestScenarios(t *testing.T) {
 		expectedNs := Namespace{Name: "hello", Version: 0}
 
 		// we expect no namespaces
-		stdOut, err := fxconfig("namespace", "list", endpointArg)
+		stdOut, err := fxconfig("namespace", "list", configArg)
 		require.NoError(t, err)
 		nss, err := parseNamespaceList(stdOut)
 		require.NoError(t, err)
 		require.NotContains(t, nss, expectedNs)
 
 		// create namespace hello
-		_, err = fxconfig("namespace", "create",
-			expectedNs.Name, channelArg, ordererArg, mspIDArg, mspConfigPathArg, thresholdKeyPathArg)
+		_, err = fxconfig("namespace", "create", expectedNs.Name,
+			configArg, channelArg, thresholdKeyPathArg)
 		require.NoError(t, err)
 
 		// expect one installed namespace
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", endpointArg)
+			stdOut, err := fxconfig("namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err := parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -110,22 +131,22 @@ func TestScenarios(t *testing.T) {
 		expectedNs := Namespace{Name: "dp1", Version: 0}
 
 		// we expect this namespace not to exist
-		stdOut, err := fxconfig("namespace", "list", endpointArg)
+		stdOut, err := fxconfig("namespace", "list", configArg)
 		require.NoError(t, err)
 		nss, err := parseNamespaceList(stdOut)
 		require.NoError(t, err)
 		require.NotContains(t, nss, expectedNs)
 
 		// create namespace
-		_, err = fxconfig("namespace", "create",
-			expectedNs.Name, channelArg, ordererArg, mspIDArg, mspConfigPathArg, thresholdKeyPathArg)
+		_, err = fxconfig("namespace", "create", expectedNs.Name,
+			configArg, channelArg, thresholdKeyPathArg)
 		require.NoError(t, err)
 
 		// expect out namespace to be installed
 		// we keep the stdOut
 		var expectedStdOut string
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", endpointArg)
+			stdOut, err = fxconfig("namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err = parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -136,12 +157,12 @@ func TestScenarios(t *testing.T) {
 		// now we try to run create with the namespace again,
 		// but we use a different policy, as namespace creation should fail,
 		// and we expect the previous stdOut when calling list
-		_, err = fxconfig("namespace", "create",
-			expectedNs.Name, channelArg, ordererArg, mspIDArg, mspConfigPathArg, thresholdKeyPathArg)
+		_, err = fxconfig("namespace", "create", expectedNs.Name,
+			configArg, channelArg, thresholdKeyPathArg)
 		require.NoError(t, err)
 
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", endpointArg)
+			stdOut, err = fxconfig("namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err := parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -157,20 +178,20 @@ func TestScenarios(t *testing.T) {
 		expectedNs := Namespace{Name: "ns1", Version: 0}
 
 		// we expect this namespace not to exist
-		stdOut, err := fxconfig("namespace", "list", endpointArg)
+		stdOut, err := fxconfig("namespace", "list", configArg)
 		require.NoError(t, err)
 		nss, err := parseNamespaceList(stdOut)
 		require.NoError(t, err)
 		require.NotContains(t, nss, expectedNs)
 
 		// create namespace
-		_, err = fxconfig("namespace", "create",
-			expectedNs.Name, channelArg, ordererArg, mspIDArg, mspConfigPathArg, thresholdKeyPathArg)
+		_, err = fxconfig("namespace", "create", expectedNs.Name,
+			configArg, channelArg, thresholdKeyPathArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be created
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", endpointArg)
+			stdOut, err = fxconfig("namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err = parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -182,13 +203,13 @@ func TestScenarios(t *testing.T) {
 
 		// update namespace
 		expectedNs = Namespace{Name: "ns1", Version: 1}
-		_, err = fxconfig("namespace", "update",
-			expectedNs.Name, versionArg, channelArg, ordererArg, mspIDArg, mspConfigPathArg, thresholdKeyPathArg)
+		_, err = fxconfig("namespace", "update", expectedNs.Name,
+			configArg, versionArg, channelArg, thresholdKeyPathArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be updated having a version equals 1
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", endpointArg)
+			stdOut, err = fxconfig("namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err = parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -200,13 +221,13 @@ func TestScenarios(t *testing.T) {
 
 		// update namespace
 		expectedNs = Namespace{Name: "ns1", Version: 1}
-		_, err = fxconfig("namespace", "update",
-			expectedNs.Name, versionArg, channelArg, ordererArg, mspIDArg, mspConfigPathArg, thresholdKeyPathArg)
+		_, err = fxconfig("namespace", "update", expectedNs.Name,
+			configArg, versionArg, channelArg, thresholdKeyPathArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be updated having a version equals 1
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", endpointArg)
+			stdOut, err = fxconfig("namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err = parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -218,13 +239,13 @@ func TestScenarios(t *testing.T) {
 
 		// update namespace
 		expectedNs = Namespace{Name: "ns1", Version: 2}
-		_, err = fxconfig("namespace", "update",
-			expectedNs.Name, versionArg, channelArg, ordererArg, mspIDArg, mspConfigPathArg, thresholdKeyPathArg)
+		_, err = fxconfig("namespace", "update", expectedNs.Name,
+			configArg, versionArg, channelArg, thresholdKeyPathArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be updated having a version equals 1
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err := fxconfig("namespace", "list", endpointArg)
+			stdOut, err := fxconfig("namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err := parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -238,14 +259,14 @@ func TestScenarios(t *testing.T) {
 		// create many namespaces
 		for i := 1; i <= scaleTestNamespaceCount; i++ {
 			expectedNs := Namespace{Name: fmt.Sprintf("hello%d", i)}
-			_, err := fxconfig("namespace", "create",
-				expectedNs.Name, channelArg, ordererArg, mspIDArg, mspConfigPathArg, thresholdKeyPathArg)
+			_, err := fxconfig("namespace", "create", expectedNs.Name,
+				configArg, channelArg, thresholdKeyPathArg)
 			require.NoError(t, err)
 		}
 
 		// expect all our namespaces to be installed
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err := fxconfig("namespace", "list", endpointArg)
+			stdOut, err := fxconfig("namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err := parseNamespaceList(stdOut)
 			require.NoError(ct, err)

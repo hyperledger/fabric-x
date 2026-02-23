@@ -4,20 +4,22 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package namespace
+package cmd
 
 import (
+	"errors"
+
 	"github.com/spf13/cobra"
 
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/namespace"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
+// newUpdateCommand creates a command for updating existing namespaces.
+// It accepts a namespace name as argument and requires the --version flag to specify
+// the current version number, preventing concurrent modification conflicts.
+// The deployNamespace function is injected to enable testing with mock implementations.
 func newUpdateCommand(deployNamespace deployF) *cobra.Command {
-	var (
-		ordererCfg namespace.OrdererConfig
-		mspCfg     namespace.MSPConfig
-		nsCfg      namespace.NsConfig
-	)
+	var nsCfg config.NsConfig
 
 	cmd := &cobra.Command{
 		Use:   "update NAMESPACE_NAME",
@@ -25,14 +27,23 @@ func newUpdateCommand(deployNamespace deployF) *cobra.Command {
 		Long:  "",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg := getConfig(cmd)
+
 			nsCfg.NamespaceID = args[0]
 
-			return deployNamespace(nsCfg, ordererCfg, mspCfg)
+			// validate config
+			err := errors.Join(
+				config.ValidateMSPConfig(cfg.MSP),
+				config.ValidateOrdererConfig("orderer", cfg.Orderer),
+				config.ValidateNsConfig(nsCfg),
+			)
+			if err != nil {
+				return err
+			}
+
+			return deployNamespace(nsCfg, cfg.Orderer, cfg.MSP)
 		},
 	}
-
-	ordererFlags(cmd, &ordererCfg)
-	mspFlags(cmd, &mspCfg)
 
 	// adds flags related to namespaces
 	cmd.Flags().IntVar(&nsCfg.Version,
@@ -47,14 +58,12 @@ func newUpdateCommand(deployNamespace deployF) *cobra.Command {
 		"",
 		"The path to the ecdsa threshold verification key",
 	)
-	_ = cmd.MarkFlagRequired("policy-ecdsa-threshold")
 
 	cmd.Flags().StringVar(&nsCfg.Channel,
 		"channel",
 		"",
 		"The channel name",
 	)
-	_ = cmd.MarkFlagRequired("channel")
 
 	return cmd
 }

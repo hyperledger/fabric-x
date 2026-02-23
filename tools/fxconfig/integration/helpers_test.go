@@ -115,7 +115,7 @@ type Namespace struct {
 func parseNamespaceList(output string) ([]Namespace, error) { //nolint:gocognit
 	namespaces := make([]Namespace, 0)
 
-	for _, line := range strings.Split(output, "\n") {
+	for line := range strings.SplitSeq(output, "\n") {
 		line = strings.TrimSpace(line)
 		// Skip header, empty lines, and error messages
 		if line == "" ||

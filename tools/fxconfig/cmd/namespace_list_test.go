@@ -4,7 +4,7 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package namespace
+package cmd
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
 func TestListCommand(t *testing.T) {
@@ -30,46 +30,21 @@ func TestListCommand(t *testing.T) {
 		errorContains string
 	}{
 		{
-			name:          "missing required endpoint flag",
-			args:          []string{"list"},
-			listFunc:      fakeListSuccess,
-			expectError:   true,
-			errorContains: "required flag(s)",
-		},
-		{
-			name:        "successful list with endpoint",
-			args:        []string{"list", "--endpoint=localhost:1234"},
-			listFunc:    fakeListSuccess,
-			expectError: false,
-		},
-		{
-			name:        "successful list with endpoint and TLS",
-			args:        []string{"list", "--endpoint=orderer.example.com:7050", "--cafile=/opt/tls/ca.crt"},
-			listFunc:    fakeListSuccess,
-			expectError: false,
-		},
-		{
-			name: "successful list with all TLS options",
-			args: []string{
-				"list",
-				"--endpoint=localhost:7050",
-				"--cafile=/opt/tls/ca.crt",
-				"--certfile=/opt/tls/client.crt",
-				"--keyfile=/opt/tls/client.key",
-			},
+			name:        "successful list",
+			args:        []string{"namespace", "list"},
 			listFunc:    fakeListSuccess,
 			expectError: false,
 		},
 		{
 			name:          "list function returns error",
-			args:          []string{"list", "--endpoint=localhost:1234"},
+			args:          []string{"namespace", "list"},
 			listFunc:      fakeListError,
 			expectError:   true,
 			errorContains: "failed to list namespaces",
 		},
 		{
 			name:        "help flag displays usage",
-			args:        []string{"list", "--help"},
+			args:        []string{"namespace", "list", "--help"},
 			listFunc:    fakeListSuccess,
 			expectError: false,
 		},
@@ -79,8 +54,8 @@ func TestListCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			// Setup
-			rootCmd := setupListCommand(t, tt.listFunc)
+			// Setup with mock config
+			rootCmd := setupListCommandWithConfig(t, tt.listFunc)
 
 			var outBuf, errBuf bytes.Buffer
 			rootCmd.SetOut(&outBuf)
@@ -109,15 +84,15 @@ func TestListCommand_OutputWriter(t *testing.T) {
 
 	// Setup
 	var capturedWriter io.Writer
-	captureListFunc := func(w io.Writer, _ string, _ comm.Config) error {
+	captureListFunc := func(w io.Writer, _ config.QueriesConfig) error {
 		capturedWriter = w
 		return nil
 	}
 
-	rootCmd := setupListCommand(t, captureListFunc)
+	rootCmd := setupListCommandWithConfig(t, captureListFunc)
 	var outBuf bytes.Buffer
 	rootCmd.SetOut(&outBuf)
-	rootCmd.SetArgs([]string{"list", "--endpoint=localhost:1234"})
+	rootCmd.SetArgs([]string{"namespace", "list"})
 
 	// Execute
 	err := rootCmd.Execute()
@@ -138,36 +113,21 @@ func TestNewListCommand(t *testing.T) {
 	assert.Equal(t, "list", cmd.Use, "command use should be 'list'")
 	assert.NotEmpty(t, cmd.Short, "command should have a short description")
 	assert.NotNil(t, cmd.RunE, "command should have a RunE function")
-
-	// Verify required flags
-	endpointFlag := cmd.Flag("endpoint")
-	require.NotNil(t, endpointFlag, "endpoint flag should exist")
-
-	// Verify optional TLS flags exist
-	cafileFlag := cmd.Flag("cafile")
-	require.NotNil(t, cafileFlag, "cafile flag should exist")
-
-	certfileFlag := cmd.Flag("certfile")
-	require.NotNil(t, certfileFlag, "certfile flag should exist")
-
-	keyfileFlag := cmd.Flag("keyfile")
-	require.NotNil(t, keyfileFlag, "keyfile flag should exist")
 }
 
 // Test helpers
 
-func setupListCommand(t *testing.T, list listFunc) *cobra.Command {
+func setupListCommandWithConfig(t *testing.T, list listFunc) *cobra.Command {
 	t.Helper()
 
-	rootCmd := &cobra.Command{Use: "namespace"}
-	rootCmd.AddCommand(newListCommand(list))
-	return rootCmd
+	listCmd := newListCommand(list)
+	return setupNamespaceCommandWithConfig(t, listCmd)
 }
 
-func fakeListSuccess(_ io.Writer, _ string, _ comm.Config) error {
+func fakeListSuccess(_ io.Writer, _ config.QueriesConfig) error {
 	return nil
 }
 
-func fakeListError(_ io.Writer, _ string, _ comm.Config) error {
+func fakeListError(_ io.Writer, _ config.QueriesConfig) error {
 	return errors.New("failed to list namespaces")
 }
