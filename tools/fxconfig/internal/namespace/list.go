@@ -16,16 +16,32 @@ import (
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
-// List calls the committer query service and shows all installed namespace policies.
-func List(out io.Writer, endpoint string, tlsConfig comm.Config) error {
-	cl, err := comm.NewClient(tlsConfig)
+// ListNamespaces queries the committer service for installed namespaces.
+// It connects to the query service, retrieves all namespace policies, and formats
+// the output showing namespace names, versions, and policy data in hexadecimal.
+func ListNamespaces(out io.Writer, cfg config.QueriesConfig) error {
+	// TODO we are very restricted with this
+
+	clientCfg := comm.Config{
+		Timeout: cfg.ConnectionTimeout,
+	}
+
+	// TLS config
+	if cfg.TLS.IsEnabled() {
+		clientCfg.CertPath = cfg.TLS.ClientCertPath
+		clientCfg.KeyPath = cfg.TLS.ClientKeyPath
+		clientCfg.PeerCACertPath = cfg.TLS.RootCertPaths[0]
+	}
+
+	cl, err := comm.NewClient(clientCfg)
 	if err != nil {
 		return fmt.Errorf("cannot get grpc client: %w", err)
 	}
 
-	conn, err := cl.NewDialer(endpoint)()
+	conn, err := cl.NewDialer(cfg.Address)()
 	if err != nil {
 		return fmt.Errorf("dialing grpc client error: %w", err)
 	}
@@ -35,7 +51,7 @@ func List(out io.Writer, endpoint string, tlsConfig comm.Config) error {
 
 	client := committerpb.NewQueryServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), DefaultTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.ConnectionTimeout)
 	defer cancel()
 
 	res, err := client.GetNamespacePolicies(ctx, &emptypb.Empty{})
@@ -48,6 +64,9 @@ func List(out io.Writer, endpoint string, tlsConfig comm.Config) error {
 	return nil
 }
 
+// printResult formats and writes namespace policy information to the output writer.
+// Each namespace is displayed with its index, name, version, and policy in hexadecimal format.
+//
 //nolint:errcheck
 func printResult(out io.Writer, res *applicationpb.NamespacePolicies) {
 	fmt.Fprintf(out, "Installed namespaces (%d total):\n", len(res.GetPolicies()))

@@ -17,7 +17,8 @@ import (
 	"github.com/hyperledger/fabric-x-common/common/metadata"
 )
 
-// NewVersionCommand returns a version command.
+// NewVersionCommand returns a command that displays version information.
+// It shows the fxconfig version, Go version, commit SHA, and OS/architecture.
 func NewVersionCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
@@ -35,6 +36,8 @@ func NewVersionCommand() *cobra.Command {
 	return cmd
 }
 
+// showLine formats and prints a single line of version information.
+// The title is capitalized and right-padded to 16 characters for alignment.
 func showLine(cmd *cobra.Command, title, value string) {
 	cmd.Printf(" %-16s %s\n", fmt.Sprintf("%s:", cases.Title(language.Und, cases.NoLower).String(title)), value)
 }
