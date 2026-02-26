@@ -9,168 +9,71 @@ SPDX-License-Identifier: Apache-2.0
 package namespace
 
 import (
-	"context"
-	"encoding/pem"
-	"errors"
-	"fmt"
-	"os"
-	"path"
-
-	"github.com/hyperledger/fabric-lib-go/bccsp/sw"
-	cb "github.com/hyperledger/fabric-protos-go-apiv2/common"
-	ab "github.com/hyperledger/fabric-protos-go-apiv2/orderer"
-	"google.golang.org/protobuf/proto"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/msp"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/orderer"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/transaction"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
-	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
-	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x-common/protoutil"
-	"github.com/hyperledger/fabric-x-common/tools/configtxgen"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
 // DeployNamespace creates a namespace transaction and submits it to the ordering service.
-func DeployNamespace(nsCfg config.NsConfig, ordererCfg config.OrdererConfig, mspCfg config.MSPConfig) error {
-	err := config.ValidateNsConfig(nsCfg)
+func DeployNamespace(vctx config.ValidationContext, cfg config.Config, nsCfg config.NsConfig) error {
+	if err := validate(vctx, cfg, nsCfg); err != nil {
+		return err
+	}
+
+	tx, err := CreateNamespaceTransaction(nsCfg)
 	if err != nil {
 		return err
 	}
 
-	sid, err := getSignerIdentityFromMSP(mspCfg)
+	// prepare endorsement
+	sid, err := msp.GetSignerIdentityFromMSP(cfg.MSP)
 	if err != nil {
 		return err
 	}
 
-	// we use the serialized public key as our namespace endorsement policy
-	pkData, err := os.ReadFile(nsCfg.ThresholdPolicyVerificationKeyPath)
+	// generate txID
+	txID := transaction.GenerateTxID()
+
+	// endorse transaction
+	tx, err = transaction.Endorse(sid, txID, tx)
 	if err != nil {
 		return err
 	}
 
-	nsPolicy, err := createThresholdPolicyFromPemData(pkData)
-	if err != nil {
+	// submit transaction
+	// note that we use the endorser identity to submit the transaction
+	return orderer.Broadcast(cfg.Orderer, sid, txID, tx)
+}
+
+func validate(ctx config.ValidationContext, cfg config.Config, nsCfg config.NsConfig) error {
+	if err := cfg.Orderer.Validate(ctx); err != nil {
 		return err
 	}
 
-	signatureHdr := protoutil.NewSignatureHeaderOrPanic(sid)
-	txID := protoutil.ComputeTxID(signatureHdr.Nonce, signatureHdr.Creator)
+	if err := cfg.MSP.Validate(ctx); err != nil {
+		return err
+	}
+
+	return nsCfg.Validate(ctx)
+}
+
+// CreateNamespaceTransaction creates a namespace transaction.
+func CreateNamespaceTransaction(nsCfg config.NsConfig) (*applicationpb.Tx, error) {
+	// create endorsement policy
+	nsPolicy, err := createPolicy(nsCfg.Policy)
+	if err != nil {
+		return nil, err
+	}
 
 	// create transaction
 	tx := createNamespacesTx(nsPolicy, nsCfg.NamespaceID, nsCfg.Version)
 
-	// endorse transaction
-	tx, err = endorse(sid, txID, tx)
-	if err != nil {
-		return err
-	}
-
-	// create signed envelope
-	channelHdr := protoutil.MakeChannelHeader(cb.HeaderType_MESSAGE, 0, nsCfg.Channel, 0)
-	channelHdr.TxId = txID
-
-	env, err := createSignedEnvelope(sid, tx, channelHdr, signatureHdr)
-	if err != nil {
-		return err
-	}
-
-	return broadcast(ordererCfg, env)
-}
-
-// getSignerIdentityFromMSP retrieves the default signing identity from the MSP configuration.
-func getSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error) { //nolint:ireturn
-	thisMSP, err := setupMSP(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("msp setup error: %w", err)
-	}
-
-	sid, err := thisMSP.GetDefaultSigningIdentity()
-	if err != nil {
-		return nil, fmt.Errorf("get signer identity error: %w", err)
-	}
-
-	return sid, nil
-}
-
-// setupMSP instantiates an MSP instance from the provided configuration.
-// It configures the BCCSP (Blockchain Crypto Service Provider) with a file-based keystore.
-func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) { //nolint:ireturn
-	conf, err := msp.GetLocalMspConfig(mspCfg.ConfigPath, nil, mspCfg.LocalMspID)
-	if err != nil {
-		return nil, fmt.Errorf("error getting local msp config from %v: %w", mspCfg.ConfigPath, err)
-	}
-
-	dir := path.Join(mspCfg.ConfigPath, "keystore")
-	ks, err := sw.NewFileBasedKeyStore(nil, dir, true)
-	if err != nil {
-		return nil, err
-	}
-
-	cp, err := sw.NewDefaultSecurityLevelWithKeystore(ks)
-	if err != nil {
-		return nil, err
-	}
-
-	mspOpts := &msp.BCCSPNewOpts{
-		NewBaseOpts: msp.NewBaseOpts{
-			Version: msp.MSPv1_0,
-		},
-	}
-
-	thisMSP, err := msp.New(mspOpts, cp)
-	if err != nil {
-		return nil, err
-	}
-
-	err = thisMSP.Setup(conf)
-	if err != nil {
-		return nil, err
-	}
-
-	return thisMSP, nil
-}
-
-// createThresholdPolicyFromPemData creates a threshold ECDSA namespace policy from PEM-encoded key data.
-func createThresholdPolicyFromPemData(pkData []byte) (*applicationpb.NamespacePolicy, error) {
-	serializedPublicKey, err := getPubKeyFromPemData(pkData)
-	if err != nil {
-		return nil, err
-	}
-
-	nsPolicy := &applicationpb.NamespacePolicy{
-		Rule: &applicationpb.NamespacePolicy_ThresholdRule{
-			ThresholdRule: &applicationpb.ThresholdRule{
-				Scheme:    "ECDSA",
-				PublicKey: serializedPublicKey,
-			},
-		},
-	}
-
-	return nsPolicy, nil
-}
-
-// getPubKeyFromPemData extracts an ECDSA public key from PEM-encoded content.
-// It searches through multiple PEM blocks and returns the first valid ECDSA public key found.
-func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
-	for {
-		block, rest := pem.Decode(pemContent)
-		if block == nil {
-			break
-		}
-		pemContent = rest
-
-		key, err := configtxgen.ParseCertificateOrPublicKey(block.Bytes)
-		if err != nil {
-			continue
-		}
-
-		return pem.EncodeToMemory(&pem.Block{
-			Type:  "PUBLIC KEY",
-			Bytes: key,
-		}), nil
-	}
-
-	return nil, errors.New("no ECDSA public key in pem file")
+	return tx, nil
 }
 
 // createNamespacesTx constructs a transaction for creating or updating a namespace.
@@ -204,162 +107,4 @@ func createNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, ns
 	}
 
 	return tx
-}
-
-// endorse signs the transaction with the provided identity.
-// It creates endorsements for each namespace in the transaction.
-// Currently uses threshold ECDSA signatures; MSP-based endorsement will be added later.
-func endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error) {
-	if tx == nil {
-		return nil, errors.New("nil transaction")
-	}
-
-	tx = proto.CloneOf(tx)
-
-	// check that tx does not yet carry any endorsements
-	if tx.Endorsements == nil {
-		tx.Endorsements = make([]*applicationpb.Endorsements, len(tx.GetNamespaces()))
-	}
-
-	// TODO for MSP-based endorsements we need either singerID or the hashed singerID to be attached on the Endorsement.
-	// get signer signerCert
-	// signerID, err := getSignerID(signer)
-	// if err != nil {
-	//	 return nil, err
-	// }
-
-	// create signature for each namespace in transaction
-	for nsIdx := range tx.GetNamespaces() {
-		// Note that a default msp signer hash the msg before signing.
-		// For that reason we use the TxNamespace message as ASN1 encoded msg
-
-		msg, err := tx.Namespaces[nsIdx].ASN1Marshal(txID)
-		if err != nil {
-			return nil, fmt.Errorf("failed asn1 marshal tx: %w", err)
-		}
-
-		sig, err := signer.Sign(msg)
-		if err != nil {
-			return nil, fmt.Errorf("failed signing tx: %w", err)
-		}
-
-		// store signature as endorsementWithIdentity
-		eid := &applicationpb.EndorsementWithIdentity{
-			Endorsement: sig,
-			// TODO MSP-based endorsements will attach either the signerID or just a hash.
-			// Identity:    signerID,
-		}
-
-		// check if there is already an endorsement for this namespace, so we can append the new endorsement
-		// if not we create an empty endorser set
-		if tx.Endorsements[nsIdx] == nil {
-			tx.Endorsements[nsIdx] = &applicationpb.Endorsements{
-				EndorsementsWithIdentity: []*applicationpb.EndorsementWithIdentity{},
-			}
-		}
-
-		tx.Endorsements[nsIdx].EndorsementsWithIdentity = append(tx.Endorsements[nsIdx].EndorsementsWithIdentity, eid)
-	}
-
-	return tx, nil
-}
-
-// TODO we keep this for later when we come back for the MSP-based endorsement implementation.
-// func getSignerID(signer msp.SigningIdentity) (*msppb.Identity, error) {
-//  if signer == nil {
-//		return nil, errors.New("nil signer")
-//	}
-//
-//	signerCert, err := signer.GetCertificatePEM()
-//	if err != nil {
-//		return nil, err
-//	}
-//	return msppb.NewIdentity(signer.GetIdentifier().Mspid, signerCert), nil
-// }
-
-// createSignedEnvelope wraps the transaction in a signed envelope for submission to the orderer.
-// The envelope contains the channel header, signature header, and transaction payload.
-func createSignedEnvelope(
-	signer msp.SigningIdentity,
-	tx *applicationpb.Tx,
-	channelHdr *cb.ChannelHeader,
-	signatureHdr *cb.SignatureHeader,
-) (*cb.Envelope, error) {
-	payloadHdr := protoutil.MakePayloadHeader(channelHdr, signatureHdr)
-	txBytes := protoutil.MarshalOrPanic(tx)
-
-	payloadBytes := protoutil.MarshalOrPanic(
-		&cb.Payload{
-			Header: payloadHdr,
-			Data:   txBytes,
-		},
-	)
-
-	var sig []byte
-	if signer != nil {
-		var err error
-		sig, err = signer.Sign(payloadBytes)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return &cb.Envelope{
-		Payload:   payloadBytes,
-		Signature: sig,
-	}, nil
-}
-
-// broadcast sends the signed envelope to the ordering service.
-// It establishes a gRPC connection, sends the envelope, and waits for acknowledgment.
-func broadcast(cfg config.OrdererConfig, env *cb.Envelope) error {
-	clientCfg := comm.Config{
-		Timeout: cfg.ConnectionTimeout,
-	}
-
-	// TLS config
-	if cfg.TLS.IsEnabled() {
-		clientCfg.CertPath = cfg.TLS.ClientCertPath
-		clientCfg.KeyPath = cfg.TLS.ClientKeyPath
-		clientCfg.PeerCACertPath = cfg.TLS.RootCertPaths[0]
-	}
-
-	cl, err := comm.NewClient(clientCfg)
-	if err != nil {
-		return fmt.Errorf("cannot get grpc client: %w", err)
-	}
-
-	conn, err := cl.NewDialer(cfg.Address)()
-	if err != nil {
-		return fmt.Errorf("cannot get grpc client: %w", err)
-	}
-	defer func() {
-		_ = conn.Close()
-	}()
-
-	occ := ab.NewAtomicBroadcastClient(conn)
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	abc, err := occ.Broadcast(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = abc.Send(env)
-	if err != nil {
-		return err
-	}
-
-	status, err := abc.Recv()
-	if err != nil {
-		return err
-	}
-
-	if status.GetStatus() != cb.Status_SUCCESS {
-		return fmt.Errorf("got error %#v", status.GetStatus())
-	}
-
-	return nil
 }

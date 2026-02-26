@@ -38,8 +38,7 @@ func TestUpdateCommand(t *testing.T) {
 				"namespace", "update",
 				"1",
 				"--version", "2",
-				"--channel", "mychannel",
-				"--policy-ecdsa-threshold", "/tmp/some/path/pk.pem",
+				"--policy", "threshold:/tmp/some/path/pk.pem",
 			},
 			deployFunc:  fakeDeploySuccess,
 			expectError: false,
@@ -50,8 +49,7 @@ func TestUpdateCommand(t *testing.T) {
 				"namespace", "update",
 				"2",
 				"--version", "2",
-				"--channel", "mychannel",
-				"--policy-ecdsa-threshold", "/tmp/some/path/pk.pem",
+				"--policy", "threshold:/tmp/some/path/pk.pem",
 			},
 			deployFunc:    fakeDeployError,
 			expectError:   true,
@@ -139,8 +137,7 @@ func TestUpdateCommand_VersionValidation(t *testing.T) {
 				"namespace", "update",
 				"1",
 				"--version", tt.version,
-				"--channel", "mychannel",
-				"--policy-ecdsa-threshold", "/tmp/pk.pem",
+				"--policy", "threshold:/tmp/pk.pem",
 			})
 
 			// Execute
@@ -172,11 +169,8 @@ func TestNewUpdateCommand(t *testing.T) {
 	versionFlag := cmd.Flag("version")
 	require.NotNil(t, versionFlag, "version flag should exist")
 
-	channelFlag := cmd.Flag("channel")
-	require.NotNil(t, channelFlag, "channel flag should exist")
-
-	policyFlag := cmd.Flag("policy-ecdsa-threshold")
-	require.NotNil(t, policyFlag, "policy-ecdsa-threshold flag should exist")
+	policyFlag := cmd.Flag("policy")
+	require.NotNil(t, policyFlag, "policy flag should exist")
 }
 
 // Test helpers

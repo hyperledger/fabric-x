@@ -10,6 +10,7 @@ SPDX-License-Identifier: Apache-2.0
 package config
 
 import (
+	"strings"
 	"time"
 )
 
@@ -115,23 +116,26 @@ type TLSConfig struct {
 }
 
 // Clone creates a shallow copy of the TLS configuration.
-func (t TLSConfig) Clone() *TLSConfig {
-	c := t
-	return &c
+func (c *TLSConfig) Clone() *TLSConfig {
+	n := c
+	return n
 }
 
 // IsEnabled returns whether TLS is enabled for this configuration.
 // Returns false if the config is nil or the enabled flag is not set.
-func (t *TLSConfig) IsEnabled() bool {
-	if t == nil || t.Enabled == nil {
+func (c *TLSConfig) IsEnabled() bool {
+	if c == nil || c.Enabled == nil {
 		return false // default
 	}
-	return *t.Enabled
+	return *c.Enabled
 }
 
 // OrdererConfig contains configuration for the ordering service endpoint.
+//
+//nolint:revive,lll
 type OrdererConfig struct {
 	EndpointServiceConfig `mapstructure:",squash" yaml:",inline"`
+	Channel               string `mapstructure:"channel" yaml:"channel,omitempty" desc:"Orderer channel name" default:"mychannel"`
 }
 
 // QueriesConfig contains configuration for the query service endpoint.
@@ -160,18 +164,53 @@ type EndpointServiceConfig struct {
 
 // GetTLSConfig returns the TLS configuration for this service endpoint.
 // Returns an empty TLSConfig if no TLS override is configured.
-func (t *EndpointServiceConfig) GetTLSConfig() TLSConfig {
-	if t.TLS == nil {
+func (c *EndpointServiceConfig) GetTLSConfig() TLSConfig {
+	if c.TLS == nil {
 		return TLSConfig{}
 	}
-	return *t.TLS
+	return *c.TLS
 }
 
 // NsConfig contains namespace-specific configuration for create and update operations.
+// NsConfig holds namespace-specific configuration for create and update operations.
 type NsConfig struct {
-	Channel                            string
-	NamespaceID                        string
-	Version                            int
-	ThresholdPolicyVerificationKeyPath string
-	Policy                             string
+	NamespaceID string
+	Version     int
+	Policy      PolicyConfig
+}
+
+// PolicyConfig defines the endorsement policy for a namespace.
+type PolicyConfig struct {
+	Type string `mapstructure:"type"` // "msp" | "threshold"`
+
+	MSP       *MSPPolicyConfig       `mapstructure:"msp"`
+	Threshold *ThresholdPolicyConfig `mapstructure:"threshold"`
+}
+
+// Set parses and configures the policy from a string.
+// Supports "threshold:<path>" format or MSP DSL expressions.
+func (c *PolicyConfig) Set(policy string) {
+	policy = strings.TrimSpace(policy)
+
+	if k, ok := strings.CutPrefix(policy, "threshold:"); ok {
+		c.Type = "threshold"
+		c.Threshold = &ThresholdPolicyConfig{
+			VerificationKeyPath: strings.TrimSpace(k),
+		}
+		return
+	}
+
+	// default is msp
+	c.Type = "msp"
+	c.MSP = &MSPPolicyConfig{Expression: policy}
+}
+
+// MSPPolicyConfig holds MSP-based policy configuration.
+type MSPPolicyConfig struct {
+	Expression string `mapstructure:"expression"`
+}
+
+// ThresholdPolicyConfig holds threshold ECDSA policy configuration.
+type ThresholdPolicyConfig struct {
+	VerificationKeyPath string `mapstructure:"verificationKeyPath"`
 }

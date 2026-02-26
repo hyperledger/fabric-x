@@ -22,7 +22,11 @@ import (
 // ListNamespaces queries the committer service for installed namespaces.
 // It connects to the query service, retrieves all namespace policies, and formats
 // the output showing namespace names, versions, and policy data in hexadecimal.
-func ListNamespaces(out io.Writer, cfg config.QueriesConfig) error {
+func ListNamespaces(vctx config.ValidationContext, cfg config.QueriesConfig, out io.Writer) error {
+	if err := cfg.Validate(vctx); err != nil {
+		return err
+	}
+
 	// TODO we are very restricted with this
 
 	clientCfg := comm.Config{
@@ -75,3 +79,26 @@ func printResult(out io.Writer, res *applicationpb.NamespacePolicies) {
 	}
 	fmt.Fprintln(out, "")
 }
+
+// parsePolicy extracts and formats policy information from serialized bytes.
+// Returns base64-encoded public key for threshold policies or string representation for MSP policies.
+// func parsePolicy(b []byte) string {
+//	var p applicationpb.NamespacePolicy
+//	if err := proto.Unmarshal(b, &p); err != nil {
+//		panic(err)
+//	}
+//
+//	switch r := p.Rule.(type) {
+//	case *applicationpb.NamespacePolicy_ThresholdRule:
+//		return base64.StdEncoding.EncodeToString(r.ThresholdRule.GetPublicKey())
+//	case *applicationpb.NamespacePolicy_MspRule:
+//		var en common.SignaturePolicy
+//		if err := proto.Unmarshal(r.MspRule, &en); err != nil {
+//			panic(err)
+//		}
+//		// TODO: some pretty print would be beautiful
+//		return en.String()
+//	default:
+//		return "error parsing policy"
+//	}
+// }

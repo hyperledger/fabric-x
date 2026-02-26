@@ -13,10 +13,23 @@ import (
 )
 
 const (
-	validChannelName                        = "mychannel"
-	validNamespaceID                        = "1"
-	validVersion                            = 0
-	validThresholdPolicyVerificationKeyPath = "/path/to/key"
+	validNamespaceID = "1"
+	validVersion     = 0
+)
+
+var (
+	validThreshPolicy = PolicyConfig{
+		Type: "threshold",
+		Threshold: &ThresholdPolicyConfig{
+			VerificationKeyPath: "/path/to/key",
+		},
+	}
+	validMspPolicy = PolicyConfig{
+		Type: "msp",
+		MSP: &MSPPolicyConfig{
+			Expression: "OR('Org1MSP.member')",
+		},
+	}
 )
 
 // TestValidateVersion tests the validateVersion function.
@@ -71,11 +84,7 @@ func TestValidateVersion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			nsCfg := NsConfig{
-				Version: tt.version,
-			}
-
-			err := validateVersion(nsCfg)
+			err := validateVersion(tt.version)
 
 			if tt.expectError {
 				require.Error(t, err, tt.description)
@@ -86,51 +95,49 @@ func TestValidateVersion(t *testing.T) {
 	}
 }
 
-// TestMustHavePolicy tests the mustHavePolicy function.
-func TestMustHavePolicy(t *testing.T) {
+// TestValidatePolicy tests the policy validation.
+func TestValidatePolicy(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
 		name        string
-		policyPath  string
+		policy      string
 		expectError bool
 		description string
 	}{
 		{
 			name:        "empty policy path",
-			policyPath:  "",
+			policy:      "",
 			expectError: true,
 			description: "Empty policy path should fail",
 		},
 		{
 			name:        "valid policy path",
-			policyPath:  "/path/to/policy.pem",
+			policy:      "threshold:/path/to/policy.pem",
 			expectError: false,
 			description: "Valid policy path should pass",
 		},
 		{
 			name:        "whitespace-only policy path",
-			policyPath:  "   ",
+			policy:      "   ",
 			expectError: true,
 			description: "Whitespace-only policy path should fail",
 		},
-		{
-			name:        "policy path with spaces",
-			policyPath:  "/path/with spaces/policy.pem",
-			expectError: false,
-			description: "Policy path with spaces should pass",
-		},
+	}
+
+	vctx := ValidationContext{
+		PolicyChecker: &FakePolicyChecker{},
+		FileChecker:   &FakeFileChecker{},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			nsCfg := NsConfig{
-				ThresholdPolicyVerificationKeyPath: tt.policyPath,
-			}
+			var pc PolicyConfig
+			pc.Set(tt.policy)
 
-			err := mustHavePolicy(nsCfg)
+			err := pc.Validate(vctx)
 
 			if tt.expectError {
 				require.Error(t, err, tt.description)
@@ -215,81 +222,75 @@ func TestValidateNsConfig(t *testing.T) {
 		expectError bool
 	}{
 		{
-			name: "valid config",
+			name: "valid config msp",
 			nsCfg: NsConfig{
-				Channel:                            validChannelName,
-				NamespaceID:                        validNamespaceID,
-				Version:                            validVersion,
-				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+				NamespaceID: validNamespaceID,
+				Version:     validVersion,
+				Policy:      validMspPolicy,
+			},
+			expectError: false,
+		},
+		{
+			name: "valid config threshold",
+			nsCfg: NsConfig{
+				NamespaceID: validNamespaceID,
+				Version:     validVersion,
+				Policy:      validThreshPolicy,
 			},
 			expectError: false,
 		},
 		{
 			name: "empty namespace ID",
 			nsCfg: NsConfig{
-				Channel:                            validChannelName,
-				NamespaceID:                        "",
-				Version:                            validVersion,
-				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+				NamespaceID: "",
+				Version:     validVersion,
+				Policy:      validMspPolicy,
 			},
 			expectError: true,
 		},
 		{
 			name: "invalid namespace ID",
 			nsCfg: NsConfig{
-				Channel:                            validChannelName,
-				NamespaceID:                        "invalid namespace",
-				Version:                            validVersion,
-				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+				NamespaceID: "invalid namespace",
+				Version:     validVersion,
+				Policy:      validMspPolicy,
 			},
 			expectError: true,
 		},
 		{
 			name: "invalid version",
 			nsCfg: NsConfig{
-				Channel:                            validChannelName,
-				NamespaceID:                        validNamespaceID,
-				Version:                            -2,
-				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+				NamespaceID: validNamespaceID,
+				Version:     -2,
+				Policy:      validMspPolicy,
 			},
 			expectError: true,
 		},
 		{
 			name: "empty threshold policy verification key path",
 			nsCfg: NsConfig{
-				Channel:                            validChannelName,
-				NamespaceID:                        validNamespaceID,
-				Version:                            validVersion,
-				ThresholdPolicyVerificationKeyPath: "",
-			},
-			expectError: true,
-		},
-		{
-			name: "invalid threshold policy verification key path",
-			nsCfg: NsConfig{
-				Channel:                            validChannelName,
-				NamespaceID:                        validNamespaceID,
-				Version:                            validVersion,
-				ThresholdPolicyVerificationKeyPath: " ",
-			},
-			expectError: true,
-		},
-		{
-			name: "invalid channel name",
-			nsCfg: NsConfig{
-				Channel:                            "",
-				NamespaceID:                        validNamespaceID,
-				Version:                            validVersion,
-				ThresholdPolicyVerificationKeyPath: validThresholdPolicyVerificationKeyPath,
+				NamespaceID: validNamespaceID,
+				Version:     validVersion,
+				Policy: PolicyConfig{
+					Type: "threshold",
+					Threshold: &ThresholdPolicyConfig{
+						VerificationKeyPath: "",
+					},
+				},
 			},
 			expectError: true,
 		},
 	}
 
+	vctx := ValidationContext{
+		PolicyChecker: &FakePolicyChecker{},
+		FileChecker:   &FakeFileChecker{},
+	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			err := ValidateNsConfig(tt.nsCfg)
+			err := tt.nsCfg.Validate(vctx)
 			if tt.expectError {
 				require.Error(t, err, "expected error for %s", tt.name)
 			} else {
@@ -297,4 +298,18 @@ func TestValidateNsConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+type FakePolicyChecker struct{}
+
+func (FakePolicyChecker) Check(_ string) error {
+	// always exists
+	return nil
+}
+
+type FakeFileChecker struct{}
+
+func (FakeFileChecker) Exists(_ string) error {
+	// always exists
+	return nil
 }

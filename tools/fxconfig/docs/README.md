@@ -41,7 +41,7 @@ fxconfig namespace list [flags]
 
 **Common Flags:**
 - `--policy=<DSL>` - Endorsement policy DSL string
-- `--policy-threshold-ecdsa=<path>` - Threshold ECDSA policy from PEM file
+- `--policy=threshold:<path>` - Threshold ECDSA policy from PEM file
 - `--version=<int>` - Version number (update only; create defaults to 0)
 - `--output=<path>` - Save transaction to file (`.pb` extension)
 - `--endorse` - Sign transaction with local MSP identity
@@ -52,7 +52,7 @@ fxconfig namespace list [flags]
 - Single org: `--policy="OR('Org1MSP.member')"`
 - Multi org: `--policy="AND('Org1MSP.member', 'Org2MSP.member')"`
 - Complex: `--policy="OutOf(1, 'Org1MSP.member', 'Org2MSP.member')"`
-- Threshold ECDSA: `--policy-threshold-ecdsa=/path/to/policy.pem`
+- Threshold ECDSA: `--policy="threshold:/path/to/policy.pem"`
 
 ### Transaction Operations
 

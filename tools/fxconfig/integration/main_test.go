@@ -77,6 +77,7 @@ msp:
 
 orderer:
   address: ` + endpoints["orderer"] + `
+  channel: ` + channelID + `
   connectionTimeout: 45s
 
 queries:
@@ -91,11 +92,11 @@ notifications:
 	require.NoError(t, err)
 
 	var (
-		configArg  = "--config=" + configPath
-		channelArg = "--channel=" + channelID
+		configArg = "--config=" + configPath
 
 		// policy
-		thresholdKeyPathArg = "--policy-ecdsa-threshold=" + thresholdKeyPath
+		policyArg = "--policy=threshold:" + thresholdKeyPath
+		// policyArg = "--policy=" + policy
 	)
 
 	t.Run("create_new_namespace", func(t *testing.T) {
@@ -104,20 +105,20 @@ notifications:
 		expectedNs := Namespace{Name: "hello", Version: 0}
 
 		// we expect no namespaces
-		stdOut, err := fxconfig("namespace", "list", configArg)
+		stdOut, err := fxconfig(t, "namespace", "list", configArg)
 		require.NoError(t, err)
 		nss, err := parseNamespaceList(stdOut)
 		require.NoError(t, err)
 		require.NotContains(t, nss, expectedNs)
 
 		// create namespace hello
-		_, err = fxconfig("namespace", "create", expectedNs.Name,
-			configArg, channelArg, thresholdKeyPathArg)
+		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
+			configArg, policyArg)
 		require.NoError(t, err)
 
 		// expect one installed namespace
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err := fxconfig("namespace", "list", configArg)
+			stdOut, err := fxconfig(t, "namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err := parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -131,22 +132,22 @@ notifications:
 		expectedNs := Namespace{Name: "dp1", Version: 0}
 
 		// we expect this namespace not to exist
-		stdOut, err := fxconfig("namespace", "list", configArg)
+		stdOut, err := fxconfig(t, "namespace", "list", configArg)
 		require.NoError(t, err)
 		nss, err := parseNamespaceList(stdOut)
 		require.NoError(t, err)
 		require.NotContains(t, nss, expectedNs)
 
 		// create namespace
-		_, err = fxconfig("namespace", "create", expectedNs.Name,
-			configArg, channelArg, thresholdKeyPathArg)
+		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
+			configArg, policyArg)
 		require.NoError(t, err)
 
 		// expect out namespace to be installed
 		// we keep the stdOut
 		var expectedStdOut string
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", configArg)
+			stdOut, err = fxconfig(t, "namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err = parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -157,12 +158,12 @@ notifications:
 		// now we try to run create with the namespace again,
 		// but we use a different policy, as namespace creation should fail,
 		// and we expect the previous stdOut when calling list
-		_, err = fxconfig("namespace", "create", expectedNs.Name,
-			configArg, channelArg, thresholdKeyPathArg)
+		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
+			configArg, policyArg)
 		require.NoError(t, err)
 
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", configArg)
+			stdOut, err = fxconfig(t, "namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err := parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -178,20 +179,20 @@ notifications:
 		expectedNs := Namespace{Name: "ns1", Version: 0}
 
 		// we expect this namespace not to exist
-		stdOut, err := fxconfig("namespace", "list", configArg)
+		stdOut, err := fxconfig(t, "namespace", "list", configArg)
 		require.NoError(t, err)
 		nss, err := parseNamespaceList(stdOut)
 		require.NoError(t, err)
 		require.NotContains(t, nss, expectedNs)
 
 		// create namespace
-		_, err = fxconfig("namespace", "create", expectedNs.Name,
-			configArg, channelArg, thresholdKeyPathArg)
+		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
+			configArg, policyArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be created
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", configArg)
+			stdOut, err = fxconfig(t, "namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err = parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -203,13 +204,13 @@ notifications:
 
 		// update namespace
 		expectedNs = Namespace{Name: "ns1", Version: 1}
-		_, err = fxconfig("namespace", "update", expectedNs.Name,
-			configArg, versionArg, channelArg, thresholdKeyPathArg)
+		_, err = fxconfig(t, "namespace", "update", expectedNs.Name,
+			configArg, versionArg, policyArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be updated having a version equals 1
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", configArg)
+			stdOut, err = fxconfig(t, "namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err = parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -221,13 +222,13 @@ notifications:
 
 		// update namespace
 		expectedNs = Namespace{Name: "ns1", Version: 1}
-		_, err = fxconfig("namespace", "update", expectedNs.Name,
-			configArg, versionArg, channelArg, thresholdKeyPathArg)
+		_, err = fxconfig(t, "namespace", "update", expectedNs.Name,
+			configArg, versionArg, policyArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be updated having a version equals 1
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err = fxconfig("namespace", "list", configArg)
+			stdOut, err = fxconfig(t, "namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err = parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -239,13 +240,13 @@ notifications:
 
 		// update namespace
 		expectedNs = Namespace{Name: "ns1", Version: 2}
-		_, err = fxconfig("namespace", "update", expectedNs.Name,
-			configArg, versionArg, channelArg, thresholdKeyPathArg)
+		_, err = fxconfig(t, "namespace", "update", expectedNs.Name,
+			configArg, versionArg, policyArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be updated having a version equals 1
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err := fxconfig("namespace", "list", configArg)
+			stdOut, err := fxconfig(t, "namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err := parseNamespaceList(stdOut)
 			require.NoError(ct, err)
@@ -259,14 +260,14 @@ notifications:
 		// create many namespaces
 		for i := 1; i <= scaleTestNamespaceCount; i++ {
 			expectedNs := Namespace{Name: fmt.Sprintf("hello%d", i)}
-			_, err := fxconfig("namespace", "create", expectedNs.Name,
-				configArg, channelArg, thresholdKeyPathArg)
+			_, err := fxconfig(t, "namespace", "create", expectedNs.Name,
+				configArg, policyArg)
 			require.NoError(t, err)
 		}
 
 		// expect all our namespaces to be installed
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
-			stdOut, err := fxconfig("namespace", "list", configArg)
+			stdOut, err := fxconfig(t, "namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err := parseNamespaceList(stdOut)
 			require.NoError(ct, err)

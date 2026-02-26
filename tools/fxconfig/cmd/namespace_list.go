@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package cmd
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -17,7 +18,7 @@ import (
 // listFunc is a function type for listing namespaces.
 // It queries the committer service, formats the results, and writes them to the provided writer.
 // This abstraction enables dependency injection for testing.
-type listFunc func(out io.Writer, cfg config.QueriesConfig) error
+type listFunc func(vctx config.ValidationContext, cfg config.QueriesConfig, out io.Writer) error
 
 // newListCommand creates a command for listing installed namespaces.
 // It connects to the query service and displays namespace names, versions, and policies.
@@ -31,11 +32,12 @@ func newListCommand(listFunc listFunc) *cobra.Command {
 			cfg := getConfig(cmd)
 
 			// validate config
-			if err := config.ValidateQueriesConfig("queries", cfg.Queries); err != nil {
-				return err
+			vctx := *getConfigValidatorContext(cmd)
+			if err := cfg.Queries.Validate(vctx); err != nil {
+				return fmt.Errorf("query service configuration invalid: %w", err)
 			}
 
-			return listFunc(cmd.OutOrStdout(), cfg.Queries)
+			return listFunc(vctx, cfg.Queries, cmd.OutOrStdout())
 		},
 	}
 

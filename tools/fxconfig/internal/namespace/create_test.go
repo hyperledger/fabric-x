@@ -16,11 +16,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hyperledger/fabric-protos-go-apiv2/msp"
+	msppb "github.com/hyperledger/fabric-protos-go-apiv2/msp"
 	"github.com/stretchr/testify/require"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
-	fxmsp "github.com/hyperledger/fabric-x-common/msp"
+	"github.com/hyperledger/fabric-x-common/msp"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/transaction"
 )
 
 // mockSigningIdentity is a mock signing identity for testing.
@@ -44,8 +45,8 @@ func (m *mockSigningIdentity) GetCertificatePEM() ([]byte, error) {
 	return []byte("-----BEGIN CERTIFICATE-----\nMOCK\n-----END CERTIFICATE-----"), nil
 }
 
-func (m *mockSigningIdentity) GetIdentifier() *fxmsp.IdentityIdentifier {
-	return &fxmsp.IdentityIdentifier{
+func (m *mockSigningIdentity) GetIdentifier() *msp.IdentityIdentifier {
+	return &msp.IdentityIdentifier{
 		Mspid: m.mspID,
 		Id:    "mock-id",
 	}
@@ -59,7 +60,7 @@ func (*mockSigningIdentity) SerializeWithIDOfCert() ([]byte, error) {
 	return []byte("serialized-identity-with-cert-id"), nil
 }
 
-func (*mockSigningIdentity) GetPublicVersion() fxmsp.Identity { //nolint:ireturn
+func (*mockSigningIdentity) GetPublicVersion() msp.Identity { //nolint:ireturn
 	return nil
 }
 
@@ -67,7 +68,7 @@ func (*mockSigningIdentity) Verify(_, _ []byte) error {
 	return nil
 }
 
-func (*mockSigningIdentity) GetOrganizationalUnits() []*fxmsp.OUIdentifier {
+func (*mockSigningIdentity) GetOrganizationalUnits() []*msp.OUIdentifier {
 	return nil
 }
 
@@ -87,7 +88,7 @@ func (*mockSigningIdentity) Validate() error {
 	return nil
 }
 
-func (*mockSigningIdentity) SatisfiesPrincipal(_ *msp.MSPPrincipal) error {
+func (*mockSigningIdentity) SatisfiesPrincipal(_ *msppb.MSPPrincipal) error {
 	return nil
 }
 
@@ -259,7 +260,7 @@ func TestEndorse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			result, err := endorse(tt.signer, tt.txID, tt.tx)
+			result, err := transaction.Endorse(tt.signer, tt.txID, tt.tx)
 
 			if tt.expectError {
 				require.Error(t, err, tt.description)

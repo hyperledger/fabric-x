@@ -42,8 +42,7 @@ func TestCreateCommand(t *testing.T) {
 			args: []string{
 				"namespace", "create",
 				"1",
-				"--channel", "mychannel",
-				"--policy-ecdsa-threshold", "/tmp/some/path/pk.pem",
+				"--policy", "threshold:/tmp/some/path/pk.pem",
 			},
 			deployFunc:  fakeDeploySuccess,
 			expectError: false,
@@ -53,8 +52,7 @@ func TestCreateCommand(t *testing.T) {
 			args: []string{
 				"namespace", "create",
 				"2",
-				"--channel", "mychannel",
-				"--policy-ecdsa-threshold", "/tmp/some/path/pk.pem",
+				"--policy", "threshold:/tmp/some/path/pk.pem",
 			},
 			deployFunc:    fakeDeployError,
 			expectError:   true,
@@ -135,8 +133,7 @@ func TestCreateCommand_NamespaceIDValidation(t *testing.T) {
 				args = append(args, tt.namespaceID)
 			}
 			args = append(args,
-				"--channel", "mychannel",
-				"--policy-ecdsa-threshold", "/tmp/pk.pem",
+				"--policy", "threshold:/tmp/pk.pem",
 			)
 			rootCmd.SetArgs(args)
 
@@ -165,11 +162,8 @@ func TestNewCreateCommand(t *testing.T) {
 	assert.NotEmpty(t, cmd.Short, "command should have a short description")
 	assert.NotNil(t, cmd.RunE, "command should have a RunE function")
 
-	channelFlag := cmd.Flag("channel")
-	require.NotNil(t, channelFlag, "channel flag should exist")
-
-	policyFlag := cmd.Flag("policy-ecdsa-threshold")
-	require.NotNil(t, policyFlag, "policy-ecdsa-threshold flag should exist")
+	policyFlag := cmd.Flag("policy")
+	require.NotNil(t, policyFlag, "policy flag should exist")
 }
 
 // Test helpers
@@ -218,16 +212,36 @@ func setupNamespaceCommandWithConfig(t *testing.T, cmd *cobra.Command) *cobra.Co
 		},
 	}
 
-	ctx := context.WithValue(context.Background(), configKey, cfg)
+	// Mock config validator
+	vctx := &config.ValidationContext{
+		FileChecker:      &fakeFC{},
+		DirectoryChecker: &fakeDC{},
+	}
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, configKey, cfg)
+	ctx = context.WithValue(ctx, configValidatorKey, vctx)
 	rootCmd.SetContext(ctx)
 
 	return rootCmd
 }
 
-func fakeDeploySuccess(_ config.NsConfig, _ config.OrdererConfig, _ config.MSPConfig) error {
+type fakeFC struct{}
+
+func (fakeFC) Exists(_ string) error {
 	return nil
 }
 
-func fakeDeployError(_ config.NsConfig, _ config.OrdererConfig, _ config.MSPConfig) error {
+type fakeDC struct{}
+
+func (fakeDC) Exists(_ string) error {
+	return nil
+}
+
+func fakeDeploySuccess(_ config.ValidationContext, _ config.Config, _ config.NsConfig) error {
+	return nil
+}
+
+func fakeDeployError(_ config.ValidationContext, _ config.Config, _ config.NsConfig) error {
 	return errors.New("deployment failed")
 }

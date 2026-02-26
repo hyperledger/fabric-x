@@ -84,7 +84,7 @@ func TestListCommand_OutputWriter(t *testing.T) {
 
 	// Setup
 	var capturedWriter io.Writer
-	captureListFunc := func(w io.Writer, _ config.QueriesConfig) error {
+	captureListFunc := func(_ config.ValidationContext, _ config.QueriesConfig, w io.Writer) error {
 		capturedWriter = w
 		return nil
 	}
@@ -124,10 +124,10 @@ func setupListCommandWithConfig(t *testing.T, list listFunc) *cobra.Command {
 	return setupNamespaceCommandWithConfig(t, listCmd)
 }
 
-func fakeListSuccess(_ io.Writer, _ config.QueriesConfig) error {
+func fakeListSuccess(_ config.ValidationContext, _ config.QueriesConfig, _ io.Writer) error {
 	return nil
 }
 
-func fakeListError(_ io.Writer, _ config.QueriesConfig) error {
+func fakeListError(_ config.ValidationContext, _ config.QueriesConfig, _ io.Writer) error {
 	return errors.New("failed to list namespaces")
 }

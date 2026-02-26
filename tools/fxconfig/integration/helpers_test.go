@@ -25,6 +25,7 @@ const (
 	sidecarPort      = "4001"
 	queryServicePort = "7001"
 	channelID        = "mychannel"
+	policy           = "OR('Org1MSP.member')"
 )
 
 // setup spawns a committer test container and returns a map containing the endpoints of the committers services.
@@ -89,19 +90,25 @@ func setup(t *testing.T) map[string]string {
 	return endpoints
 }
 
-func fxconfig(args ...string) (string, error) {
+func fxconfig(tb testing.TB, args ...string) (string, error) {
+	tb.Helper()
+
 	var stdOut bytes.Buffer
 
 	rootCmd := cmd.RootCmd()
 	rootCmd.SetArgs(args)
 	rootCmd.SetOut(&stdOut)
 
+	tb.Logf("fxconfig %v", args)
 	err := rootCmd.Execute()
 	if err != nil {
 		return "", err
 	}
 
-	return stdOut.String(), nil
+	out := stdOut.String()
+	tb.Logf("> %v", out)
+
+	return out, nil
 }
 
 type Namespace struct {
