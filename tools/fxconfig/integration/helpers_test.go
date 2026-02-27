@@ -17,7 +17,7 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
-	"github.com/hyperledger/fabric-x/tools/fxconfig/cmd"
+	cli "github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1"
 )
 
 const (
@@ -95,7 +95,7 @@ func fxconfig(tb testing.TB, args ...string) (string, error) {
 
 	var stdOut bytes.Buffer
 
-	rootCmd := cmd.RootCmd()
+	rootCmd := cli.RootCmd()
 	rootCmd.SetArgs(args)
 	rootCmd.SetOut(&stdOut)
 

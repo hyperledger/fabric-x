@@ -4,7 +4,7 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package cmd
+package v1
 
 import (
 	"github.com/spf13/cobra"
@@ -12,19 +12,22 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
-// newUpdateCommand creates a command for updating existing namespaces.
-// It accepts a namespace name as argument and requires the --version flag to specify
-// the current version number, preventing concurrent modification conflicts.
+// deployF is a function type for deploying namespace transactions.
+// It takes namespace configuration, orderer configuration, and MSP configuration,
+// and returns an error if the deployment fails.
+type deployF func(vctx config.ValidationContext, cfg config.Config, nsCfg config.NsConfig) error
+
+// newCreateCommand creates a command for creating new namespaces.
 // The deployNamespace function is injected to enable testing with mock implementations.
-func newUpdateCommand(deployNamespace deployF) *cobra.Command {
+func newCreateCommand(deployNamespace deployF) *cobra.Command {
 	var (
 		nsCfg  config.NsConfig
 		policy string
 	)
 
 	cmd := &cobra.Command{
-		Use:   "update NAMESPACE_NAME",
-		Short: "Update Namespace",
+		Use:   "create NAMESPACE_NAME",
+		Short: "Create Namespace",
 		Long:  "",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -32,6 +35,8 @@ func newUpdateCommand(deployNamespace deployF) *cobra.Command {
 
 			nsCfg.NamespaceID = args[0]
 			nsCfg.Policy.Set(policy)
+			// Set version to -1 to indicate this is a create operation (not an update)
+			nsCfg.Version = -1
 
 			vctx := *getConfigValidatorContext(cmd)
 			return deployNamespace(vctx, *cfg, nsCfg)
@@ -39,18 +44,12 @@ func newUpdateCommand(deployNamespace deployF) *cobra.Command {
 	}
 
 	// adds flags related to namespaces
-	cmd.Flags().IntVar(&nsCfg.Version,
-		"version",
-		0,
-		"The current namespace version",
-	)
-
 	cmd.PersistentFlags().StringVar(&policy,
 		"policy",
 		"",
-		"The new endorsement policy",
+		"The endorsement policy",
 	)
-	cmd.MarkFlagsRequiredTogether("policy", "version")
+	_ = cmd.MarkPersistentFlagRequired("policy")
 
 	return cmd
 }

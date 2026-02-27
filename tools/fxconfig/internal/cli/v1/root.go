@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 // Package cmd implements the command-line interface for fxconfig.
 // It provides commands for namespace management and configuration handling.
-package cmd
+package v1
 
 import (
 	"context"

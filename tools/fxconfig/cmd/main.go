@@ -9,11 +9,11 @@ package main
 import (
 	"os"
 
-	"github.com/hyperledger/fabric-x/tools/fxconfig/cmd"
+	v1 "github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1"
 )
 
 func main() {
-	if err := cmd.Execute(); err != nil {
+	if err := v1.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
