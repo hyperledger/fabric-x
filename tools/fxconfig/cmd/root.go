@@ -10,6 +10,8 @@ package cmd
 
 import (
 	"context"
+	"os"
+	"os/signal"
 
 	"github.com/spf13/cobra"
 
@@ -74,6 +76,12 @@ func RootCmd() *cobra.Command {
 	rootCmd.AddCommand(NewVersionCommand())
 	rootCmd.AddCommand(NewInfoCommand())
 	rootCmd.AddCommand(NewNamespaceCommand())
+
+	//
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+	rootCmd.SetContext(ctx)
+
 	return rootCmd
 }
 

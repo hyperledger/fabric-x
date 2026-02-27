@@ -9,8 +9,10 @@ SPDX-License-Identifier: Apache-2.0
 package namespace
 
 import (
+	"context"
+
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/client"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/msp"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/orderer"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/transaction"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
@@ -47,7 +49,12 @@ func DeployNamespace(vctx config.ValidationContext, cfg config.Config, nsCfg con
 
 	// submit transaction
 	// note that we use the endorser identity to submit the transaction
-	return orderer.Broadcast(cfg.Orderer, sid, txID, tx)
+	oc, err := client.NewOrdererClient(cfg.Orderer, sid)
+	if err != nil {
+		return err
+	}
+
+	return oc.Broadcast(context.TODO(), txID, tx)
 }
 
 func validate(ctx config.ValidationContext, cfg config.Config, nsCfg config.NsConfig) error {

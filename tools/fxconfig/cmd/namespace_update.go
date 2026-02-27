@@ -42,13 +42,13 @@ func newUpdateCommand(deployNamespace deployF) *cobra.Command {
 	cmd.Flags().IntVar(&nsCfg.Version,
 		"version",
 		0,
-		"The version",
+		"The current namespace version",
 	)
 
 	cmd.PersistentFlags().StringVar(&policy,
 		"policy",
 		"",
-		"The endorsement policy",
+		"The new endorsement policy",
 	)
 	cmd.MarkFlagsRequiredTogether("policy", "version")
 

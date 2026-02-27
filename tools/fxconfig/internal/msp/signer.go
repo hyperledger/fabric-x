@@ -17,7 +17,9 @@ import (
 )
 
 // GetSignerIdentityFromMSP retrieves the default signing identity from the MSP configuration.
-func GetSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error) { //nolint:ireturn
+//
+//nolint:ireturn
+func GetSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error) {
 	thisMSP, err := setupMSP(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("msp setup error: %w", err)
@@ -33,7 +35,9 @@ func GetSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error)
 
 // setupMSP instantiates an MSP instance from the provided configuration.
 // It configures the BCCSP (Blockchain Crypto Service Provider) with a file-based keystore.
-func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) { //nolint:ireturn
+//
+//nolint:ireturn
+func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) {
 	conf, err := msp.GetLocalMspConfig(mspCfg.ConfigPath, nil, mspCfg.LocalMspID)
 	if err != nil {
 		return nil, fmt.Errorf("error getting local msp config from %v: %w", mspCfg.ConfigPath, err)

@@ -11,11 +11,8 @@ import (
 	"fmt"
 	"io"
 
-	"google.golang.org/protobuf/types/known/emptypb"
-
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
-	"github.com/hyperledger/fabric-x-common/api/committerpb"
-	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
+	client2 "github.com/hyperledger/fabric-x/tools/fxconfig/internal/client"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
@@ -27,38 +24,13 @@ func ListNamespaces(vctx config.ValidationContext, cfg config.QueriesConfig, out
 		return err
 	}
 
-	// TODO we are very restricted with this
-
-	clientCfg := comm.Config{
-		Timeout: cfg.ConnectionTimeout,
-	}
-
-	// TLS config
-	if cfg.TLS.IsEnabled() {
-		clientCfg.CertPath = cfg.TLS.ClientCertPath
-		clientCfg.KeyPath = cfg.TLS.ClientKeyPath
-		clientCfg.PeerCACertPath = cfg.TLS.RootCertPaths[0]
-	}
-
-	cl, err := comm.NewClient(clientCfg)
+	// TODO we move this creation somewhere else
+	qc, err := client2.NewQueryClient(cfg)
 	if err != nil {
-		return fmt.Errorf("cannot get grpc client: %w", err)
+		return fmt.Errorf("cannot query existing namespaces: %w", err)
 	}
 
-	conn, err := cl.NewDialer(cfg.Address)()
-	if err != nil {
-		return fmt.Errorf("dialing grpc client error: %w", err)
-	}
-	defer func() {
-		_ = conn.Close()
-	}()
-
-	client := committerpb.NewQueryServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.ConnectionTimeout)
-	defer cancel()
-
-	res, err := client.GetNamespacePolicies(ctx, &emptypb.Empty{})
+	res, err := qc.GetNamespacePolicies(context.Background())
 	if err != nil {
 		return fmt.Errorf("cannot query existing namespaces: %w", err)
 	}
