@@ -20,6 +20,7 @@ type Application interface {
 	EndorseTransaction(ctx context.Context, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error)
 	SubmitTransaction(ctx context.Context, txID string, tx *applicationpb.Tx) error
 	SubmitTransactionWithWait(ctx context.Context, txID string, tx *applicationpb.Tx) error
+	MergeTransactions(ctx context.Context, txs []*applicationpb.Tx) (*applicationpb.Tx, error)
 }
 
 type AdminApp struct {

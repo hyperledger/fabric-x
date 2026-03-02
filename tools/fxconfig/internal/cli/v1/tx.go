@@ -21,6 +21,7 @@ func NewTxRootCommand(ctx *CLIContext) *cobra.Command {
 	}
 
 	cmd.AddCommand(
+		newTxMergeCommand(ctx),
 		newTxEndorseCommand(ctx),
 		newTxSubmitCommand(ctx),
 	)
