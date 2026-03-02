@@ -14,17 +14,14 @@ import (
 
 // newTxEndorseCommand creates a command for endorsing transactions.
 func newTxEndorseCommand(ctx *CLIContext) *cobra.Command {
-	var (
-		inputInput  InputFlag
-		outputInput OutputFlag
-	)
+	var outputInput OutputFlag
 
 	cmd := &cobra.Command{
 		Use:   "endorse",
 		Short: "Endorse transaction",
-		Long:  "",
+		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			input, err := io.ResolveInput(cmd, string(inputInput))
+			input, err := io.ResolveInput(cmd, args[0])
 			if err != nil {
 				return err
 			}
@@ -47,7 +44,6 @@ func newTxEndorseCommand(ctx *CLIContext) *cobra.Command {
 			return io.WriteOutput(cmd, string(outputInput), o)
 		},
 	}
-	inputInput.Bind(cmd)
 	outputInput.Bind(cmd)
 
 	return cmd

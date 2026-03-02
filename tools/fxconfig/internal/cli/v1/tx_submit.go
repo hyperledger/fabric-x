@@ -14,17 +14,14 @@ import (
 
 // newTxSubmitCommand creates a command for submitting transactions.
 func newTxSubmitCommand(ctx *CLIContext) *cobra.Command {
-	var (
-		inputFlag InputFlag
-		waitFlag  WaitFlag
-	)
+	var waitFlag WaitFlag
 
 	cmd := &cobra.Command{
 		Use:   "submit",
 		Short: "Submit transaction",
-		Long:  "",
+		Args:  cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			input, err := io.ResolveInput(cmd, string(inputFlag))
+			input, err := io.ResolveInput(cmd, args[0])
 			if err != nil {
 				return err
 			}
@@ -41,7 +38,6 @@ func newTxSubmitCommand(ctx *CLIContext) *cobra.Command {
 			return ctx.App.SubmitTransaction(cmd.Context(), txID, tx)
 		},
 	}
-	inputFlag.Bind(cmd)
 	waitFlag.Bind(cmd)
 
 	return cmd

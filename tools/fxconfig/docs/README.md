@@ -58,13 +58,13 @@ fxconfig namespace list [flags]
 
 ```bash
 # Endorse a transaction
-fxconfig tx endorse --input=<path> --output=<path>
+fxconfig tx endorse <path> --output=<path>
 
 # Merge multiple endorsed transactions
-fxconfig tx merge --inputs <path1> <path2> ... --output=<path>
+fxconfig tx merge <path1> <path2> ... --output=<path>
 
 # Submit transaction to ordering service
-fxconfig tx submit --input=<path> [--wait]
+fxconfig tx submit <path> [--wait]
 ```
 
 ### Utility Commands
@@ -188,19 +188,17 @@ fxconfig namespace create hello \
   --output=hello.pb
 
 # Endorse with Org1
-fxconfig tx endorse \
+fxconfig tx endorse hello.pb \
   --config=org1_config.yaml \
-  --input=hello.pb \
   --output=hello_org1.pb
 
 # Endorse with Org2 (appends to existing endorsements)
-fxconfig tx endorse \
+fxconfig tx endorse hello_org1.pb \
   --config=org2_config.yaml \
-  --input=hello_org1.pb \
   --output=hello_endorsed.pb
 
 # Submit to network
-fxconfig tx submit --input=hello_endorsed.pb
+fxconfig tx submit hello_endorsed.pb
 ```
 
 ### Multi-Org Distributed Flow
@@ -218,26 +216,24 @@ fxconfig namespace create hello \
 # Send hello.pb to Org1 and Org2 via external secure channel
 
 # Org1: Endorse
-fxconfig tx endorse \
+fxconfig tx endorse hello.pb \
   --config=org1_config.yaml \
-  --input=hello.pb \
   --output=hello_org1.pb
 
 # Org2: Endorse (receives hello.pb via external channel)
-fxconfig tx endorse \
+fxconfig tx endorse hello.pb \
   --config=org2_config.yaml \
-  --input=hello.pb \
   --output=hello_org2.pb
 
 # Collect endorsed transactions from org1 and org2
 
 # Either org: Merge endorsements
 fxconfig tx merge \
-  --inputs hello_org1.pb hello_org2.pb \
+  hello_org1.pb hello_org2.pb \
   --output=hello_endorsed.pb
 
 # Either org: Submit to network
-fxconfig tx submit --input=hello_endorsed.pb
+fxconfig tx submit hello_endorsed.pb
 ```
 
 ### Update Namespace
@@ -311,25 +307,23 @@ fxconfig namespace create payments \
   --output=payments.pb
 
 # Org1 endorses
-fxconfig tx endorse \
+fxconfig tx endorse payments.pb \
   --config org1-config.yaml \
-  --input=payments.pb \
   --output=payments_org1.pb
 
 # Org2 endorses
-fxconfig tx endorse \
+fxconfig tx endorse payments.pb \
   --config org2-config.yaml \
-  --input=payments.pb \
   --output=payments_org2.pb
 
 # Merge and submit
 fxconfig tx merge \
-  --inputs payments_org1.pb payments_org2.pb \
+  payments_org1.pb payments_org2.pb \
   --output=payments_endorsed.pb
 
 fxconfig tx submit \
-  --config org1-config.yaml \
-  --input=payments_endorsed.pb
+  payments_endorsed.pb \
+  --config org1-config.yaml
 ```
 
 ## Exit Codes
