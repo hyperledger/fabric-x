@@ -10,58 +10,37 @@ package app
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/client"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/msp"
+	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/transaction"
-
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
-// DeployNamespace creates a namespace transaction and submits it to the ordering service.
-func DeployNamespace(vctx config.ValidationContext, cfg config.Config, nsCfg config.NsConfig) error {
-	if err := validate(vctx, cfg, nsCfg); err != nil {
-		return err
-	}
-
-	tx, err := transaction.CreateNamespaceTransaction(nsCfg)
+func (d *AdminApp) CreateNamespace(_ context.Context, input *DeployNamespaceInput) (*DeployNamespaceOutput, error) {
+	nsPolicy, err := createPolicy(input.Policy)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	// prepare endorsement
-	sid, err := msp.GetSignerIdentityFromMSP(cfg.MSP)
-	if err != nil {
-		return err
+	out := &DeployNamespaceOutput{
+		TxID: transaction.GenerateTxID(),
+		Tx:   transaction.CreateNamespacesTx(nsPolicy, input.NsID, input.Version),
 	}
 
-	// generate txID
-	txID := transaction.GenerateTxID()
-
-	// endorse transaction
-	tx, err = transaction.Endorse(sid, txID, tx)
-	if err != nil {
-		return err
-	}
-
-	// submit transaction
-	// note that we use the endorser identity to submit the transaction
-	oc, err := client.NewOrdererClient(cfg.Orderer, sid)
-	if err != nil {
-		return err
-	}
-
-	return oc.Broadcast(context.TODO(), txID, tx)
+	return out, nil
 }
 
-func validate(ctx config.ValidationContext, cfg config.Config, nsCfg config.NsConfig) error {
-	if err := cfg.Orderer.Validate(ctx); err != nil {
-		return err
-	}
+// createPolicy creates a namespace policy from configuration.
+// Supports MSP-based and threshold ECDSA policies.
+func createPolicy(cfg PolicyConfig) (*applicationpb.NamespacePolicy, error) {
+	switch cfg.Type {
+	case "msp":
+		return transaction.CreateMspPolicy(cfg.MSP.Expression)
 
-	if err := cfg.MSP.Validate(ctx); err != nil {
-		return err
-	}
+	case "threshold":
+		return transaction.CreateThresholdPolicy(cfg.Threshold.VerificationKeyPath)
 
-	return nsCfg.Validate(ctx)
+	default:
+		return nil, fmt.Errorf("unknown policy type: %s", cfg.Type)
+	}
 }

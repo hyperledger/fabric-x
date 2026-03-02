@@ -53,16 +53,6 @@ func Load(opts ...Option) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	v.AutomaticEnv()
 
-	// Attempt to load project-level config (.fxconfig/config.yaml)
-	v.AddConfigPath(".fxconfig")
-	v.SetConfigName("config")
-	v.SetConfigType("yaml")
-	if err := v.MergeInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return nil, fmt.Errorf("error loading project config: %w", err)
-		}
-	}
-
 	// Attempt to load user-level config (~/.fxconfig/config.yaml)
 	if home, err := os.UserHomeDir(); err == nil {
 		v.AddConfigPath(filepath.Join(home, ".fxconfig"))
@@ -70,6 +60,16 @@ func Load(opts ...Option) (*Config, error) {
 			if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 				return nil, fmt.Errorf("error loading user config: %w", err)
 			}
+		}
+	}
+
+	// Attempt to load project-level config (.fxconfig/config.yaml)
+	v.AddConfigPath(".fxconfig")
+	v.SetConfigName("config")
+	v.SetConfigType("yaml")
+	if err := v.MergeInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			return nil, fmt.Errorf("error loading project config: %w", err)
 		}
 	}
 

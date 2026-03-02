@@ -17,6 +17,12 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/client"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/msp"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
+
 	cli "github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1"
 )
 
@@ -95,7 +101,16 @@ func fxconfig(tb testing.TB, args ...string) (string, error) {
 
 	var stdOut bytes.Buffer
 
-	rootCmd := cli.RootCmd()
+	rootCmd := cli.NewRootCommand(&cli.CLIContext{}, func(cfg *config.Config) (app.Application, error) {
+		vctx := validation.NewValidationContext()
+		return &app.AdminApp{
+			Validators:      vctx,
+			MspProvider:     &msp.SignerProvider{ValidationContext: vctx, Cfg: cfg.MSP},
+			QueryProvider:   &client.QueryProvider{ValidationContext: vctx, Cfg: cfg.Queries},
+			OrdererProvider: &client.OrdererProvider{ValidationContext: vctx, Cfg: cfg.Orderer},
+		}, nil
+	})
+	rootCmd.SetContext(tb.Context())
 	rootCmd.SetArgs(args)
 	rootCmd.SetOut(&stdOut)
 

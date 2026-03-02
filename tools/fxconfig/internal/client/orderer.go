@@ -20,21 +20,38 @@ import (
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x-common/protoutil"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app/api"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
+
+// OrdererProvider constructs OrdererClient instances.
+// SignerFactory satisfies the canonical app.MspProvider port; no local shadow interface needed.
+type OrdererProvider struct {
+	ValidationContext validation.Context
+	Cfg               config.OrdererConfig
+	// TODO make this provide once
+}
+
+func (f *OrdererProvider) Validate() error {
+	return f.Cfg.Validate(f.ValidationContext)
+}
+
+func (f *OrdererProvider) Get() (api.OrdererClient, error) {
+	return NewOrdererClient(f.Cfg)
+}
 
 // OrdererClient provides a gRPC client for submitting transactions to the Fabric-X ordering service.
 // It handles connection management, TLS configuration, and transaction envelope creation.
 type OrdererClient struct {
 	cfg    config.OrdererConfig
-	signer msp.SigningIdentity
 	client ab.AtomicBroadcastClient
 	closeF func()
 }
 
 // NewOrdererClient creates a new orderer client with the provided configuration and signing identity.
 // It establishes a gRPC connection with optional TLS and returns an error if connection fails.
-func NewOrdererClient(cfg config.OrdererConfig, sid msp.SigningIdentity) (*OrdererClient, error) {
+func NewOrdererClient(cfg config.OrdererConfig) (*OrdererClient, error) {
 	clientCfg := comm.Config{
 		Timeout: cfg.ConnectionTimeout,
 	}
@@ -58,7 +75,6 @@ func NewOrdererClient(cfg config.OrdererConfig, sid msp.SigningIdentity) (*Order
 
 	return &OrdererClient{
 		cfg:    cfg,
-		signer: sid,
 		client: ab.NewAtomicBroadcastClient(conn),
 		closeF: func() {
 			_ = conn.Close()
@@ -74,21 +90,21 @@ func (oc *OrdererClient) Close() error {
 	return nil
 }
 
+type BroadcastRequest struct {
+	txID   string
+	tx     *applicationpb.Tx
+	signer msp.SigningIdentity
+}
+
 // Broadcast sends the signed envelope to the ordering service.
 // It establishes a gRPC connection, sends the envelope, and waits for acknowledgment.
 func (oc *OrdererClient) Broadcast(
 	ctx context.Context,
+	signer msp.SigningIdentity,
 	txID string,
 	tx *applicationpb.Tx,
 ) error {
-	signatureHdr := protoutil.NewSignatureHeaderOrPanic(oc.signer)
-
-	// prepare transaction submission
-	// create signed envelope
-	channelHdr := protoutil.MakeChannelHeader(cb.HeaderType_MESSAGE, 0, oc.cfg.Channel, 0)
-	channelHdr.TxId = txID
-
-	env, err := oc.createSignedEnvelope(tx, channelHdr, signatureHdr)
+	env, err := oc.createSignedEnvelope(signer, txID, tx)
 	if err != nil {
 		return err
 	}
@@ -131,10 +147,17 @@ func (oc *OrdererClient) send(ctx context.Context, env *cb.Envelope) error {
 // createSignedEnvelope wraps the transaction in a signed envelope for submission to the orderer.
 // The envelope contains the channel header, signature header, and transaction payload.
 func (oc *OrdererClient) createSignedEnvelope(
+	signer msp.SigningIdentity,
+	txID string,
 	tx *applicationpb.Tx,
-	channelHdr *cb.ChannelHeader,
-	signatureHdr *cb.SignatureHeader,
 ) (*cb.Envelope, error) {
+	signatureHdr := protoutil.NewSignatureHeaderOrPanic(signer)
+
+	// prepare transaction submission
+	// create signed envelope
+	channelHdr := protoutil.MakeChannelHeader(cb.HeaderType_MESSAGE, 0, oc.cfg.Channel, 0)
+	channelHdr.TxId = txID
+
 	payloadHdr := protoutil.MakePayloadHeader(channelHdr, signatureHdr)
 	txBytes := protoutil.MarshalOrPanic(tx)
 
@@ -145,11 +168,11 @@ func (oc *OrdererClient) createSignedEnvelope(
 		},
 	)
 
-	if oc.signer == nil {
-		return nil, errors.New("require signer")
+	if signer == nil {
+		return nil, errors.New("require Signer")
 	}
 
-	sig, err := oc.signer.Sign(payloadBytes)
+	sig, err := signer.Sign(payloadBytes)
 	if err != nil {
 		return nil, err
 	}

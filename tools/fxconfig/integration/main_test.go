@@ -97,6 +97,8 @@ notifications:
 		// policy
 		policyArg = "--policy=threshold:" + thresholdKeyPath
 		// policyArg = "--policy=" + policy
+		endorseArg = "--endorse"
+		submitArg  = "--submit"
 	)
 
 	t.Run("create_new_namespace", func(t *testing.T) {
@@ -113,7 +115,7 @@ notifications:
 
 		// create namespace hello
 		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
-			configArg, policyArg)
+			configArg, policyArg, endorseArg, submitArg)
 		require.NoError(t, err)
 
 		// expect one installed namespace
@@ -140,7 +142,7 @@ notifications:
 
 		// create namespace
 		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
-			configArg, policyArg)
+			configArg, policyArg, endorseArg, submitArg)
 		require.NoError(t, err)
 
 		// expect out namespace to be installed
@@ -159,7 +161,7 @@ notifications:
 		// but we use a different policy, as namespace creation should fail,
 		// and we expect the previous stdOut when calling list
 		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
-			configArg, policyArg)
+			configArg, policyArg, endorseArg, submitArg)
 		require.NoError(t, err)
 
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
@@ -187,7 +189,7 @@ notifications:
 
 		// create namespace
 		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
-			configArg, policyArg)
+			configArg, policyArg, endorseArg, submitArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be created
@@ -205,7 +207,7 @@ notifications:
 		// update namespace
 		expectedNs = Namespace{Name: "ns1", Version: 1}
 		_, err = fxconfig(t, "namespace", "update", expectedNs.Name,
-			configArg, versionArg, policyArg)
+			configArg, versionArg, policyArg, endorseArg, submitArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be updated having a version equals 1
@@ -223,7 +225,7 @@ notifications:
 		// update namespace
 		expectedNs = Namespace{Name: "ns1", Version: 1}
 		_, err = fxconfig(t, "namespace", "update", expectedNs.Name,
-			configArg, versionArg, policyArg)
+			configArg, versionArg, policyArg, endorseArg, submitArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be updated having a version equals 1
@@ -241,7 +243,7 @@ notifications:
 		// update namespace
 		expectedNs = Namespace{Name: "ns1", Version: 2}
 		_, err = fxconfig(t, "namespace", "update", expectedNs.Name,
-			configArg, versionArg, policyArg)
+			configArg, versionArg, policyArg, endorseArg, submitArg)
 		require.NoError(t, err)
 
 		// we expect our namespace to be updated having a version equals 1
@@ -261,7 +263,7 @@ notifications:
 		for i := 1; i <= scaleTestNamespaceCount; i++ {
 			expectedNs := Namespace{Name: fmt.Sprintf("hello%d", i)}
 			_, err := fxconfig(t, "namespace", "create", expectedNs.Name,
-				configArg, policyArg)
+				configArg, policyArg, endorseArg, submitArg)
 			require.NoError(t, err)
 		}
 

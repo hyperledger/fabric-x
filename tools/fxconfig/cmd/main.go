@@ -7,13 +7,40 @@
 package main
 
 import (
+	"context"
 	"os"
+	"os/signal"
 
-	v1 "github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
+	cli "github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/client"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/msp"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
 
 func main() {
-	if err := v1.Execute(); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
+	cliCtx := &cli.CLIContext{}
+
+	// setup our root command
+	cmd := cli.NewRootCommand(
+		cliCtx,
+		// inject an application builder that is invoked once we have loaded the configration
+		func(cfg *config.Config) (app.Application, error) {
+			vctx := validation.NewValidationContext()
+			return &app.AdminApp{
+				Validators:      vctx,
+				MspProvider:     &msp.SignerProvider{ValidationContext: vctx, Cfg: cfg.MSP},
+				QueryProvider:   &client.QueryProvider{ValidationContext: vctx, Cfg: cfg.Queries},
+				OrdererProvider: &client.OrdererProvider{ValidationContext: vctx, Cfg: cfg.Orderer},
+			}, nil
+		},
+	)
+
+	if err := cmd.ExecuteContext(ctx); err != nil {
 		os.Exit(1)
 	}
 }

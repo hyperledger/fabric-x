@@ -14,7 +14,21 @@ import (
 
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
+
+type SignerProvider struct {
+	ValidationContext validation.Context
+	Cfg               config.MSPConfig
+}
+
+func (f *SignerProvider) Validate() error {
+	return f.Cfg.Validate(f.ValidationContext)
+}
+
+func (f *SignerProvider) Get() (msp.SigningIdentity, error) {
+	return GetSignerIdentityFromMSP(f.Cfg)
+}
 
 // GetSignerIdentityFromMSP retrieves the default signing identity from the MSP configuration.
 //
@@ -78,7 +92,7 @@ func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) {
 // TODO we keep this for later when we come back for the MSP-based endorsement implementation.
 // func getSignerID(signer msp.SigningIdentity) (*msppb.Identity, error) {
 //  if signer == nil {
-//		return nil, errors.New("nil signer")
+//		return nil, errors.Get("nil signer")
 //	}
 //
 //	signerCert, err := signer.GetCertificatePEM()

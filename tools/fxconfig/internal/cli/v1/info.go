@@ -14,21 +14,17 @@ import (
 // NewInfoCommand returns a command that displays the effective configuration.
 // The configuration is shown as YAML after applying all overrides from
 // flags, environment variables, and config files.
-func NewInfoCommand() *cobra.Command {
+func NewInfoCommand(ctx *CLIContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "info",
 		Short: "Display system-wide information",
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			cfg := getConfig(cmd)
-
-			out, err := yaml.Marshal(cfg)
+			out, err := yaml.Marshal(ctx.Config)
 			if err != nil {
 				return err
 			}
-
-			cmd.Println(string(out))
-			return nil
+			return ctx.Printer.Print(string(out))
 		},
 	}
 

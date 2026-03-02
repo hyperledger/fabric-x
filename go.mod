@@ -124,6 +124,7 @@ require (
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/sykesm/zap-logfmt v0.0.4 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect

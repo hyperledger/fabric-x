@@ -10,7 +10,6 @@ SPDX-License-Identifier: Apache-2.0
 package config
 
 import (
-	"strings"
 	"time"
 )
 
@@ -117,8 +116,25 @@ type TLSConfig struct {
 
 // Clone creates a shallow copy of the TLS configuration.
 func (c *TLSConfig) Clone() *TLSConfig {
-	n := c
-	return n
+	if c == nil {
+		return nil
+	}
+
+	// copy all non-pointer types
+	clone := *c
+
+	// copy enabled
+	if c.Enabled != nil {
+		v := *c.Enabled
+		clone.Enabled = &v
+	}
+
+	if len(c.RootCertPaths) > 0 {
+		clone.RootCertPaths = make([]string, len(clone.RootCertPaths))
+		copy(clone.RootCertPaths, c.RootCertPaths)
+	}
+
+	return &clone
 }
 
 // IsEnabled returns whether TLS is enabled for this configuration.
@@ -169,48 +185,4 @@ func (c *EndpointServiceConfig) GetTLSConfig() TLSConfig {
 		return TLSConfig{}
 	}
 	return *c.TLS
-}
-
-// NsConfig contains namespace-specific configuration for create and update operations.
-// NsConfig holds namespace-specific configuration for create and update operations.
-type NsConfig struct {
-	NamespaceID string
-	Version     int
-	Policy      PolicyConfig
-}
-
-// PolicyConfig defines the endorsement policy for a namespace.
-type PolicyConfig struct {
-	Type string `mapstructure:"type"` // "msp" | "threshold"`
-
-	MSP       *MSPPolicyConfig       `mapstructure:"msp"`
-	Threshold *ThresholdPolicyConfig `mapstructure:"threshold"`
-}
-
-// Set parses and configures the policy from a string.
-// Supports "threshold:<path>" format or MSP DSL expressions.
-func (c *PolicyConfig) Set(policy string) {
-	policy = strings.TrimSpace(policy)
-
-	if k, ok := strings.CutPrefix(policy, "threshold:"); ok {
-		c.Type = "threshold"
-		c.Threshold = &ThresholdPolicyConfig{
-			VerificationKeyPath: strings.TrimSpace(k),
-		}
-		return
-	}
-
-	// default is msp
-	c.Type = "msp"
-	c.MSP = &MSPPolicyConfig{Expression: policy}
-}
-
-// MSPPolicyConfig holds MSP-based policy configuration.
-type MSPPolicyConfig struct {
-	Expression string `mapstructure:"expression"`
-}
-
-// ThresholdPolicyConfig holds threshold ECDSA policy configuration.
-type ThresholdPolicyConfig struct {
-	VerificationKeyPath string `mapstructure:"verificationKeyPath"`
 }

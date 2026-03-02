@@ -9,47 +9,43 @@ package app
 import (
 	"context"
 	"fmt"
-	"io"
-
-	"github.com/hyperledger/fabric-x-common/api/applicationpb"
-	client2 "github.com/hyperledger/fabric-x/tools/fxconfig/internal/client"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
 // ListNamespaces queries the committer service for installed namespaces.
 // It connects to the query service, retrieves all namespace policies, and formats
-// the output showing namespace names, versions, and policy data in hexadecimal.
-func ListNamespaces(vctx config.ValidationContext, cfg config.QueriesConfig, out io.Writer) error {
-	if err := cfg.Validate(vctx); err != nil {
-		return err
+// the Output showing namespace names, versions, and policy data in hexadecimal.
+func (d *AdminApp) ListNamespaces(ctx context.Context) ([]NamespaceQueryResult, error) {
+	// query service validation
+	if err := d.QueryProvider.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid query service configuration: %w", err)
 	}
 
-	// TODO we move this creation somewhere else
-	qc, err := client2.NewQueryClient(cfg)
+	qc, err := d.QueryProvider.Get()
 	if err != nil {
-		return fmt.Errorf("cannot query existing namespaces: %w", err)
+		return nil, err
 	}
 
-	res, err := qc.GetNamespacePolicies(context.Background())
+	res, err := qc.GetNamespacePolicies(ctx)
 	if err != nil {
-		return fmt.Errorf("cannot query existing namespaces: %w", err)
+		return nil, fmt.Errorf("cannot query existing namespaces: %w", err)
 	}
 
-	printResult(out, res)
+	results := make([]NamespaceQueryResult, len(res.GetPolicies()))
+	for i, p := range res.GetPolicies() {
+		results[i] = NamespaceQueryResult{
+			NsID:    p.GetNamespace(),
+			Version: int(p.GetVersion()),
+			Policy:  p.GetPolicy(),
+		}
+	}
 
-	return nil
+	return results, nil
 }
 
-// printResult formats and writes namespace policy information to the output writer.
-// Each namespace is displayed with its index, name, version, and policy in hexadecimal format.
-//
-//nolint:errcheck
-func printResult(out io.Writer, res *applicationpb.NamespacePolicies) {
-	fmt.Fprintf(out, "Installed namespaces (%d total):\n", len(res.GetPolicies()))
-	for i, p := range res.GetPolicies() {
-		fmt.Fprintf(out, "%d) %v: version %d policy: %x\n", i, p.GetNamespace(), p.GetVersion(), p.GetPolicy())
-	}
-	fmt.Fprintln(out, "")
+type NamespaceQueryResult struct {
+	NsID    string `json:"name" yaml:"name"`
+	Version int    `json:"version" yaml:"version"`
+	Policy  []byte `json:"policy" yaml:"policy"`
 }
 
 // parsePolicy extracts and formats policy information from serialized bytes.

@@ -1,0 +1,48 @@
+/*
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+*/
+
+package v1
+
+import (
+	"github.com/spf13/cobra"
+
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/io"
+)
+
+// newTxSubmitCommand creates a command for submitting transactions.
+func newTxSubmitCommand(ctx *CLIContext) *cobra.Command {
+	var (
+		inputFlag InputFlag
+		waitFlag  WaitFlag
+	)
+
+	cmd := &cobra.Command{
+		Use:   "submit",
+		Short: "Submit transaction",
+		Long:  "",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			input, err := io.ResolveInput(cmd, string(inputFlag))
+			if err != nil {
+				return err
+			}
+
+			txID, tx, err := ctx.IOTransactionCodec.Decode(input)
+			if err != nil {
+				return err
+			}
+
+			if waitFlag {
+				return ctx.App.SubmitTransactionWithWait(cmd.Context(), txID, tx)
+			}
+
+			return ctx.App.SubmitTransaction(cmd.Context(), txID, tx)
+		},
+	}
+	inputFlag.Bind(cmd)
+	waitFlag.Bind(cmd)
+
+	return cmd
+}

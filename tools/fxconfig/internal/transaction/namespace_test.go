@@ -14,7 +14,7 @@ import (
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 )
 
-// TestCreateNamespacesTx tests the createNamespacesTx function.
+// TestCreateNamespacesTx tests the CreateNamespacesTx function.
 func TestCreateNamespacesTx(t *testing.T) {
 	t.Parallel()
 
@@ -61,7 +61,7 @@ func TestCreateNamespacesTx(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			result := createNamespacesTx(tt.nsPolicy, tt.nsID, tt.nsVersion)
+			result := CreateNamespacesTx(tt.nsPolicy, tt.nsID, tt.nsVersion)
 
 			require.NotNil(t, result, tt.description)
 			require.Len(t, result.Namespaces, 1, "Should have one namespace entry")

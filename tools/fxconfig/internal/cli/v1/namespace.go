@@ -8,14 +8,12 @@ package v1
 
 import (
 	"github.com/spf13/cobra"
-
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
 )
 
-// NewNamespaceCommand returns the namespace command group.
+// NewNsRootCommand returns the namespace command group.
 // This command provides subcommands for namespace lifecycle operations:
 // create, update, and list.
-func NewNamespaceCommand() *cobra.Command {
+func NewNsRootCommand(ctx *CLIContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "namespace",
 		Short: "Perform namespace operations",
@@ -23,9 +21,9 @@ func NewNamespaceCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		newCreateCommand(app.DeployNamespace),
-		newListCommand(app.ListNamespaces),
-		newUpdateCommand(app.DeployNamespace),
+		newNsCreateCommand(ctx),
+		newNsUpdateCommand(ctx),
+		newNsListCommand(ctx),
 	)
 
 	return cmd

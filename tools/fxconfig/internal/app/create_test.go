@@ -87,7 +87,7 @@ func (*mockSigningIdentity) SatisfiesPrincipal(_ *msppb.MSPPrincipal) error {
 	return nil
 }
 
-// TestEndorse tests the endorse function.
+// TestEndorse tests the Endorse function.
 func TestEndorse(t *testing.T) {
 	t.Parallel()
 
@@ -114,7 +114,7 @@ func TestEndorse(t *testing.T) {
 			},
 			txID:        "tx-123",
 			expectError: false,
-			description: "Should successfully endorse single namespace",
+			description: "Should successfully Endorse single namespace",
 		},
 		{
 			name: "successful endorsement with multiple namespaces",
@@ -130,7 +130,7 @@ func TestEndorse(t *testing.T) {
 			},
 			txID:        "tx-456",
 			expectError: false,
-			description: "Should successfully endorse multiple namespaces",
+			description: "Should successfully Endorse multiple namespaces",
 		},
 		{
 			name: "signing failure",

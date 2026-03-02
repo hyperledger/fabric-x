@@ -16,8 +16,24 @@ import (
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app/api"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
+
+type QueryProvider struct {
+	ValidationContext validation.Context
+	Cfg               config.QueriesConfig
+	// TODO make this provide once
+}
+
+func (f *QueryProvider) Validate() error {
+	return f.Cfg.Validate(f.ValidationContext)
+}
+
+func (f *QueryProvider) Get() (api.QueryClient, error) {
+	return NewQueryClient(f.Cfg)
+}
 
 // QueryClient provides a gRPC client for querying namespace policies from the Fabric-X committer query service.
 type QueryClient struct {

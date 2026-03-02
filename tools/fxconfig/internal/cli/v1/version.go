@@ -25,6 +25,7 @@ func NewVersionCommand() *cobra.Command {
 		Short: "Print the version of fxconfig",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, _ []string) {
+			// TODO use printer
 			cmd.Printf("fxconfig\n")
 			showLine(cmd, "Version", metadata.Version)
 			showLine(cmd, "Go version", runtime.Version())

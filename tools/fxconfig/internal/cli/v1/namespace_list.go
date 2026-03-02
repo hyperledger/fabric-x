@@ -8,36 +8,31 @@ package v1
 
 import (
 	"fmt"
-	"io"
 
 	"github.com/spf13/cobra"
-
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
-// listFunc is a function type for listing namespaces.
-// It queries the committer service, formats the results, and writes them to the provided writer.
-// This abstraction enables dependency injection for testing.
-type listFunc func(vctx config.ValidationContext, cfg config.QueriesConfig, out io.Writer) error
-
-// newListCommand creates a command for listing installed namespaces.
+// newNsListCommand creates a command for listing installed namespaces.
 // It connects to the query service and displays namespace names, versions, and policies.
 // The listFunc is injected to enable testing with mock implementations.
-func newListCommand(listFunc listFunc) *cobra.Command {
+func newNsListCommand(ctx *CLIContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List installed Namespaces",
-		Long:  "",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			cfg := getConfig(cmd)
-
-			// validate config
-			vctx := *getConfigValidatorContext(cmd)
-			if err := cfg.Queries.Validate(vctx); err != nil {
-				return fmt.Errorf("query service configuration invalid: %w", err)
+			result, err := ctx.App.ListNamespaces(cmd.Context())
+			if err != nil {
+				return err
 			}
 
-			return listFunc(vctx, cfg.Queries, cmd.OutOrStdout())
+			// print namespace policy information to the Output writer.
+			// Each namespace is displayed with its index, name, version, and policy in hexadecimal format.
+			ctx.Printer.Print(fmt.Sprintf("Installed namespaces (%d total):\n", len(result)))
+			for i, p := range result {
+				ctx.Printer.Print(fmt.Sprintf("%d) %v: version %d policy: %x\n", i, p.NsID, p.Version, p.Policy))
+			}
+
+			return nil
 		},
 	}
 
