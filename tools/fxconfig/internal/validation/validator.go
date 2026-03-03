@@ -10,6 +10,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/hyperledger/fabric-x-common/common/policydsl"
 )
@@ -39,7 +41,12 @@ type OSFileChecker struct{}
 
 // Exists checks if the path exists and is a file.
 func (OSFileChecker) Exists(path string) error {
-	info, err := os.Stat(path)
+	clean := filepath.Clean(path)
+	if strings.Contains(clean, "..") {
+		return errors.New("path traversal not allowed")
+	}
+
+	info, err := os.Stat(clean)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return fmt.Errorf("file does not exist: %s", path)
@@ -61,7 +68,12 @@ func (OSDirectoryChecker) Exists(path string) error {
 		return errors.New("path must not be empty")
 	}
 
-	info, err := os.Stat(path)
+	clean := filepath.Clean(path)
+	if strings.Contains(clean, "..") {
+		return errors.New("path traversal not allowed")
+	}
+
+	info, err := os.Stat(clean)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return fmt.Errorf("directory does not exist: %s", path)

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -22,11 +24,17 @@ func (f *IOFlags) Bind(cmd *cobra.Command) {
 }
 
 func ResolveInput(cmd *cobra.Command, inputFile string) ([]byte, error) {
+
 	pipe := isInputFromPipe()
 	switch {
 	case inputFile != "" && pipe:
 		return nil, errors.New("cannot use --input and stdin together")
 	case inputFile != "":
+		// Prevent path traversal
+		inputFile = filepath.Clean(inputFile)
+		if strings.Contains(inputFile, "..") {
+			return nil, errors.New("path traversal not allowed")
+		}
 		// read from file
 		file, err := os.Open(inputFile)
 		if err != nil {
