@@ -10,6 +10,7 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
 
+// DeployNamespaceInput contains parameters for namespace deployment.
 type DeployNamespaceInput struct {
 	NsID    string       `json:"name" yaml:"name"`
 	Version int          `json:"version" yaml:"version"`
@@ -38,6 +39,7 @@ func (c *DeployNamespaceInput) Validate(vctx validation.Context) error {
 	return nil
 }
 
+// DeployNamespaceOutput contains the generated transaction and ID.
 type DeployNamespaceOutput struct {
 	TxID string
 	Tx   *applicationpb.Tx
@@ -84,6 +86,7 @@ func (d *AdminApp) DeployNamespace(ctx context.Context, input *DeployNamespaceIn
 	return nil, UnknownStatus, nil
 }
 
+// validate performs comprehensive validation of deployment input and providers.
 func (d *AdminApp) validate(input *DeployNamespaceInput) error {
 	// input validation
 	if err := input.Validate(d.Validators); err != nil {

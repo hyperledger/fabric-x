@@ -13,16 +13,19 @@ import (
 
 const defaultMaxInputSize = 20 * 1024 * 1024
 
+// IOFlags groups input and output file path flags.
 type IOFlags struct {
 	Input  string
 	Output string
 }
 
+// Bind registers input and output flags on the command.
 func (f *IOFlags) Bind(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&f.Input, "input", "", "Input file (optional, defaults to stdin)")
 	cmd.Flags().StringVar(&f.Output, "output", "", "Output file (optional, defaults to stdout)")
 }
 
+// ResolveInput reads input from file or stdin with size limits and security checks.
 func ResolveInput(cmd *cobra.Command, inputFile string) ([]byte, error) {
 
 	pipe := isInputFromPipe()
@@ -53,6 +56,7 @@ func ResolveInput(cmd *cobra.Command, inputFile string) ([]byte, error) {
 	}
 }
 
+// WriteOutput writes data to file or stdout.
 func WriteOutput(cmd *cobra.Command, outputFile string, data []byte) error {
 	if outputFile != "" {
 		return os.WriteFile(outputFile, data, 0o600)
@@ -69,6 +73,7 @@ func isInputFromPipe() bool {
 	return (info.Mode() & os.ModeCharDevice) == 0
 }
 
+// ReadWithLimit reads from reader with maximum size enforcement.
 func ReadWithLimit(r io.Reader, maxBytes int64) ([]byte, error) {
 	// Read at most maxBytes + 1
 	limited := io.LimitReader(r, maxBytes+1)

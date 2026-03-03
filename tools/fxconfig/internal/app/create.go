@@ -4,8 +4,6 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-// Package app provides functionality for namespace lifecycle operations.
-// It handles creating, updating, and listing namespaces in Fabric-X.
 package app
 
 import (
@@ -16,6 +14,8 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/transaction"
 )
 
+// CreateNamespace generates a namespace transaction without endorsement or submission.
+// Returns transaction ID and unsigned transaction for later processing.
 func (d *AdminApp) CreateNamespace(_ context.Context, input *DeployNamespaceInput) (*DeployNamespaceOutput, error) {
 	nsPolicy, err := createPolicy(input.Policy)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Format specifies the output format for CLI printing.
 type Format string
 
 const (
@@ -16,17 +17,20 @@ const (
 	FormatYAML  Format = "yaml"
 )
 
+// Printer handles formatted output for CLI commands.
 type Printer interface {
 	Print(v any) error
 	PrintError(err error)
 }
 
+// CLIPrinter implements Printer with support for multiple output formats.
 type CLIPrinter struct {
 	out    io.Writer
 	errOut io.Writer
 	format Format
 }
 
+// NewCLIPrinter creates a printer with specified output writers and format.
 func NewCLIPrinter(out, errOut io.Writer, format Format) *CLIPrinter {
 	return &CLIPrinter{
 		out:    out,
@@ -35,6 +39,7 @@ func NewCLIPrinter(out, errOut io.Writer, format Format) *CLIPrinter {
 	}
 }
 
+// Print outputs data in the configured format (JSON, YAML, or table).
 func (p *CLIPrinter) Print(v any) error {
 	switch p.format {
 	case FormatJSON:
@@ -55,6 +60,7 @@ func (p *CLIPrinter) Print(v any) error {
 	}
 }
 
+// PrintError outputs errors in human-readable or JSON format.
 func (p *CLIPrinter) PrintError(err error) {
 	// Human readable
 	if p.format != FormatJSON {

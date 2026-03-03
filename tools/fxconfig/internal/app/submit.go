@@ -14,8 +14,10 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/api"
 )
 
+// TxStatus represents the finality status of a submitted transaction.
 type TxStatus = int
 
+// UnknownStatus indicates transaction status is not yet determined.
 const UnknownStatus TxStatus = 0
 
 // SubmitTransaction receives a transaction and sends it to the ordering service.
@@ -29,6 +31,8 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 	return d.submitTransaction(ctx, txID, tx, true)
 }
 
+// submitTransaction broadcasts transaction to ordering service.
+// Optionally waits for finality notification when waitForFinality is true.
 func (d *AdminApp) submitTransaction(ctx context.Context, txID string, tx *applicationpb.Tx, waitForFinality bool) (TxStatus, error) {
 	var (
 		nc           api.NotificationClient

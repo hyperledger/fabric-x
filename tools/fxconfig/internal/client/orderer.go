@@ -33,10 +33,12 @@ type OrdererProvider struct {
 	// TODO make this provide once
 }
 
+// Validate checks the orderer configuration against the validation context.
 func (f *OrdererProvider) Validate() error {
 	return f.Cfg.Validate(f.ValidationContext)
 }
 
+// Get creates and returns a new OrdererClient instance.
 func (f *OrdererProvider) Get() (api.OrdererClient, error) {
 	return NewOrdererClient(f.Cfg)
 }
@@ -90,6 +92,7 @@ func (oc *OrdererClient) Close() error {
 	return nil
 }
 
+// BroadcastRequest encapsulates the parameters needed to broadcast a transaction.
 type BroadcastRequest struct {
 	txID   string
 	tx     *applicationpb.Tx

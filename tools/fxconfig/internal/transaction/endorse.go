@@ -20,9 +20,9 @@ import (
 	"github.com/hyperledger/fabric-x-common/msp"
 )
 
-// Endorse signs the transaction with the provided identity.
-// It creates endorsements for each namespace in the transaction.
-// Currently, uses threshold ECDSA signatures; MSP-based endorsement will be added later.
+// Endorse signs a transaction with the provided identity for all namespaces.
+// Returns a cloned transaction with added endorsements. Currently uses threshold ECDSA;
+// MSP-based endorsement support is planned.
 func Endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error) {
 	if tx == nil {
 		return nil, errors.New("nil transaction")
@@ -78,7 +78,7 @@ func Endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 	return tx, nil
 }
 
-// GenerateTxID produces a TxID.
+// GenerateTxID generates a unique transaction ID using SHA-256 hash of a random nonce.
 func GenerateTxID() string {
 	nonce := readNonce(nil)
 	hasher := sha256.New()
@@ -95,7 +95,7 @@ func readNonce(source io.Reader) []byte {
 	}
 
 	size := 24
-	value := make([]byte, 24)
+	value := make([]byte, size)
 	n, err := source.Read(value)
 	if err != nil {
 		panic("ouch")

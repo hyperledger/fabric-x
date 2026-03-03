@@ -13,6 +13,8 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/transaction"
 )
 
+// MergeTransactions combines multiple transactions into a single transaction.
+// Useful for collecting endorsements from multiple organizations.
 func (d *AdminApp) MergeTransactions(_ context.Context, txs []*applicationpb.Tx) (*applicationpb.Tx, error) {
 	return transaction.Merge(txs)
 }

@@ -4,6 +4,7 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
+// Package msp provides MSP (Membership Service Provider) signing identity management.
 package msp
 
 import (
@@ -17,20 +18,23 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
 
+// SignerProvider manages MSP signing identity retrieval with validation support.
 type SignerProvider struct {
 	ValidationContext validation.Context
 	Cfg               config.MSPConfig
 }
 
+// Validate checks the MSP configuration validity.
 func (f *SignerProvider) Validate() error {
 	return f.Cfg.Validate(f.ValidationContext)
 }
 
+// Get retrieves the signing identity from the configured MSP.
 func (f *SignerProvider) Get() (msp.SigningIdentity, error) {
 	return GetSignerIdentityFromMSP(f.Cfg)
 }
 
-// GetSignerIdentityFromMSP retrieves the default signing identity from the MSP configuration.
+// GetSignerIdentityFromMSP returns the default signing identity from MSP configuration.
 //
 //nolint:ireturn
 func GetSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error) {
@@ -47,8 +51,7 @@ func GetSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error)
 	return sid, nil
 }
 
-// setupMSP instantiates an MSP instance from the provided configuration.
-// It configures the BCCSP (Blockchain Crypto Service Provider) with a file-based keystore.
+// setupMSP creates an MSP instance with file-based BCCSP keystore from the given configuration.
 //
 //nolint:ireturn
 func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) {

@@ -18,6 +18,7 @@ import (
 )
 
 // CreateMspPolicy creates an MSP-based namespace policy from a DSL expression.
+// Example: "OR('Org1MSP.member', 'Org2MSP.member')" or "AND('Org1MSP.admin', 'Org2MSP.admin')".
 func CreateMspPolicy(policy string) (*applicationpb.NamespacePolicy, error) {
 	p, err := policydsl.FromString(policy)
 	if err != nil {
@@ -33,7 +34,8 @@ func CreateMspPolicy(policy string) (*applicationpb.NamespacePolicy, error) {
 	return nsPolicy, nil
 }
 
-// CreateThresholdPolicy creates a threshold ECDSA namespace policy from PEM-encoded key data.
+// CreateThresholdPolicy creates a threshold ECDSA namespace policy from a PEM file.
+// The file must contain an ECDSA public key or X.509 certificate with an ECDSA key.
 func CreateThresholdPolicy(path string) (*applicationpb.NamespacePolicy, error) {
 	pkData, err := os.ReadFile(path)
 	if err != nil {

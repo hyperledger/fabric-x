@@ -9,13 +9,16 @@ import (
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 )
 
+// Codec handles encoding and decoding of transactions for CLI I/O.
 type Codec interface {
 	Encode(txID string, tx *applicationpb.Tx) ([]byte, error)
 	Decode(data []byte) (txID string, tx *applicationpb.Tx, err error)
 }
 
+// JsonCodec implements Codec using JSON format with protobuf marshaling.
 type JsonCodec struct{}
 
+// Encode converts a transaction to JSON format with transaction ID.
 func (jc *JsonCodec) Encode(txID string, tx *applicationpb.Tx) ([]byte, error) {
 	var txJSON map[string]interface{}
 
@@ -45,6 +48,7 @@ func (jc *JsonCodec) Encode(txID string, tx *applicationpb.Tx) ([]byte, error) {
 	return json.MarshalIndent(output, "", "  ")
 }
 
+// Decode parses JSON data into transaction ID and transaction.
 func (jc *JsonCodec) Decode(data []byte) (string, *applicationpb.Tx, error) {
 	carrier := struct {
 		TxID string          `json:"txID"`

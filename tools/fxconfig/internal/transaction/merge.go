@@ -17,6 +17,10 @@ import (
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 )
 
+// Merge combines multiple endorsed transactions into a single transaction.
+// It validates that all transactions have identical namespace content, then merges
+// their endorsements while deduplicating by MSP ID. Requires at least 2 transactions.
+// The merged endorsements are sorted alphabetically by MSP ID.
 func Merge(txs []*applicationpb.Tx) (*applicationpb.Tx, error) {
 	if len(txs) < 2 {
 		return nil, errors.New("at least two transactions required for merge")

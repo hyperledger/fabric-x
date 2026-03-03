@@ -45,6 +45,7 @@ func (d *AdminApp) ListNamespaces(ctx context.Context) ([]NamespaceQueryResult, 
 	return results, nil
 }
 
+// NamespaceQueryResult represents a namespace retrieved from the query service.
 type NamespaceQueryResult struct {
 	NsID    string `json:"name" yaml:"name"`
 	Version int    `json:"version" yaml:"version"`

@@ -2,6 +2,7 @@ package v1
 
 import "github.com/spf13/cobra"
 
+// InputFlag represents an input file path flag.
 type InputFlag string
 
 func (f *InputFlag) Bind(cmd *cobra.Command) {
@@ -9,6 +10,7 @@ func (f *InputFlag) Bind(cmd *cobra.Command) {
 		"Input file path (if not specified, reads from stdin)")
 }
 
+// OutputFlag represents an output file path flag.
 type OutputFlag string
 
 func (f *OutputFlag) Bind(cmd *cobra.Command) {
@@ -16,6 +18,7 @@ func (f *OutputFlag) Bind(cmd *cobra.Command) {
 		"Output file path (if not specified, writes to stdout)")
 }
 
+// PolicyFlag represents an endorsement policy flag.
 type PolicyFlag string
 
 func (f *PolicyFlag) Bind(cmd *cobra.Command) {
@@ -24,6 +27,7 @@ func (f *PolicyFlag) Bind(cmd *cobra.Command) {
 	_ = cmd.MarkFlagRequired("policy")
 }
 
+// VersionFlag represents a namespace version number flag.
 type VersionFlag int
 
 func (f *VersionFlag) Bind(cmd *cobra.Command) {
@@ -32,6 +36,7 @@ func (f *VersionFlag) Bind(cmd *cobra.Command) {
 	_ = cmd.MarkFlagRequired("version")
 }
 
+// NamespaceDeployFlags groups flags for namespace deployment operations.
 type NamespaceDeployFlags struct {
 	endorse bool
 	submit  bool
@@ -47,6 +52,7 @@ func (f *NamespaceDeployFlags) Bind(cmd *cobra.Command) {
 		"Wait for transaction finalization (implies --submit)")
 }
 
+// WaitFlag represents a flag to wait for transaction finalization.
 type WaitFlag bool
 
 func (f *WaitFlag) Bind(cmd *cobra.Command) {

@@ -22,20 +22,26 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
 
+// NotificationProvider constructs NotificationClient instances with validation.
 type NotificationProvider struct {
 	ValidationContext validation.Context
 	Cfg               config.NotificationsConfig
 	// TODO make this provide once
 }
 
+// Validate checks the notification configuration against the validation context.
 func (f *NotificationProvider) Validate() error {
 	return f.Cfg.Validate(f.ValidationContext)
 }
 
+// Get creates and returns a new NotificationClient instance.
 func (f *NotificationProvider) Get() (api.NotificationClient, error) {
 	return NewNotificationClient(f.Cfg)
 }
 
+// NotificationClient provides a gRPC client for receiving transaction status notifications.
+// It manages bidirectional streaming with the committer notification service and multiplexes
+// notifications to multiple subscribers per transaction ID.
 type NotificationClient struct {
 	cfg    config.NotificationsConfig
 	closeF func()
@@ -48,6 +54,8 @@ type NotificationClient struct {
 	subscribersMu sync.RWMutex
 }
 
+// NewNotificationClient creates a notification client with the provided configuration.
+// It establishes a gRPC connection with optional TLS and starts a background listener.
 func NewNotificationClient(cfg config.NotificationsConfig) (*NotificationClient, error) {
 	clientCfg := comm.Config{
 		Timeout: cfg.ConnectionTimeout,
@@ -94,6 +102,7 @@ func NewNotificationClient(cfg config.NotificationsConfig) (*NotificationClient,
 	return nc, nil
 }
 
+// Close terminates the gRPC connection and cancels the background listener.
 func (n *NotificationClient) Close() error {
 	if n.closeF != nil {
 		n.closeF()
@@ -101,6 +110,8 @@ func (n *NotificationClient) Close() error {
 	return nil
 }
 
+// Subscribe registers interest in a transaction's status and returns a channel for notifications.
+// Multiple subscribers to the same txID share a single upstream subscription.
 func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan int, error) {
 	receiverCh := make(chan int, 1)
 
@@ -140,6 +151,8 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	return receiverCh, nil
 }
 
+// WaitForEvent blocks until a status notification arrives or the timeout expires.
+// Returns the transaction status code or an error if the context is canceled.
 func (n *NotificationClient) WaitForEvent(ctx context.Context, subscription chan int) (int, error) {
 	ctx, cancel := context.WithTimeout(ctx, n.cfg.WaitingTimeout)
 	defer cancel()
@@ -162,7 +175,8 @@ func wait(ctx context.Context, subscription chan int) (int, error) {
 	}
 }
 
-// Listen is a blocking method that runs the notification listener stream.
+// listen runs the bidirectional gRPC stream, managing request/response queues
+// and dispatching notifications to subscribers. Blocks until context is canceled.
 func (n *NotificationClient) listen(ctx context.Context) error {
 	notifyStream, err := n.notifyClient.OpenNotificationStream(ctx)
 	if err != nil {
@@ -260,6 +274,8 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 	return err
 }
 
+// parseResponse extracts transaction statuses from a notification response,
+// mapping transaction IDs to their status codes (timeouts and status events).
 func parseResponse(resp *committerpb.NotificationResponse) map[string]int {
 	res := make(map[string]int)
 
@@ -270,7 +286,6 @@ func parseResponse(resp *committerpb.NotificationResponse) map[string]int {
 
 	// next we parse the status events
 	for _, r := range resp.GetTxStatusEvents() {
-
 		txID := r.GetRef().GetTxId()
 		status := r.GetStatus()
 

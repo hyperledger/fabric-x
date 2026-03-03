@@ -18,6 +18,7 @@ func (d *AdminApp) EndorseTransaction(ctx context.Context, txID string, tx *appl
 	return d.endorseTransaction(ctx, txID, tx)
 }
 
+// endorseTransaction signs the transaction with the configured MSP identity.
 func (d *AdminApp) endorseTransaction(_ context.Context, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error) {
 	// msp validation
 	if err := d.MspProvider.Validate(); err != nil {

@@ -17,6 +17,7 @@ import (
 )
 
 // NewValidationContext creates a validation context with OS-based validators.
+// Returns a Context configured with PolicyDSLChecker, OSFileChecker, and OSDirectoryChecker.
 func NewValidationContext() Context {
 	return Context{
 		PolicyChecker:    PolicyDSLChecker{},
@@ -25,10 +26,11 @@ func NewValidationContext() Context {
 	}
 }
 
-// PolicyDSLChecker implements app.PolicyChecker using the Fabric policy DSL parser.
+// PolicyDSLChecker validates Fabric policy DSL expressions using the policydsl parser.
 type PolicyDSLChecker struct{}
 
-// Check validates a policy DSL expression.
+// Check validates a policy DSL expression string.
+// Returns an error if the expression cannot be parsed.
 func (PolicyDSLChecker) Check(e string) error {
 	if _, err := policydsl.FromString(e); err != nil {
 		return fmt.Errorf("invalid policy expression: %w", err)
@@ -36,10 +38,12 @@ func (PolicyDSLChecker) Check(e string) error {
 	return nil
 }
 
-// OSFileChecker implements app.FileChecker using os.Stat.
+// OSFileChecker validates file paths using os.Stat.
+// Prevents path traversal attacks and ensures paths reference regular files.
 type OSFileChecker struct{}
 
-// Exists checks if the path exists and is a file.
+// Exists verifies that the path exists and is a regular file.
+// Returns an error if the path doesn't exist, is a directory, or contains path traversal.
 func (OSFileChecker) Exists(path string) error {
 	clean := filepath.Clean(path)
 	if strings.Contains(clean, "..") {
@@ -59,10 +63,12 @@ func (OSFileChecker) Exists(path string) error {
 	return nil
 }
 
-// OSDirectoryChecker implements app.DirectoryChecker using os.Stat.
+// OSDirectoryChecker validates directory paths using os.Stat.
+// Prevents path traversal attacks and ensures paths reference directories.
 type OSDirectoryChecker struct{}
 
-// Exists checks if the path exists and is a directory.
+// Exists verifies that the path exists and is a directory.
+// Returns an error if the path is empty, doesn't exist, is a file, or contains path traversal.
 func (OSDirectoryChecker) Exists(path string) error {
 	if path == "" {
 		return errors.New("path must not be empty")

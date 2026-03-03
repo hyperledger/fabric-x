@@ -21,16 +21,19 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
 
+// QueryProvider constructs QueryClient instances with validation.
 type QueryProvider struct {
 	ValidationContext validation.Context
 	Cfg               config.QueriesConfig
 	// TODO make this provide once
 }
 
+// Validate checks the query configuration against the validation context.
 func (f *QueryProvider) Validate() error {
 	return f.Cfg.Validate(f.ValidationContext)
 }
 
+// Get creates and returns a new QueryClient instance.
 func (f *QueryProvider) Get() (api.QueryClient, error) {
 	return NewQueryClient(f.Cfg)
 }

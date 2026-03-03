@@ -12,9 +12,8 @@ import (
 	"github.com/hyperledger/fabric-x-common/protoutil"
 )
 
-// CreateNamespacesTx constructs a transaction for creating or updating a namespace.
-// The transaction writes to the meta-namespace with the namespace policy.
-// Version -1 indicates a create operation; >= 0 indicates an update.
+// CreateNamespacesTx builds a transaction to create or update a namespace policy.
+// Writes to the meta-namespace. Use version -1 for create, >= 0 for update.
 func CreateNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, nsVersion int) *applicationpb.Tx {
 	writeToMetaNs := &applicationpb.TxNamespace{
 		NsId: committerpb.MetaNamespaceID,
