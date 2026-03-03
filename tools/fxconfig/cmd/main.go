@@ -32,10 +32,11 @@ func main() {
 		func(cfg *config.Config) (app.Application, error) {
 			vctx := validation.NewValidationContext()
 			return &app.AdminApp{
-				Validators:      vctx,
-				MspProvider:     &msp.SignerProvider{ValidationContext: vctx, Cfg: cfg.MSP},
-				QueryProvider:   &client.QueryProvider{ValidationContext: vctx, Cfg: cfg.Queries},
-				OrdererProvider: &client.OrdererProvider{ValidationContext: vctx, Cfg: cfg.Orderer},
+				Validators:           vctx,
+				MspProvider:          &msp.SignerProvider{ValidationContext: vctx, Cfg: cfg.MSP},
+				QueryProvider:        &client.QueryProvider{ValidationContext: vctx, Cfg: cfg.Queries},
+				OrdererProvider:      &client.OrdererProvider{ValidationContext: vctx, Cfg: cfg.Orderer},
+				NotificationProvider: &client.NotificationProvider{ValidationContext: vctx, Cfg: cfg.Notifications},
 			}, nil
 		},
 	)

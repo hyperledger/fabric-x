@@ -7,6 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 package v1
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
@@ -39,9 +41,14 @@ func newNsCreateCommand(ctx *CLIContext) *cobra.Command {
 				Wait:    namespaceFlags.wait,
 			}
 
-			res, err := ctx.App.DeployNamespace(cmd.Context(), &input)
+			res, status, err := ctx.App.DeployNamespace(cmd.Context(), &input)
 			if err != nil {
 				return err
+			}
+
+			if res == nil {
+				ctx.Printer.Print(fmt.Sprintf("Status code: %d", status))
+				return nil
 			}
 
 			o, err := ctx.IOTransactionCodec.Encode(res.TxID, res.Tx)

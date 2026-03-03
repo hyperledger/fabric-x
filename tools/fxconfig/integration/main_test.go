@@ -78,15 +78,16 @@ msp:
 orderer:
   address: ` + endpoints["orderer"] + `
   channel: ` + channelID + `
-  connectionTimeout: 45s
+  connectionTimeout: 30s
 
 queries:
   address: ` + endpoints["query"] + `
-  connectionTimeout: 60s
+  connectionTimeout: 20s
 
 notifications:
   address: ` + endpoints["sidecar"] + `
-  connectionTimeout: 90s
+  connectionTimeout: 15s
+  waitingTimeout: 15s
 `
 	err = os.WriteFile(configPath, []byte(configContent), 0o600)
 	require.NoError(t, err)
@@ -99,6 +100,7 @@ notifications:
 		// policyArg = "--policy=" + policy
 		endorseArg = "--endorse"
 		submitArg  = "--submit"
+		waitArg    = "--wait"
 	)
 
 	t.Run("create_new_namespace", func(t *testing.T) {
@@ -116,6 +118,33 @@ notifications:
 		// create namespace hello
 		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
 			configArg, policyArg, endorseArg, submitArg)
+		require.NoError(t, err)
+
+		// expect one installed namespace
+		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
+			stdOut, err := fxconfig(t, "namespace", "list", configArg)
+			require.NoError(ct, err)
+			nss, err := parseNamespaceList(stdOut)
+			require.NoError(ct, err)
+			require.Contains(ct, nss, expectedNs)
+		}, eventuallyTimeout, eventuallyTick)
+	})
+
+	t.Run("create_new_namespace_with_wait", func(t *testing.T) {
+		t.Parallel()
+
+		expectedNs := Namespace{Name: "hello_with_wait", Version: 0}
+
+		// we expect no namespaces
+		stdOut, err := fxconfig(t, "namespace", "list", configArg)
+		require.NoError(t, err)
+		nss, err := parseNamespaceList(stdOut)
+		require.NoError(t, err)
+		require.NotContains(t, nss, expectedNs)
+
+		// create namespace hello
+		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
+			configArg, policyArg, endorseArg, submitArg, waitArg)
 		require.NoError(t, err)
 
 		// expect one installed namespace

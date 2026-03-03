@@ -37,9 +37,14 @@ type testApp struct {
 	mock.Mock
 }
 
-func (t *testApp) DeployNamespace(ctx context.Context, input *app.DeployNamespaceInput) (*app.DeployNamespaceOutput, error) {
+func (t *testApp) MergeTransactions(ctx context.Context, txs []*applicationpb.Tx) (*applicationpb.Tx, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (t *testApp) DeployNamespace(ctx context.Context, input *app.DeployNamespaceInput) (*app.DeployNamespaceOutput, app.TxStatus, error) {
 	args := t.Called(ctx, input)
-	return nil, args.Error(1)
+	return nil, 0, args.Error(1)
 }
 
 func (t *testApp) ListNamespaces(ctx context.Context) ([]app.NamespaceQueryResult, error) {
@@ -57,7 +62,7 @@ func (t *testApp) SubmitTransaction(ctx context.Context, txID string, tx *applic
 	panic("implement me")
 }
 
-func (t *testApp) SubmitTransactionWithWait(ctx context.Context, txID string, tx *applicationpb.Tx) error {
+func (t *testApp) SubmitTransactionWithWait(ctx context.Context, txID string, tx *applicationpb.Tx) (app.TxStatus, error) {
 	// TODO implement me
 	panic("implement me")
 }

@@ -7,6 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 package v1
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/io"
@@ -32,7 +34,12 @@ func newTxSubmitCommand(ctx *CLIContext) *cobra.Command {
 			}
 
 			if waitFlag {
-				return ctx.App.SubmitTransactionWithWait(cmd.Context(), txID, tx)
+				status, err := ctx.App.SubmitTransactionWithWait(cmd.Context(), txID, tx)
+				if err != nil {
+					return err
+				}
+				ctx.Printer.Print(fmt.Sprintf("Status Code: %d", status))
+				return nil
 			}
 
 			return ctx.App.SubmitTransaction(cmd.Context(), txID, tx)

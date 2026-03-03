@@ -44,45 +44,44 @@ type DeployNamespaceOutput struct {
 }
 
 // DeployNamespace creates a namespace transaction and submits it to the ordering service.
-func (d *AdminApp) DeployNamespace(ctx context.Context, input *DeployNamespaceInput) (*DeployNamespaceOutput, error) {
+func (d *AdminApp) DeployNamespace(ctx context.Context, input *DeployNamespaceInput) (*DeployNamespaceOutput, TxStatus, error) {
 	// input validation
 	err := d.validate(input)
 	if err != nil {
-		return nil, err
+		return nil, UnknownStatus, err
 	}
 
 	// create namespace tx
 	out, err := d.CreateNamespace(ctx, input)
 	if err != nil {
-		return nil, err
+		return nil, UnknownStatus, err
 	}
 
 	if !input.Endorse {
-		return out, nil
+		return out, UnknownStatus, nil
 	}
 
 	// Endorse transaction
 	out.Tx, err = d.EndorseTransaction(ctx, out.TxID, out.Tx)
 	if err != nil {
-		return nil, err
+		return nil, UnknownStatus, err
 	}
 
 	if !input.Submit {
-		return out, nil
+		return out, UnknownStatus, nil
 	}
 
 	// submit transaction
 	if input.Wait {
-		if err := d.SubmitTransactionWithWait(ctx, out.TxID, out.Tx); err != nil {
-			return nil, err
-		}
-	} else {
-		if err := d.SubmitTransaction(ctx, out.TxID, out.Tx); err != nil {
-			return nil, err
+		if status, err := d.SubmitTransactionWithWait(ctx, out.TxID, out.Tx); err != nil {
+			return nil, status, err
 		}
 	}
+	if err := d.SubmitTransaction(ctx, out.TxID, out.Tx); err != nil {
+		return nil, UnknownStatus, err
+	}
 
-	return out, nil
+	return nil, UnknownStatus, nil
 }
 
 func (d *AdminApp) validate(input *DeployNamespaceInput) error {

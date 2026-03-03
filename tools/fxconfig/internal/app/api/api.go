@@ -17,6 +17,7 @@ type MspProvider interface {
 // needs) is the adapter's responsibility, not the domain's.
 type OrdererClient interface {
 	Broadcast(ctx context.Context, signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) error
+	Close() error
 }
 
 type OrdererProvider interface {
@@ -26,8 +27,21 @@ type OrdererProvider interface {
 
 type QueryClient interface {
 	GetNamespacePolicies(ctx context.Context) (*applicationpb.NamespacePolicies, error)
+	Close() error
 }
+
 type QueryProvider interface {
 	Get() (QueryClient, error)
+	Validate() error
+}
+
+type NotificationClient interface {
+	Subscribe(ctx context.Context, txID string) (chan int, error)
+	WaitForEvent(ctx context.Context, subscription chan int) (int, error)
+	Close() error
+}
+
+type NotificationProvider interface {
+	Get() (NotificationClient, error)
 	Validate() error
 }
