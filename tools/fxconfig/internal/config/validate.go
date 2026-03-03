@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package config
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"strings"
@@ -81,12 +82,19 @@ func (c *TLSConfig) Validate(vctx validation.Context) error {
 		return nil
 	}
 
+	// check that client cert exists
 	if err := validateFilePath(vctx, c.ClientCertPath); err != nil {
 		return fmt.Errorf("invalid clientCertPath: %w", err)
 	}
 
+	// check that client key exists
 	if err := validateFilePath(vctx, c.ClientKeyPath); err != nil {
 		return fmt.Errorf("invalid clientKeyPath: %w", err)
+	}
+
+	// try to load key pair
+	if _, err := tls.LoadX509KeyPair(c.ClientKeyPath, c.ClientKeyPath); err != nil {
+		return fmt.Errorf("invalid cert/key pair: %w", err)
 	}
 
 	return nil

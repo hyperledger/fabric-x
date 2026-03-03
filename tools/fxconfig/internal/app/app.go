@@ -10,7 +10,7 @@ import (
 	"context"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app/api"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/api"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
 

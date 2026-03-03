@@ -11,7 +11,7 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app/api"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/api"
 )
 
 type TxStatus = int
