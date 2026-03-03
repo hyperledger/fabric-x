@@ -17,7 +17,20 @@ func NewTxRootCommand(ctx *CLIContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tx",
 		Short: "Perform transaction operations",
-		Long:  "",
+		Long: `Perform transaction operations such as endorsement, merging, and submission.
+
+Transaction Lifecycle:
+  1. Create - Generate transaction (e.g., namespace create/update)
+  2. Endorse - Collect signatures from required organizations
+  3. Merge - Combine endorsements from multiple organizations
+  4. Submit - Send to ordering service for finalization
+
+Multi-Organization Workflow:
+  1. Org1 creates transaction: fxconfig namespace create ... --output tx.json
+  2. Org1 endorses: fxconfig tx endorse tx.json --output tx_org1.json
+  3. Org2 endorses: fxconfig tx endorse tx.json --output tx_org2.json
+  4. Merge endorsements: fxconfig tx merge tx_org1.json tx_org2.json --output merged.json
+  5. Submit: fxconfig tx submit merged.json --wait`,
 	}
 
 	cmd.AddCommand(

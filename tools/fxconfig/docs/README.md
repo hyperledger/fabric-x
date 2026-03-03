@@ -185,20 +185,20 @@ fxconfig namespace create hello \
 # Create transaction
 fxconfig namespace create hello \
   --policy="AND('Org1MSP.member', 'Org2MSP.member')" \
-  --output=hello.pb
+  --output=hello.json
 
 # Endorse with Org1
-fxconfig tx endorse hello.pb \
+fxconfig tx endorse hello.json \
   --config=org1_config.yaml \
-  --output=hello_org1.pb
+  --output=hello_org1.json
 
 # Endorse with Org2 (appends to existing endorsements)
-fxconfig tx endorse hello_org1.pb \
+fxconfig tx endorse hello_org1.json \
   --config=org2_config.yaml \
-  --output=hello_endorsed.pb
+  --output=hello_endorsed.json
 
 # Submit to network
-fxconfig tx submit hello_endorsed.pb
+fxconfig tx submit hello_endorsed.json
 ```
 
 ### Multi-Org Distributed Flow
@@ -211,29 +211,29 @@ fxconfig namespace list
 # Org1: Create transaction
 fxconfig namespace create hello \
   --policy="AND('Org1MSP.member', 'Org2MSP.member')" \
-  --output=hello.pb
+  --output=hello.json
 
-# Send hello.pb to Org1 and Org2 via external secure channel
+# Send hello.json to Org1 and Org2 via external secure channel
 
 # Org1: Endorse
-fxconfig tx endorse hello.pb \
+fxconfig tx endorse hello.json \
   --config=org1_config.yaml \
-  --output=hello_org1.pb
+  --output=hello_org1.json
 
-# Org2: Endorse (receives hello.pb via external channel)
-fxconfig tx endorse hello.pb \
+# Org2: Endorse (receives hello.json via external channel)
+fxconfig tx endorse hello.json \
   --config=org2_config.yaml \
-  --output=hello_org2.pb
+  --output=hello_org2.json
 
 # Collect endorsed transactions from org1 and org2
 
 # Either org: Merge endorsements
 fxconfig tx merge \
-  hello_org1.pb hello_org2.pb \
-  --output=hello_endorsed.pb
+  hello_org1.json hello_org2.json \
+  --output=hello_endorsed.json
 
 # Either org: Submit to network
-fxconfig tx submit hello_endorsed.pb
+fxconfig tx submit hello_endorsed.json
 ```
 
 ### Update Namespace
@@ -304,25 +304,25 @@ EOF
 fxconfig namespace create payments \
   --config org1-config.yaml \
   --policy="AND('Org1MSP.member', 'Org2MSP.member')" \
-  --output=payments.pb
+  --output=payments.json
 
 # Org1 endorses
-fxconfig tx endorse payments.pb \
+fxconfig tx endorse payments.json \
   --config org1-config.yaml \
-  --output=payments_org1.pb
+  --output=payments_org1.json
 
 # Org2 endorses
-fxconfig tx endorse payments.pb \
+fxconfig tx endorse payments.json \
   --config org2-config.yaml \
-  --output=payments_org2.pb
+  --output=payments_org2.json
 
 # Merge and submit
 fxconfig tx merge \
-  payments_org1.pb payments_org2.pb \
-  --output=payments_endorsed.pb
+  payments_org1.json payments_org2.json \
+  --output=payments_endorsed.json
 
 fxconfig tx submit \
-  payments_endorsed.pb \
+  payments_endorsed.json \
   --config org1-config.yaml
 ```
 
@@ -351,8 +351,11 @@ Get help for any command:
 fxconfig --help                    # Global help
 fxconfig namespace --help          # Namespace commands help
 fxconfig namespace create --help   # Create command help
+fxconfig namespace update --help   # Create command help
 fxconfig tx --help                 # Transaction commands help
 fxconfig tx endorse --help         # Endorse command help
+fxconfig tx merge--help            # Merge command help
+fxconfig tx submit --help          # Submit command help
 ```
 
 ## Troubleshooting

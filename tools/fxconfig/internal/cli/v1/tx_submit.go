@@ -19,9 +19,35 @@ func newTxSubmitCommand(ctx *CLIContext) *cobra.Command {
 	var waitFlag WaitFlag
 
 	cmd := &cobra.Command{
-		Use:   "submit",
-		Short: "Submit transaction",
-		Args:  cobra.MinimumNArgs(1),
+		Use:   "submit [file]",
+		Short: "Submit transaction to ordering service",
+		Long: `Submit an endorsed transaction to the Fabric-X ordering service.
+
+The transaction must have sufficient endorsements to satisfy its endorsement
+policy. Use 'fxconfig tx merge' to combine endorsements from multiple
+organizations before submission.
+
+Status Codes (with --wait):
+  0 - Transaction successfully committed
+  1 - Transaction failed (see error message for details)
+
+Examples:
+  # Submit transaction (returns immediately)
+  fxconfig tx submit merged_tx.json
+
+  # Submit and wait for finalization
+  fxconfig tx submit merged_tx.json --wait
+
+  # Submit with custom config
+  fxconfig tx submit merged_tx.json --config /path/to/config.yaml --wait
+
+  # Submit and capture status
+  if fxconfig tx submit merged_tx.json --wait; then
+    echo "Transaction committed successfully"
+  else
+    echo "Transaction failed"
+  fi`,
+		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			input, err := io.ResolveInput(cmd, args[0])
 			if err != nil {

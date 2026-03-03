@@ -21,9 +21,32 @@ func newTxMergeCommand(ctx *CLIContext) *cobra.Command {
 	var outputFlag OutputFlag
 
 	cmd := &cobra.Command{
-		Use:   "merge <tx1.json> <tx2.json> [txN.json...]",
+		Use:   "merge [tx1.json] [tx2.json] [txN.json...]",
 		Short: "Merge multiple endorsed transactions",
-		Args:  cobra.MinimumNArgs(2),
+		Long: `Combine endorsements from multiple organizations into a single transaction.
+
+All input transactions must:
+  • Have the same transaction ID
+  • Contain the same transaction data
+  • Have endorsements from different organizations
+
+The merged transaction will contain all endorsement signatures, making it
+ready for submission if the endorsement policy is satisfied.
+
+This command is essential for multi-organization workflows where each
+organization endorses independently and endorsements must be collected
+before submission.
+
+Examples:
+  # Merge two endorsed transactions
+  fxconfig tx merge tx_org1.json tx_org2.json --output merged_tx.json
+
+  # Merge three organizations' endorsements
+  fxconfig tx merge tx_org1.json tx_org2.json tx_org3.json --output merged_tx.json
+
+  # Merge and output to stdout
+  fxconfig tx merge tx_org1.json tx_org2.json > merged_tx.json`,
+		Args: cobra.MinimumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			txs := make([]*applicationpb.Tx, 0, len(args))
 			txIDs := make(map[string]struct{})

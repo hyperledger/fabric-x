@@ -31,7 +31,33 @@ func newNsUpdateCommand(ctx *CLIContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update [name]",
 		Short: "Update existing namespace",
-		Args:  cobra.ExactArgs(1),
+		Long: `Update an existing namespace's endorsement policy.
+
+The --version flag is required to prevent concurrent modification conflicts.
+Use 'fxconfig namespace list' to find the current version number.
+
+Version numbers increment with each successful update. If the version you
+specify doesn't match the current version, the update will fail.
+
+Examples:
+  # Update namespace policy (check version first with 'list')
+  fxconfig namespace update hello \
+    --policy="OR('Org2MSP.member')" \
+    --version=0 \
+    --endorse --submit --wait
+
+  # Change from single-org to multi-org policy
+  fxconfig namespace update hello \
+    --policy="AND('Org1MSP.member', 'Org2MSP.member')" \
+    --version=1 \
+    --output=tx.json
+
+  # Update and save transaction for multi-org endorsement
+  fxconfig namespace update payments \
+    --policy="OutOf(2, 'Org1MSP.member', 'Org2MSP.member', 'Org3MSP.member')" \
+    --version=2 \
+    --output=update_tx.json`,
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			p := app.PolicyConfig{}
 			p.Set(string(policyFlag))

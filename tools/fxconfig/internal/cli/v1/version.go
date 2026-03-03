@@ -22,10 +22,14 @@ import (
 func NewVersionCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
-		Short: "Print the version of fxconfig",
-		Long:  ``,
+		Short: "Display version information",
+		Long: `Display detailed version information including:
+  • fxconfig version
+  • Go compiler version
+  • Git commit SHA
+  • Operating system and architecture`,
 		Run: func(cmd *cobra.Command, _ []string) {
-			// TODO use printer
+			// TODO: use printer
 			cmd.Printf("fxconfig\n")
 			showLine(cmd, "Version", metadata.Version)
 			showLine(cmd, "Go version", runtime.Version())

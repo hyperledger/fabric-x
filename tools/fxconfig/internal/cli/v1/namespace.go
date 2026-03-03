@@ -16,8 +16,14 @@ import (
 func NewNsRootCommand(ctx *CLIContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "namespace",
-		Short: "Perform namespace operations",
-		Long:  "",
+		Short: "Manage Fabric-X namespaces",
+		Long: `Manage namespace lifecycle operations.
+
+Namespaces in Fabric-X define isolated execution environments with their own
+endorsement policies. Each namespace has:
+  • Unique identifier (name)
+  • Version number (incremented on updates)
+  • Endorsement policy (defines which organizations must sign transactions)`,
 	}
 
 	cmd.AddCommand(

@@ -19,6 +19,27 @@ func newNsListCommand(ctx *CLIContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List installed Namespaces",
+		Long: `Query and display all installed namespaces with their configurations.
+
+For each namespace, displays:
+  • Name (namespace identifier)
+  • Version (current version number)
+  • Policy (endorsement policy in hexadecimal format)
+
+Use this command to:
+  • Verify namespace deployment
+  • Check current version before updates
+  • Audit endorsement policies
+
+Examples:
+  # List all namespaces
+  fxconfig namespace list
+
+  # List with custom config
+  fxconfig namespace list --config /path/to/config.yaml
+
+  # List and save output to file
+  fxconfig namespace list > namespaces.txt`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			result, err := ctx.App.ListNamespaces(cmd.Context())
 			if err != nil {

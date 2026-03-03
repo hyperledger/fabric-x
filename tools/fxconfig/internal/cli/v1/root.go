@@ -24,9 +24,19 @@ func NewRootCommand(cliCtx *CLIContext, buildApp func(cfg *config.Config) (app.A
 	var cfgFile string
 	rootCmd := &cobra.Command{
 		Use:   "fxconfig",
-		Short: "Yet another admin tool for Fabric-X",
-		Long: `fxconfig is a CLI tool for managing Fabric-X namespaces.
-This application enables creating, updating, and querying namespaces with flexible endorsement policies.`,
+		Short: "CLI tool for managing Fabric-X namespaces and transactions",
+		Long: `fxconfig is a command-line tool for managing Fabric-X namespaces and transactions.
+
+Namespaces in Fabric-X define isolated execution environments with their own
+endorsement policies. This tool allows you to:
+  • Create and update namespaces with custom endorsement policies
+  • Query installed namespaces and their configurations
+  • Endorse, merge, and submit transactions
+  • Manage transaction lifecycle across multiple organizations
+	
+Configuration can be provided via:
+  • Config file (--config flag or $HOME/.fxconfig/config.yaml, .fxconfig/config.yaml)
+  • Environment variables (FXCONFIG_*)`,
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			var opts []config.Option
 			// Add config file option if specified
@@ -58,7 +68,8 @@ This application enables creating, updating, and querying namespaces with flexib
 	}
 
 	// config parameter
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.fxconfig/config.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
+		"Config file (default is $HOME/.fxconfig/config.yaml)")
 
 	// Register all subcommands
 	rootCmd.AddCommand(NewVersionCommand())
