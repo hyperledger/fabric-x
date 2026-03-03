@@ -20,6 +20,12 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
@@ -28,7 +34,7 @@ func main() {
 	// setup our root command
 	cmd := cli.NewRootCommand(
 		cliCtx,
-		// inject an application builder that is invoked once we have loaded the configration
+		// inject an application builder that is invoked once we have loaded the configuration
 		func(cfg *config.Config) (app.Application, error) {
 			vctx := validation.NewValidationContext()
 			return &app.AdminApp{
@@ -41,7 +47,5 @@ func main() {
 		},
 	)
 
-	if err := cmd.ExecuteContext(ctx); err != nil {
-		os.Exit(1)
-	}
+	return cmd.ExecuteContext(ctx)
 }

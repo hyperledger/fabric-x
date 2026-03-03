@@ -12,16 +12,16 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/io"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
 
 // newNsCreateCommand creates a command for creating new namespaces.
 // The deployNamespace function is injected to enable testing with mock implementations.
 func newNsCreateCommand(ctx *CLIContext) *cobra.Command {
 	var (
-		policyFlag     PolicyFlag
-		outputFlag     OutputFlag
-		namespaceFlags NamespaceDeployFlags
+		policy    policyFlag
+		output    outputFlag
+		namespace namespaceDeployFlags
 	)
 
 	cmd := &cobra.Command{
@@ -61,15 +61,15 @@ Examples:
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			p := app.PolicyConfig{}
-			p.Set(string(policyFlag))
+			p.Set(string(policy))
 
 			input := app.DeployNamespaceInput{
 				NsID:    args[0],
 				Version: -1, // Set version to -1 to indicate this is a create operation (not an update)
 				Policy:  p,
-				Endorse: namespaceFlags.endorse,
-				Submit:  namespaceFlags.submit,
-				Wait:    namespaceFlags.wait,
+				Endorse: namespace.endorse,
+				Submit:  namespace.submit,
+				Wait:    namespace.wait,
 			}
 
 			res, status, err := ctx.App.DeployNamespace(cmd.Context(), &input)
@@ -87,14 +87,14 @@ Examples:
 				return err
 			}
 
-			return io.WriteOutput(cmd, string(outputFlag), o)
+			return cliio.WriteOutput(cmd, string(output), o)
 		},
 	}
 
 	// adds flags related to namespaces
-	policyFlag.Bind(cmd)
-	outputFlag.Bind(cmd)
-	namespaceFlags.Bind(cmd)
+	policy.bind(cmd)
+	output.bind(cmd)
+	namespace.bind(cmd)
 
 	return cmd
 }

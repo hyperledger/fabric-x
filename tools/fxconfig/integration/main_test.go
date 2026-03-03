@@ -8,7 +8,6 @@ package integration_test
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -68,36 +67,11 @@ func TestScenarios(t *testing.T) {
 	)
 
 	// Setup - Create temporary config file
-	tmpDir := t.TempDir()
-	configPath := filepath.Join(tmpDir, "config.yaml")
-	configContent := `
-msp:
-  localMspID: ` + localMspID + `
-  configPath: ` + mspConfigPath + `
-
-orderer:
-  address: ` + endpoints["orderer"] + `
-  channel: ` + channelID + `
-  connectionTimeout: 30s
-
-queries:
-  address: ` + endpoints["query"] + `
-  connectionTimeout: 20s
-
-notifications:
-  address: ` + endpoints["sidecar"] + `
-  connectionTimeout: 15s
-  waitingTimeout: 15s
-`
-	err = os.WriteFile(configPath, []byte(configContent), 0o600)
-	require.NoError(t, err)
+	configPath := generateConfigFile(t, localMspID, mspConfigPath, endpoints)
 
 	var (
-		configArg = "--config=" + configPath
-
-		// policy
-		policyArg = "--policy=threshold:" + thresholdKeyPath
-		// policyArg = "--policy=" + policy
+		configArg  = "--config=" + configPath
+		policyArg  = "--policy=threshold:" + thresholdKeyPath
 		endorseArg = "--endorse"
 		submitArg  = "--submit"
 		waitArg    = "--wait"

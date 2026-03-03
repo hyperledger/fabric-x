@@ -1,3 +1,7 @@
+// Copyright IBM Corp. All Rights Reserved.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package app
 
 import (
@@ -46,7 +50,10 @@ type DeployNamespaceOutput struct {
 }
 
 // DeployNamespace creates a namespace transaction and submits it to the ordering service.
-func (d *AdminApp) DeployNamespace(ctx context.Context, input *DeployNamespaceInput) (*DeployNamespaceOutput, TxStatus, error) {
+func (d *AdminApp) DeployNamespace(
+	ctx context.Context,
+	input *DeployNamespaceInput,
+) (*DeployNamespaceOutput, TxStatus, error) {
 	// input validation
 	err := d.validate(input)
 	if err != nil {

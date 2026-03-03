@@ -1,5 +1,9 @@
-// Package api defines the core interfaces for fxconfig to interact with Fabric-X components.
-package api
+// Copyright IBM Corp. All Rights Reserved.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+// Package adapters provides the adapter apis.
+package adapters
 
 import (
 	"context"

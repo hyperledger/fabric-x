@@ -1,4 +1,8 @@
-package io
+// Copyright IBM Corp. All Rights Reserved.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+package cliio
 
 import (
 	"encoding/json"
@@ -15,12 +19,12 @@ type Codec interface {
 	Decode(data []byte) (txID string, tx *applicationpb.Tx, err error)
 }
 
-// JsonCodec implements Codec using JSON format with protobuf marshaling.
-type JsonCodec struct{}
+// JSONCodec implements Codec using JSON format with protobuf marshaling.
+type JSONCodec struct{}
 
 // Encode converts a transaction to JSON format with transaction ID.
-func (jc *JsonCodec) Encode(txID string, tx *applicationpb.Tx) ([]byte, error) {
-	var txJSON map[string]interface{}
+func (*JSONCodec) Encode(txID string, tx *applicationpb.Tx) ([]byte, error) {
+	var txJSON map[string]any
 
 	if tx == nil {
 		return nil, errors.New("tx is nil")
@@ -40,7 +44,7 @@ func (jc *JsonCodec) Encode(txID string, tx *applicationpb.Tx) ([]byte, error) {
 		return nil, err
 	}
 
-	output := map[string]interface{}{
+	output := map[string]any{
 		"txID": txID,
 		"tx":   txJSON,
 	}
@@ -49,7 +53,7 @@ func (jc *JsonCodec) Encode(txID string, tx *applicationpb.Tx) ([]byte, error) {
 }
 
 // Decode parses JSON data into transaction ID and transaction.
-func (jc *JsonCodec) Decode(data []byte) (string, *applicationpb.Tx, error) {
+func (*JSONCodec) Decode(data []byte) (string, *applicationpb.Tx, error) {
 	carrier := struct {
 		TxID string          `json:"txID"`
 		Tx   json.RawMessage `json:"tx"`

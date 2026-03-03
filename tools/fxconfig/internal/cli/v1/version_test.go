@@ -17,6 +17,8 @@ import (
 )
 
 func TestVersionCommand(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name           string
 		args           []string

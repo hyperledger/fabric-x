@@ -15,7 +15,7 @@ import (
 	"github.com/hyperledger/fabric-x-common/api/msppb"
 )
 
-// Helper function to create a test transaction with endorsements
+// Helper function to create a test transaction with endorsements.
 func createTestTx(namespaces []string, endorsements map[string][]string) *applicationpb.Tx {
 	tx := &applicationpb.Tx{
 		Namespaces:   make([]*applicationpb.TxNamespace, len(namespaces)),
@@ -31,17 +31,17 @@ func createTestTx(namespaces []string, endorsements map[string][]string) *applic
 			EndorsementsWithIdentity: make([]*applicationpb.EndorsementWithIdentity, 0),
 		}
 
-		if mspIds, ok := endorsements[ns]; ok {
-			for _, mspId := range mspIds {
+		if mspIDs, ok := endorsements[ns]; ok {
+			for _, mspID := range mspIDs {
 				// Create identity using the msppb package
 				identity := &msppb.Identity{
-					MspId: mspId,
+					MspId: mspID,
 				}
 				tx.Endorsements[i].EndorsementsWithIdentity = append(
 					tx.Endorsements[i].EndorsementsWithIdentity,
 					&applicationpb.EndorsementWithIdentity{
 						Identity:    identity,
-						Endorsement: []byte("sig-" + mspId),
+						Endorsement: []byte("sig-" + mspID),
 					},
 				)
 			}
@@ -255,7 +255,7 @@ func TestMerge_MultipleNamespaces(t *testing.T) {
 		require.Len(t, result.Endorsements, 3)
 
 		// Each namespace should have 2 endorsements
-		for i := 0; i < 3; i++ {
+		for i := range 3 {
 			require.Len(t, result.Endorsements[i].EndorsementsWithIdentity, 2)
 		}
 	})

@@ -16,7 +16,7 @@ import (
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/api"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
@@ -34,7 +34,7 @@ func (f *QueryProvider) Validate() error {
 }
 
 // Get creates and returns a new QueryClient instance.
-func (f *QueryProvider) Get() (api.QueryClient, error) {
+func (f *QueryProvider) Get() (adapters.QueryClient, error) { //nolint:ireturn
 	return NewQueryClient(f.Cfg)
 }
 

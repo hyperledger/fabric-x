@@ -1,4 +1,8 @@
-package io
+// Copyright IBM Corp. All Rights Reserved.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+package cliio
 
 import (
 	"errors"
@@ -27,7 +31,6 @@ func (f *IOFlags) Bind(cmd *cobra.Command) {
 
 // ResolveInput reads input from file or stdin with size limits and security checks.
 func ResolveInput(cmd *cobra.Command, inputFile string) ([]byte, error) {
-
 	pipe := isInputFromPipe()
 	switch {
 	case inputFile != "" && pipe:
@@ -43,7 +46,9 @@ func ResolveInput(cmd *cobra.Command, inputFile string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		defer file.Close()
+		defer func() {
+			_ = file.Close()
+		}()
 		// check file size
 		if info, err := file.Stat(); err == nil && info.Size() > defaultMaxInputSize {
 			return nil, fmt.Errorf("input file exceeds maximum allowed size of %d bytes", defaultMaxInputSize)

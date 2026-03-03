@@ -25,9 +25,9 @@ func TestNewUpdateCommand(t *testing.T) {
 	require.NotNil(t, cmd.RunE, "command should have a RunE function")
 
 	// Verify command-specific required flags
-	versionFlag := cmd.Flag("version")
-	require.NotNil(t, versionFlag, "version flag should exist")
+	version := cmd.Flag("version")
+	require.NotNil(t, version, "version flag should exist")
 
-	policyFlag := cmd.Flag("policy")
-	require.NotNil(t, policyFlag, "policy flag should exist")
+	policy := cmd.Flag("policy")
+	require.NotNil(t, policy, "policy flag should exist")
 }

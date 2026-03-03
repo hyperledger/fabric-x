@@ -9,12 +9,12 @@ package v1
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/io"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
 
 // newTxEndorseCommand creates a command for endorsing transactions.
 func newTxEndorseCommand(ctx *CLIContext) *cobra.Command {
-	var outputInput OutputFlag
+	var output outputFlag
 
 	cmd := &cobra.Command{
 		Use:   "endorse [file]",
@@ -42,7 +42,7 @@ Examples:
   fxconfig tx endorse tx.json --config /path/to/org1-config.yaml --output tx_org1.json`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			input, err := io.ResolveInput(cmd, args[0])
+			input, err := cliio.ResolveInput(cmd, args[0])
 			if err != nil {
 				return err
 			}
@@ -62,10 +62,10 @@ Examples:
 				return err
 			}
 
-			return io.WriteOutput(cmd, string(outputInput), o)
+			return cliio.WriteOutput(cmd, string(output), o)
 		},
 	}
-	outputInput.Bind(cmd)
+	output.bind(cmd)
 
 	return cmd
 }

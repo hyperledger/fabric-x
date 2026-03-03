@@ -37,7 +37,7 @@ func (d *AdminApp) ListNamespaces(ctx context.Context) ([]NamespaceQueryResult, 
 	for i, p := range res.GetPolicies() {
 		results[i] = NamespaceQueryResult{
 			NsID:    p.GetNamespace(),
-			Version: int(p.GetVersion()),
+			Version: int(p.GetVersion()), //nolint:gosec
 			Policy:  p.GetPolicy(),
 		}
 	}

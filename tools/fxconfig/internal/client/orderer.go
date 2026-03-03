@@ -20,7 +20,7 @@ import (
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x-common/protoutil"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/api"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
@@ -39,7 +39,7 @@ func (f *OrdererProvider) Validate() error {
 }
 
 // Get creates and returns a new OrdererClient instance.
-func (f *OrdererProvider) Get() (api.OrdererClient, error) {
+func (f *OrdererProvider) Get() (adapters.OrdererClient, error) { //nolint:ireturn
 	return NewOrdererClient(f.Cfg)
 }
 
@@ -90,13 +90,6 @@ func (oc *OrdererClient) Close() error {
 		oc.closeF()
 	}
 	return nil
-}
-
-// BroadcastRequest encapsulates the parameters needed to broadcast a transaction.
-type BroadcastRequest struct {
-	txID   string
-	tx     *applicationpb.Tx
-	signer msp.SigningIdentity
 }
 
 // Broadcast sends the signed envelope to the ordering service.

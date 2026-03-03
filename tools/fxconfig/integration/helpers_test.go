@@ -9,6 +9,7 @@ package integration_test
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -94,6 +95,39 @@ func setup(t *testing.T) map[string]string {
 	require.NoError(t, err)
 
 	return endpoints
+}
+
+func generateConfigFile(
+	tb testing.TB,
+	localMspID string,
+	mspConfigPath string,
+	endpoints map[string]string,
+) string {
+	tb.Helper()
+	tmpDir := tb.TempDir()
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	configContent := `
+msp:
+  localMspID: ` + localMspID + `
+  configPath: ` + mspConfigPath + `
+
+orderer:
+  address: ` + endpoints["orderer"] + `
+  channel: ` + channelID + `
+  connectionTimeout: 30s
+
+queries:
+  address: ` + endpoints["query"] + `
+  connectionTimeout: 20s
+
+notifications:
+  address: ` + endpoints["sidecar"] + `
+  connectionTimeout: 15s
+  waitingTimeout: 15s
+`
+	err := os.WriteFile(configPath, []byte(configContent), 0o600)
+	require.NoError(tb, err)
+	return configPath
 }
 
 func fxconfig(tb testing.TB, args ...string) (string, error) {

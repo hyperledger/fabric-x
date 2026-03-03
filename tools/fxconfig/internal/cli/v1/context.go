@@ -1,8 +1,12 @@
+// Copyright IBM Corp. All Rights Reserved.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package v1
 
 import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/io"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
@@ -11,8 +15,8 @@ import (
 // and the application layer for executing operations.
 type CLIContext struct {
 	Config             *config.Config
-	Printer            io.Printer
-	IOTransactionCodec io.Codec
+	Printer            cliio.Printer
+	IOTransactionCodec cliio.Codec
 	// Logger  logger.Logger
 
 	App app.Application

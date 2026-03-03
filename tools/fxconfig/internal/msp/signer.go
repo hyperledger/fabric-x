@@ -30,6 +30,8 @@ func (f *SignerProvider) Validate() error {
 }
 
 // Get retrieves the signing identity from the configured MSP.
+//
+//nolint:ireturn
 func (f *SignerProvider) Get() (msp.SigningIdentity, error) {
 	return GetSignerIdentityFromMSP(f.Cfg)
 }
@@ -52,9 +54,7 @@ func GetSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error)
 }
 
 // setupMSP creates an MSP instance with file-based BCCSP keystore from the given configuration.
-//
-//nolint:ireturn
-func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) {
+func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) { //nolint:ireturn
 	conf, err := msp.GetLocalMspConfig(mspCfg.ConfigPath, nil, mspCfg.LocalMspID)
 	if err != nil {
 		return nil, fmt.Errorf("error getting local msp config from %v: %w", mspCfg.ConfigPath, err)

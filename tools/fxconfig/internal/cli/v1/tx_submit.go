@@ -11,12 +11,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/io"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
 
 // newTxSubmitCommand creates a command for submitting transactions.
 func newTxSubmitCommand(ctx *CLIContext) *cobra.Command {
-	var waitFlag WaitFlag
+	var wait waitFlag
 
 	cmd := &cobra.Command{
 		Use:   "submit [file]",
@@ -49,7 +49,7 @@ Examples:
   fi`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			input, err := io.ResolveInput(cmd, args[0])
+			input, err := cliio.ResolveInput(cmd, args[0])
 			if err != nil {
 				return err
 			}
@@ -59,7 +59,7 @@ Examples:
 				return err
 			}
 
-			if waitFlag {
+			if wait {
 				status, err := ctx.App.SubmitTransactionWithWait(cmd.Context(), txID, tx)
 				if err != nil {
 					return err
@@ -71,7 +71,7 @@ Examples:
 			return ctx.App.SubmitTransaction(cmd.Context(), txID, tx)
 		},
 	}
-	waitFlag.Bind(cmd)
+	wait.bind(cmd)
 
 	return cmd
 }

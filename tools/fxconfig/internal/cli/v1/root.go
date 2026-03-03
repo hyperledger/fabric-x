@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/io"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
@@ -52,10 +52,10 @@ Configuration can be provided via:
 
 			// set our config and printer in our context
 			cliCtx.Config = cfg
-			cliCtx.Printer = io.NewCLIPrinter(cmd.OutOrStdout(), cmd.ErrOrStderr(), io.FormatTable)
+			cliCtx.Printer = cliio.NewCLIPrinter(cmd.OutOrStdout(), cmd.ErrOrStderr(), cliio.FormatTable)
 
 			// output coded
-			cliCtx.IOTransactionCodec = &io.JsonCodec{}
+			cliCtx.IOTransactionCodec = &cliio.JSONCodec{}
 
 			// set application in context
 			cliCtx.App, err = buildApp(cfg)

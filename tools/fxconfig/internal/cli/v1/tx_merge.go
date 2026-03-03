@@ -12,13 +12,13 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/io"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
 
 // newTxMergeCommand creates a command to merge multiple endorsed transactions
 // with the same transaction ID into a single transaction.
 func newTxMergeCommand(ctx *CLIContext) *cobra.Command {
-	var outputFlag OutputFlag
+	var output outputFlag
 
 	cmd := &cobra.Command{
 		Use:   "merge [tx1.json] [tx2.json] [txN.json...]",
@@ -48,31 +48,9 @@ Examples:
   fxconfig tx merge tx_org1.json tx_org2.json > merged_tx.json`,
 		Args: cobra.MinimumNArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			txs := make([]*applicationpb.Tx, 0, len(args))
-			txIDs := make(map[string]struct{})
-			var txID string
-
-			for _, arg := range args {
-				input, err := io.ResolveInput(cmd, arg)
-				if err != nil {
-					return err
-				}
-
-				id, tx, err := ctx.IOTransactionCodec.Decode(input)
-				if err != nil {
-					return err
-				}
-
-				txIDs[txID] = struct{}{}
-				if txID == "" {
-					txID = id
-				}
-
-				txs = append(txs, tx)
-			}
-
-			if len(txIDs) != 1 {
-				return fmt.Errorf("all transaction must have the same txID, found %d different txIDs", len(txIDs))
+			txID, txs, err := resolveInputs(ctx, cmd, args)
+			if err != nil {
+				return err
 			}
 
 			mergedTx, err := ctx.App.MergeTransactions(cmd.Context(), txs)
@@ -85,10 +63,44 @@ Examples:
 				return err
 			}
 
-			return io.WriteOutput(cmd, string(outputFlag), o)
+			return cliio.WriteOutput(cmd, string(output), o)
 		},
 	}
-	outputFlag.Bind(cmd)
+	output.bind(cmd)
 
 	return cmd
+}
+
+func resolveInputs(ctx *CLIContext, cmd *cobra.Command, args []string) (string, []*applicationpb.Tx, error) {
+	txs := make([]*applicationpb.Tx, 0, len(args))
+	txIDs := make(map[string]struct{})
+	var txID string
+
+	// go through all arguments and decode transactions
+	for _, arg := range args {
+		input, err := cliio.ResolveInput(cmd, arg)
+		if err != nil {
+			return "", nil, err
+		}
+
+		id, tx, err := ctx.IOTransactionCodec.Decode(input)
+		if err != nil {
+			return "", nil, err
+		}
+
+		txIDs[txID] = struct{}{}
+		if txID == "" {
+			txID = id
+		}
+
+		txs = append(txs, tx)
+	}
+
+	// let's make sure that all transaction have the same txID
+	if len(txIDs) != 1 {
+		return "", nil,
+			fmt.Errorf("all transaction must have the same txID, found %d different txIDs", len(txIDs))
+	}
+
+	return txID, txs, nil
 }

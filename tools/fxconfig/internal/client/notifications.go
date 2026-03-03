@@ -17,7 +17,7 @@ import (
 
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/api"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
@@ -35,7 +35,7 @@ func (f *NotificationProvider) Validate() error {
 }
 
 // Get creates and returns a new NotificationClient instance.
-func (f *NotificationProvider) Get() (api.NotificationClient, error) {
+func (f *NotificationProvider) Get() (adapters.NotificationClient, error) { //nolint:ireturn
 	return NewNotificationClient(f.Cfg)
 }
 
@@ -177,6 +177,8 @@ func wait(ctx context.Context, subscription chan int) (int, error) {
 
 // listen runs the bidirectional gRPC stream, managing request/response queues
 // and dispatching notifications to subscribers. Blocks until context is canceled.
+//
+//nolint:gocognit
 func (n *NotificationClient) listen(ctx context.Context) error {
 	notifyStream, err := n.notifyClient.OpenNotificationStream(ctx)
 	if err != nil {
@@ -188,12 +190,12 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 	// spawn stream receiver
 	g.Go(func() error {
 		for {
-			res, err := notifyStream.Recv()
-			if err != nil {
-				if errors.Is(err, context.Canceled) {
+			res, rerr := notifyStream.Recv()
+			if rerr != nil {
+				if errors.Is(rerr, context.Canceled) {
 					return nil
 				}
-				return err
+				return rerr
 			}
 			select {
 			case <-gCtx.Done():
@@ -213,8 +215,8 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 			case req = <-n.requestQueue:
 			}
 
-			if err := notifyStream.Send(req); err != nil {
-				return err
+			if rerr := notifyStream.Send(req); rerr != nil {
+				return rerr
 			}
 		}
 	})

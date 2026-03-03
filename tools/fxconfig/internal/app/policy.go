@@ -28,7 +28,7 @@ func (c *PolicyConfig) Set(policy string) {
 	policy = strings.TrimSpace(policy)
 
 	if k, ok := strings.CutPrefix(policy, "threshold:"); ok {
-		c.Type = "threshold"
+		c.Type = thresholdPolicyType
 		c.Threshold = &ThresholdPolicyConfig{
 			VerificationKeyPath: strings.TrimSpace(k),
 		}
@@ -36,7 +36,7 @@ func (c *PolicyConfig) Set(policy string) {
 	}
 
 	// default is msp
-	c.Type = "msp"
+	c.Type = mspPolicyType
 	c.MSP = &MSPPolicyConfig{Expression: policy}
 }
 
@@ -57,13 +57,13 @@ func (c *PolicyConfig) Validate(ctx validation.Context) error {
 	}
 
 	switch c.Type {
-	case "msp":
+	case mspPolicyType:
 		if c.MSP == nil {
 			return errors.New("msp policy config missing")
 		}
 		return c.MSP.Validate(ctx)
 
-	case "threshold":
+	case thresholdPolicyType:
 		if c.Threshold == nil {
 			return errors.New("threshold policy config missing")
 		}

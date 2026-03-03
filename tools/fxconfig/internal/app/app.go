@@ -12,7 +12,7 @@ import (
 	"context"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/api"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
 
@@ -29,8 +29,8 @@ type Application interface {
 // AdminApp implements Application interface with provider-based dependencies.
 type AdminApp struct {
 	Validators           validation.Context
-	MspProvider          api.MspProvider
-	QueryProvider        api.QueryProvider
-	OrdererProvider      api.OrdererProvider
-	NotificationProvider api.NotificationProvider
+	MspProvider          adapters.MspProvider
+	QueryProvider        adapters.QueryProvider
+	OrdererProvider      adapters.OrdererProvider
+	NotificationProvider adapters.NotificationProvider
 }

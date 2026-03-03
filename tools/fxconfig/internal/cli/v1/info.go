@@ -38,13 +38,14 @@ Examples:
 
   # Show configuration as environment variables
   fxconfig info --format env`,
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			// TODO: add flag to show yaml/env config
 			out, err := yaml.Marshal(ctx.Config)
 			if err != nil {
 				return err
 			}
-			return ctx.Printer.Print(string(out))
+			ctx.Printer.Print(string(out))
+			return nil
 		},
 	}
 

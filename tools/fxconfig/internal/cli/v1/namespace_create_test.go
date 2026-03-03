@@ -29,20 +29,23 @@ func TestNewCreateCommand(t *testing.T) {
 	require.NotEmpty(t, cmd.Short, "command should have a short description")
 	require.NotNil(t, cmd.RunE, "command should have a RunE function")
 
-	policyFlag := cmd.Flag("policy")
-	require.NotNil(t, policyFlag, "policy flag should exist")
+	policy := cmd.Flag("policy")
+	require.NotNil(t, policy, "policy flag should exist")
 }
 
 type testApp struct {
 	mock.Mock
 }
 
-func (t *testApp) MergeTransactions(ctx context.Context, txs []*applicationpb.Tx) (*applicationpb.Tx, error) {
+func (*testApp) MergeTransactions(_ context.Context, _ []*applicationpb.Tx) (*applicationpb.Tx, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (t *testApp) DeployNamespace(ctx context.Context, input *app.DeployNamespaceInput) (*app.DeployNamespaceOutput, app.TxStatus, error) {
+func (t *testApp) DeployNamespace(
+	ctx context.Context,
+	input *app.DeployNamespaceInput,
+) (*app.DeployNamespaceOutput, app.TxStatus, error) {
 	args := t.Called(ctx, input)
 	return nil, 0, args.Error(1)
 }
@@ -52,17 +55,17 @@ func (t *testApp) ListNamespaces(ctx context.Context) ([]app.NamespaceQueryResul
 	return nil, args.Error(1)
 }
 
-func (t *testApp) EndorseTransaction(ctx context.Context, txID string, tx *applicationpb.Tx) (*applicationpb.Tx, error) {
+func (*testApp) EndorseTransaction(_ context.Context, _ string, _ *applicationpb.Tx) (*applicationpb.Tx, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (t *testApp) SubmitTransaction(ctx context.Context, txID string, tx *applicationpb.Tx) error {
+func (*testApp) SubmitTransaction(_ context.Context, _ string, _ *applicationpb.Tx) error {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (t *testApp) SubmitTransactionWithWait(ctx context.Context, txID string, tx *applicationpb.Tx) (app.TxStatus, error) {
+func (*testApp) SubmitTransactionWithWait(_ context.Context, _ string, _ *applicationpb.Tx) (app.TxStatus, error) {
 	// TODO implement me
 	panic("implement me")
 }

@@ -14,9 +14,14 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/transaction"
 )
 
+const (
+	mspPolicyType       = "msp"
+	thresholdPolicyType = "threshold"
+)
+
 // CreateNamespace generates a namespace transaction without endorsement or submission.
 // Returns transaction ID and unsigned transaction for later processing.
-func (d *AdminApp) CreateNamespace(_ context.Context, input *DeployNamespaceInput) (*DeployNamespaceOutput, error) {
+func (*AdminApp) CreateNamespace(_ context.Context, input *DeployNamespaceInput) (*DeployNamespaceOutput, error) {
 	nsPolicy, err := createPolicy(input.Policy)
 	if err != nil {
 		return nil, err
@@ -34,10 +39,10 @@ func (d *AdminApp) CreateNamespace(_ context.Context, input *DeployNamespaceInpu
 // Supports MSP-based and threshold ECDSA policies.
 func createPolicy(cfg PolicyConfig) (*applicationpb.NamespacePolicy, error) {
 	switch cfg.Type {
-	case "msp":
+	case mspPolicyType:
 		return transaction.CreateMspPolicy(cfg.MSP.Expression)
 
-	case "threshold":
+	case thresholdPolicyType:
 		return transaction.CreateThresholdPolicy(cfg.Threshold.VerificationKeyPath)
 
 	default:

@@ -83,7 +83,7 @@ func mergeEndorsements(txs []*applicationpb.Tx) []*applicationpb.Endorsements {
 	seen := make([]map[string]struct{}, numNamespaces)
 
 	// Initialize merged and seen for each namespace
-	for i := 0; i < numNamespaces; i++ {
+	for i := range numNamespaces {
 		merged[i] = &applicationpb.Endorsements{
 			EndorsementsWithIdentity: make([]*applicationpb.EndorsementWithIdentity, 0),
 		}
@@ -93,7 +93,6 @@ func mergeEndorsements(txs []*applicationpb.Tx) []*applicationpb.Endorsements {
 	for _, tx := range txs {
 		for nsIdx, ns := range tx.GetEndorsements() {
 			for _, e := range ns.GetEndorsementsWithIdentity() {
-
 				key := e.GetIdentity().GetMspId()
 				if _, exists := seen[nsIdx][key]; exists {
 					// we have seen
