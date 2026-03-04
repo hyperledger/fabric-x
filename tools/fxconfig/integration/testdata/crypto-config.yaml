@@ -1,7 +1,7 @@
 ---
 OrdererOrgs:
   - Name: OrdererOrg
-    Domain: example.com
+    Domain: orderer.com
     EnableNodeOUs: false
     Specs:
       - Hostname: orderer
@@ -12,16 +12,14 @@ OrdererOrgs:
           - host.docker.internal
           - fabric
           - ::1
-
 PeerOrgs:
   - Name: Org1
-    Domain: org1.example.com
+    Domain: org1.com
     EnableNodeOUs: false
     Users:
-      Count: 2
       Specs:
         - Name: endorser
-        - Name: channel_admin
+        - Name: committer
     Specs:
       - Hostname: committer
         SANS:
@@ -30,16 +28,14 @@ PeerOrgs:
           - 127.0.0.1
           - ::1
   - Name: Org2
-    Domain: org2.example.com
+    Domain: org2.com
     EnableNodeOUs: false
     Users:
-      Count: 1
       Specs:
         - Name: endorser
   - Name: Org3
-    Domain: org3.example.com
+    Domain: org3.com
     EnableNodeOUs: false
     Users:
-      Count: 1
       Specs:
         - Name: endorser

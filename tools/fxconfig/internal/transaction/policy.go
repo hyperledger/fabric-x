@@ -7,14 +7,16 @@ SPDX-License-Identifier: Apache-2.0
 package transaction
 
 import (
+	"crypto/ecdsa"
+	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/common/policydsl"
 	"github.com/hyperledger/fabric-x-common/protoutil"
-	"github.com/hyperledger/fabric-x-common/tools/configtxgen"
 )
 
 // CreateMspPolicy creates an MSP-based namespace policy from a DSL expression.
@@ -69,7 +71,7 @@ func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 		}
 		pemContent = rest
 
-		key, err := configtxgen.ParseCertificateOrPublicKey(block.Bytes)
+		key, err := parseCertificateOrPublicKey(block.Bytes)
 		if err != nil {
 			continue
 		}
@@ -81,4 +83,32 @@ func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 	}
 
 	return nil, errors.New("no ECDSA public key in pem file")
+}
+
+func parseCertificateOrPublicKey(blockBytes []byte) ([]byte, error) {
+	// Try reading certificate
+	cert, err := x509.ParseCertificate(blockBytes)
+	var publicKey any
+	if err == nil {
+		if cert.PublicKey != nil && cert.PublicKeyAlgorithm == x509.ECDSA {
+			publicKey = cert.PublicKey
+		}
+	} else {
+		// If fails, try reading public key
+		anyPublicKey, err := x509.ParsePKIXPublicKey(blockBytes)
+		if err == nil && anyPublicKey != nil {
+			publicKey, _ = anyPublicKey.(*ecdsa.PublicKey)
+
+		}
+	}
+
+	if publicKey == nil {
+		return nil, errors.New("no ECDSA public key in block")
+	}
+
+	key, err := x509.MarshalPKIXPublicKey(publicKey)
+	if err != nil {
+		return nil, fmt.Errorf("marshalling public key from failed: %w", err)
+	}
+	return key, nil
 }

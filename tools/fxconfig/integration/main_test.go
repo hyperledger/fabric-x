@@ -43,14 +43,15 @@ func TestScenarios(t *testing.T) {
 	testdata, err := filepath.Abs(filepath.Join(".", "testdata"))
 	require.NoError(t, err)
 
-	localMspID := "Org1"
+	// endorser MSP configuration
+	localMspID := "Org1MSP"
 	mspConfigPath := filepath.Join(
 		testdata,
 		"crypto",
 		"peerOrganizations",
 		"Org1",
 		"users",
-		"channel_admin@org1.example.com",
+		"endorser@org1.com",
 		"msp",
 	)
 
@@ -60,10 +61,10 @@ func TestScenarios(t *testing.T) {
 		"peerOrganizations",
 		"Org1",
 		"users",
-		"endorser@org1.example.com",
+		"endorser@org1.com",
 		"msp",
 		"signcerts",
-		"endorser@org1.example.com-cert.pem",
+		"endorser@org1.com-cert.pem",
 	)
 
 	// Setup - Create temporary config file

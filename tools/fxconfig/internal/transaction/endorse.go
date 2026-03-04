@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/hyperledger/fabric-x-common/api/msppb"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
@@ -35,12 +36,11 @@ func Endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 		tx.Endorsements = make([]*applicationpb.Endorsements, len(tx.GetNamespaces()))
 	}
 
-	// TODO for MSP-based endorsements we need either singerID or the hashed singerID to be attached on the Endorsement.
-	// get signer signerCert
-	// signerID, err := getSignerID(signer)
-	// if err != nil {
-	//	 return nil, err
-	// }
+	// get signer identity to be attached to the endorsement
+	signerIdentity, err := identity(signer)
+	if err != nil {
+		return nil, err
+	}
 
 	// create signature for each namespace in transaction
 	for nsIdx := range tx.GetNamespaces() {
@@ -60,8 +60,7 @@ func Endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 		// store signature as endorsementWithIdentity
 		eid := &applicationpb.EndorsementWithIdentity{
 			Endorsement: sig,
-			// TODO MSP-based endorsements will attach either the signerID or just a hash.
-			// Identity:    signerID,
+			Identity:    signerIdentity,
 		}
 
 		// check if there is already an endorsement for this namespace, so we can append the new endorsement
@@ -76,6 +75,28 @@ func Endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 	}
 
 	return tx, nil
+}
+
+func identity(signer msp.SigningIdentity) (*msppb.Identity, error) {
+	// signer identity with certificate attached
+	//s, err := signer.Serialize()
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	// signer identity with hash of certificate attached
+	s, err := signer.SerializeWithIDOfCert()
+	if err != nil {
+		return nil, err
+	}
+
+	var sid msppb.Identity
+	err = proto.Unmarshal(s, &sid)
+	if err != nil {
+		return nil, err
+	}
+
+	return &sid, nil
 }
 
 // GenerateTxID generates a unique transaction ID using SHA-256 hash of a random nonce.

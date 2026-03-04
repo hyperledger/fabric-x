@@ -103,8 +103,8 @@ Profiles:
         Consenters:
           - Host: 127.0.0.1
             Port: 5427
-            ClientTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.example.com/tls/server.crt
-            ServerTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.example.com/tls/server.crt
+            ClientTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/server.crt
+            ServerTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/server.crt
       Organizations:
         - *OrdererMSP
       Policies:
@@ -127,7 +127,6 @@ Profiles:
         - *Org1MSP
         - *Org2MSP
         - *Org3MSP
-      MetaNamespaceVerificationKeyPath: ./crypto/peerOrganizations/Org1/users/channel_admin@org1.example.com/msp/signcerts/channel_admin@org1.example.com-cert.pem
       Policies:
         Readers:
           Type: ImplicitMeta

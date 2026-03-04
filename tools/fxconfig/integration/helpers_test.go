@@ -49,30 +49,32 @@ func setup(t *testing.T) map[string]string {
 
 	ctx := t.Context()
 	committerContainer, err := testcontainers.Run(
-		ctx, "ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.8",
+		ctx, "ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.9",
 		testcontainers.WithCmd("run", "db", "orderer", "committer", "--insecure"),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      absPath,
-			ContainerFilePath: "/root/material/config-block.pb.bin",
+			ContainerFilePath: "/root/artifacts/config-block.pb.bin",
 			FileMode:          0o700,
 		}),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      dataDirectory,
-			ContainerFilePath: "/root/material/",
+			ContainerFilePath: "/root/artifacts/",
 			FileMode:          0o755,
 		}),
 		testcontainers.WithExposedPorts(ordererPort, sidecarPort, queryServicePort),
 		testcontainers.WithEnv(map[string]string{
-			"SC_COORDINATOR_LOGGING_LEVEL":        "DEBUG",
-			"SC_SIDECAR_LOGGING_LEVEL":            "DEBUG",
+			"SC_COORDINATOR_LOGGING_LOGSPEC":      "DEBUG",
+			"SC_SIDECAR_LOGGING_LOGSPEC":          "DEBUG",
 			"SC_SIDECAR_ORDERER_CHANNEL_ID":       channelID,
 			"SC_SIDECAR_ORDERER_TLS_MODE":         "none",
 			"SC_SIDECAR_ORDERER_SIGNED_ENVELOPES": "true",
+			"SC_SIDECAR_ORDERER_IDENTITY_MSP_ID":  "Org1MSP",
+			"SC_SIDECAR_ORDERER_IDENTITY_MSP_DIR": "/root/artifacts/crypto/peerOrganizations/Org1/users/committer@org1.com/msp",
 			"SC_QUERY_SERVICE_SERVER_ENDPOINT":    fmt.Sprintf(":%v", queryServicePort),
-			"SC_QUERY_SERVICE_LOGGING_LEVEL":      "DEBUG",
+			"SC_QUERY_SERVICE_LOGGING_LOGSPEC":    "DEBUG",
 			"SC_ORDERER_BLOCK_SIZE":               "1",
-			"SC_ORDERER_LOGGING_LEVEL":            "DEBUG",
-			"SC_VC_LOGGING_LEVEL":                 "DEBUG",
+			"SC_ORDERER_LOGGING_LOGSPEC":          "DEBUG",
+			"SC_VC_LOGGING_LOGSPEC":               "DEBUG",
 		}),
 		testcontainers.WithWaitStrategy(
 			wait.ForListeningPort(ordererPort),
