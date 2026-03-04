@@ -25,7 +25,6 @@ type Option func(*viper.Viper)
 // This takes precedence over project and user config files.
 func WithConfigFile(path string) Option {
 	return func(v *viper.Viper) {
-		v.Set("_hasConfigFile", true)
 		v.SetConfigFile(path)
 	}
 }
@@ -53,6 +52,10 @@ func Load(opts ...Option) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	v.AutomaticEnv()
 
+	// define our default config file to be "config.yaml"
+	v.SetConfigName("config")
+	v.SetConfigType("yaml")
+
 	// Attempt to load user-level config (~/.fxconfig/config.yaml)
 	if home, err := os.UserHomeDir(); err == nil {
 		v.AddConfigPath(filepath.Join(home, ".fxconfig"))
@@ -65,8 +68,6 @@ func Load(opts ...Option) (*Config, error) {
 
 	// Attempt to load project-level config (.fxconfig/config.yaml)
 	v.AddConfigPath(".fxconfig")
-	v.SetConfigName("config")
-	v.SetConfigType("yaml")
 	if err := v.MergeInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			return nil, fmt.Errorf("error loading project config: %w", err)
@@ -79,7 +80,7 @@ func Load(opts ...Option) (*Config, error) {
 	}
 
 	// Read explicit config file if specified via WithConfigFile
-	if v.GetBool("_hasConfigFile") {
+	if v.ConfigFileUsed() != "" {
 		if err := v.ReadInConfig(); err != nil {
 			return nil, fmt.Errorf("error reading config file %s: %w", v.ConfigFileUsed(), err)
 		}
@@ -126,15 +127,18 @@ func registerStructKeys(v *viper.Viper, viperPrefix string, t reflect.Type) {
 
 		defaultValue := field.Tag.Get("default")
 
-		fieldType := field.Type
+		ft := field.Type
 
 		// Recurse into nested struct (except time.Duration)
-		if fieldType.Kind() == reflect.Struct && !isDuration(fieldType) {
-			registerStructKeys(v, viperKey, fieldType)
+		if ft.Kind() == reflect.Pointer {
+			ft = ft.Elem()
+		}
+		if ft.Kind() == reflect.Struct && !isDuration(ft) {
+			registerStructKeys(v, viperKey, ft)
 			continue
 		}
 
-		registerSingleFlag(v, fieldType, viperKey, defaultValue)
+		registerSingleFlag(v, ft, viperKey, defaultValue)
 	}
 }
 

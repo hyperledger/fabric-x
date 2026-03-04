@@ -73,7 +73,7 @@ func (c *TLSConfig) Validate(vctx validation.Context) error {
 	// check all provided root certs exist
 	for _, p := range c.RootCertPaths {
 		if err := validateFilePath(vctx, p); err != nil {
-			return fmt.Errorf("invalid clientCertPath: %w", err)
+			return fmt.Errorf("invalid rootCertPath: %w", err)
 		}
 	}
 
@@ -93,7 +93,7 @@ func (c *TLSConfig) Validate(vctx validation.Context) error {
 	}
 
 	// try to load key pair
-	if _, err := tls.LoadX509KeyPair(c.ClientKeyPath, c.ClientKeyPath); err != nil {
+	if _, err := tls.LoadX509KeyPair(c.ClientCertPath, c.ClientKeyPath); err != nil {
 		return fmt.Errorf("invalid cert/key pair: %w", err)
 	}
 
@@ -135,7 +135,7 @@ func errorIfEmpty(s, errMsg string) error {
 
 // errorIfZeroDuration returns an error if the duration is zero.
 func errorIfZeroDuration(d time.Duration, errMsg string) error {
-	if d == time.Duration(0) {
+	if d == 0 {
 		return errors.New(errMsg)
 	}
 	return nil

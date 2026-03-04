@@ -10,6 +10,8 @@ SPDX-License-Identifier: Apache-2.0
 package config
 
 import (
+	"cmp"
+	"slices"
 	"time"
 )
 
@@ -28,65 +30,16 @@ type Config struct {
 // Each service inherits from the parent TLS config unless it provides overrides.
 // After merging, all TLS configs are normalized to have explicit enabled flags.
 func (c *Config) ResolveTLS() {
-	resolveServiceTLS(&c.Orderer.EndpointServiceConfig, c.TLS)
-	resolveServiceTLS(&c.Queries.EndpointServiceConfig, c.TLS)
-	resolveServiceTLS(&c.Notifications.EndpointServiceConfig, c.TLS)
+	c.TLS.Normalize()
 
-	normalizeTLS(&c.TLS)
-	normalizeTLS(c.Orderer.TLS)
-	normalizeTLS(c.Queries.TLS)
-	normalizeTLS(c.Notifications.TLS)
-}
+	c.Orderer.TLS = c.Orderer.TLS.InheritFrom(&c.TLS)
+	c.Orderer.TLS.Normalize()
 
-// normalizeTLS ensures the TLS config has an explicit enabled flag.
-// Sets enabled to false if not specified.
-func normalizeTLS(t *TLSConfig) {
-	if t == nil {
-		return
-	}
+	c.Queries.TLS = c.Queries.TLS.InheritFrom(&c.TLS)
+	c.Queries.TLS.Normalize()
 
-	if t.Enabled == nil {
-		defaultValue := false
-		t.Enabled = &defaultValue
-	}
-}
-
-// resolveServiceTLS merges service-specific TLS config with parent TLS config.
-// If the service has no TLS override, it inherits the parent config completely.
-// Otherwise, it merges field-by-field, with service values taking precedence.
-func resolveServiceTLS(s *EndpointServiceConfig, parent TLSConfig) {
-	if s.TLS == nil {
-		// No override -> inherit fully
-		s.TLS = parent.Clone()
-		return
-	}
-
-	// Merge field-by-field
-	mergeTLS(s.TLS, parent)
-}
-
-// mergeTLS merges service-specific TLS overrides with parent TLS settings.
-// Service values take precedence; parent values are used as fallbacks.
-func mergeTLS(override *TLSConfig, parent TLSConfig) {
-	if override.Enabled == nil {
-		override.Enabled = parent.Enabled
-	}
-
-	if override.ClientKeyPath == "" {
-		override.ClientKeyPath = parent.ClientKeyPath
-	}
-
-	if override.ClientCertPath == "" {
-		override.ClientCertPath = parent.ClientCertPath
-	}
-
-	if len(override.RootCertPaths) == 0 {
-		override.RootCertPaths = parent.RootCertPaths
-	}
-
-	if override.ServerNameOverride == "" {
-		override.ServerNameOverride = parent.ServerNameOverride
-	}
+	c.Notifications.TLS = c.Notifications.TLS.InheritFrom(&c.TLS)
+	c.Notifications.TLS.Normalize()
 }
 
 // LoggingConfig controls logging behavior.
@@ -114,27 +67,38 @@ type TLSConfig struct {
 	ServerNameOverride string   `mapstructure:"serverNameOverride" yaml:"serverNameOverride,omitempty" desc:"Override TLS server name"`
 }
 
-// Clone creates a shallow copy of the TLS configuration.
-func (c *TLSConfig) Clone() *TLSConfig {
+// Normalize ensures the TLS config has an explicit enabled flag.
+// Sets enabled to false if not specified.
+func (c *TLSConfig) Normalize() {
+	if c.Enabled == nil {
+		enabled := false
+		c.Enabled = &enabled
+	}
+}
+
+func (c *TLSConfig) InheritFrom(parent *TLSConfig) *TLSConfig {
 	if c == nil {
-		return nil
+		c = &TLSConfig{}
 	}
 
-	// copy all non-pointer types
-	clone := *c
-
-	// copy enabled
-	if c.Enabled != nil {
-		v := *c.Enabled
-		clone.Enabled = &v
+	if parent == nil {
+		return c
 	}
 
+	result := &TLSConfig{
+		Enabled:            cmp.Or(c.Enabled, parent.Enabled),
+		ClientKeyPath:      cmp.Or(c.ClientKeyPath, parent.ClientKeyPath),
+		ClientCertPath:     cmp.Or(c.ClientCertPath, parent.ClientCertPath),
+		ServerNameOverride: cmp.Or(c.ServerNameOverride, parent.ServerNameOverride),
+	}
+
+	src := parent.RootCertPaths
 	if len(c.RootCertPaths) > 0 {
-		clone.RootCertPaths = make([]string, len(clone.RootCertPaths))
-		copy(clone.RootCertPaths, c.RootCertPaths)
+		src = c.RootCertPaths
 	}
+	result.RootCertPaths = slices.Clone(src)
 
-	return &clone
+	return result
 }
 
 // IsEnabled returns whether TLS is enabled for this configuration.
@@ -176,13 +140,4 @@ type EndpointServiceConfig struct {
 	Address           string        `mapstructure:"address" yaml:"address,omitempty" desc:"Service address (host:port)"`
 	ConnectionTimeout time.Duration `mapstructure:"connectionTimeout" yaml:"connectionTimeout,omitempty" desc:"Connection timeout duration" default:"30s"`
 	TLS               *TLSConfig    `mapstructure:"tls" yaml:"tls,omitempty" desc:"(Optional) Overrides parent TLS section"`
-}
-
-// GetTLSConfig returns the TLS configuration for this service endpoint.
-// Returns an empty TLSConfig if no TLS override is configured.
-func (c *EndpointServiceConfig) GetTLSConfig() TLSConfig {
-	if c.TLS == nil {
-		return TLSConfig{}
-	}
-	return *c.TLS
 }
