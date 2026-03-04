@@ -8,7 +8,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
@@ -37,11 +36,6 @@ func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *appli
 
 // SubmitTransactionWithWait receives a transaction and sends it to the ordering service.
 func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, tx *applicationpb.Tx) (TxStatus, error) {
-	// notification config validation
-	if err := d.NotificationProvider.Validate(); err != nil {
-		return UnknownStatus, fmt.Errorf("invalid notifications configuration: %w", err)
-	}
-
 	// get orderer client and signing identity
 	sc, err := d.prepareSubmission(ctx)
 	if err != nil {
@@ -79,16 +73,6 @@ type submissionContext struct {
 }
 
 func (d *AdminApp) prepareSubmission(_ context.Context) (*submissionContext, error) {
-	// msp config validation
-	if err := d.MspProvider.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid msp configuration: %w", err)
-	}
-
-	// orderer config validation
-	if err := d.OrdererProvider.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid ordering service configuration: %w", err)
-	}
-
 	// get signing identity
 	sid, err := d.MspProvider.Get()
 	if err != nil {

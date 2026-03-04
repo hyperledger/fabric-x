@@ -85,8 +85,45 @@ func TestProvider_Get_LazyInitialization(t *testing.T) {
 	require.NoError(t, err2)
 	require.NoError(t, err3)
 
-	// Factory should only be called once due to sync.Once
+	// Validation and factory should only be called once due to sync.Once
 	assert.Equal(t, 1, callCount)
+}
+
+func TestProvider_Get_ValidationError(t *testing.T) {
+	t.Parallel()
+
+	validationErr := errors.New("validation error")
+	cfg := &mockConfig{validateErr: validationErr}
+	factoryCalled := false
+	factory := func(*mockConfig) (*mockService, error) {
+		factoryCalled = true
+		return &mockService{value: "test"}, nil
+	}
+
+	p := provider.New(factory, cfg, validation.Context{})
+
+	svc, err := p.Get()
+	assert.Nil(t, svc)
+	assert.ErrorIs(t, err, validationErr)
+	assert.False(t, factoryCalled, "factory must not be called if validation fails")
+}
+
+func TestProvider_Get_ValidationErrorIsCached(t *testing.T) {
+	t.Parallel()
+
+	validationErr := errors.New("validation error")
+	cfg := &mockConfig{validateErr: validationErr}
+	factory := func(*mockConfig) (*mockService, error) {
+		return &mockService{value: "test"}, nil
+	}
+
+	p := provider.New(factory, cfg, validation.Context{})
+
+	_, err1 := p.Get()
+	_, err2 := p.Get()
+
+	assert.ErrorIs(t, err1, validationErr)
+	assert.ErrorIs(t, err2, validationErr)
 }
 
 func TestProvider_Get_ThreadSafety(t *testing.T) {

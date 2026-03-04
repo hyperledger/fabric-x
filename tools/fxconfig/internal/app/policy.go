@@ -81,10 +81,6 @@ func (c *ThresholdPolicyConfig) Validate(vctx validation.Context) error {
 		return errors.New("threshold policy key path must not be empty")
 	}
 
-	if vctx.FileChecker == nil {
-		return errors.New("file checker not available")
-	}
-
 	return vctx.FileChecker.Exists(c.VerificationKeyPath)
 }
 
@@ -93,10 +89,6 @@ func (c *ThresholdPolicyConfig) Validate(vctx validation.Context) error {
 func (c *MSPPolicyConfig) Validate(ctx validation.Context) error {
 	if c.Expression == "" {
 		return errors.New("msp policy expression must not be empty")
-	}
-
-	if ctx.PolicyChecker == nil {
-		return errors.New("policy checker not available")
 	}
 
 	return ctx.PolicyChecker.Check(c.Expression)

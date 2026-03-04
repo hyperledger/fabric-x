@@ -38,10 +38,14 @@ func New[T any, K Validatable](
 	}
 }
 
-// Get returns the service instance, initializing it on first call.
+// Get returns the service instance, validating the config and initializing the service instance on first call.
 // Subsequent calls return the cached instance. Thread-safe.
 func (p *Provider[T, K]) Get() (T, error) {
 	p.once.Do(func() {
+		if err := p.cfg.Validate(p.validationContext); err != nil {
+			p.err = err
+			return
+		}
 		p.instance, p.err = p.factory(p.cfg)
 	})
 	return p.instance, p.err

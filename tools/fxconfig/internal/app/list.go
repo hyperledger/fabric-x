@@ -15,11 +15,7 @@ import (
 // It connects to the query service, retrieves all namespace policies, and formats
 // the Output showing namespace names, versions, and policy data in hexadecimal.
 func (d *AdminApp) ListNamespaces(ctx context.Context) ([]NamespaceQueryResult, error) {
-	// query service validation
-	if err := d.QueryProvider.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid query service configuration: %w", err)
-	}
-
+	// get query service instance
 	qc, err := d.QueryProvider.Get()
 	if err != nil {
 		return nil, err

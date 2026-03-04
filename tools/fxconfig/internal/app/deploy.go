@@ -55,8 +55,7 @@ func (d *AdminApp) DeployNamespace(
 	input *DeployNamespaceInput,
 ) (*DeployNamespaceOutput, TxStatus, error) {
 	// input validation
-	err := d.validate(input)
-	if err != nil {
+	if err := input.Validate(d.Validators); err != nil {
 		return nil, UnknownStatus, err
 	}
 
@@ -93,28 +92,4 @@ func (d *AdminApp) DeployNamespace(
 	}
 
 	return nil, UnknownStatus, nil
-}
-
-// validate performs comprehensive validation of deployment input and providers.
-func (d *AdminApp) validate(input *DeployNamespaceInput) error {
-	// input validation
-	if err := input.Validate(d.Validators); err != nil {
-		return fmt.Errorf("invalid input: %w", err)
-	}
-
-	// msp validation
-	if input.Endorse {
-		if err := d.MspProvider.Validate(); err != nil {
-			return fmt.Errorf("invalid msp configuration: %w", err)
-		}
-	}
-
-	// orderer validation
-	if input.Submit {
-		if err := d.OrdererProvider.Validate(); err != nil {
-			return fmt.Errorf("invalid ordering service configuration: %w", err)
-		}
-	}
-
-	return nil
 }

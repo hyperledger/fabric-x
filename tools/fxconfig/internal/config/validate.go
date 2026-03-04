@@ -23,7 +23,7 @@ func (c *MSPConfig) Validate(vctx validation.Context) error {
 		return fmt.Errorf("invalid localMspID: %w", err)
 	}
 
-	if err := validateDirectoryPath(vctx, c.ConfigPath); err != nil {
+	if err := vctx.DirectoryChecker.Exists(c.ConfigPath); err != nil {
 		return fmt.Errorf("invalid configPath: %w", err)
 	}
 
@@ -72,7 +72,7 @@ func (c *TLSConfig) Validate(vctx validation.Context) error {
 
 	// check all provided root certs exist
 	for _, p := range c.RootCertPaths {
-		if err := validateFilePath(vctx, p); err != nil {
+		if err := vctx.FileChecker.Exists(p); err != nil {
 			return fmt.Errorf("invalid rootCertPath: %w", err)
 		}
 	}
@@ -83,12 +83,12 @@ func (c *TLSConfig) Validate(vctx validation.Context) error {
 	}
 
 	// check that client cert exists
-	if err := validateFilePath(vctx, c.ClientCertPath); err != nil {
+	if err := vctx.FileChecker.Exists(c.ClientCertPath); err != nil {
 		return fmt.Errorf("invalid clientCertPath: %w", err)
 	}
 
 	// check that client key exists
-	if err := validateFilePath(vctx, c.ClientKeyPath); err != nil {
+	if err := vctx.FileChecker.Exists(c.ClientKeyPath); err != nil {
 		return fmt.Errorf("invalid clientKeyPath: %w", err)
 	}
 
@@ -98,31 +98,6 @@ func (c *TLSConfig) Validate(vctx validation.Context) error {
 	}
 
 	return nil
-}
-
-// validateFilePath checks that a file path is non-empty and resolvable via FileChecker.
-func validateFilePath(vctx validation.Context, p string) error {
-	if p == "" {
-		return errors.New("path must not be empty")
-	}
-
-	if vctx.FileChecker == nil {
-		return errors.New("file checker not available")
-	}
-
-	return vctx.FileChecker.Exists(p)
-}
-
-func validateDirectoryPath(vctx validation.Context, p string) error {
-	if p == "" {
-		return errors.New("path must not be empty")
-	}
-
-	if vctx.DirectoryChecker == nil {
-		return errors.New("directory checker not available")
-	}
-
-	return vctx.DirectoryChecker.Exists(p)
 }
 
 // errorIfEmpty returns an error if the string is empty or whitespace-only.

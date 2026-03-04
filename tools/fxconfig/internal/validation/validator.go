@@ -45,6 +45,10 @@ type OSFileChecker struct{}
 // Exists verifies that the path exists and is a regular file.
 // Returns an error if the path doesn't exist, is a directory, or contains path traversal.
 func (OSFileChecker) Exists(path string) error {
+	if path == "" {
+		return errors.New("path must not be empty")
+	}
+
 	clean := filepath.Clean(path)
 	if strings.Contains(clean, "..") {
 		return errors.New("path traversal not allowed")

@@ -28,11 +28,6 @@ func (d *AdminApp) endorseTransaction(
 	txID string,
 	tx *applicationpb.Tx,
 ) (*applicationpb.Tx, error) {
-	// msp validation
-	if err := d.MspProvider.Validate(); err != nil {
-		return nil, err
-	}
-
 	// get signing identity
 	sid, err := d.MspProvider.Get()
 	if err != nil {
