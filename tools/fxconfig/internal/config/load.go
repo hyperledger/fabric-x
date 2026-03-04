@@ -130,11 +130,14 @@ func registerStructKeys(v *viper.Viper, viperPrefix string, t reflect.Type) {
 		ft := field.Type
 
 		// Recurse into nested struct (except time.Duration)
-		if ft.Kind() == reflect.Pointer {
+		isPtr := ft.Kind() == reflect.Pointer
+		if isPtr {
 			ft = ft.Elem()
 		}
 		if ft.Kind() == reflect.Struct && !isDuration(ft) {
-			registerStructKeys(v, viperKey, ft)
+			if !isPtr {
+				registerStructKeys(v, viperKey, ft)
+			}
 			continue
 		}
 
