@@ -17,27 +17,8 @@ import (
 
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
-
-// NotificationProvider constructs NotificationClient instances with validation.
-type NotificationProvider struct {
-	ValidationContext validation.Context
-	Cfg               config.NotificationsConfig
-	// TODO make this provide once
-}
-
-// Validate checks the notification configuration against the validation context.
-func (f *NotificationProvider) Validate() error {
-	return f.Cfg.Validate(f.ValidationContext)
-}
-
-// Get creates and returns a new NotificationClient instance.
-func (f *NotificationProvider) Get() (adapters.NotificationClient, error) { //nolint:ireturn
-	return NewNotificationClient(f.Cfg)
-}
 
 // NotificationClient provides a gRPC client for receiving transaction status notifications.
 // It manages bidirectional streaming with the committer notification service and multiplexes

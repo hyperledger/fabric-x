@@ -20,28 +20,8 @@ import (
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x-common/protoutil"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
-
-// OrdererProvider constructs OrdererClient instances.
-// SignerFactory satisfies the canonical app.MspProvider port; no local shadow interface needed.
-type OrdererProvider struct {
-	ValidationContext validation.Context
-	Cfg               config.OrdererConfig
-	// TODO make this provide once
-}
-
-// Validate checks the orderer configuration against the validation context.
-func (f *OrdererProvider) Validate() error {
-	return f.Cfg.Validate(f.ValidationContext)
-}
-
-// Get creates and returns a new OrdererClient instance.
-func (f *OrdererProvider) Get() (adapters.OrdererClient, error) { //nolint:ireturn
-	return NewOrdererClient(f.Cfg)
-}
 
 // OrdererClient provides a gRPC client for submitting transactions to the Fabric-X ordering service.
 // It handles connection management, TLS configuration, and transaction envelope creation.

@@ -16,27 +16,8 @@ import (
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
-
-// QueryProvider constructs QueryClient instances with validation.
-type QueryProvider struct {
-	ValidationContext validation.Context
-	Cfg               config.QueriesConfig
-	// TODO make this provide once
-}
-
-// Validate checks the query configuration against the validation context.
-func (f *QueryProvider) Validate() error {
-	return f.Cfg.Validate(f.ValidationContext)
-}
-
-// Get creates and returns a new QueryClient instance.
-func (f *QueryProvider) Get() (adapters.QueryClient, error) { //nolint:ireturn
-	return NewQueryClient(f.Cfg)
-}
 
 // QueryClient provides a gRPC client for querying namespace policies from the Fabric-X committer query service.
 type QueryClient struct {

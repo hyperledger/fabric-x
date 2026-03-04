@@ -82,9 +82,11 @@ func (d *AdminApp) DeployNamespace(
 
 	// submit transaction
 	if input.Wait {
-		if status, err := d.SubmitTransactionWithWait(ctx, out.TxID, out.Tx); err != nil {
-			return nil, status, err
+		status, err := d.SubmitTransactionWithWait(ctx, out.TxID, out.Tx)
+		if err != nil {
+			return nil, UnknownStatus, err
 		}
+		return nil, status, nil
 	}
 	if err := d.SubmitTransaction(ctx, out.TxID, out.Tx); err != nil {
 		return nil, UnknownStatus, err

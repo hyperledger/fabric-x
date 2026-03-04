@@ -18,13 +18,15 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
+	fmsp "github.com/hyperledger/fabric-x-common/msp"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
+	cli "github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/client"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/msp"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/provider"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
-
-	cli "github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1"
 )
 
 const (
@@ -138,13 +140,38 @@ func fxconfig(tb testing.TB, args ...string) (string, error) {
 	rootCmd := cli.NewRootCommand(&cli.CLIContext{}, func(cfg *config.Config) (app.Application, error) {
 		vctx := validation.NewValidationContext()
 		return &app.AdminApp{
-			Validators:           vctx,
-			MspProvider:          &msp.SignerProvider{ValidationContext: vctx, Cfg: cfg.MSP},
-			QueryProvider:        &client.QueryProvider{ValidationContext: vctx, Cfg: cfg.Queries},
-			OrdererProvider:      &client.OrdererProvider{ValidationContext: vctx, Cfg: cfg.Orderer},
-			NotificationProvider: &client.NotificationProvider{ValidationContext: vctx, Cfg: cfg.Notifications},
+			Validators: vctx,
+			MspProvider: provider.New[fmsp.SigningIdentity, *config.MSPConfig](
+				func(cfg *config.MSPConfig) (fmsp.SigningIdentity, error) {
+					return msp.GetSignerIdentityFromMSP(*cfg)
+				},
+				&cfg.MSP,
+				vctx,
+			),
+			QueryProvider: provider.New[adapters.QueryClient, *config.QueriesConfig](
+				func(cfg *config.QueriesConfig) (adapters.QueryClient, error) {
+					return client.NewQueryClient(*cfg)
+				},
+				&cfg.Queries,
+				vctx,
+			),
+			OrdererProvider: provider.New[adapters.OrdererClient, *config.OrdererConfig](
+				func(cfg *config.OrdererConfig) (adapters.OrdererClient, error) {
+					return client.NewOrdererClient(*cfg)
+				},
+				&cfg.Orderer,
+				vctx,
+			),
+			NotificationProvider: provider.New[adapters.NotificationClient, *config.NotificationsConfig](
+				func(cfg *config.NotificationsConfig) (adapters.NotificationClient, error) {
+					return client.NewNotificationClient(*cfg)
+				},
+				&cfg.Notifications,
+				vctx,
+			),
 		}, nil
 	})
+
 	rootCmd.SetContext(tb.Context())
 	rootCmd.SetArgs(args)
 	rootCmd.SetOut(&stdOut)
