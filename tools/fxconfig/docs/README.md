@@ -43,7 +43,7 @@ fxconfig namespace list [flags]
 - `--policy=<DSL>` - Endorsement policy DSL string
 - `--policy=threshold:<path>` - Threshold ECDSA policy from PEM file
 - `--version=<int>` - Version number (update only; create defaults to 0)
-- `--output=<path>` - Save transaction to file (`.pb` extension)
+- `--output=<path>` - Save transaction to file (`.json` extension)
 - `--endorse` - Sign transaction with local MSP identity
 - `--submit` - Submit endorsed transaction to ordering service
 - `--wait` - Block until transaction commits (requires notification service)
@@ -111,6 +111,7 @@ tls:
 # Ordering service configuration
 orderer:
   address: localhost:7050
+  channel: mychannel  # Channel name (default: mychannel)
   connectionTimeout: 30s
   # Optional: Override parent TLS settings
   tls:
@@ -150,10 +151,9 @@ notifications:
 
 ### Naming Conventions
 
-- **CLI Flags**: kebab-case (e.g., `--msp-configpath`, `--orderer-address`)
 - **Environment Variables**: SCREAMING_SNAKE_CASE with `FXCONFIG_` prefix (e.g., `FXCONFIG_MSP_CONFIGPATH`, `FXCONFIG_ORDERER_ADDRESS`)
 - **Config File Fields**: camelCase (e.g., `configPath`, `connectionTimeout`)
-- **Array Parameters**: Comma-separated lists (e.g., `--tls-rootcerts="/path1/cert.pem,/path2/cert.pem"`)
+- **Array Parameters**: Comma-separated values in environment variables (e.g., `FXCONFIG_TLS_ROOTCERTS="/path1/cert.pem,/path2/cert.pem"`)
 
 ### Environment Variables
 
@@ -206,7 +206,9 @@ fxconfig tx submit hello_endorsed.json
 ```bash
 # Query current state
 fxconfig namespace list
-# Output: | ns=halloNamespace | version=0 | policy=... |
+# Output:
+# Installed namespaces (1 total):
+# 0) hello: version 0 policy: <hex-encoded-policy>
 
 # Org1: Create transaction
 fxconfig namespace create hello \
@@ -351,10 +353,10 @@ Get help for any command:
 fxconfig --help                    # Global help
 fxconfig namespace --help          # Namespace commands help
 fxconfig namespace create --help   # Create command help
-fxconfig namespace update --help   # Create command help
+fxconfig namespace update --help   # Update command help
 fxconfig tx --help                 # Transaction commands help
 fxconfig tx endorse --help         # Endorse command help
-fxconfig tx merge--help            # Merge command help
+fxconfig tx merge --help           # Merge command help
 fxconfig tx submit --help          # Submit command help
 ```
 
