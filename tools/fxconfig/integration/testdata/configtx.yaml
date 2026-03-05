@@ -69,6 +69,41 @@ Organizations:
       - id=0,broadcast,deliver,localhost:7050
 
 Channel: &ChannelDefaults
+  Consortium: SampleConsortium
+  Orderer:
+    OrdererType: etcdraft
+    BatchTimeout: 1s
+    BatchSize:
+      MaxMessageCount: 500
+      AbsoluteMaxBytes: 98 MB
+      PreferredMaxBytes: 2 KB
+    Capabilities:
+      V2_0: true
+      V3_0: true
+    EtcdRaft:
+      Options:
+        TickInterval: 500ms
+        SnapshotIntervalSize: 1 KB
+      Consenters:
+        - Host: 127.0.0.1
+          Port: 5427
+          ClientTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/server.crt
+          ServerTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/server.crt
+    Organizations:
+      - *OrdererMSP
+    Policies:
+      Readers:
+        Type: ImplicitMeta
+        Rule: ANY Readers
+      Writers:
+        Type: ImplicitMeta
+        Rule: ANY Writers
+      Admins:
+        Type: ImplicitMeta
+        Rule: MAJORITY Admins
+      BlockValidation:
+        Type: ImplicitMeta
+        Rule: ANY Writers
   Capabilities:
     V2_0: true
     V3_0: true
@@ -83,50 +118,35 @@ Channel: &ChannelDefaults
       Type: ImplicitMeta
       Rule: MAJORITY Admins
 
+Application: &ApplicationDefaults
+  Capabilities:
+    V2_5: true
+  Organizations:
+    - *Org1MSP
+    - *Org2MSP
+    - *Org3MSP
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: ANY Readers
+    Writers:
+      Type: ImplicitMeta
+      Rule: ANY Writers
+    Admins:
+      Type: ImplicitMeta
+      Rule: ANY Admins
+    LifecycleEndorsement:
+      Type: Signature
+      Rule: AND ('Org1MSP.member')
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: ANY Endorsement
+
 Profiles:
-  OrgsChannel:
+  SingleOrgAdminChannel:
     <<: *ChannelDefaults
-    Orderer:
-      OrdererType: etcdraft
-      BatchTimeout: 1s
-      BatchSize:
-        MaxMessageCount: 500
-        AbsoluteMaxBytes: 98 MB
-        PreferredMaxBytes: 2 KB
-      Capabilities:
-        V2_0: true
-        V3_0: true
-      EtcdRaft:
-        Options:
-          TickInterval: 500ms
-          SnapshotIntervalSize: 1 KB
-        Consenters:
-          - Host: 127.0.0.1
-            Port: 5427
-            ClientTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/server.crt
-            ServerTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/server.crt
-      Organizations:
-        - *OrdererMSP
-      Policies:
-        Readers:
-          Type: ImplicitMeta
-          Rule: ANY Readers
-        Writers:
-          Type: ImplicitMeta
-          Rule: ANY Writers
-        Admins:
-          Type: ImplicitMeta
-          Rule: MAJORITY Admins
-        BlockValidation:
-          Type: ImplicitMeta
-          Rule: ANY Writers
     Application:
-      Capabilities:
-        V2_5: true
-      Organizations:
-        - *Org1MSP
-        - *Org2MSP
-        - *Org3MSP
+      <<: *ApplicationDefaults
       Policies:
         Readers:
           Type: ImplicitMeta
@@ -143,4 +163,24 @@ Profiles:
         Endorsement:
           Type: ImplicitMeta
           Rule: ANY Endorsement
-    Consortium: SampleConsortium
+  MultiOrgAdminChannel:
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Policies:
+        Readers:
+          Type: ImplicitMeta
+          Rule: ANY Readers
+        Writers:
+          Type: ImplicitMeta
+          Rule: ANY Writers
+        Admins:
+          Type: ImplicitMeta
+          Rule: ANY Admins
+        LifecycleEndorsement:
+          Type: Signature
+          Rule: AND ('Org1MSP.member', 'Org2MSP.member')
+        Endorsement:
+          Type: ImplicitMeta
+          Rule: ANY Endorsement
+

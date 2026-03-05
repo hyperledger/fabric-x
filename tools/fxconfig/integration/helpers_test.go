@@ -34,15 +34,32 @@ const (
 	sidecarPort      = "4001"
 	queryServicePort = "7001"
 	channelID        = "mychannel"
-	policy           = "OR('Org1MSP.member')"
 )
 
-// setup spawns a committer test container and returns a map containing the endpoints of the committers services.
-func setup(t *testing.T) map[string]string {
+// setupSingleOrgAdmin spawns a committer test container with a single org admin lifecycle policy
+// and returns a map containing the endpoints of the committers services.
+func setupSingleOrgAdmin(t *testing.T) map[string]string {
 	t.Helper()
 
-	absPath, err := filepath.Abs(filepath.Join(".", "testdata", "crypto", "config-block.pb.bin"))
+	genesisPath, err := filepath.Abs(filepath.Join(".", "testdata", "crypto", "single-org.pb.bin"))
 	require.NoError(t, err)
+
+	return setup(t, genesisPath)
+}
+
+// setupSingleOrgAdmin spawns a committer test container with a single org admin lifecycle policy
+// and returns a map containing the endpoints of the committers services.
+func setupMultiOrgAdmin(t *testing.T) map[string]string {
+	t.Helper()
+
+	genesisPath, err := filepath.Abs(filepath.Join(".", "testdata", "crypto", "multi-org.pb.bin"))
+	require.NoError(t, err)
+
+	return setup(t, genesisPath)
+}
+
+func setup(t *testing.T, genesisPath string) map[string]string {
+	t.Helper()
 
 	dataDirectory, err := filepath.Abs(filepath.Join(".", "testdata", "crypto"))
 	require.NoError(t, err)
@@ -56,7 +73,7 @@ func setup(t *testing.T) map[string]string {
 		ctx, "ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.9",
 		testcontainers.WithCmd("run", "db", "orderer", "committer", "--insecure"),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
-			HostFilePath:      absPath,
+			HostFilePath:      genesisPath,
 			ContainerFilePath: "/root/artifacts/config-block.pb.bin",
 			FileMode:          0o700,
 		}),
