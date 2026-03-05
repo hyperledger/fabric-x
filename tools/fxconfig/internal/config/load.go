@@ -100,7 +100,7 @@ func Load(opts ...Option) (*Config, error) {
 // registerStructKeys recursively registers all configuration fields with viper.
 // It traverses the struct hierarchy and registers each field with its full path.
 // Supports: int, []int, string, []string, bool, []bool, time.Duration, and nested structs.
-func registerStructKeys(v *viper.Viper, viperPrefix string, t reflect.Type) {
+func registerStructKeys(v *viper.Viper, viperPrefix string, t reflect.Type) { //nolint:gocognit
 	if t.Kind() == reflect.Pointer {
 		t = t.Elem()
 	}

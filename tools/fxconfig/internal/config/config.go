@@ -76,6 +76,7 @@ func (c *TLSConfig) Normalize() {
 	}
 }
 
+// InheritFrom returns a new TLSConfig that merges c with parent, preferring c's values where set.
 func (c *TLSConfig) InheritFrom(parent *TLSConfig) *TLSConfig {
 	if c == nil {
 		c = &TLSConfig{}

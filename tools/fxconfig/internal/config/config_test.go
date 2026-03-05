@@ -79,9 +79,11 @@ func TestTLSConfig_InheritFrom(t *testing.T) {
 			},
 		},
 		{
-			name:   "nil child inherits all parent fields",
-			child:  nil,
-			parent: &TLSConfig{Enabled: boolPtr(true), ClientKeyPath: "parent-key.pem", ClientCertPath: "parent-cert.pem"},
+			name:  "nil child inherits all parent fields",
+			child: nil,
+			parent: &TLSConfig{
+				Enabled: boolPtr(true), ClientKeyPath: "parent-key.pem", ClientCertPath: "parent-cert.pem",
+			},
 			check: func(t *testing.T, result *TLSConfig) {
 				t.Helper()
 				require.True(t, *result.Enabled)
@@ -90,9 +92,11 @@ func TestTLSConfig_InheritFrom(t *testing.T) {
 			},
 		},
 		{
-			name:   "child fields win over parent",
-			child:  &TLSConfig{Enabled: boolPtr(false), ClientKeyPath: "child-key.pem"},
-			parent: &TLSConfig{Enabled: boolPtr(true), ClientKeyPath: "parent-key.pem", ClientCertPath: "parent-cert.pem"},
+			name:  "child fields win over parent",
+			child: &TLSConfig{Enabled: boolPtr(false), ClientKeyPath: "child-key.pem"},
+			parent: &TLSConfig{
+				Enabled: boolPtr(true), ClientKeyPath: "parent-key.pem", ClientCertPath: "parent-cert.pem",
+			},
 			check: func(t *testing.T, result *TLSConfig) {
 				t.Helper()
 				require.False(t, *result.Enabled)
@@ -101,9 +105,11 @@ func TestTLSConfig_InheritFrom(t *testing.T) {
 			},
 		},
 		{
-			name:   "empty child inherits all parent fields",
-			child:  &TLSConfig{},
-			parent: &TLSConfig{Enabled: boolPtr(true), ClientKeyPath: "p-key.pem", ServerNameOverride: "override"},
+			name:  "empty child inherits all parent fields",
+			child: &TLSConfig{},
+			parent: &TLSConfig{
+				Enabled: boolPtr(true), ClientKeyPath: "p-key.pem", ServerNameOverride: "override",
+			},
 			check: func(t *testing.T, result *TLSConfig) {
 				t.Helper()
 				require.True(t, *result.Enabled)

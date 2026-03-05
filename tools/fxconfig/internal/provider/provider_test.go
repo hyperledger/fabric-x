@@ -44,8 +44,8 @@ func TestProvider_Get_Success(t *testing.T) {
 
 	svc, err := p.Get()
 	require.NoError(t, err)
-	assert.NotNil(t, svc)
-	assert.Equal(t, "test", svc.value)
+	require.NotNil(t, svc)
+	require.Equal(t, "test", svc.value)
 }
 
 func TestProvider_Get_FactoryError(t *testing.T) {
@@ -60,8 +60,8 @@ func TestProvider_Get_FactoryError(t *testing.T) {
 	p := provider.New(factory, cfg, validation.Context{})
 
 	svc, err := p.Get()
-	assert.Nil(t, svc)
-	assert.ErrorIs(t, err, expectedErr)
+	require.Nil(t, svc)
+	require.ErrorIs(t, err, expectedErr)
 }
 
 func TestProvider_Get_LazyInitialization(t *testing.T) {
@@ -86,7 +86,7 @@ func TestProvider_Get_LazyInitialization(t *testing.T) {
 	require.NoError(t, err3)
 
 	// Validation and factory should only be called once due to sync.Once
-	assert.Equal(t, 1, callCount)
+	require.Equal(t, 1, callCount)
 }
 
 func TestProvider_Get_ValidationError(t *testing.T) {
@@ -103,9 +103,9 @@ func TestProvider_Get_ValidationError(t *testing.T) {
 	p := provider.New(factory, cfg, validation.Context{})
 
 	svc, err := p.Get()
-	assert.Nil(t, svc)
-	assert.ErrorIs(t, err, validationErr)
-	assert.False(t, factoryCalled, "factory must not be called if validation fails")
+	require.Nil(t, svc)
+	require.ErrorIs(t, err, validationErr)
+	require.False(t, factoryCalled, "factory must not be called if validation fails")
 }
 
 func TestProvider_Get_ValidationErrorIsCached(t *testing.T) {
@@ -122,8 +122,8 @@ func TestProvider_Get_ValidationErrorIsCached(t *testing.T) {
 	_, err1 := p.Get()
 	_, err2 := p.Get()
 
-	assert.ErrorIs(t, err1, validationErr)
-	assert.ErrorIs(t, err2, validationErr)
+	require.ErrorIs(t, err1, validationErr)
+	require.ErrorIs(t, err2, validationErr)
 }
 
 func TestProvider_Get_ThreadSafety(t *testing.T) {
@@ -159,7 +159,7 @@ func TestProvider_Get_ThreadSafety(t *testing.T) {
 	// Factory should only be called once despite concurrent access
 	mu.Lock()
 	defer mu.Unlock()
-	assert.Equal(t, 1, callCount)
+	require.Equal(t, 1, callCount)
 }
 
 func TestProvider_Validate_Success(t *testing.T) {
@@ -173,7 +173,7 @@ func TestProvider_Validate_Success(t *testing.T) {
 	p := provider.New(factory, cfg, validation.Context{})
 
 	err := p.Validate()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestProvider_Validate_Error(t *testing.T) {
@@ -188,5 +188,5 @@ func TestProvider_Validate_Error(t *testing.T) {
 	p := provider.New(factory, cfg, validation.Context{})
 
 	err := p.Validate()
-	assert.ErrorIs(t, err, expectedErr)
+	require.ErrorIs(t, err, expectedErr)
 }
