@@ -12,9 +12,13 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"encoding/pem"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 )
 
 // TestGetPubKeyFromPemData tests the getPubKeyFromPemData function.
@@ -115,4 +119,74 @@ MIIBogIBAAJBALRiMLAA
 			}
 		})
 	}
+}
+
+func TestCreateMspPolicy(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		expr    string
+		wantErr bool
+	}{
+		{"valid OR expression", "OR('Org1MSP.member')", false},
+		{"valid AND expression", "AND('Org1MSP.member', 'Org2MSP.member')", false},
+		{"invalid expression", "NOT_VALID", true},
+		{"empty expression", "", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			policy, err := CreateMspPolicy(tt.expr)
+			if tt.wantErr {
+				require.Error(t, err)
+				require.Nil(t, policy)
+			} else {
+				require.NoError(t, err)
+				require.NotNil(t, policy)
+				_, ok := policy.Rule.(*applicationpb.NamespacePolicy_MspRule)
+				require.True(t, ok, "expected MspRule policy type")
+			}
+		})
+	}
+}
+
+func TestCreateThresholdPolicy(t *testing.T) {
+	t.Parallel()
+
+	// generate an ECDSA key and write it to a temp file
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	require.NoError(t, err)
+
+	pubKeyDER, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
+	require.NoError(t, err)
+
+	pubKeyPEM := pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: pubKeyDER})
+
+	tmpDir := t.TempDir()
+	keyFile := filepath.Join(tmpDir, "key.pem")
+	require.NoError(t, os.WriteFile(keyFile, pubKeyPEM, 0o600))
+
+	t.Run("valid key file", func(t *testing.T) {
+		t.Parallel()
+
+		policy, err := CreateThresholdPolicy(keyFile)
+		require.NoError(t, err)
+		require.NotNil(t, policy)
+
+		rule, ok := policy.Rule.(*applicationpb.NamespacePolicy_ThresholdRule)
+		require.True(t, ok, "expected ThresholdRule policy type")
+		require.Equal(t, "ECDSA", rule.ThresholdRule.GetScheme())
+		require.NotEmpty(t, rule.ThresholdRule.GetPublicKey())
+	})
+
+	t.Run("non-existent file", func(t *testing.T) {
+		t.Parallel()
+
+		policy, err := CreateThresholdPolicy(filepath.Join(tmpDir, "missing.pem"))
+		require.Error(t, err)
+		require.Nil(t, policy)
+	})
 }

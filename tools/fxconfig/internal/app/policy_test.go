@@ -80,3 +80,18 @@ func (FakeFileChecker) Exists(_ string) error {
 	// always exists
 	return nil
 }
+
+type FakeDirectoryChecker struct{}
+
+func (FakeDirectoryChecker) Exists(_ string) error {
+	// always exists
+	return nil
+}
+
+func fakeValidationContext() validation.Context {
+	return validation.Context{
+		PolicyChecker:    FakePolicyChecker{},
+		FileChecker:      FakeFileChecker{},
+		DirectoryChecker: FakeDirectoryChecker{},
+	}
+}

@@ -88,7 +88,7 @@ func resolveInputs(ctx *CLIContext, cmd *cobra.Command, args []string) (string, 
 			return "", nil, err
 		}
 
-		txIDs[txID] = struct{}{}
+		txIDs[id] = struct{}{}
 		if txID == "" {
 			txID = id
 		}

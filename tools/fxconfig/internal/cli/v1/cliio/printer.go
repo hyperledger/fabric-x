@@ -75,8 +75,7 @@ func (p *CLIPrinter) print(v any) error {
 func (p *CLIPrinter) PrintError(err error) {
 	// Human readable
 	if p.format != FormatJSON {
-		//nolint:errcheck
-		fmt.Fprintf(p.errOut, "Error: %v\n", err)
+		_, _ = fmt.Fprintf(p.errOut, "Error: %v\n", err)
 		return
 	}
 

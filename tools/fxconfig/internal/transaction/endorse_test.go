@@ -4,9 +4,10 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-package app
+package transaction
 
 import (
+	"encoding/hex"
 	"errors"
 	"testing"
 	"time"
@@ -16,7 +17,6 @@ import (
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/transaction"
 )
 
 // mockSigningIdentity is a mock signing identity for testing.
@@ -155,7 +155,7 @@ func TestEndorse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			result, err := transaction.Endorse(tt.signer, tt.txID, tt.tx)
+			result, err := Endorse(tt.signer, tt.txID, tt.tx)
 
 			if tt.expectError {
 				require.Error(t, err, tt.description)
@@ -175,4 +175,26 @@ func TestEndorse(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGenerateTxID(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns valid hex string", func(t *testing.T) {
+		t.Parallel()
+
+		id := GenerateTxID()
+		require.NotEmpty(t, id)
+
+		// SHA-256 produces 32 bytes → 64 hex characters
+		require.Len(t, id, 64)
+		_, err := hex.DecodeString(id)
+		require.NoError(t, err, "txID should be valid hex")
+	})
+
+	t.Run("each call returns a unique ID", func(t *testing.T) {
+		t.Parallel()
+		a, b := GenerateTxID(), GenerateTxID()
+		require.NotEqual(t, a, b)
+	})
 }

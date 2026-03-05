@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -66,13 +65,13 @@ func TestVersionCommand(t *testing.T) {
 				require.Error(t, err)
 				output := errBuf.String()
 				for _, expected := range tt.expectedOutput {
-					assert.Contains(t, output, expected, "error output should contain expected text")
+					require.Contains(t, output, expected, "error output should contain expected text")
 				}
 			} else {
 				require.NoError(t, err)
 				output := outBuf.String()
 				for _, expected := range tt.expectedOutput {
-					assert.Contains(t, output, expected, "output should contain expected text")
+					require.Contains(t, output, expected, "output should contain expected text")
 				}
 			}
 		})
@@ -98,8 +97,8 @@ func TestVersionCommand_OutputFormat(t *testing.T) {
 	output := outBuf.String()
 	lines := strings.Split(strings.TrimSpace(output), "\n")
 
-	assert.GreaterOrEqual(t, len(lines), 5, "version output should have at least 5 lines")
-	assert.Equal(t, "fxconfig", lines[0], "first line should be 'fxconfig'")
+	require.GreaterOrEqual(t, len(lines), 5, "version output should have at least 5 lines")
+	require.Equal(t, "fxconfig", lines[0], "first line should be 'fxconfig'")
 
 	// Verify subsequent lines have the expected format (key: value)
 	for i := 1; i < len(lines); i++ {
@@ -107,7 +106,7 @@ func TestVersionCommand_OutputFormat(t *testing.T) {
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
-		assert.Contains(t, line, ":", "line %d should contain a colon separator", i)
+		require.Contains(t, line, ":", "line %d should contain a colon separator", i)
 	}
 }
 
@@ -119,7 +118,7 @@ func TestNewVersionCommand(t *testing.T) {
 
 	// Assert
 	require.NotNil(t, cmd, "NewVersionCommand should return a non-nil command")
-	assert.Equal(t, "version", cmd.Use, "command use should be 'version'")
-	assert.NotEmpty(t, cmd.Short, "command should have a short description")
-	assert.NotNil(t, cmd.Run, "command should have a Run function")
+	require.Equal(t, "version", cmd.Use, "command use should be 'version'")
+	require.NotEmpty(t, cmd.Short, "command should have a short description")
+	require.NotNil(t, cmd.Run, "command should have a Run function")
 }

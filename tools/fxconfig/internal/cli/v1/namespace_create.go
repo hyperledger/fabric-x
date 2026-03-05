@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
@@ -78,7 +79,9 @@ Examples:
 			}
 
 			if res == nil {
-				ctx.Printer.Print(fmt.Sprintf("Status code: %d", status))
+				ctx.Printer.Print(
+					fmt.Sprintf("Transaction status: %s", committerpb.Status_name[int32(status)]), //nolint:gosec
+				)
 				return nil
 			}
 
