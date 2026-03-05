@@ -47,6 +47,10 @@ func setup(t *testing.T) map[string]string {
 	dataDirectory, err := filepath.Abs(filepath.Join(".", "testdata", "crypto"))
 	require.NoError(t, err)
 
+	// msp configuration for sidecar orderer client
+	mspID := "Org1MSP"
+	mspDir := "/root/artifacts/crypto/peerOrganizations/Org1/users/committer@org1.com/msp"
+
 	ctx := t.Context()
 	committerContainer, err := testcontainers.Run(
 		ctx, "ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.9",
@@ -68,8 +72,8 @@ func setup(t *testing.T) map[string]string {
 			"SC_SIDECAR_ORDERER_CHANNEL_ID":       channelID,
 			"SC_SIDECAR_ORDERER_TLS_MODE":         "none",
 			"SC_SIDECAR_ORDERER_SIGNED_ENVELOPES": "true",
-			"SC_SIDECAR_ORDERER_IDENTITY_MSP_ID":  "Org1MSP",
-			"SC_SIDECAR_ORDERER_IDENTITY_MSP_DIR": "/root/artifacts/crypto/peerOrganizations/Org1/users/committer@org1.com/msp",
+			"SC_SIDECAR_ORDERER_IDENTITY_MSP_ID":  mspID,
+			"SC_SIDECAR_ORDERER_IDENTITY_MSP_DIR": mspDir,
 			"SC_QUERY_SERVICE_SERVER_ENDPOINT":    fmt.Sprintf(":%v", queryServicePort),
 			"SC_QUERY_SERVICE_LOGGING_LOGSPEC":    "DEBUG",
 			"SC_ORDERER_BLOCK_SIZE":               "1",

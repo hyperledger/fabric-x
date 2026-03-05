@@ -14,10 +14,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/hyperledger/fabric-x-common/api/msppb"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x-common/api/msppb"
 	"github.com/hyperledger/fabric-x-common/msp"
 )
 
@@ -79,10 +79,10 @@ func Endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 
 func identity(signer msp.SigningIdentity) (*msppb.Identity, error) {
 	// signer identity with certificate attached
-	//s, err := signer.Serialize()
-	//if err != nil {
-	//	return nil, err
-	//}
+	// s, err := signer.Serialize()
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// signer identity with hash of certificate attached
 	s, err := signer.SerializeWithIDOfCert()

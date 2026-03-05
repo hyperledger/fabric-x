@@ -95,10 +95,13 @@ func parseCertificateOrPublicKey(blockBytes []byte) ([]byte, error) {
 		}
 	} else {
 		// If fails, try reading public key
-		anyPublicKey, err := x509.ParsePKIXPublicKey(blockBytes)
-		if err == nil && anyPublicKey != nil {
-			publicKey, _ = anyPublicKey.(*ecdsa.PublicKey)
-
+		anyPublicKey, err2 := x509.ParsePKIXPublicKey(blockBytes)
+		if err2 == nil && anyPublicKey != nil {
+			var ok bool
+			publicKey, ok = anyPublicKey.(*ecdsa.PublicKey)
+			if !ok {
+				return nil, errors.New("public key is not a ecdsa public key")
+			}
 		}
 	}
 
