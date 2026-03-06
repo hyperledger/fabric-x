@@ -41,9 +41,9 @@ fxconfig namespace list [flags]
 
 **Common Flags:**
 - `--policy=<DSL>` - Endorsement policy DSL string
-- `--policy-threshold-ecdsa=<path>` - Threshold ECDSA policy from PEM file
+- `--policy=threshold:<path>` - Threshold ECDSA policy from PEM file
 - `--version=<int>` - Version number (update only; create defaults to 0)
-- `--output=<path>` - Save transaction to file (`.pb` extension)
+- `--output=<path>` - Save transaction to file (`.json` extension)
 - `--endorse` - Sign transaction with local MSP identity
 - `--submit` - Submit endorsed transaction to ordering service
 - `--wait` - Block until transaction commits (requires notification service)
@@ -52,19 +52,19 @@ fxconfig namespace list [flags]
 - Single org: `--policy="OR('Org1MSP.member')"`
 - Multi org: `--policy="AND('Org1MSP.member', 'Org2MSP.member')"`
 - Complex: `--policy="OutOf(1, 'Org1MSP.member', 'Org2MSP.member')"`
-- Threshold ECDSA: `--policy-threshold-ecdsa=/path/to/policy.pem`
+- Threshold ECDSA: `--policy="threshold:/path/to/policy.pem"`
 
 ### Transaction Operations
 
 ```bash
 # Endorse a transaction
-fxconfig tx endorse --input=<path> --output=<path>
+fxconfig tx endorse <path> --output=<path>
 
 # Merge multiple endorsed transactions
-fxconfig tx merge --inputs <path1> <path2> ... --output=<path>
+fxconfig tx merge <path1> <path2> ... --output=<path>
 
 # Submit transaction to ordering service
-fxconfig tx submit --input=<path> [--wait]
+fxconfig tx submit <path> [--wait]
 ```
 
 ### Utility Commands
@@ -111,6 +111,7 @@ tls:
 # Ordering service configuration
 orderer:
   address: localhost:7050
+  channel: mychannel  # Channel name (default: mychannel)
   connectionTimeout: 30s
   # Optional: Override parent TLS settings
   tls:
@@ -150,10 +151,9 @@ notifications:
 
 ### Naming Conventions
 
-- **CLI Flags**: kebab-case (e.g., `--msp-configpath`, `--orderer-address`)
 - **Environment Variables**: SCREAMING_SNAKE_CASE with `FXCONFIG_` prefix (e.g., `FXCONFIG_MSP_CONFIGPATH`, `FXCONFIG_ORDERER_ADDRESS`)
 - **Config File Fields**: camelCase (e.g., `configPath`, `connectionTimeout`)
-- **Array Parameters**: Comma-separated lists (e.g., `--tls-rootcerts="/path1/cert.pem,/path2/cert.pem"`)
+- **Array Parameters**: Comma-separated values in environment variables (e.g., `FXCONFIG_TLS_ROOTCERTS="/path1/cert.pem,/path2/cert.pem"`)
 
 ### Environment Variables
 
@@ -185,22 +185,20 @@ fxconfig namespace create hello \
 # Create transaction
 fxconfig namespace create hello \
   --policy="AND('Org1MSP.member', 'Org2MSP.member')" \
-  --output=hello.pb
+  --output=hello.json
 
 # Endorse with Org1
-fxconfig tx endorse \
+fxconfig tx endorse hello.json \
   --config=org1_config.yaml \
-  --input=hello.pb \
-  --output=hello_org1.pb
+  --output=hello_org1.json
 
 # Endorse with Org2 (appends to existing endorsements)
-fxconfig tx endorse \
+fxconfig tx endorse hello_org1.json \
   --config=org2_config.yaml \
-  --input=hello_org1.pb \
-  --output=hello_endorsed.pb
+  --output=hello_endorsed.json
 
 # Submit to network
-fxconfig tx submit --input=hello_endorsed.pb
+fxconfig tx submit hello_endorsed.json
 ```
 
 ### Multi-Org Distributed Flow
@@ -208,36 +206,36 @@ fxconfig tx submit --input=hello_endorsed.pb
 ```bash
 # Query current state
 fxconfig namespace list
-# Output: | ns=halloNamespace | version=0 | policy=... |
+# Output:
+# Installed namespaces (1 total):
+# 0) hello: version 0 policy: <hex-encoded-policy>
 
 # Org1: Create transaction
 fxconfig namespace create hello \
   --policy="AND('Org1MSP.member', 'Org2MSP.member')" \
-  --output=hello.pb
+  --output=hello.json
 
-# Send hello.pb to Org1 and Org2 via external secure channel
+# Send hello.json to Org1 and Org2 via external secure channel
 
 # Org1: Endorse
-fxconfig tx endorse \
+fxconfig tx endorse hello.json \
   --config=org1_config.yaml \
-  --input=hello.pb \
-  --output=hello_org1.pb
+  --output=hello_org1.json
 
-# Org2: Endorse (receives hello.pb via external channel)
-fxconfig tx endorse \
+# Org2: Endorse (receives hello.json via external channel)
+fxconfig tx endorse hello.json \
   --config=org2_config.yaml \
-  --input=hello.pb \
-  --output=hello_org2.pb
+  --output=hello_org2.json
 
 # Collect endorsed transactions from org1 and org2
 
 # Either org: Merge endorsements
 fxconfig tx merge \
-  --inputs hello_org1.pb hello_org2.pb \
-  --output=hello_endorsed.pb
+  hello_org1.json hello_org2.json \
+  --output=hello_endorsed.json
 
 # Either org: Submit to network
-fxconfig tx submit --input=hello_endorsed.pb
+fxconfig tx submit hello_endorsed.json
 ```
 
 ### Update Namespace
@@ -308,28 +306,26 @@ EOF
 fxconfig namespace create payments \
   --config org1-config.yaml \
   --policy="AND('Org1MSP.member', 'Org2MSP.member')" \
-  --output=payments.pb
+  --output=payments.json
 
 # Org1 endorses
-fxconfig tx endorse \
+fxconfig tx endorse payments.json \
   --config org1-config.yaml \
-  --input=payments.pb \
-  --output=payments_org1.pb
+  --output=payments_org1.json
 
 # Org2 endorses
-fxconfig tx endorse \
+fxconfig tx endorse payments.json \
   --config org2-config.yaml \
-  --input=payments.pb \
-  --output=payments_org2.pb
+  --output=payments_org2.json
 
 # Merge and submit
 fxconfig tx merge \
-  --inputs payments_org1.pb payments_org2.pb \
-  --output=payments_endorsed.pb
+  payments_org1.json payments_org2.json \
+  --output=payments_endorsed.json
 
 fxconfig tx submit \
-  --config org1-config.yaml \
-  --input=payments_endorsed.pb
+  payments_endorsed.json \
+  --config org1-config.yaml
 ```
 
 ## Exit Codes
@@ -357,8 +353,11 @@ Get help for any command:
 fxconfig --help                    # Global help
 fxconfig namespace --help          # Namespace commands help
 fxconfig namespace create --help   # Create command help
+fxconfig namespace update --help   # Update command help
 fxconfig tx --help                 # Transaction commands help
 fxconfig tx endorse --help         # Endorse command help
+fxconfig tx merge --help           # Merge command help
+fxconfig tx submit --help          # Submit command help
 ```
 
 ## Troubleshooting
