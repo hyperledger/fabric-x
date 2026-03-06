@@ -17,7 +17,7 @@ import (
 func CreateNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, nsVersion int) *applicationpb.Tx {
 	writeToMetaNs := &applicationpb.TxNamespace{
 		NsId: committerpb.MetaNamespaceID,
-		// TODO we need the correct version of the metaNamespaceID
+		// TODO: we need the correct version of the metaNamespaceID
 		NsVersion:  0,
 		ReadWrites: make([]*applicationpb.ReadWrite, 0, 1),
 	}

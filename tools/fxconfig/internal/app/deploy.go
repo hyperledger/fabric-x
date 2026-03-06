@@ -75,7 +75,8 @@ func (d *AdminApp) DeployNamespace(
 		return nil, UnknownStatus, err
 	}
 
-	if !input.Submit {
+	// note that we enforce submit if wait is set
+	if !input.Submit && !input.Wait {
 		return out, UnknownStatus, nil
 	}
 

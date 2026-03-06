@@ -55,7 +55,8 @@ func (*mockSigningIdentity) SerializeWithIDOfCert() ([]byte, error) {
 	return []byte("serialized-identity-with-cert-id"), nil
 }
 
-func (*mockSigningIdentity) GetPublicVersion() msp.Identity { //nolint:ireturn
+//nolint:ireturn
+func (*mockSigningIdentity) GetPublicVersion() msp.Identity {
 	return nil
 }
 

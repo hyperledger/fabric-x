@@ -10,6 +10,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -42,8 +43,7 @@ func (c *OrdererConfig) Validate(vctx validation.Context) error {
 // Validate validates service endpoint configuration.
 // Checks address, timeout, and TLS settings for a given service.
 func (c *EndpointServiceConfig) Validate(vctx validation.Context) error {
-	// TODO we should validate this better
-	if err := errorIfEmpty(c.Address, "must not be empty"); err != nil {
+	if err := validateEndpoint(c.Address); err != nil {
 		return fmt.Errorf("invalid address: %w", err)
 	}
 
@@ -112,6 +112,20 @@ func errorIfEmpty(s, errMsg string) error {
 func errorIfZeroDuration(d time.Duration, errMsg string) error {
 	if d == 0 {
 		return errors.New(errMsg)
+	}
+	return nil
+}
+
+func validateEndpoint(endpoint string) error {
+	host, port, err := net.SplitHostPort(endpoint)
+	if err != nil {
+		return err
+	}
+	if host == "" {
+		return errors.New("host is empty")
+	}
+	if port == "" {
+		return errors.New("port is empty")
 	}
 	return nil
 }

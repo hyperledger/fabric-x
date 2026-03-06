@@ -119,10 +119,10 @@ func readNonce(source io.Reader) []byte {
 	value := make([]byte, size)
 	n, err := source.Read(value)
 	if err != nil {
-		panic("ouch")
+		panic(fmt.Errorf("error while creating nonce: %w", err))
 	}
 	if n != size {
-		panic("ouch ouch")
+		panic(fmt.Errorf("cannot read enough bytes for nonce actual: %d wanted: %d", n, size))
 	}
 
 	return value
