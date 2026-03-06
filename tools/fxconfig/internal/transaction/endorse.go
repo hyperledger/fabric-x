@@ -79,16 +79,16 @@ func Endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 
 func identity(signer msp.SigningIdentity) (*msppb.Identity, error) {
 	// signer identity with certificate attached
-	// s, err := signer.Serialize()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// signer identity with hash of certificate attached
-	s, err := signer.SerializeWithIDOfCert()
+	s, err := signer.Serialize()
 	if err != nil {
 		return nil, err
 	}
+
+	// signer identity with hash of certificate attached
+	// s, err := signer.SerializeWithIDOfCert()
+	// if err != nil {
+	// 	 return nil, err
+	// }
 
 	var sid msppb.Identity
 	err = proto.Unmarshal(s, &sid)

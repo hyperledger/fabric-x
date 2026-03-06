@@ -14,8 +14,10 @@ import (
 
 	msppb "github.com/hyperledger/fabric-protos-go-apiv2/msp"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	fxmsppb "github.com/hyperledger/fabric-x-common/api/msppb"
 	"github.com/hyperledger/fabric-x-common/msp"
 )
 
@@ -47,8 +49,15 @@ func (m *mockSigningIdentity) GetIdentifier() *msp.IdentityIdentifier {
 	}
 }
 
-func (*mockSigningIdentity) Serialize() ([]byte, error) {
-	return []byte("serialized-identity"), nil
+func (m *mockSigningIdentity) Serialize() ([]byte, error) {
+	sid := &fxmsppb.Identity{
+		MspId: m.mspID,
+	}
+	b, err := proto.Marshal(sid)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
 }
 
 func (*mockSigningIdentity) SerializeWithIDOfCert() ([]byte, error) {
