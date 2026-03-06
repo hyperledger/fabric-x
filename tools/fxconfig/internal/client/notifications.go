@@ -16,7 +16,6 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
-	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
@@ -38,23 +37,7 @@ type NotificationClient struct {
 // NewNotificationClient creates a notification client with the provided configuration.
 // It establishes a gRPC connection with optional TLS and starts a background listener.
 func NewNotificationClient(cfg config.NotificationsConfig) (*NotificationClient, error) {
-	clientCfg := comm.Config{
-		Timeout: cfg.ConnectionTimeout,
-	}
-
-	// TLS config
-	if cfg.TLS.IsEnabled() {
-		clientCfg.CertPath = cfg.TLS.ClientCertPath
-		clientCfg.KeyPath = cfg.TLS.ClientKeyPath
-		clientCfg.PeerCACertPath = cfg.TLS.RootCertPaths[0]
-	}
-
-	cl, err := comm.NewClient(clientCfg)
-	if err != nil {
-		return nil, fmt.Errorf("cannot get grpc client: %w", err)
-	}
-
-	conn, err := cl.NewDialer(cfg.Address)()
+	conn, err := newClientConn(&cfg.EndpointServiceConfig)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get grpc client: %w", err)
 	}

@@ -15,7 +15,6 @@ import (
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
-	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
@@ -29,25 +28,9 @@ type QueryClient struct {
 // NewQueryClient creates a new query client with the provided configuration.
 // It establishes a gRPC connection with optional TLS and returns an error if connection fails.
 func NewQueryClient(cfg config.QueriesConfig) (*QueryClient, error) {
-	clientCfg := comm.Config{
-		Timeout: cfg.ConnectionTimeout,
-	}
-
-	// TLS config
-	if cfg.TLS.IsEnabled() {
-		clientCfg.CertPath = cfg.TLS.ClientCertPath
-		clientCfg.KeyPath = cfg.TLS.ClientKeyPath
-		clientCfg.PeerCACertPath = cfg.TLS.RootCertPaths[0]
-	}
-
-	cl, err := comm.NewClient(clientCfg)
+	conn, err := newClientConn(&cfg.EndpointServiceConfig)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get grpc client: %w", err)
-	}
-
-	conn, err := cl.NewDialer(cfg.Address)()
-	if err != nil {
-		return nil, fmt.Errorf("dialing grpc client error: %w", err)
 	}
 
 	return &QueryClient{

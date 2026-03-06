@@ -4,8 +4,6 @@ Copyright IBM Corp. All Rights Reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-// Package client provides gRPC client implementations for Fabric-X services.
-// It includes clients for orderer, query, and notification services with TLS support.
 package client
 
 import (
@@ -17,7 +15,6 @@ import (
 	ab "github.com/hyperledger/fabric-protos-go-apiv2/orderer"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
-	"github.com/hyperledger/fabric-x-common/cmd/common/comm"
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x-common/protoutil"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
@@ -34,23 +31,7 @@ type OrdererClient struct {
 // NewOrdererClient creates a new orderer client with the provided configuration and signing identity.
 // It establishes a gRPC connection with optional TLS and returns an error if connection fails.
 func NewOrdererClient(cfg config.OrdererConfig) (*OrdererClient, error) {
-	clientCfg := comm.Config{
-		Timeout: cfg.ConnectionTimeout,
-	}
-
-	// TLS config
-	if cfg.TLS.IsEnabled() {
-		clientCfg.CertPath = cfg.TLS.ClientCertPath
-		clientCfg.KeyPath = cfg.TLS.ClientKeyPath
-		clientCfg.PeerCACertPath = cfg.TLS.RootCertPaths[0]
-	}
-
-	cl, err := comm.NewClient(clientCfg)
-	if err != nil {
-		return nil, fmt.Errorf("cannot get grpc client: %w", err)
-	}
-
-	conn, err := cl.NewDialer(cfg.Address)()
+	conn, err := newClientConn(&cfg.EndpointServiceConfig)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get grpc client: %w", err)
 	}
@@ -127,6 +108,10 @@ func (oc *OrdererClient) createSignedEnvelope(
 	txID string,
 	tx *applicationpb.Tx,
 ) (*cb.Envelope, error) {
+	if signer == nil {
+		return nil, errors.New("require Signer")
+	}
+
 	signatureHdr := protoutil.NewSignatureHeaderOrPanic(signer)
 
 	// prepare transaction submission
@@ -143,10 +128,6 @@ func (oc *OrdererClient) createSignedEnvelope(
 			Data:   txBytes,
 		},
 	)
-
-	if signer == nil {
-		return nil, errors.New("require Signer")
-	}
 
 	sig, err := signer.Sign(payloadBytes)
 	if err != nil {

@@ -116,10 +116,8 @@ func TestOrdererClient_Broadcast_NilSigner(t *testing.T) {
 	oc := newTestOrdererClient(&mockAtomicBroadcastClient{
 		stream: &mockBroadcastStream{recvResp: &ab.BroadcastResponse{Status: cb.Status_SUCCESS}},
 	})
-	// protoutil.NewSignatureHeaderOrPanic panics when signer is nil.
-	require.Panics(t, func() {
-		_ = oc.Broadcast(t.Context(), nil, "tx-1", someBroadcastTx())
-	})
+	err := oc.Broadcast(t.Context(), nil, "tx-1", someBroadcastTx())
+	require.Error(t, err)
 }
 
 func TestOrdererClient_Broadcast_SignerError(t *testing.T) {
