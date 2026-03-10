@@ -18,6 +18,7 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
 
+	"github.com/hyperledger/fabric-x-common/common/crypto/tlsgen"
 	fmsp "github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
@@ -36,29 +37,93 @@ const (
 	channelID        = "mychannel"
 )
 
+// tlsModes lists the TLS configurations under which all integration tests run.
+var tlsModes = []string{"none", "tls", "mtls"}
+
+// tlsCredentials holds TLS certificate paths generated for a test run.
+// When non-nil, fxconfig clients are configured with TLS using the CA cert.
+// For mTLS, clientCertPath and clientKeyPath are also populated so that fxconfig
+// presents a client certificate to the committer services.
+type tlsCredentials struct {
+	caCertPath     string                         // host-side CA cert for fxconfig rootCerts
+	clientCertPath string                         // host-side client cert (mTLS only)
+	clientKeyPath  string                         // host-side client key  (mTLS only)
+	containerFiles []testcontainers.ContainerFile // cert files to copy into the container
+}
+
+// generateTLSCredentials creates an ephemeral CA, generates server and client
+// key pairs, writes them to disk, and returns paths and container file entries
+// that match the committer test-node's expected layout (/server-certs/, /client-certs/).
+// When tlsMode is "mtls", the returned credentials include client cert/key paths
+// so that fxconfig presents a client certificate to the server.
+func generateTLSCredentials(t *testing.T, tlsMode string) *tlsCredentials {
+	t.Helper()
+
+	ca, err := tlsgen.NewCA()
+	require.NoError(t, err)
+
+	serverKP, err := ca.NewServerCertKeyPair("localhost", "127.0.0.1", "::1")
+	require.NoError(t, err)
+
+	clientKP, err := ca.NewClientCertKeyPair()
+	require.NoError(t, err)
+
+	dir := t.TempDir()
+	write := func(name string, data []byte) string {
+		p := filepath.Join(dir, name)
+		require.NoError(t, os.WriteFile(p, data, 0o600))
+		return p
+	}
+
+	serverCert := write("server-cert.pem", serverKP.Cert)
+	serverKey := write("server-key.pem", serverKP.Key)
+	clientCert := write("client-cert.pem", clientKP.Cert)
+	clientKey := write("client-key.pem", clientKP.Key)
+	caCert := write("ca-cert.pem", ca.CertBytes())
+
+	creds := &tlsCredentials{
+		caCertPath: caCert,
+		containerFiles: []testcontainers.ContainerFile{
+			{HostFilePath: serverCert, ContainerFilePath: "/server-certs/public-key.pem", FileMode: 0o600},
+			{HostFilePath: serverKey, ContainerFilePath: "/server-certs/private-key.pem", FileMode: 0o600},
+			{HostFilePath: caCert, ContainerFilePath: "/server-certs/ca-certificate.pem", FileMode: 0o600},
+			{HostFilePath: clientCert, ContainerFilePath: "/client-certs/public-key.pem", FileMode: 0o600},
+			{HostFilePath: clientKey, ContainerFilePath: "/client-certs/private-key.pem", FileMode: 0o600},
+			{HostFilePath: caCert, ContainerFilePath: "/client-certs/ca-certificate.pem", FileMode: 0o600},
+		},
+	}
+
+	if tlsMode == "mtls" {
+		creds.clientCertPath = clientCert
+		creds.clientKeyPath = clientKey
+	}
+
+	return creds
+}
+
 // setupSingleOrgAdmin spawns a committer test container with a single org admin lifecycle policy
 // and returns a map containing the endpoints of the committers services.
-func setupSingleOrgAdmin(t *testing.T) map[string]string {
+func setupSingleOrgAdmin(t *testing.T, tlsMode string) (map[string]string, *tlsCredentials) {
 	t.Helper()
 
 	genesisPath, err := filepath.Abs(filepath.Join(".", "testdata", "crypto", "single-org.pb.bin"))
 	require.NoError(t, err)
 
-	return setup(t, genesisPath)
+	return setup(t, genesisPath, tlsMode)
 }
 
-// setupSingleOrgAdmin spawns a committer test container with a single org admin lifecycle policy
+// setupMultiOrgAdmin spawns a committer test container with a multi org admin lifecycle policy
 // and returns a map containing the endpoints of the committers services.
-func setupMultiOrgAdmin(t *testing.T) map[string]string {
+func setupMultiOrgAdmin(t *testing.T, tlsMode string) (map[string]string, *tlsCredentials) {
 	t.Helper()
 
 	genesisPath, err := filepath.Abs(filepath.Join(".", "testdata", "crypto", "multi-org.pb.bin"))
 	require.NoError(t, err)
 
-	return setup(t, genesisPath)
+	return setup(t, genesisPath, tlsMode)
 }
 
-func setup(t *testing.T, genesisPath string) map[string]string {
+func setup(t *testing.T, genesisPath, tlsMode string) (map[string]string, *tlsCredentials) {
 	t.Helper()
 
 	dataDirectory, err := filepath.Abs(filepath.Join(".", "testdata", "crypto"))
@@ -68,10 +133,55 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 	mspID := "Org1MSP"
 	mspDir := "/root/artifacts/crypto/peerOrganizations/Org1/users/committer@org1.com/msp"
 
+	cmd := []string{"run", "db", "orderer", "committer"}
+	env := map[string]string{
+		"SC_COORDINATOR_LOGGING_LOGSPEC":      "DEBUG",
+		"SC_SIDECAR_LOGGING_LOGSPEC":          "DEBUG",
+		"SC_SIDECAR_ORDERER_CHANNEL_ID":       channelID,
+		"SC_SIDECAR_ORDERER_SIGNED_ENVELOPES": "true",
+		"SC_SIDECAR_ORDERER_IDENTITY_MSP_ID":  mspID,
+		"SC_SIDECAR_ORDERER_IDENTITY_MSP_DIR": mspDir,
+		"SC_QUERY_SERVICE_SERVER_ENDPOINT":    fmt.Sprintf(":%v", queryServicePort),
+		"SC_QUERY_SERVICE_LOGGING_LOGSPEC":    "DEBUG",
+		"SC_ORDERER_BLOCK_SIZE":               "1",
+		"SC_ORDERER_LOGGING_LOGSPEC":          "DEBUG",
+		"SC_VC_LOGGING_LOGSPEC":               "DEBUG",
+	}
+
+	var creds *tlsCredentials
+
+	if tlsMode == "none" {
+		cmd = append(cmd, "--insecure")
+		env["SC_SIDECAR_ORDERER_TLS_MODE"] = "none"
+	} else {
+		creds = generateTLSCredentials(t, tlsMode)
+		// Set the TLS mode for every committer service and inter-service client,
+		// mirroring the env vars from the committer's own Docker test suite.
+		for _, key := range []string{
+			"SC_COORDINATOR_SERVER_TLS_MODE",
+			"SC_COORDINATOR_VERIFIER_TLS_MODE",
+			"SC_COORDINATOR_VALIDATOR_COMMITTER_TLS_MODE",
+			"SC_COORDINATOR_MONITORING_TLS_MODE",
+			"SC_QUERY_SERVER_TLS_MODE",
+			"SC_QUERY_MONITORING_TLS_MODE",
+			"SC_SIDECAR_SERVER_TLS_MODE",
+			"SC_SIDECAR_MONITORING_TLS_MODE",
+			"SC_SIDECAR_COMMITTER_TLS_MODE",
+			"SC_VC_SERVER_TLS_MODE",
+			"SC_VC_MONITORING_TLS_MODE",
+			"SC_VERIFIER_SERVER_TLS_MODE",
+			"SC_VERIFIER_MONITORING_TLS_MODE",
+			"SC_SIDECAR_ORDERER_TLS_MODE",
+			"SC_SIDECAR_ORDERER_CONNECTION_TLS_MODE",
+			"SC_ORDERER_SERVER_TLS_MODE",
+		} {
+			env[key] = tlsMode
+		}
+	}
+
 	ctx := t.Context()
-	committerContainer, err := testcontainers.Run(
-		ctx, "ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.9",
-		testcontainers.WithCmd("run", "db", "orderer", "committer", "--insecure"),
+	opts := []testcontainers.ContainerCustomizer{
+		testcontainers.WithCmd(cmd...),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      genesisPath,
 			ContainerFilePath: "/root/artifacts/config-block.pb.bin",
@@ -83,26 +193,22 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 			FileMode:          0o755,
 		}),
 		testcontainers.WithExposedPorts(ordererPort, sidecarPort, queryServicePort),
-		testcontainers.WithEnv(map[string]string{
-			"SC_COORDINATOR_LOGGING_LOGSPEC":      "DEBUG",
-			"SC_SIDECAR_LOGGING_LOGSPEC":          "DEBUG",
-			"SC_SIDECAR_ORDERER_CHANNEL_ID":       channelID,
-			"SC_SIDECAR_ORDERER_TLS_MODE":         "none",
-			"SC_SIDECAR_ORDERER_SIGNED_ENVELOPES": "true",
-			"SC_SIDECAR_ORDERER_IDENTITY_MSP_ID":  mspID,
-			"SC_SIDECAR_ORDERER_IDENTITY_MSP_DIR": mspDir,
-			"SC_QUERY_SERVICE_SERVER_ENDPOINT":    fmt.Sprintf(":%v", queryServicePort),
-			"SC_QUERY_SERVICE_LOGGING_LOGSPEC":    "DEBUG",
-			"SC_ORDERER_BLOCK_SIZE":               "1",
-			"SC_ORDERER_LOGGING_LOGSPEC":          "DEBUG",
-			"SC_VC_LOGGING_LOGSPEC":               "DEBUG",
-		}),
+		testcontainers.WithEnv(env),
 		testcontainers.WithWaitStrategy(
 			wait.ForListeningPort(ordererPort),
 			wait.ForListeningPort(sidecarPort),
 			wait.ForListeningPort(queryServicePort),
 			wait.ForLog("Setting the last committed block number:"),
 		),
+	}
+
+	if creds != nil {
+		opts = append(opts, testcontainers.WithFiles(creds.containerFiles...))
+	}
+
+	committerContainer, err := testcontainers.Run(
+		ctx, "ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.9",
+		opts...,
 	)
 	t.Cleanup(func() {
 		testcontainers.CleanupContainer(t, committerContainer)
@@ -119,7 +225,7 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 	endpoints["sidecar"], err = committerContainer.PortEndpoint(ctx, sidecarPort, "")
 	require.NoError(t, err)
 
-	return endpoints
+	return endpoints, creds
 }
 
 func generateConfigFile(
@@ -127,6 +233,7 @@ func generateConfigFile(
 	localMspID string,
 	mspConfigPath string,
 	endpoints map[string]string,
+	tlsCreds *tlsCredentials,
 ) string {
 	tb.Helper()
 	tmpDir := tb.TempDir()
@@ -150,6 +257,20 @@ notifications:
   connectionTimeout: 15s
   waitingTimeout: 15s
 `
+	if tlsCreds != nil {
+		configContent += `
+tls:
+  enabled: true
+  rootCerts:
+    - ` + tlsCreds.caCertPath
+		if tlsCreds.clientCertPath != "" {
+			configContent += `
+  clientCert: ` + tlsCreds.clientCertPath + `
+  clientKey: ` + tlsCreds.clientKeyPath
+		}
+		configContent += "\n"
+	}
+
 	err := os.WriteFile(configPath, []byte(configContent), 0o600)
 	require.NoError(tb, err)
 	return configPath

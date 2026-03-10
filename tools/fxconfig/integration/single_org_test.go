@@ -38,16 +38,27 @@ const (
 
 //nolint:maintidx // large by design: one container shared across many subtests
 func TestSingleOrgScenarios(t *testing.T) {
-	endpoints := setupSingleOrgAdmin(t)
+	for _, tlsMode := range tlsModes {
+		t.Run(tlsMode, func(t *testing.T) {
+			runSingleOrgScenarios(t, tlsMode)
+		})
+	}
+}
 
-	t.Logf("endpoints: %v", endpoints)
+//nolint:maintidx // large by design: one container shared across many subtests
+func runSingleOrgScenarios(t *testing.T, tlsMode string) {
+	t.Helper()
+
+	endpoints, tlsCreds := setupSingleOrgAdmin(t, tlsMode)
+
+	t.Logf("endpoints: %v (tls=%s)", endpoints, tlsMode)
 
 	testdata, err := filepath.Abs(filepath.Join(".", "testdata"))
 	require.NoError(t, err)
 
 	// endorser MSP configuration
 	org1MspPath := filepath.Join(testdata, "crypto", "peerOrganizations", "Org1", "users", "endorser@org1.com", "msp")
-	org1Config := generateConfigFile(t, "Org1MSP", org1MspPath, endpoints)
+	org1Config := generateConfigFile(t, "Org1MSP", org1MspPath, endpoints, tlsCreds)
 
 	configArg := "--config=" + org1Config
 
