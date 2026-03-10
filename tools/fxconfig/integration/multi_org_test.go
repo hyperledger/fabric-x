@@ -17,9 +17,19 @@ import (
 const policyAnd2of2 = "--policy=AND('Org1MSP.member', 'Org2MSP.member')"
 
 func TestMultiOrgScenarios(t *testing.T) {
-	endpoints := setupMultiOrgAdmin(t)
+	for _, tlsMode := range tlsModes {
+		t.Run(tlsMode, func(t *testing.T) {
+			runMultiOrgScenarios(t, tlsMode)
+		})
+	}
+}
 
-	t.Logf("endpoints: %v", endpoints)
+func runMultiOrgScenarios(t *testing.T, tlsMode string) {
+	t.Helper()
+
+	endpoints, tlsCreds := setupMultiOrgAdmin(t, tlsMode)
+
+	t.Logf("endpoints: %v (tls=%s)", endpoints, tlsMode)
 
 	testdata, err := filepath.Abs(filepath.Join(".", "testdata"))
 	require.NoError(t, err)
@@ -27,8 +37,8 @@ func TestMultiOrgScenarios(t *testing.T) {
 	org1MspPath := filepath.Join(testdata, "crypto", "peerOrganizations", "Org1", "users", "endorser@org1.com", "msp")
 	org2MspPath := filepath.Join(testdata, "crypto", "peerOrganizations", "Org2", "users", "endorser@org2.com", "msp")
 
-	org1Config := generateConfigFile(t, "Org1MSP", org1MspPath, endpoints)
-	org2Config := generateConfigFile(t, "Org2MSP", org2MspPath, endpoints)
+	org1Config := generateConfigFile(t, "Org1MSP", org1MspPath, endpoints, tlsCreds)
+	org2Config := generateConfigFile(t, "Org2MSP", org2MspPath, endpoints, tlsCreds)
 
 	t.Run("multi_org_create_2of2", func(t *testing.T) {
 		t.Parallel()
