@@ -98,7 +98,6 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 - [Fabric-X whitepaper](https://eprint.iacr.org/2023/1717.pdf) - detailed description of the Fabric-X. Explains motivation,implementation details and presents performance benchmarks
 - [Fabric-X Committer](https://github.com/hyperledger/fabric-x-committer) Github repository
 - [Fabric-X Orderer](https://github.com/hyperledger/fabric-x-orderer) Github repository
-- [Fabric-X Endorser](https://github.com/hyperledger/fabric-x-endorser) Github repository
 - [Fabric-Token-SDK](https://github.com/hyperledger-labs/fabric-token-sdk) and [Fabric-Smart-Client](https://github.com/hyperledger-labs/fabric-smart-client) Github repositories
 - [Fabrix-X Common](https://github.com/hyperledger/fabric-x-common) Github repository - contains new CLIs and protobuf, and code shared between the orderer and committer
 - [Sample deployment scripts](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection)
