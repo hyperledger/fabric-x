@@ -27,10 +27,10 @@ RUN go mod download
 COPY . .
 
 # Build the binaries
-RUN mkdir -p /tmp/bin && \
-    for tool in $FABRICX_TOOLS; do \
-    go build -o /tmp/bin/$tool ./tools/$tool; \
-    done
+RUN go build -o /tmp/bin/configtxgen ./tools/configtxgen
+RUN go build -o /tmp/bin/cryptogen ./tools/cryptogen
+RUN go build -o /tmp/bin/configtxlator ./tools/configtxlator
+RUN go build -o /tmp/bin/fxconfig ./tools/fxconfig/cmd
 
 ###########################################
 # Stage 2: Production runtime image
