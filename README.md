@@ -101,7 +101,7 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 - [Fabric-Token-SDK](https://github.com/hyperledger-labs/fabric-token-sdk) and [Fabric-Smart-Client](https://github.com/hyperledger-labs/fabric-smart-client) Github repositories
 - [Fabrix-X Common](https://github.com/hyperledger/fabric-x-common) Github repository - contains new CLIs and protobuf, and code shared between the orderer and committer
 - [Sample deployment scripts](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection)
-- [Fabric-X RFCs](https://github.com/hyperledger/fabric-x-rfcs) Github repository - contains request for changes (RFCs) in the Fabric-X project
+- [Fabric-X RFCs](https://github.com/hyperledger/fabric-x-rfcs) Github repository - contains request for comments (RFCs) in the Fabric-X project
 
 ## Coming soon...
 
