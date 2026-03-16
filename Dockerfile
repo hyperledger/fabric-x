@@ -10,9 +10,6 @@
 ###########################################
 FROM golang:1.25 AS builder
 
-# List of CLI tools to build
-ARG FABRICX_TOOLS="configtxgen cryptogen configtxlator fxconfig"
-
 # Build environment variables
 ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
@@ -27,10 +24,10 @@ RUN go mod download
 COPY . .
 
 # Build the binaries
-RUN mkdir -p /tmp/bin && \
-    for tool in $FABRICX_TOOLS; do \
-    go build -o /tmp/bin/$tool ./tools/$tool; \
-    done
+RUN go build -o /tmp/bin/configtxgen ./tools/configtxgen
+RUN go build -o /tmp/bin/cryptogen ./tools/cryptogen
+RUN go build -o /tmp/bin/configtxlator ./tools/configtxlator
+RUN go build -o /tmp/bin/fxconfig ./tools/fxconfig/cmd
 
 ###########################################
 # Stage 2: Production runtime image
