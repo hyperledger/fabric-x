@@ -10,9 +10,6 @@
 ###########################################
 FROM golang:1.25 AS builder
 
-# List of CLI tools to build
-ARG FABRICX_TOOLS="configtxgen cryptogen configtxlator fxconfig"
-
 # Build environment variables
 ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
