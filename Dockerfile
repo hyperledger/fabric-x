@@ -27,7 +27,7 @@ COPY . .
 RUN go build -o /tmp/bin/configtxgen ./tools/configtxgen
 RUN go build -o /tmp/bin/cryptogen ./tools/cryptogen
 RUN go build -o /tmp/bin/configtxlator ./tools/configtxlator
-RUN go build -o /tmp/bin/fxconfig ./tools/fxconfig/cmd
+RUN go build -o /tmp/bin/fxconfig ./tools/fxconfig
 
 ###########################################
 # Stage 2: Production runtime image
