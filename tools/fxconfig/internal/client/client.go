@@ -12,11 +12,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/hyperledger/fabric-lib-go/common/flogging"
 	"google.golang.org/grpc"
 
 	"github.com/hyperledger/fabric-x-common/tools/pkg/comm"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
+
+var logger = flogging.MustGetLogger("client")
 
 func newClientConn(cfg *config.EndpointServiceConfig) (*grpc.ClientConn, error) {
 	secOpts, err := createSecOpts(cfg.TLS)
@@ -52,10 +55,13 @@ func createSecOpts(tlsConfig *config.TLSConfig) (*comm.SecureOptions, error) {
 		}
 		serverRootCAs = append(serverRootCAs, rootCert)
 	}
-	secOpts.ClientRootCAs = serverRootCAs
+	secOpts.ServerRootCAs = serverRootCAs
 
-	// mTLS
-	if tlsConfig.ClientKeyPath == "" && tlsConfig.ClientCertPath == "" {
+	// mTLS: both key and cert must be provided; if either is absent, skip mTLS
+	if tlsConfig.ClientKeyPath == "" || tlsConfig.ClientCertPath == "" {
+		if tlsConfig.ClientKeyPath != "" || tlsConfig.ClientCertPath != "" {
+			logger.Warn("mTLS disabled: both clientKey and clientCert must be set; ignoring partial mTLS configuration")
+		}
 		return &secOpts, nil
 	}
 
@@ -69,6 +75,7 @@ func createSecOpts(tlsConfig *config.TLSConfig) (*comm.SecureOptions, error) {
 		return nil, err
 	}
 
+	secOpts.RequireClientCert = true
 	secOpts.Key = keyBytes
 	secOpts.Certificate = certBytes
 
