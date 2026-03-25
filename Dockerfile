@@ -14,6 +14,9 @@ FROM golang:1.25 AS builder
 ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
 
+# Args
+ARG IDEMIX_VERSION=latest
+
 WORKDIR /go/src/github.com/hyperledger/fabric-x
 
 # Copy dependency files first (cache optimization)
@@ -28,6 +31,7 @@ RUN go build -o /tmp/bin/configtxgen ./tools/configtxgen
 RUN go build -o /tmp/bin/cryptogen ./tools/cryptogen
 RUN go build -o /tmp/bin/configtxlator ./tools/configtxlator
 RUN go build -o /tmp/bin/fxconfig ./tools/fxconfig
+RUN go install github.com/IBM/idemix/tools/idemixgen@$IDEMIX_VERSION
 
 ###########################################
 # Stage 2: Production runtime image
