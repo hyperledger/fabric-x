@@ -15,7 +15,7 @@ ENV CGO_ENABLED=1
 ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
 
 # Args
-ARG IDEMIX_VERSION=latest
+ARG IDEMIX_VERSION=v0.0.2
 
 WORKDIR /go/src/github.com/hyperledger/fabric-x
 
