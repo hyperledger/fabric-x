@@ -31,7 +31,7 @@ RUN go build -o /tmp/bin/configtxgen ./tools/configtxgen
 RUN go build -o /tmp/bin/cryptogen ./tools/cryptogen
 RUN go build -o /tmp/bin/configtxlator ./tools/configtxlator
 RUN go build -o /tmp/bin/fxconfig ./tools/fxconfig
-RUN go install github.com/IBM/idemix/tools/idemixgen@$IDEMIX_VERSION
+RUN GOBIN=/tmp/bin go install github.com/IBM/idemix/tools/idemixgen@$IDEMIX_VERSION
 
 ###########################################
 # Stage 2: Production runtime image
