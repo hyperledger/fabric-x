@@ -93,6 +93,13 @@ Configuration is loaded from multiple sources with the following precedence (hig
 msp:
   localMspID: Org1MSP
   configPath: /path/to/msp
+  bccsp:
+    default: SW
+    sw:
+      security: 256
+      hash: SHA2
+      fileKeyStore:
+        keyStorePath: /path/to/msp/keystore
 
 # Logging configuration
 logging:
@@ -279,6 +286,13 @@ cat > org1-config.yaml <<EOF
 msp:
   localMspID: Org1MSP
   configPath: /opt/org1/msp
+  bccsp:
+    default: SW
+    sw:
+      security: 256
+      hash: SHA2
+      fileKeyStore:
+        keyStorePath: /opt/org1/msp/keystore
 orderer:
   address: orderer.example.com:7050
   tls:

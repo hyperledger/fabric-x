@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package msp
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -80,6 +81,31 @@ func TestGetSignerIdentityFromMSP(t *testing.T) {
 		sig, err := sid.Sign([]byte("test message"))
 		require.NoError(t, err)
 		require.NotEmpty(t, sig)
+	})
+
+	t.Run("success with explicit bccsp config", func(t *testing.T) {
+		t.Parallel()
+
+		cfg := config.MSPConfig{
+			LocalMspID: "Org1MSP",
+			ConfigPath: testdataMSPDir(),
+			BCCSP: config.BCCSPConfig{
+				Default: "SW",
+				SW: config.BCCSPSWConfig{
+					Security: 256,
+					Hash:     "SHA2",
+					FileKeyStore: config.BCCSPFileKeyStoreConfig{
+						KeyStorePath: filepath.Join(testdataMSPDir(), "keystore"),
+					},
+				},
+			},
+		}
+
+		sid, err := GetSignerIdentityFromMSP(cfg)
+
+		require.NoError(t, err)
+		require.NotNil(t, sid)
+		require.Equal(t, "Org1MSP", sid.GetMSPIdentifier())
 	})
 
 	t.Run("signer can serialize identity", func(t *testing.T) {
