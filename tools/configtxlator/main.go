@@ -13,24 +13,32 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"runtime"
 
+	"github.com/alecthomas/kingpin/v2"
+	"github.com/cockroachdb/errors"
 	"github.com/gorilla/handlers"
-	"github.com/hyperledger/fabric-config/protolator"
 	cb "github.com/hyperledger/fabric-protos-go-apiv2/common"
 	_ "github.com/hyperledger/fabric-protos-go-apiv2/msp"
 	_ "github.com/hyperledger/fabric-protos-go-apiv2/orderer"
 	_ "github.com/hyperledger/fabric-protos-go-apiv2/orderer/etcdraft"
 	_ "github.com/hyperledger/fabric-protos-go-apiv2/peer"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
-	"gopkg.in/alecthomas/kingpin.v2"
 
+	"github.com/hyperledger/fabric-x-common/common/metadata"
 	"github.com/hyperledger/fabric-x-common/common/util"
-	"github.com/hyperledger/fabric-x-common/internaltools/configtxlator/metadata"
-	"github.com/hyperledger/fabric-x-common/internaltools/configtxlator/rest"
-	"github.com/hyperledger/fabric-x-common/internaltools/configtxlator/update"
+	"github.com/hyperledger/fabric-x-common/protolator"
+	"github.com/hyperledger/fabric-x-common/tools/configtxlator/rest"
+	"github.com/hyperledger/fabric-x-common/tools/configtxlator/update"
+)
+
+const programName = "configtxlator"
+
+var (
+	commitSHA = metadata.CommitSHA
+	version   = metadata.Version
 )
 
 // command line flags
@@ -58,7 +66,7 @@ var (
 	computeUpdateChannelID = computeUpdate.Flag("channel_id", "The name of the channel for this update.").Required().String()
 	computeUpdateDest      = computeUpdate.Flag("output", "A file to write the JSON document to.").Default(os.Stdout.Name()).OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 
-	version = app.Command("version", "Show version information")
+	versionCmd = app.Command("version", "Show version information")
 )
 
 var logger = util.MustGetLogger("configtxlator")
@@ -93,8 +101,8 @@ func main() {
 			app.Fatalf("Error computing update: %s", err)
 		}
 	// "version" command
-	case version.FullCommand():
-		printVersion()
+	case versionCmd.FullCommand():
+		fmt.Println(getVersionInfo())
 	}
 }
 
@@ -120,10 +128,6 @@ func startServer(address string, cors []string) {
 	}
 
 	app.Fatalf("Error starting server:[%s]\n", err)
-}
-
-func printVersion() {
-	fmt.Println(metadata.GetVersionInfo())
 }
 
 func encodeProto(msgName string, input, output *os.File) error {
@@ -235,4 +239,10 @@ func computeUpdt(original, updated, output *os.File, channelID string) error {
 	}
 
 	return nil
+}
+
+func getVersionInfo() string {
+	return fmt.Sprintf("%s:\n Version: %s\n Commit SHA: %s\n Go version: %s\n OS/Arch: %s",
+		programName, version, commitSHA, runtime.Version(),
+		fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH))
 }

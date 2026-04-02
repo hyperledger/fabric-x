@@ -1,0 +1,41 @@
+---
+OrdererOrgs:
+  - Name: OrdererOrg
+    Domain: orderer.com
+    EnableNodeOUs: false
+    Specs:
+      - Hostname: orderer
+        SANS:
+          - 127.0.0.1
+          - 0.0.0.0
+          - localhost
+          - host.docker.internal
+          - fabric
+          - ::1
+PeerOrgs:
+  - Name: Org1
+    Domain: org1.com
+    EnableNodeOUs: false
+    Users:
+      Specs:
+        - Name: endorser
+        - Name: committer
+    Specs:
+      - Hostname: committer
+        SANS:
+          - 0.0.0.0
+          - localhost
+          - 127.0.0.1
+          - ::1
+  - Name: Org2
+    Domain: org2.com
+    EnableNodeOUs: false
+    Users:
+      Specs:
+        - Name: endorser
+  - Name: Org3
+    Domain: org3.com
+    EnableNodeOUs: false
+    Users:
+      Specs:
+        - Name: endorser

@@ -1,9 +1,7 @@
-#
 # Copyright IBM Corp. All Rights Reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-
 version: "2"
 linters:
   enable:
@@ -53,6 +51,10 @@ linters:
           deny:
             - pkg: github.com/pkg/errors
               desc: github.com/pkg/errors is no longer maintained
+    staticcheck:
+      checks:
+        - all
+        - "-ST1000" # Disable ST1000: "should have a package comment"
     errcheck:
       # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
       # Such cases aren't reported by default.
@@ -144,6 +146,9 @@ linters:
           arguments:
             - fmt.Printf
             - fmt.Println
+            - strings.Builder.WriteString
+            - strings.Builder.WriteByte
+            - strings.Builder.Write
         - name: confusing-naming
           disabled: true
         - name: comment-spacings
@@ -176,7 +181,7 @@ linters:
         - .Wrapf(
         - status.Error(
         - .Wait() # The error reported by errorgroup.Wait() (external) actually
-          # originates from the internal code.
+        # originates from the internal code.
       # An array of strings that specify regular expressions of signatures to ignore.
       # Default: []
       ignore-sig-regexps:
@@ -194,6 +199,8 @@ linters:
 
         SPDX-License-Identifier: Apache-2.0
   exclusions:
+    paths:
+      - protolator
     # Mode of the generated files analysis.
     #
     # - `strict`: sources are excluded by strictly following the Go generated file convention.
@@ -204,7 +211,7 @@ linters:
     # - `disable`: disable the generated files exclusion.
     #
     # Default: lax
-    generated: lax
+    generated: strict
     # Log a warning if an exclusion rule is unused.
     # Default: false
     warn-unused: true
@@ -224,6 +231,10 @@ formatters:
       # with the given prefixes are grouped after 3rd-party packages.
       # Default: ""
       local-prefixes:
-        - github.com/hyperledger/fabric-x-common
+        - github.com/hyperledger/fabric-x
   exclusions:
     generated: lax
+sort-order:
+  - file # filepath, line, and column.
+  - severity
+  - linter

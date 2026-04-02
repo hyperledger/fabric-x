@@ -41,6 +41,11 @@ tools: $(TOOLS_EXES) ## Builds all tools
 
 GO_TEST_FMT_FLAGS := -hide empty-packages
 
+## Run generate
+.PHONY: generate
+generate: FORCE
+	go generate ./...
+
 ## Run all tests
 .PHONY: test
 test: FORCE
