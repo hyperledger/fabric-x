@@ -87,8 +87,8 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
   - [Introduction into Fabric-X](https://www.youtube.com/live/gdQh-mNKSKA)
   - [Programming model and app deployment](https://www.youtube.com/live/D086vrb9GeU)
   - [Fabric-Token-SDK](https://www.youtube.com/watch?v=PX9SDva97vQ)
-  - [Orderer overview](https://www.youtube.com/live/1ikYNjDnqXw?t=200s)
-  - [Committer overview, December 9 - register](https://www.meetup.com/lfdt-sf/events/310510523/)
+  - [Orderer overview](https://www.youtube.com/live/1ikYNjDnqXw)
+  - [Committer overview](https://www.youtube.com/live/uSK300_dogg?si=kRM-mNxhVjfT__IC)
 
 ## Useful links
 
@@ -101,6 +101,8 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 - [Fabric-Token-SDK](https://github.com/hyperledger-labs/fabric-token-sdk) and [Fabric-Smart-Client](https://github.com/hyperledger-labs/fabric-smart-client) Github repositories
 - [Fabrix-X Common](https://github.com/hyperledger/fabric-x-common) Github repository - contains new CLIs and protobuf, and code shared between the orderer and committer
 - [Sample deployment scripts](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection)
+- [Fabric-X Client SDK](https://github.com/hyperledger/fabric-x-sdk/)
+- [Fabric-X EVM](https://github.com/hyperledger/fabric-x-evm)
 - [Fabric-X RFCs](https://github.com/hyperledger/fabric-x-rfcs) Github repository - contains request for comments (RFCs) in the Fabric-X project
 
 ## Coming soon...
