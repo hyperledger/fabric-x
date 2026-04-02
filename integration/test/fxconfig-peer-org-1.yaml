@@ -1,0 +1,47 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+# fxconfig configuration for peer-org-1.
+# Used in the multi-org endorsement pipeline (Step 7 of run-e2e.sh).
+#
+# Paths use ARTIFACTS_DIR as a placeholder, replaced by run-e2e.sh with the
+# actual artifacts directory path before use.
+
+msp:
+  localMspID: peer-org-1
+  configPath: ARTIFACTS_DIR/peerOrganizations/peer-org-1/users/client@peer-org-1/msp
+
+# Parent TLS configuration inherited by all services unless overridden.
+# Uses peer-org-1 loadgen TLS identity for mTLS connections.
+tls:
+  enabled: true
+  clientCert: ARTIFACTS_DIR/peerOrganizations/peer-org-1/peers/loadgen.peer-org-1/tls/server.crt
+  clientKey: ARTIFACTS_DIR/peerOrganizations/peer-org-1/peers/loadgen.peer-org-1/tls/server.key
+  rootCerts:
+    - ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/msp/tlscacerts/tlsca.orderer-org-1-cert.pem
+    - ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/msp/tlscacerts/tlsca.orderer-org-2-cert.pem
+    - ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/msp/tlscacerts/tlsca.orderer-org-3-cert.pem
+    - ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/msp/tlscacerts/tlsca.orderer-org-4-cert.pem
+
+orderer:
+  address: localhost:6022
+  channel: mychannel
+  connectionTimeout: 30s
+
+queries:
+  address: localhost:7001
+  connectionTimeout: 20s
+  tls:
+    rootCerts:
+      - ARTIFACTS_DIR/peerOrganizations/peer-org-1/msp/tlscacerts/tlsca.peer-org-1-cert.pem
+
+notifications:
+  address: localhost:4001
+  connectionTimeout: 15s
+  waitingTimeout: 30s
+  tls:
+    rootCerts:
+      - ARTIFACTS_DIR/peerOrganizations/peer-org-1/msp/tlscacerts/tlsca.peer-org-1-cert.pem

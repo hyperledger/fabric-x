@@ -1,0 +1,15 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Linux-specific override: run containers as host user to avoid
+# permission issues with bind-mounted volumes.
+# Used automatically by run-e2e.sh on Linux.
+#
+---
+services:
+  arma:
+    user: "${COMPOSE_UID}:${COMPOSE_GID}"
+  committer:
+    user: "${COMPOSE_UID}:${COMPOSE_GID}"

@@ -17,7 +17,6 @@ PKGNAME2 = github.com/hyperledger/fabric-x/tools
 GO_TAGS ?=
 
 go_cmd          ?= go
-go_test         ?= $(go_cmd) test -json -v -timeout 30m
 
 TOOLS_EXES = configtxgen configtxlator cryptogen fxconfig
 
@@ -39,7 +38,10 @@ help: ## List all commands with documentation
 .PHONY: tools
 tools: $(TOOLS_EXES) ## Builds all tools
 
-GO_TEST_FMT_FLAGS := -hide empty-packages
+# Use gotestsum (same style as fabric-x-committer):
+# - compact output format
+# - does not rerun failed tests
+TEST_METHOD = $(go_cmd) tool gotestsum --rerun-fails=0 --format dots --packages "$(1)" -- -v -timeout 30m $(2)
 
 ## Run generate
 .PHONY: generate
@@ -50,7 +52,7 @@ generate: FORCE
 .PHONY: test
 test: FORCE
 	@echo "Running Go unit tests..."
-	cd tools && $(go_test) ./... | go tool gotestfmt ${GO_TEST_FMT_FLAGS}
+	cd tools && $(call TEST_METHOD,./...)
 
 .PHONY: $(TOOLS_EXES)
 $(TOOLS_EXES): %: $(BUILD_DIR)/% ## Builds a native binary

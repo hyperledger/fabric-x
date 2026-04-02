@@ -1,0 +1,31 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+server:
+  endpoint: :5001
+  tls: &tlsConfig
+    mode: mtls
+    cert-path: /root/artifacts/peerOrganizations/peer-org-0/peers/verifier.peer-org-0/tls/server.crt
+    key-path: /root/artifacts/peerOrganizations/peer-org-0/peers/verifier.peer-org-0/tls/server.key
+    ca-cert-paths:
+      - /root/artifacts/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
+monitoring:
+  endpoint: :2115
+  tls: *tlsConfig
+  rate-limit:
+    requests-per-second: 0
+    burst: 0
+
+parallel-executor:
+  batch-size-cutoff: 50
+  batch-time-cutoff: 10ms
+  channel-buffer-size: 50
+  parallelism: 40
+
+logging:
+  logSpec: info:grpc=error
+  format: >-
+    %{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc}
+    -> %{level:.4s}%{color:reset} %{message}
