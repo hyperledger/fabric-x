@@ -11,15 +11,14 @@ import (
 	"runtime"
 
 	"github.com/spf13/cobra"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 
 	"github.com/hyperledger/fabric-x-common/common/metadata"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
 
 // NewVersionCommand returns a command that displays version information.
 // It shows the fxconfig version, Go version, commit SHA, and OS/architecture.
-func NewVersionCommand() *cobra.Command {
+func NewVersionCommand(ctx *CLIContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Display version information",
@@ -28,21 +27,18 @@ func NewVersionCommand() *cobra.Command {
   • Go compiler version
   • Git commit SHA
   • Operating system and architecture`,
-		Run: func(cmd *cobra.Command, _ []string) {
-			// TODO: use printer
-			cmd.Printf("fxconfig\n")
-			showLine(cmd, "Version", metadata.Version)
-			showLine(cmd, "Go version", runtime.Version())
-			showLine(cmd, "Commit", metadata.CommitSHA)
-			showLine(cmd, "OS/Arch", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH))
+		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
+			ctx.Printer = cliio.NewCLIPrinter(cmd.OutOrStdout(), cmd.ErrOrStderr(), cliio.FormatTable)
+			return nil
+		},
+		Run: func(_ *cobra.Command, _ []string) {
+			ctx.Printer.Print("fxconfig\n")
+			ctx.Printer.Print(fmt.Sprintf(" %-16s %s\n", "Version:", metadata.Version))
+			ctx.Printer.Print(fmt.Sprintf(" %-16s %s\n", "Go version:", runtime.Version()))
+			ctx.Printer.Print(fmt.Sprintf(" %-16s %s\n", "Commit:", metadata.CommitSHA))
+			ctx.Printer.Print(fmt.Sprintf(" %-16s %s\n", "OS/Arch:", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)))
 		},
 	}
 
 	return cmd
-}
-
-// showLine formats and prints a single line of version information.
-// The title is capitalized and right-padded to 16 characters for alignment.
-func showLine(cmd *cobra.Command, title, value string) {
-	cmd.Printf(" %-16s %s\n", fmt.Sprintf("%s:", cases.Title(language.Und, cases.NoLower).String(title)), value)
 }
