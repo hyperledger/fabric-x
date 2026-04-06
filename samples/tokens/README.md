@@ -251,6 +251,29 @@ They also communicate over P2P websockets as shown below:
 
 We can use the Swagger API on [http://localhost:8080](http://localhost:8080) or call the API directly via `curl`.
 
+### CORS and bind address configuration
+
+The sample services support configurable CORS and bind address behavior:
+
+- `BIND_ADDR`: host interface to bind the REST API service (default: `0.0.0.0`).
+- `ALLOWED_ORIGINS`: comma-separated CORS allow-list (example: `http://localhost:8080,http://127.0.0.1:8080`).
+  - Default allows Swagger UI local origins: `http://localhost:8080` and `http://127.0.0.1:8080`.
+  - Set to `*` to allow any origin.
+- `ALLOW_AUTH_HEADER`: set to `true` to include `Authorization` in CORS allowed headers.
+
+Examples:
+
+```bash
+# Restrict service to localhost only
+export BIND_ADDR=127.0.0.1
+
+# Explicit CORS allow-list
+export ALLOWED_ORIGINS=http://localhost:8080
+
+# Include Authorization in CORS headers
+export ALLOW_AUTH_HEADER=true
+```
+
 Now let's issue and transfer some tokens!
 
 ## Example: Issue tokens

@@ -38,10 +38,10 @@ func main() {
 
 	// Simple web server
 	sh := routes.NewStrictHandler(routes.NewServer(service.NewFSC(fsc)), []routes.StrictMiddlewareFunc{})
-	h := common.WithAnyCORS(routes.HandlerFromMux(sh, http.NewServeMux()))
+	h := common.WithCORS(routes.HandlerFromMux(sh, http.NewServeMux()))
 	s := &http.Server{
 		Handler: h,
-		Addr:    net.JoinHostPort("0.0.0.0", *port),
+		Addr:    net.JoinHostPort(common.BindAddress(), *port),
 	}
 	go s.ListenAndServe()
 
