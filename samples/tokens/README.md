@@ -33,6 +33,9 @@ The **Token SDK Sample** demonstrates how to:
 - [Interacting with the Application](#interacting-with-the-application)
 - [Example: Issue tokens](#example-issue-tokens)
 - [Example: Transfer tokens](#example-transfer-tokens)
+- [Security Configuration](#security-configuration)
+  - [CORS Configuration](#cors-configuration)
+  - [Network Binding](#network-binding)
 - [Teardown and cleanup](#teardown-and-cleanup)
 - [Development](#development)
 - [Debug mode](#debug-mode)
@@ -283,6 +286,38 @@ curl http://localhost:9500/owner/accounts/alice/transfer -d '{
 
 curl -X GET http://localhost:9600/owner/accounts/dan/transactions | jq
 curl -X GET http://localhost:9500/owner/accounts/alice/transactions | jq
+```
+
+## Security Configuration
+
+The sample includes configurable security settings for CORS and network binding. By default, the sample works out of the box with Swagger UI for local development.
+
+### CORS Configuration
+
+Control which origins can make cross-origin requests to the API:
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `ALLOWED_ORIGINS` | `http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000,http://127.0.0.1:3000` | Comma-separated list of allowed origins. Set to `*` to allow all origins (not recommended for production). |
+| `ALLOW_AUTH_HEADER` | `false` | Set to `true` to include `Authorization` in CORS allowed headers. |
+
+Example for production:
+```shell
+export ALLOWED_ORIGINS="https://your-frontend.example.com"
+export ALLOW_AUTH_HEADER=true
+```
+
+### Network Binding
+
+Control which network interface the services bind to:
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `BIND_ADDRESS` | `0.0.0.0` | The address to bind to. Use `127.0.0.1` for local-only access. |
+
+The default `0.0.0.0` allows the sample to work in both Docker and native configurations. For local-only development:
+```shell
+export BIND_ADDRESS=127.0.0.1
 ```
 
 ## Teardown and cleanup
