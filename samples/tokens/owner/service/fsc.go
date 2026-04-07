@@ -133,8 +133,32 @@ func (f FabricSmartClient) Transfer(ctx context.Context, tokenType string, quant
 	return txID, nil
 }
 
+// Redeem burns an amount of a certain token from a wallet. It prepares the transaction,
+// gets it approved and sends it to the blockchain for endorsement and commit.
 func (f FabricSmartClient) Redeem(ctx context.Context, tokenType string, quantity uint64, sender string, message string) (txID string, err error) {
-	return "", fmt.Errorf("not implemented: %s", "/owner/redeem") // TODO: Implement
+	logger.Infof("going to redeem %d %s from [%s] with message [%s]", quantity, tokenType, sender, message)
+	mgr, err := viewregistry.GetManager(f.node)
+	if err != nil {
+		return "", err
+	}
+	res, err := mgr.InitiateView(&RedeemView{
+		RedeemOptions: &RedeemOptions{
+			Wallet:    sender,
+			TokenType: tokenType,
+			Quantity:  quantity,
+			Message:   message,
+		},
+	}, ctx)
+	if err != nil {
+		logger.Errorf("error redeeming: %s", err.Error())
+		return "", err
+	}
+	txID, ok := res.(string)
+	if !ok {
+		return "", errors.New("cannot parse redeem response")
+	}
+	logger.Infof("redeemed %d %s from [%s] with message [%s]. ID: [%s]", quantity, tokenType, sender, message, txID)
+	return txID, nil
 }
 
 // GetTransactions returns the full transaction history for an owner.
@@ -169,6 +193,58 @@ func (f FabricSmartClient) GetTransactions(ctx context.Context, wallet string) (
 		txs = append(txs, *tx)
 	}
 	return txs, nil
+}
+
+type RedeemOptions struct {
+	// Wallet is the identifier of the wallet that owns the tokens to redeem
+	Wallet string
+	// TokenType of tokens to redeem
+	TokenType string
+	// Quantity to redeem
+	Quantity uint64
+	// Message is an optional user message sent with the transaction.
+	Message string
+}
+
+type RedeemView struct {
+	*RedeemOptions
+}
+
+func (v *RedeemView) Call(vctx view.Context) (interface{}, error) {
+	senderWallet := ttx.GetWallet(vctx, v.Wallet)
+	if senderWallet == nil {
+		return "", errors.Errorf("sender wallet [%s] not found", v.Wallet)
+	}
+
+	tx, err := ttx.NewTransaction(vctx, nil)
+	if err != nil {
+		return tx, errors.Wrap(err, "failed to create transaction")
+	}
+	if v.Message != "" {
+		tx.SetApplicationMetadata("message", []byte(v.Message))
+	}
+
+	err = tx.Redeem(senderWallet, tok.Type(v.TokenType), v.Quantity)
+	if err != nil {
+		if strings.Contains(err.Error(), "insufficient funds") {
+			return "", ErrInsufficientFunds
+		}
+		return "", errors.Wrap(err, "failed preparing redeem")
+	}
+
+	logger.Infof("collecting signatures and submitting redeem transaction: [%s]", tx.ID())
+	_, err = vctx.RunView(ttx.NewCollectEndorsementsView(tx))
+	if err != nil {
+		return "", errors.Wrap(err, "failed to sign transaction")
+	}
+
+	logger.Infof("submitting redeem transaction to orderer: [%s]", tx.ID())
+	_, err = vctx.RunView(ttx.NewOrderingAndFinalityView(tx))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed asking ordering")
+	}
+
+	return tx.ID(), nil
 }
 
 type TransferOptions struct {
