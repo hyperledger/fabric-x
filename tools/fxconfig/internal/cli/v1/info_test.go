@@ -56,3 +56,31 @@ func TestInfoCommand_NilConfigPrintsNull(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, outBuf.String(), "null")
 }
+
+func TestInfoCommand_PrintsEnvConfig(t *testing.T) {
+	t.Parallel()
+
+	var outBuf bytes.Buffer
+	ctx := &CLIContext{
+		Config: &config.Config{
+			Logging: config.LoggingConfig{
+				Level: "debug",
+			},
+			MSP: config.MSPConfig{
+				LocalMspID: "TestOrg",
+			},
+		},
+		Printer: cliio.NewCLIPrinter(&outBuf, &outBuf, cliio.FormatTable),
+	}
+
+	cmd := NewInfoCommand(ctx)
+	err := cmd.Flags().Set("format", "env")
+	require.NoError(t, err)
+
+	err = cmd.RunE(cmd, nil)
+	require.NoError(t, err)
+
+	output := outBuf.String()
+	require.Contains(t, output, "FXCONFIG_LOGGING_LEVEL=debug")
+	require.Contains(t, output, "FXCONFIG_MSP_LOCALMSPID=TestOrg")
+}
