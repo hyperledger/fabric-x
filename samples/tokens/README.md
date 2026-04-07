@@ -212,6 +212,26 @@ curl -X POST http://localhost:9300/endorser/init
 
 Now open <http://localhost:8080> in your browser to see the other API endpoints, or scroll down to follow some `curl` commands.
 
+### Security-related runtime defaults
+
+The services support environment variables for safer defaults while remaining docker-friendly:
+
+- `BIND_ADDRESS`: host/interface for API binding. Default: `127.0.0.1`.
+- `ALLOWED_ORIGINS`: comma-separated allowed CORS origins. Default: empty (cross-origin rejected).
+- `ALLOW_AUTH_HEADER`: set to `true` to include `Authorization` in CORS allow headers. Default: disabled.
+
+In docker compose, these are set so Swagger can call the sample APIs out of the box:
+
+- `BIND_ADDRESS=0.0.0.0`
+- `ALLOWED_ORIGINS=http://localhost:8080,http://127.0.0.1:8080`
+- `ALLOW_AUTH_HEADER=true`
+
+You can verify the secure default behavior (unknown origins rejected) with:
+
+```bash
+./tests/check_cors_default.sh
+```
+
 ## Option 3: Fabric v3
 
 Run the same application against a classic Fabric v3 network.
