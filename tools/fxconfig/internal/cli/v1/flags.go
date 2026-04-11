@@ -55,3 +55,11 @@ func (f *waitFlag) bind(cmd *cobra.Command) {
 	cmd.Flags().BoolVar((*bool)(f), "wait", false,
 		"Wait for transaction to be finalized and return status code")
 }
+
+// formatFlag represents an output format flag.
+type formatFlag string
+
+func (f *formatFlag) bind(cmd *cobra.Command) {
+	cmd.Flags().StringVar((*string)(f), "format", "yaml",
+		"Output format: yaml or env")
+}
