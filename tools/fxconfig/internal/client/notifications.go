@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sync/atomic"
 
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/types/known/durationpb"
@@ -32,6 +33,12 @@ type NotificationClient struct {
 
 	subscribers   map[string][]chan int
 	subscribersMu sync.RWMutex
+
+	// streamErr holds the error that caused the stream to terminate.
+	// Atomically stored; checked by Subscribe() before sending requests.
+	streamErr atomic.Pointer[error]
+	// streamReady is set to true once the gRPC stream is open and accepting requests.
+	streamReady atomic.Bool
 }
 
 // NewNotificationClient creates a notification client with the provided configuration.
@@ -58,8 +65,7 @@ func NewNotificationClient(cfg config.NotificationsConfig) (*NotificationClient,
 
 	go func() {
 		if err := nc.listen(ctx); err != nil && !errors.Is(err, context.Canceled) {
-			fmt.Printf("error: Notification listener stream terminated unexpectedly: %s\n", err)
-			// logger.Errorf("Notification listener stream terminated unexpectedly for %s: %s", key, err)
+			logger.Errorf("Notification listener stream terminated unexpectedly: %s", err)
 		}
 	}()
 
@@ -88,6 +94,11 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	if len(subscribers) > 0 {
 		// we already have an active subscription for this txID
 		return receiverCh, nil
+	}
+
+	// Fail fast if the stream has previously failed.
+	if err := n.streamErr.Load(); err != nil {
+		return nil, *err
 	}
 
 	// setup request
@@ -146,8 +157,11 @@ func wait(ctx context.Context, subscription chan int) (int, error) {
 func (n *NotificationClient) listen(ctx context.Context) error {
 	notifyStream, err := n.notifyClient.OpenNotificationStream(ctx)
 	if err != nil {
+		n.streamErr.Store(&err)
 		return err
 	}
+	n.streamReady.Store(true)
+
 	// Use the base context for errgroup
 	g, gCtx := errgroup.WithContext(ctx)
 
@@ -232,10 +246,17 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 
 	err = g.Wait()
 
+	// Capture the error from the group before cleanup.
+	if err != nil && !errors.Is(err, context.Canceled) {
+		n.streamErr.Store(&err)
+	}
+
 	// Cleanup subscribers map when listen() exits
 	n.subscribersMu.Lock()
 	clear(n.subscribers)
 	n.subscribersMu.Unlock()
+
+	n.streamReady.Store(false)
 
 	return err
 }
