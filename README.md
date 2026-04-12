@@ -5,9 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Motivation
 
-The adoption of Distributed Ledger Technology (DLT) for critical financial infrastructures like digital assets and currencies (e.g., Central Bank Digital Currencies (CBDCs) , stablecoins, tokenized deposits, tokenized bonds/sercurities) is hindered by a significant performance gap. Permissioned blockchains such as Hyperledger Fabric, while conceptually suitable, are limited by architectural bottlenecks in their monolithic peer design and consensus mechanisms, preventing them from achieving the required scale.
+The adoption of Distributed Ledger Technology (DLT) for critical financial infrastructures like digital assets and currencies (e.g., Central Bank Digital Currencies (CBDCs) , stablecoins, tokenized deposits, tokenized bonds/securities) is hindered by a significant performance gap. Permissioned blockchains such as Hyperledger Fabric, while conceptually suitable, are limited by architectural bottlenecks in their monolithic peer design and consensus mechanisms, preventing them from achieving the required scale.
 
-`Fabric-X` represents a fundamental re-archicture of [Hyperledger Fabric](https://github.com/hyperledger/fabric) that addresses these challenges end-to-end. The monolithic peer is decompossed into independently scalable microservices for endorsement, validation, and committing. To maximize parallelism, a transaction dependency graph was introduced. It enables safe, concurrent validation of transactions across multiple blocks. Complementing the peer redesign, we have introduced Arma, a novel sharded Byzantine Fault Tolerant (BFT) ordering service that dramatically increases throughput by ordering compact transaction digests rather than full transaction payloads. We have implemented and benchmarked this framework with a UTXO-based CBDC application. Our evaluation demonstrates a peak throughput exceeding 200,000 transactions per second (TPS) — two-orders-of-magnitude improvement over the standard implementation. 
+`Fabric-X` represents a fundamental re-architecture of [Hyperledger Fabric](https://github.com/hyperledger/fabric) that addresses these challenges end-to-end. The monolithic peer is decomposed into independently scalable microservices for endorsement, validation, and committing. To maximize parallelism, a transaction dependency graph was introduced. It enables safe, concurrent validation of transactions across multiple blocks. Complementing the peer redesign, we have introduced Arma, a novel sharded Byzantine Fault Tolerant (BFT) ordering service that dramatically increases throughput by ordering compact transaction digests rather than full transaction payloads. We have implemented and benchmarked this framework with a UTXO-based CBDC application. Our evaluation demonstrates a peak throughput exceeding 200,000 transactions per second (TPS) — two-orders-of-magnitude improvement over the standard implementation. 
 
 Fabric-X proves that permissioned DLTs can be engineered for national-scale payment systems, providing a resilient and highly performant foundation for practical digital assets and currencies deployments and the integration of advanced, computationally intensive features. 
 
@@ -18,7 +18,7 @@ Figure below shows the high-level architecture differences between `Fabric Class
 
 ![Fabric Classic vs Fabric-X](./diagrams/Fabric_vs_Fabric-X.png)
 
-Before we dive deep into the **differences**, we we would like to emphasize **similarities**:
+Before we dive deep into the **differences**, we would like to emphasize **similarities**:
 
 **Similarities**
 1. **Transaction lifecycle** - "Execute - Order - Validate"
@@ -27,7 +27,7 @@ Before we dive deep into the **differences**, we we would like to emphasize **si
 4. **Membership service provider** - is Fabric-cryptogen and Fabric-CA compatible
 5. **Consensus type and API** - ordering cluster provides BFT guarantees and offers same broadcast block GRPC API
 
-**Differencies**
+**Differences**
 1. **Programming model** - classical Fabric primarily uses chaincodes to simulate transaction execution. In Fabric-X, we replace chaincodes with peer-to-peer transaction negotiation protocols built on [Fabric-Smart-Client](https://github.com/hyperledger-labs/fabric-smart-client) and [Fabric-Token-SDK](https://github.com/hyperledger-labs/fabric-token-sdk). This shift enables interactive protocols between participants, aligning with patterns already present in legacy systems.
 2. **Peer decomposition** - in classical Fabric, peers handle transaction validation, commitment, and notification, among other responsibilities. This monolithic architecture limits scalability, especially when certain components become bottlenecks. In Fabric-X, we decompose the peer by offloading validation, commitment, and notification into independent, scalable microservices.
 3. **Ordering service** - classical Fabric offers the following ordering service implementations: SmartBFT and RAFT. We propose an implementation based on [Arma protocol](https://arxiv.org/abs/2405.16575) a high performance distributed BFT consensus.
@@ -57,7 +57,7 @@ Code and more details can be found under [Fabric-X-Orderer Github repository](ht
 
 ### Fabric-X-Committer
 
-Fabric-X-Commiter is responsible for post-ordering transaction processing. It has a microservice architecture comprised of the following subcomponents: sidecar, coordinator, validator-committer, verification service, query service.
+Fabric-X-Committer is responsible for post-ordering transaction processing. It has a microservice architecture comprised of the following subcomponents: sidecar, coordinator, validator-committer, verification service, query service.
 
 - **Sidecar** is a middleware component designed to operate between an Ordering Service and the Coordinator component. Its primary function is to reliably manage the flow of blocks, ensuring they are fetched, validated, persisted, and delivered to downstream clients.
 - **Coordinator** service acts as the central orchestrator of the transaction validation and commit pipeline. It sits between the Sidecar and a collection of specialized verification, validation and commit services. Its primary role is to manage the complex flow of transactions, from initial receipt to final status reporting, by leveraging a transaction dependency graph to maximize parallel processing while ensuring deterministic outcomes.
@@ -67,7 +67,7 @@ Fabric-X-Commiter is responsible for post-ordering transaction processing. It ha
 
 Figure below demonstrates the Fabric-X-Committer architecture.
 
-![Fabric-X-Commiter architecture](./diagrams/Fabric-X-Committer.png)
+![Fabric-X-Committer architecture](./diagrams/Fabric-X-Committer.png)
 
 Code and more details can be found under [Fabric-X-Committer Github repository](https://github.com/hyperledger/fabric-x-committer).
 
@@ -77,7 +77,7 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 
 ### Version compatibility matrix
 
-| Orderer | Commiter | Ansible collection | Fabric CA | Fabric Smart Client | Sample Application |
+| Orderer | Committer | Ansible collection | Fabric CA | Fabric Smart Client | Sample Application |
 |  :----: |  :----:  |       :----:       |   :----:  |       :----:        |       :----:       |
 | v0.0.21 |  v0.1.7  |       v0.5.5       |  v1.5.15  |       v0.8.2        |       v0.0.8       |
 
@@ -95,11 +95,11 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 - [Sample token application](https://github.com/iliecirciumaru/fabric-x/tree/main/samples/tokens)
 - [Fabric/Fabric-X monthly calls on the 3rd Wed of the month](https://zoom-lfx.platform.linuxfoundation.org/meetings/fabric?view=month)
 - [Fabric-X Blog](https://www.lfdecentralizedtrust.org/blog/new-major-contribution-to-hyperledger-fabric-purpose-built-implementation-for-next-gen-digital-assets)
-- [Fabric-X whitepaper](https://eprint.iacr.org/2023/1717.pdf) - detailed description of the Fabric-X. Explains motivation,implementation details and presents performance benchmarks
+- [Fabric-X whitepaper](https://eprint.iacr.org/2023/1717.pdf) - detailed description of the Fabric-X. Explains motivation, implementation details and presents performance benchmarks
 - [Fabric-X Committer](https://github.com/hyperledger/fabric-x-committer) Github repository
 - [Fabric-X Orderer](https://github.com/hyperledger/fabric-x-orderer) Github repository
 - [Fabric-Token-SDK](https://github.com/hyperledger-labs/fabric-token-sdk) and [Fabric-Smart-Client](https://github.com/hyperledger-labs/fabric-smart-client) Github repositories
-- [Fabrix-X Common](https://github.com/hyperledger/fabric-x-common) Github repository - contains new CLIs and protobuf, and code shared between the orderer and committer
+- [Fabric-X Common](https://github.com/hyperledger/fabric-x-common) Github repository - contains new CLIs and protobuf, and code shared between the orderer and committer
 - [Sample deployment scripts](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection)
 - [Fabric-X Client SDK](https://github.com/hyperledger/fabric-x-sdk/)
 - [Fabric-X EVM](https://github.com/hyperledger/fabric-x-evm)
