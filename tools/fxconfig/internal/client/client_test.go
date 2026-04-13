@@ -449,6 +449,45 @@ func TestCreateSecOpts_TLS_Error_EmptyRootCertPath(t *testing.T) {
 	require.Nil(t, secOpts)
 }
 
+func TestCreateSecOpts_TLS_EmptyRootCertPaths_UsesSystemCAs(t *testing.T) {
+	t.Parallel()
+
+	// TLS is enabled but no root certificates are provided.
+	// ServerRootCAs must be nil (not an empty slice) so Go falls back to
+	// the system default CA pool and still validates the server certificate.
+	cfg := &config.TLSConfig{
+		Enabled:            boolPtr(true),
+		RootCertPaths:      []string{},
+		ServerNameOverride: "orderer.example.com",
+	}
+
+	secOpts, err := createSecOpts(cfg)
+	require.NoError(t, err)
+	require.NotNil(t, secOpts)
+	require.True(t, secOpts.UseTLS)
+	require.Nil(t, secOpts.ServerRootCAs) // nil → Go uses system CAs
+	require.Equal(t, "orderer.example.com", secOpts.ServerNameOverride)
+	require.False(t, secOpts.RequireClientCert)
+}
+
+func TestCreateSecOpts_TLS_NilRootCertPaths_UsesSystemCAs(t *testing.T) {
+	t.Parallel()
+
+	// Same as above but with nil slice instead of empty slice.
+	cfg := &config.TLSConfig{
+		Enabled:            boolPtr(true),
+		RootCertPaths:      nil,
+		ServerNameOverride: "orderer.example.com",
+	}
+
+	secOpts, err := createSecOpts(cfg)
+	require.NoError(t, err)
+	require.NotNil(t, secOpts)
+	require.True(t, secOpts.UseTLS)
+	require.Nil(t, secOpts.ServerRootCAs) // nil → Go uses system CAs
+	require.Equal(t, "orderer.example.com", secOpts.ServerNameOverride)
+}
+
 // Test createSecOpts function - mTLS scenarios
 
 func TestCreateSecOpts_mTLS_Success(t *testing.T) {

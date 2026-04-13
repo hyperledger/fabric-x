@@ -46,16 +46,19 @@ func createSecOpts(tlsConfig *config.TLSConfig) (*comm.SecureOptions, error) {
 	secOpts.UseTLS = true
 	secOpts.ServerNameOverride = tlsConfig.ServerNameOverride
 
-	// set rootCAs
-	serverRootCAs := make([][]byte, 0, len(tlsConfig.RootCertPaths))
-	for _, rootCertPath := range tlsConfig.RootCertPaths {
-		rootCert, err := loadFile(rootCertPath)
-		if err != nil {
-			return nil, err
+	// set rootCAs — only if custom roots were configured; otherwise let Go use
+	// the system default CA pool so certificate validation is still active.
+	if len(tlsConfig.RootCertPaths) > 0 {
+		serverRootCAs := make([][]byte, 0, len(tlsConfig.RootCertPaths))
+		for _, rootCertPath := range tlsConfig.RootCertPaths {
+			rootCert, err := loadFile(rootCertPath)
+			if err != nil {
+				return nil, err
+			}
+			serverRootCAs = append(serverRootCAs, rootCert)
 		}
-		serverRootCAs = append(serverRootCAs, rootCert)
+		secOpts.ServerRootCAs = serverRootCAs
 	}
-	secOpts.ServerRootCAs = serverRootCAs
 
 	// mTLS: both key and cert must be provided; if either is absent, skip mTLS
 	if tlsConfig.ClientKeyPath == "" || tlsConfig.ClientCertPath == "" {
