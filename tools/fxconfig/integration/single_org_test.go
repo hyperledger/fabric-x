@@ -11,7 +11,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,15 +24,7 @@ import (
 //go:generate go tool configtxgen --configPath testdata --channelID mychannel --profile MultiOrgAdminChannel --outputBlock testdata/crypto/multi-org.pb.bin
 
 const (
-	eventuallyTimeout = 10 * time.Second
-	eventuallyTick    = 100 * time.Millisecond
-
 	scaleTestNamespaceCount = 50 // test with many namespaces
-
-	policyArg  = "--policy=AND('Org1MSP.member', 'Org2MSP.member')"
-	endorseArg = "--endorse"
-	submitArg  = "--submit"
-	waitArg    = "--wait"
 )
 
 //nolint:maintidx // large by design: one container shared across many subtests

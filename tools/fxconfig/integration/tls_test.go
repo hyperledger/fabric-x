@@ -9,22 +9,12 @@ package integration_test
 import (
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	eventuallyTimeout = 10 * time.Second
-	eventuallyTick    = 100 * time.Millisecond
-
-	policyArg         = "--policy=AND('Org1MSP.member', 'Org2MSP.member')"
-	policyAnd2of2TLS  = "--policy=AND('Org1MSP.member', 'Org2MSP.member')"
-	endorseArg        = "--endorse"
-	submitArg         = "--submit"
-	waitArg           = "--wait"
-)
+const policyAnd2of2TLS = "--policy=AND('Org1MSP.member', 'Org2MSP.member')"
 
 func TestSingleOrgTLSScenarios(t *testing.T) {
 	endpoints := setupSingleOrgAdminWithTLS(t)

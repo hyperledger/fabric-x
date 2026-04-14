@@ -50,7 +50,8 @@ generate: FORCE
 .PHONY: test
 test: FORCE
 	@echo "Running Go unit tests..."
-	cd tools && $(go_test) ./... | go tool gotestfmt ${GO_TEST_FMT_FLAGS}
+	@set -o pipefail; \
+	cd tools && $(go_test) ./... | (go tool gotestfmt ${GO_TEST_FMT_FLAGS} || cat)
 
 .PHONY: $(TOOLS_EXES)
 $(TOOLS_EXES): %: $(BUILD_DIR)/% ## Builds a native binary
