@@ -19,7 +19,7 @@ include ./app.mk
 # Install the utilities needed to run the components on the targeted remote hosts (e.g. make install-prerequisites).
 .PHONY: install-prerequisites
 install-prerequisites: install-prerequisites-fabric
-	./install-fabric.sh --fabric-version 3.1.1
+	./install-fabric.sh --fabric-version 3.1.4
 	go mod tidy
 
 # Build all the artifacts and binaries, and copy them to the application folders
