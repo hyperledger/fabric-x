@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x-common/api/committerpb"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
@@ -59,7 +60,7 @@ func TestTxSubmitCommand_SubmitWithWait(t *testing.T) {
 
 	mockApp := &testApp{}
 	mockApp.On("SubmitTransactionWithWait", mock.Anything, "tx-123", mock.AnythingOfType("*applicationpb.Tx")).
-		Return(0, nil)
+		Return(int(committerpb.Status_COMMITTED), nil)
 
 	var outBuf bytes.Buffer
 	ctx := &CLIContext{
