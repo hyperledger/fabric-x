@@ -85,6 +85,16 @@ func (n *NotificationClient) Close() error {
 func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan int, error) {
 	receiverCh := make(chan int, 1)
 
+	// Fail fast if the stream has previously failed.
+	if err := n.streamErr.Load(); err != nil {
+		return nil, *err
+	}
+
+	// Fail fast if the stream is not yet ready.
+	if !n.streamReady.Load() {
+		return nil, fmt.Errorf("notification stream is not ready")
+	}
+
 	n.subscribersMu.Lock()
 	defer n.subscribersMu.Unlock()
 
@@ -94,11 +104,6 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	if len(subscribers) > 0 {
 		// we already have an active subscription for this txID
 		return receiverCh, nil
-	}
-
-	// Fail fast if the stream has previously failed.
-	if err := n.streamErr.Load(); err != nil {
-		return nil, *err
 	}
 
 	// setup request
