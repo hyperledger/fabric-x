@@ -69,7 +69,10 @@ Examples:
 					fmt.Sprintf("Transaction status: %s", committerpb.Status_name[int32(status)]), //nolint:gosec
 				)
 				if status != int(committerpb.Status_COMMITTED) {
-					return fmt.Errorf("transaction failed with status: %s", committerpb.Status_name[int32(status)]) //nolint:gosec
+					return fmt.Errorf(
+						"transaction failed with status: %s",
+						committerpb.Status_name[int32(status)], //nolint:gosec
+					)
 				}
 				return nil
 			}
