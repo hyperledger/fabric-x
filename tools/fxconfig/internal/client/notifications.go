@@ -37,8 +37,6 @@ type NotificationClient struct {
 	// streamErr holds the error that caused the stream to terminate.
 	// Atomically stored; checked by Subscribe() before sending requests.
 	streamErr atomic.Pointer[error]
-	// streamReady is set to true once the gRPC stream is open and accepting requests.
-	streamReady atomic.Bool
 }
 
 // NewNotificationClient creates a notification client with the provided configuration.
@@ -83,17 +81,16 @@ func (n *NotificationClient) Close() error {
 // Subscribe registers interest in a transaction's status and returns a channel for notifications.
 // Multiple subscribers to the same txID share a single upstream subscription.
 func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan int, error) {
-	receiverCh := make(chan int, 1)
+	// Apply timeout to prevent blocking on requestQueue send.
+	ctx, cancel := context.WithTimeout(ctx, n.cfg.WaitingTimeout)
+	defer cancel()
 
-	// Fail fast if the stream has previously failed.
+	// Fail fast if the stream has previously failed — check before any state mutation.
 	if err := n.streamErr.Load(); err != nil {
 		return nil, *err
 	}
 
-	// Fail fast if the stream is not yet ready.
-	if !n.streamReady.Load() {
-		return nil, errors.New("notification stream is not ready")
-	}
+	receiverCh := make(chan int, 1)
 
 	n.subscribersMu.Lock()
 	defer n.subscribersMu.Unlock()
@@ -165,7 +162,6 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 		n.streamErr.Store(&err)
 		return err
 	}
-	n.streamReady.Store(true)
 
 	// Use the base context for errgroup
 	g, gCtx := errgroup.WithContext(ctx)
@@ -260,8 +256,6 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 	n.subscribersMu.Lock()
 	clear(n.subscribers)
 	n.subscribersMu.Unlock()
-
-	n.streamReady.Store(false)
 
 	return err
 }

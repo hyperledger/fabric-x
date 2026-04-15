@@ -135,7 +135,6 @@ func TestNotificationClient_Subscribe_DuplicateSubscription(t *testing.T) {
 	t.Parallel()
 
 	nc := newTestNotificationClient(time.Second)
-	nc.streamReady.Store(true) // Simulate stream being ready
 	// Pre-populate a subscriber so the second subscribe is a duplicate
 	// and won't send to the requestQueue (which would block without a listener).
 	nc.subscribers["tx1"] = []chan int{make(chan int, 1)}
@@ -149,7 +148,6 @@ func TestNotificationClient_Subscribe_ContextCanceled(t *testing.T) {
 	t.Parallel()
 
 	nc := newTestNotificationClient(time.Second)
-	nc.streamReady.Store(true) // Simulate stream being ready
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
@@ -161,7 +159,6 @@ func TestNotificationClient_Subscribe_SendsRequest(t *testing.T) {
 	t.Parallel()
 
 	nc := newTestNotificationClient(time.Second)
-	nc.streamReady.Store(true) // Simulate stream being ready
 
 	// Consume the request in a background goroutine to unblock Subscribe.
 	go func() { <-nc.requestQueue }()
@@ -171,21 +168,10 @@ func TestNotificationClient_Subscribe_SendsRequest(t *testing.T) {
 	require.NotNil(t, ch)
 }
 
-func TestNotificationClient_Subscribe_StreamNotReady(t *testing.T) {
-	t.Parallel()
-
-	nc := newTestNotificationClient(time.Second)
-	// streamReady is false by default
-
-	_, err := nc.Subscribe(t.Context(), "tx1")
-	require.ErrorContains(t, err, "notification stream is not ready")
-}
-
 func TestNotificationClient_Subscribe_StreamError(t *testing.T) {
 	t.Parallel()
 
 	nc := newTestNotificationClient(time.Second)
-	nc.streamReady.Store(true) // Simulate stream being ready
 	// Simulate a stream error
 	expectedErr := errors.New("stream connection lost")
 	nc.streamErr.Store(&expectedErr)
@@ -194,6 +180,18 @@ func TestNotificationClient_Subscribe_StreamError(t *testing.T) {
 	_, err := nc.Subscribe(t.Context(), "tx1")
 	require.ErrorIs(t, err, expectedErr)
 	require.Empty(t, nc.subscribers, "subscribers map should not be modified when streamErr is set")
+}
+
+func TestNotificationClient_Subscribe_Timeout(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Millisecond)
+	// Don't consume requestQueue — Subscribe should time out waiting to send.
+
+	_, err := nc.Subscribe(t.Context(), "tx1")
+	require.Error(t, err)
+	// Should get DeadlineExceeded since the context timeout is short.
+	require.ErrorContains(t, err, "deadline exceeded")
 }
 
 // Close tests
