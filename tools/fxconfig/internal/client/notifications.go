@@ -92,7 +92,7 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 
 	// Fail fast if the stream is not yet ready.
 	if !n.streamReady.Load() {
-		return nil, fmt.Errorf("notification stream is not ready")
+		return nil, errors.New("notification stream is not ready")
 	}
 
 	n.subscribersMu.Lock()

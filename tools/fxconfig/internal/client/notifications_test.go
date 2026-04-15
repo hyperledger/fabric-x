@@ -8,7 +8,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"testing"
 	"time"
 
@@ -187,7 +187,7 @@ func TestNotificationClient_Subscribe_StreamError(t *testing.T) {
 	nc := newTestNotificationClient(time.Second)
 	nc.streamReady.Store(true) // Simulate stream being ready
 	// Simulate a stream error
-	expectedErr := fmt.Errorf("stream connection lost")
+	expectedErr := errors.New("stream connection lost")
 	nc.streamErr.Store(&expectedErr)
 
 	// Verify that subscribers map is NOT modified when streamErr is set
