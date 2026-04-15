@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x-common/api/committerpb"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
@@ -59,7 +60,7 @@ func TestTxSubmitCommand_SubmitWithWait(t *testing.T) {
 
 	mockApp := &testApp{}
 	mockApp.On("SubmitTransactionWithWait", mock.Anything, "tx-123", mock.AnythingOfType("*applicationpb.Tx")).
-		Return(0, nil)
+		Return(int(committerpb.Status_COMMITTED), nil)
 
 	var outBuf bytes.Buffer
 	ctx := &CLIContext{
@@ -74,6 +75,33 @@ func TestTxSubmitCommand_SubmitWithWait(t *testing.T) {
 
 	require.NoError(t, cmd.Execute())
 	require.Contains(t, outBuf.String(), "Transaction status:")
+	mockApp.AssertExpectations(t)
+}
+
+func TestTxSubmitCommand_SubmitWithWaitFailed(t *testing.T) {
+	t.Parallel()
+
+	txFile := writeTxFile(t, "tx-123", &applicationpb.Tx{})
+
+	mockApp := &testApp{}
+	mockApp.On("SubmitTransactionWithWait", mock.Anything, "tx-123", mock.AnythingOfType("*applicationpb.Tx")).
+		Return(int(committerpb.Status_ABORTED_SIGNATURE_INVALID), nil)
+
+	var outBuf bytes.Buffer
+	ctx := &CLIContext{
+		App:                mockApp,
+		Printer:            cliio.NewCLIPrinter(&outBuf, &outBuf, cliio.FormatTable),
+		IOTransactionCodec: &cliio.JSONCodec{},
+	}
+
+	cmd := newTxSubmitCommand(ctx)
+	cmd.SetOut(&outBuf)
+	cmd.SetArgs([]string{txFile, "--wait"})
+
+	err := cmd.Execute()
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "transaction failed with status: ABORTED_SIGNATURE_INVALID")
+	require.Contains(t, outBuf.String(), "Transaction status: ABORTED_SIGNATURE_INVALID")
 	mockApp.AssertExpectations(t)
 }
 
