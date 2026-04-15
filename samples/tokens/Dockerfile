@@ -18,7 +18,8 @@ COPY . .
 
 RUN --mount=type=cache,target=/go-cache \
     --mount=type=cache,target=/gomod-cache \
-    cd "${NODE_TYPE}" && go build -tags "${PLATFORM}" -o /app
+    if [ "${PLATFORM}" = "xdev" ]; then BUILD_TAGS="fabricx"; else BUILD_TAGS="${PLATFORM}"; fi && \
+    cd "${NODE_TYPE}" && go build -tags "${BUILD_TAGS}" -o /app
 
 FROM busybox
 
