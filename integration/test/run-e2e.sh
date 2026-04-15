@@ -150,7 +150,12 @@ sed "s|ARTIFACTS_DIR|/artifacts|g" \
 # the orderer image. The --entrypoint flag overrides the default entrypoint.sh which
 # would try to start the full orderer.
 mkdir -p "${ARTIFACTS_DIR}/bootstrap"
+DOCKER_USER_FLAG=""
+if [ "$(uname)" = "Linux" ]; then
+  DOCKER_USER_FLAG="--user $(id -u):$(id -g)"
+fi
 docker run --rm --entrypoint armageddon \
+  ${DOCKER_USER_FLAG} \
   -v "${ARTIFACTS_DIR}:/artifacts" \
   "${ORDERER_IMAGE}" \
   createSharedConfigProto \
@@ -352,25 +357,27 @@ mkdir -p "${FXCONFIG_TX_DIR}"
   --output="${FXCONFIG_TX_DIR}/tx.json"
 
 # Step 7b: Endorse with peer-org-0
+# Note: < /dev/null closes stdin so fxconfig does not detect a pipe
+# (on Linux/SSH, stdin is a pipe which conflicts with positional file args)
 "${FABRIC_X_BIN}/fxconfig" tx endorse "${FXCONFIG_TX_DIR}/tx.json" \
   --config="${FXCONFIG_ORG0}" \
-  --output="${FXCONFIG_TX_DIR}/tx_org0.json"
+  --output="${FXCONFIG_TX_DIR}/tx_org0.json" < /dev/null
 
 # Step 7c: Endorse with peer-org-1
 "${FABRIC_X_BIN}/fxconfig" tx endorse "${FXCONFIG_TX_DIR}/tx.json" \
   --config="${FXCONFIG_ORG1}" \
-  --output="${FXCONFIG_TX_DIR}/tx_org1.json"
+  --output="${FXCONFIG_TX_DIR}/tx_org1.json" < /dev/null
 
 # Step 7d: Merge both endorsements
 "${FABRIC_X_BIN}/fxconfig" tx merge \
   "${FXCONFIG_TX_DIR}/tx_org0.json" \
   "${FXCONFIG_TX_DIR}/tx_org1.json" \
-  --output="${FXCONFIG_TX_DIR}/tx_merged.json"
+  --output="${FXCONFIG_TX_DIR}/tx_merged.json" < /dev/null
 
 # Step 7e: Submit merged transaction and wait for commit
 "${FABRIC_X_BIN}/fxconfig" tx submit --wait \
   "${FXCONFIG_TX_DIR}/tx_merged.json" \
-  --config="${FXCONFIG_ORG0}"
+  --config="${FXCONFIG_ORG0}" < /dev/null
 
 echo "Namespace 0 created successfully"
 
