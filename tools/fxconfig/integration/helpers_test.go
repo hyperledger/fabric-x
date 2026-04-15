@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
@@ -34,6 +35,14 @@ const (
 	sidecarPort      = "4001"
 	queryServicePort = "7001"
 	channelID        = "mychannel"
+
+	eventuallyTimeout = 10 * time.Second
+	eventuallyTick    = 100 * time.Millisecond
+
+	policyArg  = "--policy=AND('Org1MSP.member', 'Org2MSP.member')"
+	endorseArg = "--endorse"
+	submitArg  = "--submit"
+	waitArg    = "--wait"
 )
 
 // setupSingleOrgAdmin spawns a committer test container with a single org admin lifecycle policy
@@ -47,7 +56,17 @@ func setupSingleOrgAdmin(t *testing.T) map[string]string {
 	return setup(t, genesisPath)
 }
 
-// setupSingleOrgAdmin spawns a committer test container with a single org admin lifecycle policy
+// setupSingleOrgAdminWithTLS spawns a committer test container with TLS enabled
+func setupSingleOrgAdminWithTLS(t *testing.T) map[string]string {
+	t.Helper()
+
+	genesisPath, err := filepath.Abs(filepath.Join(".", "testdata", "crypto", "single-org.pb.bin"))
+	require.NoError(t, err)
+
+	return setupWithTLS(t, genesisPath)
+}
+
+// setupMultiOrgAdmin spawns a committer test container with a multi org admin lifecycle policy
 // and returns a map containing the endpoints of the committers services.
 func setupMultiOrgAdmin(t *testing.T) map[string]string {
 	t.Helper()
@@ -56,6 +75,16 @@ func setupMultiOrgAdmin(t *testing.T) map[string]string {
 	require.NoError(t, err)
 
 	return setup(t, genesisPath)
+}
+
+// setupMultiOrgAdminWithTLS spawns a committer test container with TLS enabled
+func setupMultiOrgAdminWithTLS(t *testing.T) map[string]string {
+	t.Helper()
+
+	genesisPath, err := filepath.Abs(filepath.Join(".", "testdata", "crypto", "multi-org.pb.bin"))
+	require.NoError(t, err)
+
+	return setupWithTLS(t, genesisPath)
 }
 
 func setup(t *testing.T, genesisPath string) map[string]string {
@@ -122,15 +151,132 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 	return endpoints
 }
 
+func setupWithTLS(t *testing.T, genesisPath string) map[string]string {
+	t.Helper()
+
+	dataDirectory, err := filepath.Abs(filepath.Join(".", "testdata", "crypto"))
+	require.NoError(t, err)
+
+	// msp configuration for sidecar orderer client
+	mspID := "Org1MSP"
+	mspDir := "/root/artifacts/crypto/peerOrganizations/Org1/users/committer@org1.com/msp"
+
+	// Base environment configuration
+	envVars := map[string]string{
+		"SC_COORDINATOR_LOGGING_LOGSPEC":      "DEBUG",
+		"SC_SIDECAR_LOGGING_LOGSPEC":          "DEBUG",
+		"SC_SIDECAR_ORDERER_CHANNEL_ID":       channelID,
+		"SC_SIDECAR_ORDERER_TLS_MODE":         "tls",
+		"SC_SIDECAR_ORDERER_SIGNED_ENVELOPES": "true",
+		"SC_SIDECAR_ORDERER_IDENTITY_MSP_ID":  mspID,
+		"SC_SIDECAR_ORDERER_IDENTITY_MSP_DIR": mspDir,
+		"SC_QUERY_SERVICE_SERVER_ENDPOINT":    fmt.Sprintf(":%v", queryServicePort),
+		"SC_QUERY_SERVICE_LOGGING_LOGSPEC":    "DEBUG",
+		"SC_ORDERER_BLOCK_SIZE":               "1",
+		"SC_ORDERER_LOGGING_LOGSPEC":          "DEBUG",
+		"SC_VC_LOGGING_LOGSPEC":               "DEBUG",
+
+		"SC_ORDERER_SERVER_TLS_MODE":      "tls",
+		"SC_ORDERER_SERVER_TLS_CERT_PATH": "/root/artifacts/crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/server.crt",
+		"SC_ORDERER_SERVER_TLS_KEY_PATH":  "/root/artifacts/crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/key.crt",
+
+		"SC_QUERY_SERVICE_SERVER_TLS_MODE":          "tls",
+		"SC_QUERY_SERVICE_SERVER_TLS_CERT_PATH":     "/root/artifacts/crypto/peerOrganizations/Org1/peers/committer.org1.com/tls/server.crt",
+		"SC_QUERY_SERVICE_SERVER_TLS_KEY_PATH":      "/root/artifacts/crypto/peerOrganizations/Org1/peers/committer.org1.com/tls/server.key",
+		"SC_SIDECAR_SERVER_TLS_MODE":                "tls",
+		"SC_SIDECAR_SERVER_TLS_CERT_PATH":           "/root/artifacts/crypto/peerOrganizations/Org1/peers/committer.org1.com/tls/server.crt",
+		"SC_SIDECAR_SERVER_TLS_KEY_PATH":            "/root/artifacts/crypto/peerOrganizations/Org1/peers/committer.org1.com/tls/server.key",
+		"SC_ORDERER_SERVER_TLS_CA_CERT_PATHS":       "",
+		"SC_QUERY_SERVICE_SERVER_TLS_CA_CERT_PATHS": "",
+		"SC_SIDECAR_SERVER_TLS_CA_CERT_PATHS":       "",
+	}
+
+	caCertPaths := []string{
+		"/root/artifacts/crypto/peerOrganizations/Org1/tlsca/tlsca.org1.com-cert.pem",
+		"/root/artifacts/crypto/peerOrganizations/Org2/tlsca/tlsca.org2.com-cert.pem",
+		"/root/artifacts/crypto/peerOrganizations/Org3/tlsca/tlsca.org3.com-cert.pem",
+		"/root/artifacts/crypto/ordererOrganizations/OrdererOrg/tlsca/tlsca.orderer.com-cert.pem",
+	}
+	caCerts := fmt.Sprintf("[%s]", strings.Join(caCertPaths, ","))
+	envVars["SC_ORDERER_SERVER_TLS_CA_CERT_PATHS"] = caCerts
+	envVars["SC_QUERY_SERVICE_SERVER_TLS_CA_CERT_PATHS"] = caCerts
+	envVars["SC_SIDECAR_SERVER_TLS_CA_CERT_PATHS"] = caCerts
+
+	ctx := t.Context()
+	committerContainer, err := testcontainers.Run(
+		ctx, "ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.9",
+		testcontainers.WithCmd("run", "db", "orderer", "committer", "--insecure"),
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			HostFilePath:      genesisPath,
+			ContainerFilePath: "/root/artifacts/config-block.pb.bin",
+			FileMode:          0o700,
+		}),
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			HostFilePath:      dataDirectory,
+			ContainerFilePath: "/root/artifacts/",
+			FileMode:          0o755,
+		}),
+		testcontainers.WithExposedPorts(ordererPort, sidecarPort, queryServicePort),
+		testcontainers.WithEnv(envVars),
+		testcontainers.WithWaitStrategy(
+			wait.ForListeningPort(ordererPort),
+			wait.ForListeningPort(sidecarPort),
+			wait.ForListeningPort(queryServicePort),
+			wait.ForLog("Setting the last committed block number:"),
+		),
+	)
+	t.Cleanup(func() {
+		testcontainers.CleanupContainer(t, committerContainer)
+	})
+	require.NoError(t, err)
+
+	endpoints := make(map[string]string)
+	endpoints["query"], err = committerContainer.PortEndpoint(ctx, queryServicePort, "")
+	require.NoError(t, err)
+
+	endpoints["orderer"], err = committerContainer.PortEndpoint(ctx, ordererPort, "")
+	require.NoError(t, err)
+
+	endpoints["sidecar"], err = committerContainer.PortEndpoint(ctx, sidecarPort, "")
+	require.NoError(t, err)
+
+	return endpoints
+}
+
 func generateConfigFile(
 	tb testing.TB,
 	localMspID string,
 	mspConfigPath string,
 	endpoints map[string]string,
 ) string {
+	return generateConfigFileWithTLS(tb, localMspID, mspConfigPath, endpoints, false)
+}
+
+func generateConfigFileWithTLS(
+	tb testing.TB,
+	localMspID string,
+	mspConfigPath string,
+	endpoints map[string]string,
+	enableTLS bool,
+) string {
 	tb.Helper()
 	tmpDir := tb.TempDir()
 	configPath := filepath.Join(tmpDir, "config.yaml")
+
+	tlsEnabled := "false"
+	if enableTLS {
+		tlsEnabled = "true"
+	}
+
+	tlsConfig := fmt.Sprintf(`
+  tls:
+    enabled: %s
+    rootCertPaths:
+      - ./testdata/crypto/peerOrganizations/Org1/tlsca/tlsca.org1.com-cert.pem
+      - ./testdata/crypto/peerOrganizations/Org2/tlsca/tlsca.org2.com-cert.pem
+      - ./testdata/crypto/peerOrganizations/Org3/tlsca/tlsca.org3.com-cert.pem
+      - ./testdata/crypto/ordererOrganizations/OrdererOrg/tlsca/tlsca.orderer.com-cert.pem`, tlsEnabled)
+
 	configContent := `
 msp:
   localMspID: ` + localMspID + `
@@ -139,16 +285,16 @@ msp:
 orderer:
   address: ` + endpoints["orderer"] + `
   channel: ` + channelID + `
-  connectionTimeout: 30s
+  connectionTimeout: 30s` + tlsConfig + `
 
 queries:
   address: ` + endpoints["query"] + `
-  connectionTimeout: 20s
+  connectionTimeout: 20s` + tlsConfig + `
 
 notifications:
   address: ` + endpoints["sidecar"] + `
   connectionTimeout: 15s
-  waitingTimeout: 15s
+  waitingTimeout: 15s` + tlsConfig + `
 `
 	err := os.WriteFile(configPath, []byte(configContent), 0o600)
 	require.NoError(tb, err)
