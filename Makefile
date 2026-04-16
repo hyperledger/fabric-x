@@ -9,6 +9,19 @@
 .SUFFIXES:
 MAKEFLAGS += --no-builtin-rules
 
+# Cross-platform shell command abstraction
+ifeq ($(OS),Windows_NT)
+    MKDIR   = if not exist $(subst /,\,$1) mkdir $(subst /,\,$1)
+    RM      = if exist $(subst /,\,$(1)) rmdir /s /q $(subst /,\,$(1))
+    TOUCH   = type nul > $(subst /,\,$1)
+    SET_ENV = set $1=$2 &&
+else
+    MKDIR   = mkdir -p $1
+    RM      = rm -rf $1
+    TOUCH   = touch $1
+    SET_ENV = $1=$2
+endif
+
 BUILD_DIR ?= bin
 
 PKGNAME = github.com/hyperledger/fabric-x-common
@@ -58,13 +71,13 @@ $(TOOLS_EXES): %: $(BUILD_DIR)/% ## Builds a native binary
 $(BUILD_DIR)/%: GO_LDFLAGS = $(METADATA_VAR:%=-X $(PKGNAME)/common/metadata.%)
 $(BUILD_DIR)/%:
 	@echo "Building $@"
-	@mkdir -p $(@D)
-	@GOBIN=$(abspath $(@D)) go install -tags "$(GO_TAGS)" -ldflags "$(GO_LDFLAGS)" -buildvcs=false $(pkgmap.$(@F))
-	@touch $@
+	@$(call MKDIR,$(@D))
+	@$(call SET_ENV,GOBIN,$(abspath $(@D))) go install -tags "$(GO_TAGS)" -ldflags "$(GO_LDFLAGS)" -buildvcs=false $(pkgmap.$(@F))
+	@$(call TOUCH,$@)
 
 .PHONY: clean
 clean: ## Cleans the build area
-	-@rm -rf $(BUILD_DIR)
+	-@$(call RM,$(BUILD_DIR))
 
 # Run lint
 # TODO: fix existing lint issues (to find them, remove --new-from-rev=origin/main option)
