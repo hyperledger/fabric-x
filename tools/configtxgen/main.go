@@ -14,13 +14,13 @@ import (
 	"strings"
 
 	"github.com/hyperledger/fabric-lib-go/bccsp/factory"
+	"github.com/hyperledger/fabric-lib-go/common/flogging"
 
 	"github.com/hyperledger/fabric-x-common/common/metadata"
-	"github.com/hyperledger/fabric-x-common/common/util"
 	"github.com/hyperledger/fabric-x-common/tools/configtxgen"
 )
 
-var logger = util.MustGetLogger("common.tools.configtxgen")
+var logger = flogging.MustGetLogger("common.tools.configtxgen")
 
 const programName = "configtxgen"
 
