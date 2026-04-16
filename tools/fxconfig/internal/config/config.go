@@ -60,7 +60,7 @@ type MSPConfig struct {
 //
 //nolint:revive,lll
 type TLSConfig struct {
-	Enabled            *bool    `mapstructure:"enabled" yaml:"enabled,omitempty" desc:"Enable/disable TLS" default:"false"`
+	Enabled            *bool    `mapstructure:"enabled" yaml:"enabled,omitempty" desc:"Enable/disable TLS" default:"true"`
 	ClientKeyPath      string   `mapstructure:"clientKey" yaml:"clientKey,omitempty" desc:"Path to TLS client private key"`
 	ClientCertPath     string   `mapstructure:"clientCert" yaml:"clientCert,omitempty" desc:"Path to TLS client certificate"`
 	RootCertPaths      []string `mapstructure:"rootCerts" yaml:"rootCerts,omitempty" desc:"Paths to TLS root certificates"`
