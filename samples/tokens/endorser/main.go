@@ -43,7 +43,11 @@ func main() {
 		Handler: h,
 		Addr:    net.JoinHostPort("0.0.0.0", *port),
 	}
-	go s.ListenAndServe()
+	go func() {
+		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+	}()
 
 	// Stop
 	stop := make(chan os.Signal, 1)
