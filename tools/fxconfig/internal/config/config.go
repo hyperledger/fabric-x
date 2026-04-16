@@ -68,10 +68,10 @@ type TLSConfig struct {
 }
 
 // Normalize ensures the TLS config has an explicit enabled flag.
-// Sets enabled to false if not specified.
+// Sets enabled to true if not specified.
 func (c *TLSConfig) Normalize() {
 	if c.Enabled == nil {
-		enabled := false
+		enabled := true
 		c.Enabled = &enabled
 	}
 }
