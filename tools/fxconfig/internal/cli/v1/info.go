@@ -13,7 +13,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-
 )
 
 func NewInfoCommand(ctx *CLIContext) *cobra.Command {
@@ -48,13 +47,13 @@ Examples:
 				sort.Strings(env)
 				ctx.Printer.Print(strings.Join(env, "\n") + "\n")
 			case "yaml":
-				fallthrough
-			default:
 				out, err := yaml.Marshal(ctx.Config)
 				if err != nil {
 					return err
 				}
 				ctx.Printer.Print(string(out))
+			default:
+				return fmt.Errorf("invalid --format: %s (want yaml|env)", format)
 			}
 			return nil
 		},
