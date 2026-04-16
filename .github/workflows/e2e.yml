@@ -1,0 +1,83 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# E2E Integration Test workflow.
+#
+# Uses integration/test/build-e2e.sh to build orderer+committer+loadgen images
+# and runs the full E2E pipeline test.
+# All refs default to values in integration/test/refs.conf when not provided.
+#
+
+name: E2E Integration Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      fabric-x-ref:
+        description: "fabric-x ref. Empty=use refs.conf default"
+        required: false
+        default: ""
+      orderer-ref:
+        description: "fabric-x-orderer ref. Empty=use refs.conf default"
+        required: false
+        default: ""
+      committer-ref:
+        description: "fabric-x-committer ref. Empty=use refs.conf default"
+        required: false
+        default: ""
+
+jobs:
+  e2e:
+    name: E2E Integration Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout fabric-x
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # ---------------------------------------------------------------
+      # Resolve/build orderer+committer images and fabric-x tools.
+      # build-e2e.sh writes orderer_image and committer_image to
+      # GITHUB_OUTPUT so downstream steps can reference them directly.
+      # It also builds fabric-x tools (cryptogen, configtxgen, fxconfig)
+      # at the specified fabric-x-ref for artifact generation.
+      # ---------------------------------------------------------------
+      - name: Build E2E images and tools
+        id: images
+        env:
+          INPUT_FABRIC_X_REF: ${{ inputs.fabric-x-ref }}
+          INPUT_ORDERER_REF: ${{ inputs.orderer-ref }}
+          INPUT_COMMITTER_REF: ${{ inputs.committer-ref }}
+        run: |
+          args=()
+          if [ -n "${INPUT_FABRIC_X_REF}" ]; then
+            args+=("--fabric-x-ref=${INPUT_FABRIC_X_REF}")
+          fi
+          if [ -n "${INPUT_ORDERER_REF}" ]; then
+            args+=("--orderer-ref=${INPUT_ORDERER_REF}")
+          fi
+          if [ -n "${INPUT_COMMITTER_REF}" ]; then
+            args+=("--committer-ref=${INPUT_COMMITTER_REF}")
+          fi
+
+          ./integration/test/build-e2e.sh "${args[@]}"
+
+      # ---------------------------------------------------------------
+      # Run E2E test
+      # ---------------------------------------------------------------
+      - name: Run E2E integration test
+        env:
+          ORDERER_IMAGE: ${{ steps.images.outputs.orderer_image }}
+          COMMITTER_IMAGE: ${{ steps.images.outputs.committer_image }}
+          LOADGEN_IMAGE: ${{ steps.images.outputs.loadgen_image }}
+          FABRIC_X_BIN: ${{ github.workspace }}/integration/test/.build/fabric-x/bin
+        run: ./integration/test/run-e2e.sh
+
+      # Failure logs are emitted by run-e2e.sh via an ERR trap before cleanup.

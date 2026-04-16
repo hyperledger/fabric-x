@@ -1,0 +1,127 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+OrdererOrgs:
+  - Name: orderer-org-1
+    Domain: orderer-org-1
+    EnableNodeOUs: false
+    CA:
+      Hostname: ca
+    Specs:
+      - Hostname: router
+        Party: party1
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: assembler
+        Party: party1
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: batcher1
+        Party: party1
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: consenter
+        Party: party1
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+    Users:
+      Count: 1
+
+  - Name: orderer-org-2
+    Domain: orderer-org-2
+    EnableNodeOUs: false
+    CA:
+      Hostname: ca
+    Specs:
+      - Hostname: router
+        Party: party2
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: assembler
+        Party: party2
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: batcher1
+        Party: party2
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: consenter
+        Party: party2
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+    Users:
+      Count: 1
+
+  - Name: orderer-org-3
+    Domain: orderer-org-3
+    EnableNodeOUs: false
+    CA:
+      Hostname: ca
+    Specs:
+      - Hostname: router
+        Party: party3
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: assembler
+        Party: party3
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: batcher1
+        Party: party3
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: consenter
+        Party: party3
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+    Users:
+      Count: 1
+
+  - Name: orderer-org-4
+    Domain: orderer-org-4
+    EnableNodeOUs: false
+    CA:
+      Hostname: ca
+    Specs:
+      - Hostname: router
+        Party: party4
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: assembler
+        Party: party4
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: batcher1
+        Party: party4
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+      - Hostname: consenter
+        Party: party4
+        SANS: [127.0.0.1, 0.0.0.0, localhost, arma]
+    Users:
+      Count: 1
+
+PeerOrgs:
+  - Name: peer-org-0
+    Domain: peer-org-0
+    EnableNodeOUs: false
+    CA:
+      Hostname: ca
+    Specs:
+      - Hostname: sidecar
+        SANS: [127.0.0.1, 0.0.0.0, localhost, committer]
+      - Hostname: verifier
+        SANS: [127.0.0.1, 0.0.0.0, localhost, committer]
+      - Hostname: vc
+        SANS: [127.0.0.1, 0.0.0.0, localhost, committer]
+      - Hostname: coordinator
+        SANS: [127.0.0.1, 0.0.0.0, localhost, committer]
+      - Hostname: query
+        SANS: [127.0.0.1, 0.0.0.0, localhost, committer]
+      - Hostname: loadgen
+        SANS: [127.0.0.1, 0.0.0.0, localhost]
+    Users:
+      Count: 1
+      Specs:
+        - Name: client
+
+  - Name: peer-org-1
+    Domain: peer-org-1
+    EnableNodeOUs: false
+    CA:
+      Hostname: ca
+    Specs:
+      - Hostname: sidecar
+        SANS: [127.0.0.1, 0.0.0.0, localhost, committer]
+    Users:
+      Count: 1
+      Specs:
+        - Name: client

@@ -1,0 +1,143 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+Parties:
+  - PartyID: 1
+    CACerts:
+      - ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/msp/cacerts/ca.orderer-org-1-cert.pem
+    TLSCACerts:
+      - ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/msp/tlscacerts/tlsca.orderer-org-1-cert.pem
+    RouterConfig:
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/router.orderer-org-1/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6022
+    BatchersConfig:
+      - ShardID: 1
+        SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/batcher1.orderer-org-1/msp/signcerts/batcher1.orderer-org-1-cert.pem
+        TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/batcher1.orderer-org-1/tls/server.crt
+        Host: 127.0.0.1
+        Port: 6024
+    ConsenterConfig:
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/consenter.orderer-org-1/msp/signcerts/consenter.orderer-org-1-cert.pem
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/consenter.orderer-org-1/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6025
+    AssemblerConfig:
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/assembler.orderer-org-1/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6023
+
+  - PartyID: 2
+    CACerts:
+      - ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/msp/cacerts/ca.orderer-org-2-cert.pem
+    TLSCACerts:
+      - ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/msp/tlscacerts/tlsca.orderer-org-2-cert.pem
+    RouterConfig:
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/router.orderer-org-2/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6122
+    BatchersConfig:
+      - ShardID: 1
+        SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/batcher1.orderer-org-2/msp/signcerts/batcher1.orderer-org-2-cert.pem
+        TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/batcher1.orderer-org-2/tls/server.crt
+        Host: 127.0.0.1
+        Port: 6124
+    ConsenterConfig:
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/consenter.orderer-org-2/msp/signcerts/consenter.orderer-org-2-cert.pem
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/consenter.orderer-org-2/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6125
+    AssemblerConfig:
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/assembler.orderer-org-2/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6123
+
+  - PartyID: 3
+    CACerts:
+      - ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/msp/cacerts/ca.orderer-org-3-cert.pem
+    TLSCACerts:
+      - ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/msp/tlscacerts/tlsca.orderer-org-3-cert.pem
+    RouterConfig:
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/router.orderer-org-3/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6222
+    BatchersConfig:
+      - ShardID: 1
+        SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/batcher1.orderer-org-3/msp/signcerts/batcher1.orderer-org-3-cert.pem
+        TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/batcher1.orderer-org-3/tls/server.crt
+        Host: 127.0.0.1
+        Port: 6224
+    ConsenterConfig:
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/consenter.orderer-org-3/msp/signcerts/consenter.orderer-org-3-cert.pem
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/consenter.orderer-org-3/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6225
+    AssemblerConfig:
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/assembler.orderer-org-3/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6223
+
+  - PartyID: 4
+    CACerts:
+      - ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/msp/cacerts/ca.orderer-org-4-cert.pem
+    TLSCACerts:
+      - ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/msp/tlscacerts/tlsca.orderer-org-4-cert.pem
+    RouterConfig:
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/router.orderer-org-4/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6322
+    BatchersConfig:
+      - ShardID: 1
+        SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/batcher1.orderer-org-4/msp/signcerts/batcher1.orderer-org-4-cert.pem
+        TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/batcher1.orderer-org-4/tls/server.crt
+        Host: 127.0.0.1
+        Port: 6324
+    ConsenterConfig:
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/consenter.orderer-org-4/msp/signcerts/consenter.orderer-org-4-cert.pem
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/consenter.orderer-org-4/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6325
+    AssemblerConfig:
+      TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/assembler.orderer-org-4/tls/server.crt
+      Host: 127.0.0.1
+      Port: 6323
+
+Consensus:
+  SmartBFT:
+    selfid: 0
+    requestbatchmaxcount: 100
+    requestbatchmaxbytes: 10485760
+    requestbatchmaxinterval: 500ms
+    incomingmessagebuffersize: 200
+    requestpoolsize: 400
+    requestforwardtimeout: 10s
+    requestcomplaintimeout: 20s
+    requestautoremovetimeout: 3m0s
+    viewchangeresendinterval: 5s
+    viewchangetimeout: 20s
+    leaderheartbeattimeout: 1m0s
+    leaderheartbeatcount: 10
+    numofticksbehindbeforesyncing: 10
+    collecttimeout: 1s
+    synconstart: false
+    speedupviewchange: false
+    leaderrotation: false
+    decisionsperleader: 0
+    requestmaxbytes: 10240
+    requestpoolsubmittimeout: 5s
+
+Batching:
+  BatchTimeouts:
+    BatchCreationTimeout: 500ms
+    FirstStrikeThreshold: 10s
+    SecondStrikeThreshold: 10s
+    AutoRemoveTimeout: 10s
+  BatchSize:
+    MaxMessageCount: 100
+    AbsoluteMaxBytes: 10485760
+  RequestMaxBytes: 1048576
+
+MaxPartyID: 4

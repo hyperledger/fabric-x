@@ -1,0 +1,71 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+server:
+  endpoint: :4001
+  tls: &tlsConfig
+    mode: mtls
+    cert-path: /root/artifacts/peerOrganizations/peer-org-0/peers/sidecar.peer-org-0/tls/server.crt
+    key-path: /root/artifacts/peerOrganizations/peer-org-0/peers/sidecar.peer-org-0/tls/server.key
+    ca-cert-paths:
+      - /root/artifacts/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
+  keep-alive:
+    params:
+      time: 300s
+      timeout: 600s
+    enforcement-policy:
+      min-time: 60s
+      permit-without-stream: false
+  max-concurrent-streams: 10
+  rate-limit:
+    requests-per-second: 0
+    burst: 0
+monitoring:
+  endpoint: :2114
+  tls: *tlsConfig
+  rate-limit:
+    requests-per-second: 0
+    burst: 0
+
+orderer:
+  fault-tolerance-level: BFT
+  latest-known-config-block-path: /root/artifacts/config-block.pb.bin
+  tls:
+    mode: mtls
+    cert-path: /root/artifacts/peerOrganizations/peer-org-0/peers/sidecar.peer-org-0/tls/server.crt
+    key-path: /root/artifacts/peerOrganizations/peer-org-0/peers/sidecar.peer-org-0/tls/server.key
+    ca-cert-paths:
+      - /root/artifacts/ordererOrganizations/orderer-org-1/msp/tlscacerts/tlsca.orderer-org-1-cert.pem
+      - /root/artifacts/ordererOrganizations/orderer-org-2/msp/tlscacerts/tlsca.orderer-org-2-cert.pem
+      - /root/artifacts/ordererOrganizations/orderer-org-3/msp/tlscacerts/tlsca.orderer-org-3-cert.pem
+      - /root/artifacts/ordererOrganizations/orderer-org-4/msp/tlscacerts/tlsca.orderer-org-4-cert.pem
+  identity:
+    msp-id: peer-org-0
+    msp-dir: /root/artifacts/peerOrganizations/peer-org-0/users/client@peer-org-0/msp
+    bccsp:
+      Default: SW
+      SW:
+        Security: 256
+        Hash: SHA2
+committer:
+  endpoint: localhost:9001
+  tls: *tlsConfig
+ledger:
+  path: /root/sc/ledger
+  sync-interval: 100
+notification:
+  max-timeout: 10m
+  max-active-tx-ids: 100_000
+  max-tx-ids-per-request: 1000
+
+last-committed-block-set-interval: 5s
+waiting-txs-limit: 20_000_000
+channel-buffer-size: 100
+
+logging:
+  logSpec: info:grpc=error
+  format: >-
+    %{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc}
+    -> %{level:.4s}%{color:reset} %{message}

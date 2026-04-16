@@ -1,0 +1,118 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  # ---------------------------------------------------------------------------
+  # Committer pipeline metrics (mTLS endpoints)
+  # ---------------------------------------------------------------------------
+  - job_name: "committer-sidecar"
+    static_configs:
+      - targets: ["committer:2114"]
+    scheme: https
+    tls_config:
+      ca_file: /tls/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
+      cert_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.crt
+      key_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.key
+      insecure_skip_verify: true
+
+  - job_name: "committer-verifier"
+    static_configs:
+      - targets: ["committer:2115"]
+    scheme: https
+    tls_config:
+      ca_file: /tls/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
+      cert_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.crt
+      key_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.key
+      insecure_skip_verify: true
+
+  - job_name: "committer-vc"
+    static_configs:
+      - targets: ["committer:2116"]
+    scheme: https
+    tls_config:
+      ca_file: /tls/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
+      cert_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.crt
+      key_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.key
+      insecure_skip_verify: true
+
+  - job_name: "committer-query"
+    static_configs:
+      - targets: ["committer:2117"]
+    scheme: https
+    tls_config:
+      ca_file: /tls/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
+      cert_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.crt
+      key_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.key
+      insecure_skip_verify: true
+
+  - job_name: "committer-coordinator"
+    static_configs:
+      - targets: ["committer:2119"]
+    scheme: https
+    tls_config:
+      ca_file: /tls/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
+      cert_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.crt
+      key_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.key
+      insecure_skip_verify: true
+
+  # ---------------------------------------------------------------------------
+  # Loadgen metrics (mTLS endpoint)
+  # ---------------------------------------------------------------------------
+  - job_name: "loadgen"
+    static_configs:
+      - targets: ["loadgen:2118"]
+    scheme: https
+    tls_config:
+      ca_file: /tls/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
+      cert_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.crt
+      key_file: /tls/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.key
+      insecure_skip_verify: true
+
+  # ---------------------------------------------------------------------------
+  # Arma orderer metrics (operations endpoints, plain HTTP)
+  # ---------------------------------------------------------------------------
+  - job_name: "arma-router"
+    static_configs:
+      - targets:
+          - "arma:8022"
+          - "arma:8122"
+          - "arma:8222"
+          - "arma:8322"
+        labels:
+          role: "router"
+
+  - job_name: "arma-assembler"
+    static_configs:
+      - targets:
+          - "arma:8023"
+          - "arma:8123"
+          - "arma:8223"
+          - "arma:8323"
+        labels:
+          role: "assembler"
+
+  - job_name: "arma-batcher"
+    static_configs:
+      - targets:
+          - "arma:8024"
+          - "arma:8124"
+          - "arma:8224"
+          - "arma:8324"
+        labels:
+          role: "batcher"
+
+  - job_name: "arma-consenter"
+    static_configs:
+      - targets:
+          - "arma:8025"
+          - "arma:8125"
+          - "arma:8225"
+          - "arma:8325"
+        labels:
+          role: "consenter"

@@ -1,0 +1,54 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+server:
+  endpoint: :7001
+  tls: &tlsConfig
+    mode: mtls
+    cert-path: /root/artifacts/peerOrganizations/peer-org-0/peers/query.peer-org-0/tls/server.crt
+    key-path: /root/artifacts/peerOrganizations/peer-org-0/peers/query.peer-org-0/tls/server.key
+    ca-cert-paths:
+      - /root/artifacts/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
+  rate-limit:
+    requests-per-second: 0
+    burst: 0
+monitoring:
+  endpoint: :2117
+  tls: *tlsConfig
+  rate-limit:
+    requests-per-second: 0
+    burst: 0
+
+database:
+  endpoints:
+    - localhost:5433
+  username: "postgres"
+  password: "postgres"
+  database: "postgres"
+  tls:
+    mode: none
+  max-connections: 10
+  min-connections: 5
+  load-balance: false
+  retry:
+    initial-interval: 500ms
+    randomization-factor: 0.5
+    multiplier: 1.5
+    max-interval: 60s
+    max-elapsed-time: 15m
+
+min-batch-keys: 1024
+max-batch-wait: 100ms
+view-aggregation-window: 100ms
+max-aggregated-views: 1024
+max-active-views: 4096
+max-view-timeout: 10s
+max-request-keys: 10000
+
+logging:
+  logSpec: info:grpc=error
+  format: >-
+    %{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc}
+    -> %{level:.4s}%{color:reset} %{message}

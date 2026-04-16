@@ -1,0 +1,704 @@
+{
+  "id": null,
+  "uid": null,
+  "title": "Fabric-X-Orderer Dashboard",
+  "tags": ["Arma Nightly"],
+  "timezone": "",
+  "schemaVersion": 42,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 0,
+  "preload": false,
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h"]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": { "type": "grafana", "uid": "-- Grafana --" },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "DS_PROMETHEUS",
+        "type": "datasource",
+        "label": "Prometheus",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "options": []
+      }
+    ]
+  },
+  "links": [],
+  "description": "running commands were for 3 days :\n\nfor i in {1..4}; do\n  nohup ./armageddon receive \\\n    --config=arma-config/config/party${i}/user_config.yaml \\\n    --pullFromPartyId=${i} \\\n    --expectedTxs=259200000 \\\n    --output=\"/tmp${i}\" \\\n    >> receiver${i}.log 2>&1 &\ndone\nnohup ./armageddon load --config=arma-config/config/party1/user_config.yaml --transactions=259200000 --rate=1000 --txSize=300 >> loader.log 2>&1 &",
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 16,
+      "panels": [],
+      "title": "Batchers",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Incoming TXs / second",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 1 },
+      "id": 17,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(batcher_router_txs_total[1m])",
+          "legendFormat": "Batcher {{party_id}}-{{shard_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Batcher - Incoming TXs / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "TXs Batched / sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 1 },
+      "id": 18,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(batcher_batched_txs_total[1m])",
+          "legendFormat": "Batcher {{party_id}}-{{shard_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Batcher - TXs Batched / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Transactions in mempool",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 9 },
+      "id": 20,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "batcher_mempool_size",
+          "legendFormat": "Batcher {{party_id}}-{{shard_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Batcher - Mempool Size",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Batches Created / sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }, { "color": "red", "value": 80 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 9 },
+      "id": 19,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(batcher_batches_created_total[1m])",
+          "legendFormat": "Batcher {{party_id}}-{{shard_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Batcher - Batches Created / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed" },
+          "custom": {
+            "axisPlacement": "auto",
+            "fillOpacity": 70,
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineWidth": 0,
+            "spanNulls": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "1": { "color": "green", "index": 0, "text": "Primary" },
+                "2": { "color": "blue", "index": 1, "text": "Secondary" }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+      "id": 21,
+      "options": {
+        "alignValue": "left",
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "mergeValues": true,
+        "rowHeight": 0.9,
+        "showValue": "always",
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "batcher_current_role",
+          "legendFormat": "Batcher {{party_id}}-{{shard_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Batcher - Current Role",
+      "type": "state-timeline"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Role changes / sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }, { "color": "red", "value": 1 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
+      "id": 22,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(batcher_role_changes_total[1m])",
+          "legendFormat": "Batcher {{party_id}}-{{shard_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Batcher - Role Changes / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Complaints / sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }, { "color": "red", "value": 1 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 25 },
+      "id": 23,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(batcher_complaints_total[1m])",
+          "legendFormat": "Batcher {{party_id}}-{{shard_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Batcher - Complaints / sec",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "First resends / sec",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": 0 }, { "color": "red", "value": 1 }] }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 25 },
+      "id": 24,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "pluginVersion": "12.3.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(batcher_first_resends_total[1m])",
+          "legendFormat": "Batcher {{party_id}}-{{shard_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Batcher - First Resend / sec",
+      "type": "timeseries"
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 33 },
+      "id": 9,
+      "panels": [],
+      "title": "Consenters",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 34 },
+      "id": 10,
+      "type": "timeseries",
+      "title": "Consenter - Decisions / sec",
+      "pluginVersion": "12.3.2",
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(consensus_decisions_count[1m])",
+          "legendFormat": "Consenter {{party_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 34 },
+      "id": 12,
+      "type": "timeseries",
+      "title": "Consenter - Blocks / sec",
+      "pluginVersion": "12.3.2",
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(consensus_blocks_count[1m])",
+          "legendFormat": "Consenter {{party_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 42 },
+      "id": 14,
+      "type": "timeseries",
+      "title": "Consenter - BAFs / sec",
+      "pluginVersion": "12.3.2",
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(consensus_bafs_count[1m])",
+          "legendFormat": "Consenter {{party_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 42 },
+      "id": 15,
+      "type": "timeseries",
+      "title": "Consenter - Complaints / sec",
+      "pluginVersion": "12.3.2",
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(consensus_complaints_count[1m])",
+          "legendFormat": "Consenter {{party_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 50 },
+      "id": 5,
+      "panels": [],
+      "title": "Routers",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 51 },
+      "id": 6,
+      "type": "timeseries",
+      "title": "Router - Requests / sec",
+      "pluginVersion": "12.3.2",
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(router_requests_completed[1m])",
+          "legendFormat": "Router {{party_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 51 },
+      "id": 7,
+      "type": "timeseries",
+      "title": "Router - Rejected Requests / sec",
+      "pluginVersion": "12.3.2",
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(router_requests_rejected{code=\"400\"}[1m])",
+          "legendFormat": "Router {{party_id}} - 400",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "editorMode": "code",
+          "expr": "rate(router_requests_rejected{code=\"500\"}[1m])",
+          "legendFormat": "Router {{party_id}} - 500",
+          "range": true,
+          "refId": "B"
+        }
+      ]
+    },
+
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 67 },
+      "id": 4,
+      "panels": [],
+      "title": "Assemblers",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 68 },
+      "id": 3,
+      "type": "timeseries",
+      "title": "Assembler - TX per Block",
+      "pluginVersion": "12.3.2",
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(assembler_ledger_transaction_count_total[1m]) / rate(assembler_ledger_blocks_count_total[1m])",
+          "legendFormat": "Assembler {{party_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 68 },
+      "id": 2,
+      "type": "timeseries",
+      "title": "Assembler - Blocks / sec",
+      "pluginVersion": "12.3.2",
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(assembler_ledger_blocks_count_total[1m])",
+          "legendFormat": "Assembler {{party_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 76 },
+      "id": 1,
+      "type": "timeseries",
+      "title": "Assembler - TX / sec",
+      "pluginVersion": "12.3.2",
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "multi", "sort": "none" }
+      },
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(assembler_ledger_transaction_count_total[1m])",
+          "legendFormat": "Assembler {{party_id}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

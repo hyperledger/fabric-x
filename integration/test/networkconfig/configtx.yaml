@@ -1,0 +1,284 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+################################################################################
+#
+#   ORGANIZATIONS
+#
+#   This section defines the organizational identities that can be referenced
+#   in the configuration profiles.
+#
+################################################################################
+---
+Organizations:
+
+  - &OrdererOrg1MSP
+    Name: orderer-org-1
+    SkipAsForeign: false
+    ID: OrdererOrg1MSP
+    MSPDir: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/msp
+    Policies: &OrdererOrg1Policies
+      Readers:
+        Type: Signature
+        Rule: OR('OrdererOrg1MSP.member')
+      Writers:
+        Type: Signature
+        Rule: OR('OrdererOrg1MSP.member')
+      Admins:
+        Type: Signature
+        Rule: OR('OrdererOrg1MSP.admin')
+    OrdererEndpoints:
+      - id=0,broadcast,arma:6022
+      - id=0,deliver,arma:6023
+
+  - &OrdererOrg2MSP
+    Name: orderer-org-2
+    SkipAsForeign: false
+    ID: OrdererOrg2MSP
+    MSPDir: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/msp
+    Policies: &OrdererOrg2Policies
+      Readers:
+        Type: Signature
+        Rule: OR('OrdererOrg2MSP.member')
+      Writers:
+        Type: Signature
+        Rule: OR('OrdererOrg2MSP.member')
+      Admins:
+        Type: Signature
+        Rule: OR('OrdererOrg2MSP.admin')
+    OrdererEndpoints:
+      - id=1,broadcast,arma:6122
+      - id=1,deliver,arma:6123
+
+  - &OrdererOrg3MSP
+    Name: orderer-org-3
+    SkipAsForeign: false
+    ID: OrdererOrg3MSP
+    MSPDir: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/msp
+    Policies: &OrdererOrg3Policies
+      Readers:
+        Type: Signature
+        Rule: OR('OrdererOrg3MSP.member')
+      Writers:
+        Type: Signature
+        Rule: OR('OrdererOrg3MSP.member')
+      Admins:
+        Type: Signature
+        Rule: OR('OrdererOrg3MSP.admin')
+    OrdererEndpoints:
+      - id=2,broadcast,arma:6222
+      - id=2,deliver,arma:6223
+
+  - &OrdererOrg4MSP
+    Name: orderer-org-4
+    SkipAsForeign: false
+    ID: OrdererOrg4MSP
+    MSPDir: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/msp
+    Policies: &OrdererOrg4Policies
+      Readers:
+        Type: Signature
+        Rule: OR('OrdererOrg4MSP.member')
+      Writers:
+        Type: Signature
+        Rule: OR('OrdererOrg4MSP.member')
+      Admins:
+        Type: Signature
+        Rule: OR('OrdererOrg4MSP.admin')
+    OrdererEndpoints:
+      - id=3,broadcast,arma:6322
+      - id=3,deliver,arma:6323
+
+  - &PeerOrg0MSP
+    Name: peer-org-0
+    SkipAsForeign: false
+    ID: peer-org-0
+    MSPDir: ARTIFACTS_DIR/peerOrganizations/peer-org-0/msp
+    Policies: &PeerOrg0Policies
+      Readers:
+        Type: Signature
+        Rule: OR('peer-org-0.member')
+      Writers:
+        Type: Signature
+        Rule: OR('peer-org-0.member')
+      Admins:
+        Type: Signature
+        Rule: OR('peer-org-0.admin')
+      Endorsement:
+        Type: Signature
+        Rule: OR('peer-org-0.member')
+
+  - &PeerOrg1MSP
+    Name: peer-org-1
+    SkipAsForeign: false
+    ID: peer-org-1
+    MSPDir: ARTIFACTS_DIR/peerOrganizations/peer-org-1/msp
+    Policies: &PeerOrg1Policies
+      Readers:
+        Type: Signature
+        Rule: OR('peer-org-1.member')
+      Writers:
+        Type: Signature
+        Rule: OR('peer-org-1.member')
+      Admins:
+        Type: Signature
+        Rule: OR('peer-org-1.admin')
+      Endorsement:
+        Type: Signature
+        Rule: OR('peer-org-1.member')
+
+################################################################################
+#
+#   CAPABILITIES
+#
+################################################################################
+Capabilities:
+  Channel: &ChannelCapabilities
+    V3_0: true
+
+  Orderer: &OrdererCapabilities
+    V2_0: true
+
+  Application: &ApplicationCapabilities
+    V2_5: true
+
+################################################################################
+#
+#   APPLICATION
+#
+################################################################################
+Application: &ApplicationDefaults
+  Organizations:
+
+  Policies:
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: MAJORITY Endorsement
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: MAJORITY Endorsement
+    Readers:
+      Type: ImplicitMeta
+      Rule: ANY Readers
+    Writers:
+      Type: ImplicitMeta
+      Rule: ANY Writers
+    Admins:
+      Type: ImplicitMeta
+      Rule: MAJORITY Admins
+
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+################################################################################
+#
+#   ORDERER
+#
+################################################################################
+Orderer: &OrdererDefaults
+  OrdererType: arma
+
+  BatchTimeout: 2s
+
+  BatchSize:
+    MaxMessageCount: 100
+    AbsoluteMaxBytes: 10 MB
+    PreferredMaxBytes: 2 MB
+
+  MaxChannels: 0
+
+  Arma:
+    Path: ARTIFACTS_DIR/bootstrap/shared_config.binpb
+
+  ConsenterMapping:
+    - ID: 1
+      Host: 127.0.0.1
+      Port: 6025
+      MSPID: OrdererOrg1MSP
+      Identity: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/consenter.orderer-org-1/msp/signcerts/consenter.orderer-org-1-cert.pem
+      ClientTLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/consenter.orderer-org-1/tls/server.crt
+      ServerTLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/consenter.orderer-org-1/tls/server.crt
+    - ID: 2
+      Host: 127.0.0.1
+      Port: 6125
+      MSPID: OrdererOrg2MSP
+      Identity: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/consenter.orderer-org-2/msp/signcerts/consenter.orderer-org-2-cert.pem
+      ClientTLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/consenter.orderer-org-2/tls/server.crt
+      ServerTLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/consenter.orderer-org-2/tls/server.crt
+    - ID: 3
+      Host: 127.0.0.1
+      Port: 6225
+      MSPID: OrdererOrg3MSP
+      Identity: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/consenter.orderer-org-3/msp/signcerts/consenter.orderer-org-3-cert.pem
+      ClientTLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/consenter.orderer-org-3/tls/server.crt
+      ServerTLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/consenter.orderer-org-3/tls/server.crt
+    - ID: 4
+      Host: 127.0.0.1
+      Port: 6325
+      MSPID: OrdererOrg4MSP
+      Identity: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/consenter.orderer-org-4/msp/signcerts/consenter.orderer-org-4-cert.pem
+      ClientTLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/consenter.orderer-org-4/tls/server.crt
+      ServerTLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/consenter.orderer-org-4/tls/server.crt
+
+  Organizations:
+
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: ANY Readers
+    Writers:
+      Type: ImplicitMeta
+      Rule: ANY Writers
+    Admins:
+      Type: ImplicitMeta
+      Rule: MAJORITY Admins
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: ANY Writers
+
+  Capabilities:
+    <<: *OrdererCapabilities
+
+################################################################################
+#
+#   CHANNEL
+#
+################################################################################
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: ANY Readers
+    Writers:
+      Type: ImplicitMeta
+      Rule: ANY Writers
+    Admins:
+      Type: ImplicitMeta
+      Rule: MAJORITY Admins
+
+  Capabilities:
+    <<: *ChannelCapabilities
+
+################################################################################
+#
+#   PROFILES
+#
+################################################################################
+Profiles:
+
+  E2EProfile:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg1MSP
+        - *OrdererOrg2MSP
+        - *OrdererOrg3MSP
+        - *OrdererOrg4MSP
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *PeerOrg0MSP
+        - *PeerOrg1MSP

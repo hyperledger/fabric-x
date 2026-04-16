@@ -1,0 +1,12 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+Assembler:
+  PrefetchBufferMemoryBytes: 1073741824
+  RestartLedgerScanTimeout: 5s
+  PrefetchEvictionTtl: 1h0m0s
+  ReplicationChannelSize: 100
+  BatchRequestsChannelSize: 1000

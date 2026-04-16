@@ -1,0 +1,11 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+Batcher:
+  ShardID: 1
+  BatchSequenceGap: 10
+  MemPoolMaxSize: 1000000
+  SubmitTimeout: 500ms

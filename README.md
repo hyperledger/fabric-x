@@ -21,7 +21,6 @@ Fabric-X proves that permissioned DLTs can be engineered for national-scale paym
 - [Fabric-X-EVM](https://github.com/hyperledger/fabric-x-evm) - makes Hyperledger Fabric-x (and Fabric) compatible with the Ethereum ecosystem. [Docs](https://github.com/hyperledger/fabric-x-evm/blob/main/docs/ARCHITECTURE.md), [Issues](https://github.com/hyperledger/fabric-x-evm/issues)
 - [Fabric-X Ansible](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection) - is an Ansible collection for deploying Fabric-X. [Docs](https://lf-decentralized-trust-labs.github.io/fabric-x-ansible-collection/), [Issues](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection/issues)
 
-
 ## Architecture Overview
 
 Figure below shows the high-level architecture differences between `Fabric Classic` and `Fabric-X`.
