@@ -8,7 +8,7 @@ package v1
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -44,7 +44,7 @@ Examples:
 			switch format {
 			case "env":
 				env := toEnv("FXCONFIG", ctx.Config)
-				sort.Strings(env)
+				slices.Sort(env)
 				ctx.Printer.Print(strings.Join(env, "\n") + "\n")
 			case "yaml":
 				out, err := yaml.Marshal(ctx.Config)
@@ -92,7 +92,7 @@ func flatten(prefix string, m map[string]any) []string {
 		case map[string]any:
 			result = append(result, flatten(key, val)...)
 		case []any:
-			var strVals []string
+			strVals := make([]string, 0, len(val))
 			for _, item := range val {
 				strVals = append(strVals, fmt.Sprintf("%v", item))
 			}
