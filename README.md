@@ -71,6 +71,17 @@ Figure below demonstrates the Fabric-X-Committer architecture.
 
 Code and more details can be found under [Fabric-X-Committer Github repository](https://github.com/hyperledger/fabric-x-committer).
 
+## Prerequisites
+
+| Tool | Version | Install |
+|------|---------|----------|
+| Go | **1.25.5+** (required) | https://go.dev/dl |
+| golangci-lint | **v2.11.4+** | `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.4` |
+| Docker | 20.x+ | https://docs.docker.com/get-docker |
+| GNU Make | any | `sudo apt install make` |
+
+> ℹ️ golangci-lint v2.11.4+ is built with Go 1.25 and supports this project's Go version requirement.
+
 ## Run the network
 
 To set up the network yourself, follow the tutorial in the [sample deployment scripts](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection) repository. It provides Ansible scripts with predefined inventories and playbooks for both local and remote cluster deployments. Support for deploying a sample application will be added soon.
