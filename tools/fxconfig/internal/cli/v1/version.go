@@ -32,11 +32,12 @@ func NewVersionCommand(ctx *CLIContext) *cobra.Command {
 			return nil
 		},
 		Run: func(_ *cobra.Command, _ []string) {
+			osArch := fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
 			ctx.Printer.Print("fxconfig\n")
 			ctx.Printer.Print(fmt.Sprintf(" %-16s %s\n", "Version:", metadata.Version))
 			ctx.Printer.Print(fmt.Sprintf(" %-16s %s\n", "Go version:", runtime.Version()))
 			ctx.Printer.Print(fmt.Sprintf(" %-16s %s\n", "Commit:", metadata.CommitSHA))
-			ctx.Printer.Print(fmt.Sprintf(" %-16s %s\n", "OS/Arch:", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)))
+			ctx.Printer.Print(fmt.Sprintf(" %-16s %s\n", "OS/Arch:", osArch))
 		},
 	}
 
