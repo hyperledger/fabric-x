@@ -25,7 +25,13 @@ type mockOrdererClient struct {
 	broadcastErr error
 }
 
-func (m *mockOrdererClient) Broadcast(_ context.Context, _ msp.SigningIdentity, _ string, _ *applicationpb.Tx) error {
+func (m *mockOrdererClient) Broadcast(ctx context.Context, _ msp.SigningIdentity, txID string, _ *applicationpb.Tx) error {
+	if txID == "" {
+		return errors.New("txID is required")
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	return m.broadcastErr
 }
 
@@ -140,6 +146,52 @@ func TestSubmitTransaction_Success(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestSubmitTransaction_ContextCancelled(t *testing.T) {
+	t.Parallel()
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err := a.SubmitTransaction(ctx, "tx-1", someTx())
+	require.Error(t, err)
+	require.ErrorIs(t, err, context.Canceled)
+}
+
+func TestSubmitTransaction_Timeout(t *testing.T) {
+	t.Parallel()
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Nanosecond)
+	defer cancel()
+	time.Sleep(time.Millisecond)
+
+	err := a.SubmitTransaction(ctx, "tx-1", someTx())
+	require.Error(t, err)
+	require.ErrorIs(t, err, context.DeadlineExceeded)
+}
+
+func TestSubmitTransaction_EmptyTransactionID(t *testing.T) {
+	t.Parallel()
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+	}
+
+	err := a.SubmitTransaction(t.Context(), "", someTx())
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "txID is required")
+}
+
 // SubmitTransactionWithWait tests
 
 func TestSubmitTransactionWithWait_MspProviderError(t *testing.T) {
@@ -164,8 +216,9 @@ func TestSubmitTransactionWithWait_NotificationProviderError(t *testing.T) {
 		NotificationProvider: makeNotificationProvider(nil, errors.New("notification unavailable")),
 	}
 
-	_, err := a.SubmitTransactionWithWait(t.Context(), "tx-1", someTx())
+	status, err := a.SubmitTransactionWithWait(t.Context(), "tx-1", someTx())
 	require.Error(t, err)
+	require.Equal(t, UnknownStatus, status)
 }
 
 func TestSubmitTransactionWithWait_SubscribeError(t *testing.T) {
@@ -179,8 +232,9 @@ func TestSubmitTransactionWithWait_SubscribeError(t *testing.T) {
 		),
 	}
 
-	_, err := a.SubmitTransactionWithWait(t.Context(), "tx-1", someTx())
+	status, err := a.SubmitTransactionWithWait(t.Context(), "tx-1", someTx())
 	require.Error(t, err)
+	require.Equal(t, UnknownStatus, status)
 }
 
 func TestSubmitTransactionWithWait_BroadcastError(t *testing.T) {
@@ -194,8 +248,25 @@ func TestSubmitTransactionWithWait_BroadcastError(t *testing.T) {
 		NotificationProvider: makeNotificationProvider(&mockNotificationClient{}, nil),
 	}
 
-	_, err := a.SubmitTransactionWithWait(t.Context(), "tx-1", someTx())
+	status, err := a.SubmitTransactionWithWait(t.Context(), "tx-1", someTx())
 	require.Error(t, err)
+	require.Equal(t, UnknownStatus, status)
+}
+
+func TestSubmitTransactionWithWait_WaitForEventError(t *testing.T) {
+	t.Parallel()
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+		NotificationProvider: makeNotificationProvider(
+			&mockNotificationClient{waitErr: errors.New("wait failed")}, nil,
+		),
+	}
+
+	status, err := a.SubmitTransactionWithWait(t.Context(), "tx-1", someTx())
+	require.Error(t, err)
+	require.Equal(t, UnknownStatus, status)
 }
 
 func TestSubmitTransactionWithWait_Success(t *testing.T) {

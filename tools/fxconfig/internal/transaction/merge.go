@@ -52,6 +52,7 @@ func sortEndorsementsByMspID(merged *applicationpb.Tx) {
 	}
 }
 
+// TODO: Add test coverage for edge cases in validation.
 func validateTransactionsForMerge(txs []*applicationpb.Tx) error {
 	baseTx := txs[0]
 	baseNsCount := len(baseTx.GetNamespaces())
