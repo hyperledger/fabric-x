@@ -1,0 +1,128 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# =============================================================================
+# E2E Integration Test - Docker Compose
+# =============================================================================
+#
+# Runs three services on a shared Docker network:
+#
+#   1. arma      - Arma BFT orderer (4 parties, 1 shard, 16 processes)
+#   2. committer - Committer pipeline (embedded PostgreSQL + 5 microservices)
+#   3. loadgen   - Load generator (submits TXs, receives committed blocks)
+#
+# Image names are configurable via environment variables (set by run-e2e.sh
+# or build-e2e.sh). Defaults are provided for convenience.
+#
+# Data flow:
+#   loadgen --broadcast--> arma routers --consensus--> arma assemblers
+#       --deliver--> committer sidecar --> coordinator --> verifier --> VC
+#       --deliver--> loadgen (receives committed blocks with statuses)
+#
+---
+services:
+
+  # ---------------------------------------------------------------------------
+  # Arma BFT Orderer (4 parties, 1 shard)
+  # ---------------------------------------------------------------------------
+  # Runs all 16 orderer processes (4 parties x 4 roles) in a single container.
+  # The entrypoint.sh detects pre-generated configs at /tmp/arma-all-in-one/config/party1
+  # and skips its own generation step, going straight to /run_all.sh.
+  #
+  # Port scheme per party (offset = (partyID - 1) * 100):
+  #   60x2 = router     (accepts broadcast from loadgen)
+  #   60x3 = assembler  (delivers blocks to committer sidecar)
+  #   60x4 = batcher    (internal: batches TXs for consensus)
+  #   60x5 = consenter  (internal: SmartBFT consensus)
+  arma:
+    image: ${ORDERER_IMAGE:-localhost/arma-4p1s}
+    container_name: arma
+    volumes:
+      # Pre-generated artifacts: crypto material, configs, genesis block
+      - ${ARTIFACTS_DIR:-/tmp/fabric-x-test/artifacts}:/tmp/arma-all-in-one
+      # Persistent ledger storage for each party's roles
+      - ${STORAGE_DIR:-/tmp/fabric-x-test/arma-storage}:/storage
+    ports:
+      # Party 1: router=6022, assembler=6023, batcher=6024, consenter=6025
+      - "6022-6025:6022-6025"
+      # Party 2: router=6122, assembler=6123, batcher=6124, consenter=6125
+      - "6122-6125:6122-6125"
+      # Party 3: router=6222, assembler=6223, batcher=6224, consenter=6225
+      - "6222-6225:6222-6225"
+      # Party 4: router=6322, assembler=6323, batcher=6324, consenter=6325
+      - "6322-6325:6322-6325"
+    networks:
+      - e2e
+
+  # ---------------------------------------------------------------------------
+  # Committer Test Node (embedded DB + 5 microservices)
+  # ---------------------------------------------------------------------------
+  # The "run db committer" command starts:
+  #   1. Embedded PostgreSQL database
+  #   2. Sidecar       - connects to Arma assemblers, verifies blocks (BFT)
+  #   3. Coordinator   - orchestrates validation pipeline
+  #   4. Verifier      - validates transaction endorsement signatures
+  #   5. VC            - validates read-sets, commits write-sets to DB
+  #   6. Query         - read-only state access (not used in this test)
+  #
+  # Port mapping:
+  #   4001 = Sidecar deliver (loadgen receives committed blocks here)
+  #   7001 = Coordinator gRPC
+  #   2114 = Sidecar monitoring (Prometheus metrics)
+  #   2116 = VC monitoring (Prometheus metrics, used for verification)
+  committer:
+    image: ${COMMITTER_IMAGE:-docker.io/hyperledger/committer-test-node}
+    container_name: committer
+    command: ["run", "db", "committer"]
+    volumes:
+      # Crypto material and config block (read by sidecar for channel config)
+      - ${ARTIFACTS_DIR:-/tmp/fabric-x-test/artifacts}:/root/artifacts
+      # Service-specific config files (sidecar.yaml, coordinator.yaml, etc.)
+      - ./committerconfig:/root/config
+    ports:
+      - "4001:4001"   # Sidecar deliver (loadgen connects here)
+      - "7001:7001"   # Coordinator gRPC
+      - "2114:2114"   # Sidecar Prometheus metrics
+      - "2116:2116"   # VC Prometheus metrics (verified in Step 9)
+    depends_on:
+      - arma
+    networks:
+      - e2e
+
+  # ---------------------------------------------------------------------------
+  # Load Generator
+  # ---------------------------------------------------------------------------
+  # Generates synthetic transactions and submits them to Arma routers via
+  # BFT broadcast. Receives committed blocks from the committer sidecar
+  # to track transaction statuses (COMMITTED, ABORTED, etc.).
+  #
+  # Configured via loadgen.yaml which specifies:
+  #   - Orderer endpoints (4 routers for broadcast, 4 assemblers for deliver)
+  #   - Transaction signing identity (peer-org-0 client)
+  #   - Load profile (rate limit, workers, transaction shape)
+  #   - Stopping condition (transaction count)
+  #
+  # The loadgen exits with code 1 on normal shutdown ("context canceled").
+  # This is expected — run-e2e.sh tolerates this exit code.
+  loadgen:
+    image: ${LOADGEN_IMAGE:-docker.io/hyperledger/fabric-x-loadgen}
+    container_name: loadgen
+    command: ["start", "--config", "/config/loadgen.yaml"]
+    volumes:
+      # Crypto material (signing identities, TLS certs for orderer connections)
+      - ${ARTIFACTS_DIR:-/tmp/fabric-x-test/artifacts}:/artifacts
+      # Loadgen configuration file
+      - ./loadgen.yaml:/config/loadgen.yaml
+    depends_on:
+      - arma
+      - committer
+    networks:
+      - e2e
+
+# All services communicate over this bridge network using container DNS names
+# (e.g., "arma:6022" for the party 1 router, "committer:4001" for the sidecar).
+networks:
+  e2e:
+    driver: bridge
