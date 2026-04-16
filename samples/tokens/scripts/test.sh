@@ -58,6 +58,11 @@ function run_test() {
     }'
     curl -f -X GET http://localhost:9600/owner/accounts/dan/transactions | jq
     curl -f -X GET http://localhost:9500/owner/accounts/alice/transactions | jq
+    curl -f -X POST http://localhost:9500/owner/accounts/alice/redeem -d '{
+        "amount": {"code": "TOK","value": 50},
+        "message": "redeem test"
+    }'
+    curl -f -X GET http://localhost:9500/owner/accounts/alice | jq
 }
 
 # Script Start
