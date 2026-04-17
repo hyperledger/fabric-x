@@ -44,8 +44,23 @@ func (c *Config) ResolveTLS() {
 
 // LoggingConfig controls logging behavior.
 type LoggingConfig struct {
-	Level  string `mapstructure:"level" yaml:"level,omitempty" desc:"Logging level" default:"error"`
-	Format string `mapstructure:"format" yaml:"format,omitempty" desc:"logging format"`
+	Level  string       `mapstructure:"level" yaml:"level,omitempty" desc:"Logging level" default:"error"`
+	Format string       `mapstructure:"format" yaml:"format,omitempty" desc:"logging format"`
+	Audit  AuditConfig  `mapstructure:"audit" yaml:"audit,omitempty" desc:"Audit logging configuration"`
+}
+
+// AuditConfig configures audit logging for security-critical operations.
+type AuditConfig struct {
+	Enabled       bool   `mapstructure:"enabled" yaml:"enabled,omitempty" desc:"Enable audit logging" default:"false"`
+	OutputPath    string `mapstructure:"outputPath" yaml:"outputPath,omitempty" desc:"Audit log file path" default:"audit.log"`
+	MaxSizeMB     int    `mapstructure:"maxSizeMB" yaml:"maxSizeMB,omitempty" desc:"Max size per audit file in MB" default:"100"`
+	MaxAgeDays    int    `mapstructure:"maxAgeDays" yaml:"maxAgeDays,omitempty" desc:"Days to retain audit files" default:"7"`
+	MaxBackups    int    `mapstructure:"maxBackups" yaml:"maxBackups,omitempty" desc:"Max number of backup files" default:"10"`
+	SyslogEnabled bool   `mapstructure:"syslogEnabled" yaml:"syslogEnabled,omitempty" desc:"Enable syslog output" default:"false"`
+	SyslogAddr    string `mapstructure:"syslogAddr" yaml:"syslogAddr,omitempty" desc:"Syslog address (host:port)"`
+	WebhookURL    string `mapstructure:"webhookURL" yaml:"webhookURL,omitempty" desc:"HTTP webhook URL for SIEM integration"`
+	VerifyEnabled bool   `mapstructure:"verifyEnabled" yaml:"verifyEnabled,omitempty" desc:"Enable log integrity verification" default:"false"`
+	SigningKey    string `mapstructure:"signingKey" yaml:"signingKey,omitempty" desc:"HMAC signing key (hex encoded) for tamper detection"`
 }
 
 // MSPConfig contains MSP (Membership Service Provider) identity configuration.

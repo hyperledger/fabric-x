@@ -10,6 +10,7 @@ import (
 
 	"github.com/hyperledger/fabric-x-committer/service/verifier/policy"
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/audit"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/transaction"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
@@ -28,17 +29,65 @@ type DeployNamespaceInput struct {
 // Validate validates namespace configuration.
 // Checks namespace ID, version, and policy.
 func (c *DeployNamespaceInput) Validate(vctx validation.Context) error {
+	auditLogger := audit.MustGetAuditLogger(nil)
+
+	auditLogger.NamespaceDeployInputValidation(context.Background(), audit.NamespaceDeployInputValidationEvent{
+		EventMeta:  audit.NewEventMeta(),
+		NamespaceID: c.NsID,
+		Version:    c.Version,
+		PolicyType: string(c.Policy.Type),
+		Endorse:    c.Endorse,
+		Submit:     c.Submit,
+		Wait:       c.Wait,
+		Result:     "pending",
+	})
+
 	if err := policy.ValidateNamespaceID(c.NsID); err != nil {
+		auditLogger.NamespaceDeployInputValidation(context.Background(), audit.NamespaceDeployInputValidationEvent{
+			EventMeta:   audit.NewEventMeta(),
+			NamespaceID: c.NsID,
+			Version:    c.Version,
+			PolicyType: string(c.Policy.Type),
+			Result:     "failure",
+			ErrorMsg:   fmt.Errorf("invalid namespaceID: %w", err).Error(),
+		})
 		return fmt.Errorf("invalid namespaceID: %w", err)
 	}
 
 	if err := transaction.ValidateVersion(c.Version); err != nil {
+		auditLogger.NamespaceDeployInputValidation(context.Background(), audit.NamespaceDeployInputValidationEvent{
+			EventMeta:   audit.NewEventMeta(),
+			NamespaceID: c.NsID,
+			Version:    c.Version,
+			PolicyType: string(c.Policy.Type),
+			Result:     "failure",
+			ErrorMsg:   fmt.Errorf("invalid version: %w", err).Error(),
+		})
 		return fmt.Errorf("invalid version: %w", err)
 	}
 
 	if err := c.Policy.Validate(vctx); err != nil {
+		auditLogger.NamespaceDeployInputValidation(context.Background(), audit.NamespaceDeployInputValidationEvent{
+			EventMeta:   audit.NewEventMeta(),
+			NamespaceID: c.NsID,
+			Version:    c.Version,
+			PolicyType: string(c.Policy.Type),
+			Result:     "failure",
+			ErrorMsg:   fmt.Errorf("invalid policy: %w", err).Error(),
+		})
 		return fmt.Errorf("invalid policy: %w", err)
 	}
+
+	auditLogger.NamespaceDeployInputValidation(context.Background(), audit.NamespaceDeployInputValidationEvent{
+		EventMeta:  audit.NewEventMeta(),
+		NamespaceID: c.NsID,
+		Version:    c.Version,
+		PolicyType: string(c.Policy.Type),
+		Endorse:    c.Endorse,
+		Submit:     c.Submit,
+		Wait:       c.Wait,
+		Result:     "success",
+	})
 
 	return nil
 }

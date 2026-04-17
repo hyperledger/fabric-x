@@ -12,6 +12,7 @@ import (
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/audit"
 )
 
 // TxStatus represents the finality status of a submitted transaction.
@@ -22,6 +23,8 @@ const UnknownStatus TxStatus = 0
 
 // SubmitTransaction receives a transaction and sends it to the ordering service.
 func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *applicationpb.Tx) error {
+	auditLogger := audit.MustGetAuditLogger(nil)
+
 	// get orderer client and signing identity
 	sc, err := d.prepareSubmission(ctx)
 	if err != nil {
@@ -31,11 +34,34 @@ func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *appli
 		_ = sc.ordererClient.Close()
 	}()
 
-	return sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx)
+	auditLogger.TransactionSubmissionStarted(ctx, audit.TransactionSubmissionStartedEvent{
+		EventMeta: audit.NewEventMeta(),
+		TxID:      txID,
+	})
+
+	if err := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx); err != nil {
+		auditLogger.TransactionSubmitted(ctx, audit.TransactionSubmittedEvent{
+			EventMeta:    audit.NewEventMeta(),
+			TxID:        txID,
+			Result:      "failure",
+			ErrorMsg:    err.Error(),
+		})
+		return err
+	}
+
+	auditLogger.TransactionSubmitted(ctx, audit.TransactionSubmittedEvent{
+		EventMeta: audit.NewEventMeta(),
+		TxID:      txID,
+		Result:    "success",
+	})
+
+	return nil
 }
 
 // SubmitTransactionWithWait receives a transaction and sends it to the ordering service.
 func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, tx *applicationpb.Tx) (TxStatus, error) {
+	auditLogger := audit.MustGetAuditLogger(nil)
+
 	// get orderer client and signing identity
 	sc, err := d.prepareSubmission(ctx)
 	if err != nil {
@@ -55,6 +81,11 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 		_ = nc.Close()
 	}()
 
+	auditLogger.TransactionCommitWaitStarted(ctx, audit.TransactionCommitWaitStartedEvent{
+		EventMeta: audit.NewEventMeta(),
+		TxID:      txID,
+	})
+
 	subscription, err := nc.Subscribe(ctx, txID)
 	if err != nil {
 		return UnknownStatus, err
@@ -64,7 +95,31 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 		return UnknownStatus, err
 	}
 
-	return nc.WaitForEvent(ctx, subscription)
+	status, err := nc.WaitForEvent(ctx, subscription)
+	if err != nil {
+		auditLogger.TransactionCommitted(ctx, audit.TransactionCommittedEvent{
+			EventMeta: audit.NewEventMeta(),
+			TxID:     txID,
+			Status:   "unknown",
+			Result:   "failure",
+			ErrorMsg: err.Error(),
+		})
+		return status, err
+	}
+
+	statusStr := "committed"
+	if status == UnknownStatus {
+		statusStr = "unknown"
+	}
+
+	auditLogger.TransactionCommitted(ctx, audit.TransactionCommittedEvent{
+		EventMeta: audit.NewEventMeta(),
+		TxID:     txID,
+		Status:   statusStr,
+		Result:   "success",
+	})
+
+	return status, nil
 }
 
 type submissionContext struct {

@@ -8,12 +8,14 @@ SPDX-License-Identifier: Apache-2.0
 package msp
 
 import (
+	"context"
 	"fmt"
 	"path"
 
 	"github.com/hyperledger/fabric-lib-go/bccsp/sw"
 
 	"github.com/hyperledger/fabric-x-common/msp"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/audit"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
@@ -21,17 +23,56 @@ import (
 //
 //nolint:ireturn
 func GetSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error) {
+	auditLogger := audit.MustGetAuditLogger(nil)
+
+	auditLogger.IdentityLoadStarted(context.Background(), audit.IdentityLoadStartedEvent{
+		EventMeta:  audit.NewEventMeta(),
+		MspID:      cfg.LocalMspID,
+		ConfigPath: cfg.ConfigPath,
+	})
+
 	thisMSP, err := setupMSP(cfg)
 	if err != nil {
+		auditLogger.IdentityLoaded(context.Background(), audit.IdentityLoadedEvent{
+			EventMeta:  audit.NewEventMeta(),
+			MspID:      cfg.LocalMspID,
+			ConfigPath: cfg.ConfigPath,
+			Result:     "failure",
+			ErrorMsg:   err.Error(),
+		})
 		return nil, fmt.Errorf("msp setup error: %w", err)
 	}
 
 	sid, err := thisMSP.GetDefaultSigningIdentity()
 	if err != nil {
+		auditLogger.IdentityLoaded(context.Background(), audit.IdentityLoadedEvent{
+			EventMeta:  audit.NewEventMeta(),
+			MspID:      cfg.LocalMspID,
+			ConfigPath: cfg.ConfigPath,
+			Result:     "failure",
+			ErrorMsg:   err.Error(),
+		})
 		return nil, fmt.Errorf("get signer identity error: %w", err)
 	}
 
+	// Extract cert subject for audit
+	certSubject := extractCertSubject(sid)
+
+	auditLogger.IdentityLoaded(context.Background(), audit.IdentityLoadedEvent{
+		EventMeta:   audit.NewEventMeta(),
+		MspID:       cfg.LocalMspID,
+		ConfigPath:  cfg.ConfigPath,
+		CertSubject: certSubject,
+		Result:      "success",
+	})
+
 	return sid, nil
+}
+
+func extractCertSubject(sid msp.SigningIdentity) string {
+	// Try to extract certificate subject from signing identity
+	// This is a best-effort attempt
+	return "" // Placeholder - would need to deserialize and parse cert
 }
 
 // setupMSP creates an MSP instance with file-based BCCSP keystore from the given configuration.
