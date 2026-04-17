@@ -59,7 +59,7 @@ var (
 func (f FabricSmartClient) Balances(ctx context.Context, wallet string) ([]Amount, error) {
 	mgmt, err := token.GetManagementService(f.node)
 	if err != nil {
-		panic("configuration error, check the logs")
+		return nil, fmt.Errorf("configuration error, check the logs: %w", err)
 	}
 
 	wal := mgmt.WalletManager().OwnerWallet(ctx, wallet)
@@ -90,7 +90,7 @@ func (f FabricSmartClient) Balances(ctx context.Context, wallet string) ([]Amoun
 func (f FabricSmartClient) Balance(ctx context.Context, wallet, code string) (Amount, error) {
 	mgmt, err := token.GetManagementService(f.node)
 	if err != nil {
-		panic("configuration error, check the logs")
+		return Amount{}, fmt.Errorf("configuration error, check the logs: %w", err)
 	}
 	wal := mgmt.WalletManager().OwnerWallet(ctx, wallet)
 	if wal == nil {
@@ -149,11 +149,11 @@ func (f FabricSmartClient) GetTransactions(ctx context.Context, wallet string) (
 	}
 	mgmt, err := token.GetManagementService(f.node)
 	if err != nil {
-		panic("configuration error, check the logs")
+		return txs, fmt.Errorf("configuration error, check the logs: %w", err)
 	}
 	owner := ttx.NewOwner(f.node, mgmt)
 	if owner == nil {
-		panic("configuration error, check the logs")
+		return txs, fmt.Errorf("configuration error: owner could not be initialized")
 	}
 
 	it, err := owner.Transactions(ctx, params, pagination.None())
