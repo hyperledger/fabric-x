@@ -46,7 +46,7 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 	}()
 
 	// get notification client
-	nc, err := d.NotificationProvider.Get()
+	nc, err := d.NotificationProvider.Get(ctx)
 	if err != nil {
 		return UnknownStatus, err
 	}
@@ -72,15 +72,20 @@ type submissionContext struct {
 	ordererClient   adapters.OrdererClient
 }
 
-func (d *AdminApp) prepareSubmission(_ context.Context) (*submissionContext, error) {
+func (d *AdminApp) prepareSubmission(ctx context.Context) (*submissionContext, error) {
+	// fail fast if context is already canceled or timed out
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+
 	// get signing identity
-	sid, err := d.MspProvider.Get()
+	sid, err := d.MspProvider.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	// get orderer client
-	oc, err := d.OrdererProvider.Get()
+	oc, err := d.OrdererProvider.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
