@@ -47,7 +47,7 @@ stop-fabric:
 # Teardown fabric-x
 .PHONY: teardown-fabric
 teardown-fabric: stop-fabric
-	@$(CONTAINER_CLI) network inspect fabric_test >/dev/null 2>&1 && $(CONTAINER_CLI) network rm fabric_test
+	@$(CONTAINER_CLI) network rm fabric_test >/dev/null 2>&1 || echo "Warning: Docker network 'fabric_test' not found or already removed."
 
 
 # Restart fabric. This deletes the ledger; the app must be cleaned as well.
