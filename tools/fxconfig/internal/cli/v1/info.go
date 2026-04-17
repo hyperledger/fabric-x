@@ -7,6 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 package v1
 
 import (
+	"fmt"
+	"sort"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -15,6 +19,8 @@ import (
 // The configuration is shown as YAML after applying all overrides from
 // flags, environment variables, and config files.
 func NewInfoCommand(ctx *CLIContext) *cobra.Command {
+	var format string
+
 	cmd := &cobra.Command{
 		Use:   "info",
 		Short: "Display effective configuration",
@@ -39,15 +45,55 @@ Examples:
   # Show configuration as environment variables
   fxconfig info --format env`,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			// TODO: add flag to show yaml/env config
-			out, err := yaml.Marshal(ctx.Config)
-			if err != nil {
-				return err
+			if format == "yaml" {
+				out, err := yaml.Marshal(ctx.Config)
+				if err != nil {
+					return err
+				}
+				ctx.Printer.Print(string(out))
+				return nil
 			}
-			ctx.Printer.Print(string(out))
-			return nil
+
+			if format == "env" {
+				out, err := yaml.Marshal(ctx.Config)
+				if err != nil {
+					return err
+				}
+				var m map[string]interface{}
+				if err := yaml.Unmarshal(out, &m); err != nil {
+					return err
+				}
+				envVars := flattenEnv("FXCONFIG", m)
+				sort.Strings(envVars)
+				ctx.Printer.Print(strings.Join(envVars, "\n") + "\n")
+				return nil
+			}
+
+			return fmt.Errorf("unsupported format: %s", format)
 		},
 	}
 
+	cmd.Flags().StringVar(&format, "format", "yaml", "output format (yaml|env)")
+
 	return cmd
+}
+
+// flattenEnv recursively flattens a nested map into environment variable definitions.
+func flattenEnv(prefix string, v interface{}) []string {
+	var result []string
+	switch typedVal := v.(type) {
+	case map[string]interface{}:
+		for k, val := range typedVal {
+			nextPrefix := prefix + "_" + strings.ToUpper(k)
+			result = append(result, flattenEnv(nextPrefix, val)...)
+		}
+	case []interface{}:
+		for i, val := range typedVal {
+			nextPrefix := fmt.Sprintf("%s_%d", prefix, i)
+			result = append(result, flattenEnv(nextPrefix, val)...)
+		}
+	default:
+		result = append(result, fmt.Sprintf("%s=%v", prefix, typedVal))
+	}
+	return result
 }
