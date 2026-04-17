@@ -62,7 +62,11 @@ func main() {
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
-	<-stop
+	select {
+	case <-stop:
+	case err := <-serverErr:
+		log.Printf("server error: %v", err)
+	}
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*10)
 	defer cancel()
 	s.Shutdown(ctx)

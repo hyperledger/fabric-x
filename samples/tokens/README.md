@@ -12,33 +12,32 @@ The **Token SDK Sample** demonstrates how to:
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
-- [About the Sample](#about-the-sample)
-  - [Components](#components)
-    - [Application services](#application-services)
-    - [Fabric(x) Blockchain Network](#fabricx-blockchain-network)
-  - [Application](#application)
-  - [UTXO Model](#utxo-model)
-  - [Deep Dive: What Happens During a Transfer?](#deep-dive-what-happens-during-a-transfer)
-- [Running the sample](#running-the-sample)
-- [Prerequisites](#prerequisites)
-- [Default option: Fabric-X with Ansible](#default-option-fabric-x-with-ansible)
-  - [Requirements](#requirements)
-  - [Installation](#installation)
-  - [Setup Fabric-X](#setup-fabric-x)
-- [Option 2: Fabric-X test container](#option-2-fabric-x-test-container)
-- [Option 3: Fabric v3](#option-3-fabric-v3)
-  - [Setup Fabric v3](#setup-fabric-v3)
-  - [Start the Network and Application](#start-the-network-and-application)
-- [Interacting with the Application](#interacting-with-the-application)
-- [Example: Issue tokens](#example-issue-tokens)
-- [Example: Transfer tokens](#example-transfer-tokens)
-- [Teardown and cleanup](#teardown-and-cleanup)
-- [Development](#development)
-- [Debug mode](#debug-mode)
-  - [VSCode](#vscode)
-  - [Running the binaries](#running-the-binaries)
-- [Troubleshooting](#troubleshooting)
+- [Token SDK Sample](#token-sdk-sample)
+  - [Table of Contents](#table-of-contents)
+  - [About the Sample](#about-the-sample)
+    - [Components](#components)
+      - [Application services](#application-services)
+      - [Fabric(x) Blockchain Network](#fabricx-blockchain-network)
+    - [Application](#application)
+    - [UTXO Model](#utxo-model)
+    - [Deep Dive: What Happens During a Transfer?](#deep-dive-what-happens-during-a-transfer)
+  - [Running the sample](#running-the-sample)
+  - [Prerequisites](#prerequisites)
+  - [Default option: Fabric-X with Ansible](#default-option-fabric-x-with-ansible)
+    - [Requirements](#requirements)
+    - [Installation](#installation)
+    - [Setup Fabric-X](#setup-fabric-x)
+  - [Option 2: Fabric-X test container](#option-2-fabric-x-test-container)
+  - [Option 3: Fabric v3](#option-3-fabric-v3)
+  - [Interacting with the Application](#interacting-with-the-application)
+  - [Example: Issue tokens](#example-issue-tokens)
+  - [Example: Transfer tokens](#example-transfer-tokens)
+  - [Teardown and cleanup](#teardown-and-cleanup)
+  - [Development](#development)
+  - [Debug mode](#debug-mode)
+    - [VSCode](#vscode)
+    - [Running the binaries](#running-the-binaries)
+  - [Troubleshooting](#troubleshooting)
 
 ## About the Sample
 
@@ -161,29 +160,11 @@ make install-prerequisites
 
 ### Setup Fabric-X
 
-Make sure that the crypto is cleared and let the scripts know you want to use ansible:
+Let the scripts know you want to use ansible (not strictly necessary as this is the default).
+Then generate the crypto material.
 
 ```shell
-make teardown
-make clean
 export PLATFORM=fabricx
-make setup
-```
-
-Then, like with the test container:
-
-```shell
-make start
-curl -X POST http://localhost:9300/endorser/init
-```
-
-## Option 2: Fabric-X test container
-
-The quickest way to get going: a test version of Fabric-X in a single docker container! Even if you want to use different backends, we suggest to start here.
-
-First generate the necessary crypto material:
-
-```shell
 make setup
 ```
 
@@ -203,22 +184,42 @@ This creates:
 
 The relevant crypto material is copied to the folders in the conf/\* directories.
 
-The following first command starts the Fabric-X test container, creates a namespace, and runs the application in docker containers. The second command ensures that the parameters for the network (cryptographic material, the idemix issuer identity for the accounts, the token issuer certificate) are registered on the ledger.
+Then start the application and initialize it. The "init" endpoint records the cryptographic
+parameters and configuration which we generated in the "setup" step on the blockchain. This will be the anchor for the token transactions.
 
 ```shell
 make start
 curl -X POST http://localhost:9300/endorser/init
 ```
 
-Now open <http://localhost:8080> in your browser to see the other API endpoints, or scroll down to follow some `curl` commands.
+## Option 2: Fabric-X test container
+
+The quickest way for development: a test version of Fabric-X in a single docker container!
+First make sure that the crypto from the ansible network is cleared.
+
+```shell
+make teardown
+make clean
+```
+
+Let the scripts know you want to use the test container ('xdev') and generate the necessary crypto material:
+
+```shell
+export PLATFORM=xdev
+make setup
+```
+
+Start the application and initialize it. 
+
+```shell
+make start
+curl -X POST http://localhost:9300/endorser/init
+```
 
 ## Option 3: Fabric v3
 
-Run the same application against a classic Fabric v3 network.
-
-### Setup Fabric v3
-
-First, clean up any previous state and set Fabric v3:
+It's also possible to the same application against a classic Fabric network. Clean up any previous
+state and setup the classic Fabric material:
 
 ```shell
 make teardown
@@ -226,8 +227,6 @@ make clean
 export PLATFORM=fabric3
 make setup
 ```
-
-### Start the Network and Application
 
 Start the Fabric network, create the namespace (chaincode), and start the application services. For Fabric 3, you don't have to call the Init endpoint; this is taken care of when installing the chaincode.
 

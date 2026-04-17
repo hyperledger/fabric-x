@@ -18,6 +18,7 @@ GO_TAGS ?=
 
 go_cmd          ?= go
 go_test         ?= $(go_cmd) test -json -v -timeout 30m
+go_test_sum     ?= $(go_cmd) tool gotestsum --format pkgname --
 
 TOOLS_EXES = configtxgen configtxlator cryptogen fxconfig
 
@@ -39,8 +40,6 @@ help: ## List all commands with documentation
 .PHONY: tools
 tools: $(TOOLS_EXES) ## Builds all tools
 
-GO_TEST_FMT_FLAGS := -hide empty-packages
-
 ## Run generate
 .PHONY: generate
 generate: FORCE
@@ -50,7 +49,7 @@ generate: FORCE
 .PHONY: test
 test: FORCE
 	@echo "Running Go unit tests..."
-	cd tools && $(go_test) ./... | go tool gotestfmt ${GO_TEST_FMT_FLAGS}
+	cd tools && $(go_test_sum) -timeout 30m -v ./...
 
 .PHONY: $(TOOLS_EXES)
 $(TOOLS_EXES): %: $(BUILD_DIR)/% ## Builds a native binary

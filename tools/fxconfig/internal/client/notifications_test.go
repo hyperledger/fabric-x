@@ -8,6 +8,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -165,6 +166,32 @@ func TestNotificationClient_Subscribe_SendsRequest(t *testing.T) {
 	ch, err := nc.Subscribe(t.Context(), "tx1")
 	require.NoError(t, err)
 	require.NotNil(t, ch)
+}
+
+func TestNotificationClient_Subscribe_StreamError(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Second)
+	// Simulate a stream error
+	expectedErr := errors.New("stream connection lost")
+	nc.streamErr.Store(&expectedErr)
+
+	// Verify that subscribers map is NOT modified when streamErr is set
+	_, err := nc.Subscribe(t.Context(), "tx1")
+	require.ErrorIs(t, err, expectedErr)
+	require.Empty(t, nc.subscribers, "subscribers map should not be modified when streamErr is set")
+}
+
+func TestNotificationClient_Subscribe_Timeout(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Millisecond)
+	// Don't consume requestQueue — Subscribe should time out waiting to send.
+
+	_, err := nc.Subscribe(t.Context(), "tx1")
+	require.Error(t, err)
+	// Should get DeadlineExceeded since the context timeout is short.
+	require.ErrorContains(t, err, "deadline exceeded")
 }
 
 // Close tests
