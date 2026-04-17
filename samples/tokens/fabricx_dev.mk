@@ -16,7 +16,7 @@ install-prerequisites-fabric:
 .PHONY: setup-fabric
 setup-fabric:
 	@go tool cryptogen generate --config crypto-config.yaml --output crypto
-	@go tool configtxgen --channelID mychannel --profile OrgsChannel --outputBlock crypto/sc-genesis-block.proto.bin
+	@go tool configtxgen --channelID arma --profile OrgsChannel --outputBlock crypto/sc-genesis-block.proto.bin
 	@CRYPTO_DIR=crypto ./scripts/cp_fabricx.sh
 
 # Clean all the artifacts (configs and bins) built on the controller node (e.g. make clean).
@@ -33,7 +33,7 @@ start-fabric:
 	@$(CONTAINER_CLI) network inspect fabric_test >/dev/null 2>&1 || $(CONTAINER_CLI) network create fabric_test
 	@$(CONTAINER_CLI) compose -f compose-xdev.yml up -d --wait && sleep 2
 	@echo "install namespace:"
-	@go tool fxconfig namespace create token_namespace --channel=mychannel --orderer=localhost:7050 --mspID=Org1MSP \
+	@go tool fxconfig namespace create token_namespace --channel=arma --orderer=localhost:7050 --mspID=Org1MSP \
 		--mspConfigPath=crypto/peerOrganizations/org1.example.com/users/channel_admin@org1.example.com/msp \
 		--pk=crypto/peerOrganizations/org1.example.com/users/endorser@org1.example.com/msp/signcerts/endorser@org1.example.com-cert.pem
 	@until go tool fxconfig namespace list --endpoint=localhost:7001 2>/dev/null | grep -q token_namespace; do sleep 1; echo "waiting for namespace to be created..."; done

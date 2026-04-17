@@ -8,6 +8,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
@@ -28,7 +29,7 @@ func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *appli
 	// get orderer client and signing identity
 	sc, err := d.prepareSubmission(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to prepare submission: %w", err)
 	}
 	defer func() {
 		_ = sc.ordererClient.Close()
@@ -55,6 +56,10 @@ func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *appli
 		Result:    "success",
 	})
 
+	if err := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx); err != nil {
+		return fmt.Errorf("failed to broadcast transaction: %w", err)
+	}
+
 	return nil
 }
 
@@ -65,7 +70,7 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 	// get orderer client and signing identity
 	sc, err := d.prepareSubmission(ctx)
 	if err != nil {
-		return UnknownStatus, err
+		return UnknownStatus, fmt.Errorf("failed to prepare submission: %w", err)
 	}
 	defer func() {
 		_ = sc.ordererClient.Close()
@@ -74,7 +79,7 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 	// get notification client
 	nc, err := d.NotificationProvider.Get()
 	if err != nil {
-		return UnknownStatus, err
+		return UnknownStatus, fmt.Errorf("failed to get notification client: %w", err)
 	}
 
 	defer func() {
@@ -88,11 +93,16 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 
 	subscription, err := nc.Subscribe(ctx, txID)
 	if err != nil {
-		return UnknownStatus, err
+		return UnknownStatus, fmt.Errorf("failed to subscribe to transaction events: %w", err)
 	}
 
 	if err := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx); err != nil {
-		return UnknownStatus, err
+		return UnknownStatus, fmt.Errorf("failed to broadcast transaction: %w", err)
+	}
+
+	status, err := nc.WaitForEvent(ctx, subscription)
+	if err != nil {
+		return UnknownStatus, fmt.Errorf("failed to wait for transaction status event: %w", err)
 	}
 
 	status, err := nc.WaitForEvent(ctx, subscription)
@@ -131,13 +141,13 @@ func (d *AdminApp) prepareSubmission(_ context.Context) (*submissionContext, err
 	// get signing identity
 	sid, err := d.MspProvider.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get signing identity: %w", err)
 	}
 
 	// get orderer client
 	oc, err := d.OrdererProvider.Get()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get orderer client: %w", err)
 	}
 
 	return &submissionContext{
