@@ -17,7 +17,12 @@ function print_section_header() {
 
 ## Cleanup and stop network on abort
 function cleanup() {
+    local exit_code=$?
+    local failed_cmd="$BASH_COMMAND"
+    trap - INT ERR
+    set +e
     stop_network
+    echo "Error: command '$failed_cmd' exited with status $exit_code" >&2
     exit 1
 }
 
@@ -61,15 +66,15 @@ function run_test() {
 }
 
 # Script Start
-set +e
+set -eE
 set -o pipefail
-trap exit 1 INT
+trap cleanup INT ERR
 
 run_network
 # # currently we wait manually with a sleep.
 # # TODO: add an healthcheck within the `docker-compose`
 sleep 10
-if [[ "$PLATFORM" == "fabricx" ]]; then
+if [[ "$PLATFORM" == "fabricx" || "$PLATFORM" == "xdev" ]]; then
     init_fabricx
 fi
 run_test
