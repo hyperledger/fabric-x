@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package provider
 
 import (
+	"context"
 	"sync"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
@@ -40,7 +41,7 @@ func New[T any, K Validatable](
 
 // Get returns the service instance, validating the config and initializing the service instance on first call.
 // Subsequent calls return the cached instance. Thread-safe.
-func (p *Provider[T, K]) Get() (T, error) {
+func (p *Provider[T, K]) Get(ctx context.Context) (T, error) {
 	p.once.Do(func() {
 		if err := p.cfg.Validate(p.validationContext); err != nil {
 			p.err = err

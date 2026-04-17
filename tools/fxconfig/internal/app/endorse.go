@@ -24,12 +24,12 @@ func (d *AdminApp) EndorseTransaction(
 
 // endorseTransaction signs the transaction with the configured MSP identity.
 func (d *AdminApp) endorseTransaction(
-	_ context.Context,
+	ctx context.Context,
 	txID string,
 	tx *applicationpb.Tx,
 ) (*applicationpb.Tx, error) {
 	// get signing identity
-	sid, err := d.MspProvider.Get()
+	sid, err := d.MspProvider.Get(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -15,7 +15,7 @@ import (
 // MspProvider supplies signing identities for transaction authentication.
 type MspProvider interface {
 	// Get returns the configured signing identity.
-	Get() (msp.SigningIdentity, error)
+	Get(ctx context.Context) (msp.SigningIdentity, error)
 	// Validate checks if the provider configuration is valid.
 	Validate() error
 }
@@ -31,7 +31,7 @@ type OrdererClient interface {
 // OrdererProvider creates and validates OrdererClient instances.
 type OrdererProvider interface {
 	// Get returns a configured orderer client.
-	Get() (OrdererClient, error)
+	Get(ctx context.Context) (OrdererClient, error)
 	// Validate checks if the provider configuration is valid.
 	Validate() error
 }
@@ -65,7 +65,7 @@ type NotificationClient interface {
 // NotificationProvider creates and validates NotificationClient instances.
 type NotificationProvider interface {
 	// Get returns a configured notification client.
-	Get() (NotificationClient, error)
+	Get(ctx context.Context) (NotificationClient, error)
 	// Validate checks if the provider configuration is valid.
 	Validate() error
 }

@@ -16,7 +16,7 @@ import (
 // the Output showing namespace names, versions, and policy data in hexadecimal.
 func (d *AdminApp) ListNamespaces(ctx context.Context) ([]NamespaceQueryResult, error) {
 	// get query service instance
-	qc, err := d.QueryProvider.Get()
+	qc, err := d.QueryProvider.Get(ctx)
 	if err != nil {
 		return nil, err
 	}
