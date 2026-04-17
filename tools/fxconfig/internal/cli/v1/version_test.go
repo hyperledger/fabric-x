@@ -13,6 +13,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
+
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
 
 func TestVersionCommand(t *testing.T) {
@@ -50,9 +52,14 @@ func TestVersionCommand(t *testing.T) {
 
 			// Setup
 			rootCmd := &cobra.Command{Use: "fxconfig"}
-			rootCmd.AddCommand(NewVersionCommand())
 
 			var outBuf, errBuf bytes.Buffer
+			cliCtx := &CLIContext{
+				Printer: cliio.NewCLIPrinter(&outBuf, &errBuf, cliio.FormatTable),
+			}
+			rootCmd.AddCommand(NewVersionCommand(cliCtx))
+			
+			// Set cobra's outputs just in case cobra prints errors directly
 			rootCmd.SetOut(&outBuf)
 			rootCmd.SetErr(&errBuf)
 			rootCmd.SetArgs(tt.args)
@@ -82,12 +89,16 @@ func TestVersionCommand_OutputFormat(t *testing.T) {
 	t.Parallel()
 
 	// Setup
-	rootCmd := &cobra.Command{Use: "fxconfig"}
-	rootCmd.AddCommand(NewVersionCommand())
+			rootCmd := &cobra.Command{Use: "fxconfig"}
 
-	var outBuf bytes.Buffer
-	rootCmd.SetOut(&outBuf)
-	rootCmd.SetArgs([]string{"version"})
+			var outBuf, errBuf bytes.Buffer
+			cliCtx := &CLIContext{
+				Printer: cliio.NewCLIPrinter(&outBuf, &errBuf, cliio.FormatTable),
+			}
+			rootCmd.AddCommand(NewVersionCommand(cliCtx))
+			
+			rootCmd.SetOut(&outBuf)
+			rootCmd.SetArgs([]string{"version"})
 
 	// Execute
 	err := rootCmd.Execute()
@@ -114,7 +125,11 @@ func TestNewVersionCommand(t *testing.T) {
 	t.Parallel()
 
 	// Execute
-	cmd := NewVersionCommand()
+	var outBuf bytes.Buffer
+	cliCtx := &CLIContext{
+		Printer: cliio.NewCLIPrinter(&outBuf, &outBuf, cliio.FormatTable),
+	}
+	cmd := NewVersionCommand(cliCtx)
 
 	// Assert
 	require.NotNil(t, cmd, "NewVersionCommand should return a non-nil command")

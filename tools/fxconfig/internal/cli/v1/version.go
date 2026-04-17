@@ -19,7 +19,7 @@ import (
 
 // NewVersionCommand returns a command that displays version information.
 // It shows the fxconfig version, Go version, commit SHA, and OS/architecture.
-func NewVersionCommand() *cobra.Command {
+func NewVersionCommand(cliCtx *CLIContext) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "Display version information",
@@ -29,20 +29,19 @@ func NewVersionCommand() *cobra.Command {
   • Git commit SHA
   • Operating system and architecture`,
 		Run: func(cmd *cobra.Command, _ []string) {
-			// TODO: use printer
-			cmd.Printf("fxconfig\n")
-			showLine(cmd, "Version", metadata.Version)
-			showLine(cmd, "Go version", runtime.Version())
-			showLine(cmd, "Commit", metadata.CommitSHA)
-			showLine(cmd, "OS/Arch", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH))
+			cliCtx.Printer.Print("fxconfig\n")
+			cliCtx.Printer.Print(formatLine("Version", metadata.Version))
+			cliCtx.Printer.Print(formatLine("Go version", runtime.Version()))
+			cliCtx.Printer.Print(formatLine("Commit", metadata.CommitSHA))
+			cliCtx.Printer.Print(formatLine("OS/Arch", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)))
 		},
 	}
 
 	return cmd
 }
 
-// showLine formats and prints a single line of version information.
+// formatLine formats and returns a single line of version information.
 // The title is capitalized and right-padded to 16 characters for alignment.
-func showLine(cmd *cobra.Command, title, value string) {
-	cmd.Printf(" %-16s %s\n", fmt.Sprintf("%s:", cases.Title(language.Und, cases.NoLower).String(title)), value)
+func formatLine(title, value string) string {
+	return fmt.Sprintf(" %-16s %s\n", fmt.Sprintf("%s:", cases.Title(language.Und, cases.NoLower).String(title)), value)
 }
