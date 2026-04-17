@@ -29,6 +29,12 @@ services:
       - 9101
     ports:
       - 9100:9000/tcp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
 
   endorser1:
     <<: *service-template
@@ -47,6 +53,12 @@ services:
       - 9301
     ports:
       - 9300:9000/tcp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
 
   owner1:
     <<: *service-template
@@ -64,6 +76,12 @@ services:
       - 9501
     ports:
       - 9500:9000/tcp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
 
   owner2:
     <<: *service-template
@@ -81,6 +99,12 @@ services:
       - 9601
     ports:
       - 9600:9000/tcp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
 
   swagger-ui:
     <<: *service-template

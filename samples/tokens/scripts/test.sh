@@ -66,8 +66,6 @@ set -o pipefail
 trap exit 1 INT
 
 run_network
-# # currently we wait manually with a sleep.
-# # TODO: add an healthcheck within the `docker-compose`
 sleep 10
 if [[ "$PLATFORM" == "fabricx" ]]; then
     init_fabricx

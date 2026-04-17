@@ -26,6 +26,12 @@ services:
       - 9001
     ports:
       - 9400:9000/tcp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
 
 networks:
   test:
