@@ -143,7 +143,7 @@ notifications:
 
 ### TLS Configuration
 
-- **No TLS**: `enabled: false` or all TLS fields empty
+- **No TLS**: `enabled: false`
 - **Server TLS**: `enabled: true` with only `rootCerts` set (server authentication only)
 - **Mutual TLS**: `enabled: true` with `clientKey`, `clientCert`, and `rootCerts` all set (mutual authentication)
 - **Service-specific TLS**: Each service (orderer, queries, notifications) can override the parent `tls` section
