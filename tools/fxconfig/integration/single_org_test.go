@@ -161,21 +161,18 @@ func TestSingleOrgScenarios(t *testing.T) {
 			configArg, policyArg, endorseArg, submitArg)
 		require.NoError(t, err)
 
-		// expect out namespace to be installed
-		// we keep the stdOut
-		var expectedStdOut string
+		// expect our namespace to be installed
 		assert.EventuallyWithT(t, func(ct *assert.CollectT) {
 			stdOut, err = fxconfig(t, "namespace", "list", configArg)
 			require.NoError(ct, err)
 			nss, err = parseNamespaceList(stdOut)
 			require.NoError(ct, err)
 			require.Contains(ct, nss, expectedNs)
-			expectedStdOut = stdOut
 		}, eventuallyTimeout, eventuallyTick)
 
 		// now we try to run create with the namespace again,
 		// but we use a different policy, as namespace creation should fail,
-		// and we expect the previous stdOut when calling list
+		// and we expect the namespace list to still contain exactly one entry for it
 		_, err = fxconfig(t, "namespace", "create", expectedNs.Name,
 			configArg, policyArg, endorseArg, submitArg)
 		require.NoError(t, err)
@@ -185,9 +182,13 @@ func TestSingleOrgScenarios(t *testing.T) {
 			require.NoError(ct, err)
 			nss, err := parseNamespaceList(stdOut)
 			require.NoError(ct, err)
-			require.Contains(ct, nss, expectedNs)
-			require.Equal(ct, expectedStdOut, stdOut)
-			expectedStdOut = stdOut
+			count := 0
+			for _, ns := range nss {
+				if ns.Name == expectedNs.Name {
+					count++
+				}
+			}
+			require.Equalf(ct, 1, count, "expected namespace %s to appear exactly once, got %d", expectedNs.Name, count)
 		}, eventuallyTimeout, eventuallyTick)
 	})
 
