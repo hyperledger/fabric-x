@@ -21,6 +21,7 @@ type Provider[T any, K Validatable] struct {
 	instance          T
 	err               error
 	cfg               K
+	initialized       bool
 	validationContext validation.Context
 }
 
@@ -42,6 +43,7 @@ func New[T any, K Validatable](
 // Subsequent calls return the cached instance. Thread-safe.
 func (p *Provider[T, K]) Get() (T, error) {
 	p.once.Do(func() {
+		p.initialized = true
 		if err := p.cfg.Validate(p.validationContext); err != nil {
 			p.err = err
 			return
@@ -54,6 +56,21 @@ func (p *Provider[T, K]) Get() (T, error) {
 // Validate delegates to the configuration's Validate method.
 func (p *Provider[T, K]) Validate() error {
 	return p.cfg.Validate(p.validationContext)
+}
+
+// Close releases the cached instance if it was initialized successfully and
+// implements a Close() error method. Non-closeable instances are ignored.
+func (p *Provider[T, K]) Close() error {
+	if !p.initialized || p.err != nil {
+		return nil
+	}
+
+	closer, ok := any(p.instance).(interface{ Close() error })
+	if !ok {
+		return nil
+	}
+
+	return closer.Close()
 }
 
 // Validatable defines the interface for configuration types that can be validated.

@@ -10,6 +10,7 @@ package app
 
 import (
 	"context"
+	"errors"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
@@ -27,6 +28,7 @@ type Application interface {
 	SubmitTransaction(ctx context.Context, txID string, tx *applicationpb.Tx) error
 	SubmitTransactionWithWait(ctx context.Context, txID string, tx *applicationpb.Tx) (TxStatus, error)
 	MergeTransactions(ctx context.Context, txs []*applicationpb.Tx) (*applicationpb.Tx, error)
+	Close() error
 }
 
 // AdminApp implements Application interface with provider-based dependencies.
@@ -36,4 +38,24 @@ type AdminApp struct {
 	QueryProvider        *provider.Provider[adapters.QueryClient, *config.QueriesConfig]
 	OrdererProvider      *provider.Provider[adapters.OrdererClient, *config.OrdererConfig]
 	NotificationProvider *provider.Provider[adapters.NotificationClient, *config.NotificationsConfig]
+}
+
+// Close releases provider-managed resources owned by the application.
+func (d *AdminApp) Close() error {
+	var errs []error
+
+	if d.NotificationProvider != nil {
+		errs = append(errs, d.NotificationProvider.Close())
+	}
+	if d.OrdererProvider != nil {
+		errs = append(errs, d.OrdererProvider.Close())
+	}
+	if d.QueryProvider != nil {
+		errs = append(errs, d.QueryProvider.Close())
+	}
+	if d.MspProvider != nil {
+		errs = append(errs, d.MspProvider.Close())
+	}
+
+	return errors.Join(errs...)
 }

@@ -23,13 +23,20 @@ import (
 type mockQueryClient struct {
 	policies *applicationpb.NamespacePolicies
 	err      error
+	closed   bool
 }
 
 func (m *mockQueryClient) GetNamespacePolicies(_ context.Context) (*applicationpb.NamespacePolicies, error) {
+	if m.closed {
+		return nil, errors.New("query client closed")
+	}
 	return m.policies, m.err
 }
 
-func (*mockQueryClient) Close() error { return nil }
+func (m *mockQueryClient) Close() error {
+	m.closed = true
+	return nil
+}
 
 func makeQueryProvider(
 	client adapters.QueryClient,
@@ -44,6 +51,18 @@ func makeQueryProvider(
 	return provider.New(func(_ *config.QueriesConfig) (adapters.QueryClient, error) {
 		return client, err
 	}, cfg, fakeValidationContext())
+}
+
+func makeManagedQueryProvider(
+	factory func(*config.QueriesConfig) (adapters.QueryClient, error),
+) *provider.Provider[adapters.QueryClient, *config.QueriesConfig] {
+	cfg := &config.QueriesConfig{
+		EndpointServiceConfig: config.EndpointServiceConfig{
+			Address:           "localhost:7050",
+			ConnectionTimeout: 30 * time.Second,
+		},
+	}
+	return provider.New(factory, cfg, fakeValidationContext())
 }
 
 func TestListNamespaces_Empty(t *testing.T) {
@@ -89,4 +108,22 @@ func TestListNamespaces_QueryError(t *testing.T) {
 
 	_, err := a.ListNamespaces(t.Context())
 	require.Error(t, err)
+}
+
+func TestListNamespaces_ReusesProviderManagedQueryClient(t *testing.T) {
+	t.Parallel()
+
+	client := &mockQueryClient{policies: &applicationpb.NamespacePolicies{}}
+	a := &AdminApp{
+		QueryProvider: makeManagedQueryProvider(func(_ *config.QueriesConfig) (adapters.QueryClient, error) {
+			return client, nil
+		}),
+	}
+
+	_, err := a.ListNamespaces(t.Context())
+	require.NoError(t, err)
+
+	_, err = a.ListNamespaces(t.Context())
+	require.NoError(t, err)
+	require.False(t, client.closed)
 }
