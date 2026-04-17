@@ -27,8 +27,13 @@ func (*AdminApp) CreateNamespace(_ context.Context, input *DeployNamespaceInput)
 		return nil, err
 	}
 
+	txID, err := transaction.GenerateTxID()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate transaction ID: %w", err)
+	}
+
 	out := &DeployNamespaceOutput{
-		TxID: transaction.GenerateTxID(),
+		TxID: txID,
 		Tx:   transaction.CreateNamespacesTx(nsPolicy, input.NsID, input.Version),
 	}
 

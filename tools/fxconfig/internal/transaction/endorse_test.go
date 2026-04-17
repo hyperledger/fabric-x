@@ -193,18 +193,74 @@ func TestGenerateTxID(t *testing.T) {
 	t.Run("returns valid hex string", func(t *testing.T) {
 		t.Parallel()
 
-		id := GenerateTxID()
+		id, err := GenerateTxID()
+		require.NoError(t, err)
 		require.NotEmpty(t, id)
 
 		// SHA-256 produces 32 bytes → 64 hex characters
 		require.Len(t, id, 64)
-		_, err := hex.DecodeString(id)
-		require.NoError(t, err, "txID should be valid hex")
+		_, decErr := hex.DecodeString(id)
+		require.NoError(t, decErr, "txID should be valid hex")
 	})
 
 	t.Run("each call returns a unique ID", func(t *testing.T) {
 		t.Parallel()
-		a, b := GenerateTxID(), GenerateTxID()
+
+		a, err := GenerateTxID()
+		require.NoError(t, err)
+		b, err := GenerateTxID()
+		require.NoError(t, err)
 		require.NotEqual(t, a, b)
 	})
+}
+
+func TestReadNonce(t *testing.T) {
+	t.Parallel()
+
+	t.Run("returns error on reader failure", func(t *testing.T) {
+		t.Parallel()
+
+		failReader := &errReader{err: errors.New("read failed")}
+		nonce, err := readNonce(failReader)
+		require.Error(t, err)
+		require.Nil(t, nonce)
+		require.Contains(t, err.Error(), "error while creating nonce")
+	})
+
+	t.Run("returns error on short read", func(t *testing.T) {
+		t.Parallel()
+
+		shortReader := &shortReader{data: []byte("short")}
+		nonce, err := readNonce(shortReader)
+		require.Error(t, err)
+		require.Nil(t, nonce)
+		require.Contains(t, err.Error(), "cannot read enough bytes for nonce")
+	})
+
+	t.Run("succeeds with valid reader", func(t *testing.T) {
+		t.Parallel()
+
+		nonce, err := readNonce(nil)
+		require.NoError(t, err)
+		require.Len(t, nonce, 24)
+	})
+}
+
+// errReader is an io.Reader that always returns an error.
+type errReader struct {
+	err error
+}
+
+func (r *errReader) Read([]byte) (int, error) {
+	return 0, r.err
+}
+
+// shortReader is an io.Reader that returns fewer bytes than requested.
+type shortReader struct {
+	data []byte
+}
+
+func (r *shortReader) Read(p []byte) (int, error) {
+	n := copy(p, r.data)
+	return n, nil
 }

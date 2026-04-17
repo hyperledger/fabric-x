@@ -100,17 +100,19 @@ func identity(signer msp.SigningIdentity) (*msppb.Identity, error) {
 }
 
 // GenerateTxID generates a unique transaction ID using SHA-256 hash of a random nonce.
-func GenerateTxID() string {
-	nonce := readNonce(nil)
+func GenerateTxID() (string, error) {
+	nonce, err := readNonce(nil)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate tx ID: %w", err)
+	}
 	hasher := sha256.New()
 	hasher.Write(nonce)
-	return hex.EncodeToString(hasher.Sum(nil))
+	return hex.EncodeToString(hasher.Sum(nil)), nil
 }
 
 // readNonce reads a byte array of the given size from the source.
-// It panics if the read fails, or cannot read the requested size.
-// "crypto/rand" and "math/rand" never fail and always returns the correct length.
-func readNonce(source io.Reader) []byte {
+// If source is nil, crypto/rand.Reader is used.
+func readNonce(source io.Reader) ([]byte, error) {
 	if source == nil {
 		source = rand.Reader
 	}
@@ -119,11 +121,11 @@ func readNonce(source io.Reader) []byte {
 	value := make([]byte, size)
 	n, err := source.Read(value)
 	if err != nil {
-		panic(fmt.Errorf("error while creating nonce: %w", err))
+		return nil, fmt.Errorf("error while creating nonce: %w", err)
 	}
 	if n != size {
-		panic(fmt.Errorf("cannot read enough bytes for nonce actual: %d wanted: %d", n, size))
+		return nil, fmt.Errorf("cannot read enough bytes for nonce actual: %d wanted: %d", n, size)
 	}
 
-	return value
+	return value, nil
 }
