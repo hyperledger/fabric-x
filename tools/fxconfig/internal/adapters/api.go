@@ -25,7 +25,7 @@ type OrdererClient interface {
 	// Broadcast sends a signed transaction to the ordering service.
 	Broadcast(ctx context.Context, signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) error
 	// Close releases resources held by the client.
-	Close() error
+	Close(ctx context.Context) error
 }
 
 // OrdererProvider creates and validates OrdererClient instances.
@@ -41,7 +41,7 @@ type QueryClient interface {
 	// GetNamespacePolicies fetches current namespace policy configurations.
 	GetNamespacePolicies(ctx context.Context) (*applicationpb.NamespacePolicies, error)
 	// Close releases resources held by the client.
-	Close() error
+	Close(ctx context.Context) error
 }
 
 // QueryProvider creates and validates QueryClient instances.
@@ -59,7 +59,7 @@ type NotificationClient interface {
 	// WaitForEvent blocks until a transaction event is received on the subscription.
 	WaitForEvent(ctx context.Context, subscription chan int) (int, error)
 	// Close releases resources held by the client.
-	Close() error
+	Close(ctx context.Context) error
 }
 
 // NotificationProvider creates and validates NotificationClient instances.
