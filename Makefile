@@ -65,11 +65,17 @@ $(BUILD_DIR)/%:
 clean: ## Cleans the build area
 	-@rm -rf $(BUILD_DIR)
 
-# Run lint (reports all lint issues)
+# Run lint (only reports new lint issues since origin/main)
 .PHONY: lint
 lint: FORCE
 	@echo "Running Go Linters..."
-	cd tools && golangci-lint run --color=always --max-same-issues 0
+	cd tools && golangci-lint run --new-from-rev=origin/main --color=always --max-same-issues 0
 	@echo "Running License Header Linters..."
 	scripts/license-lint.sh
+
+# Run lint-all: reports all lint issues including pre-existing ones
+.PHONY: lint-all
+lint-all: FORCE
+	@echo "Running Go Linters (all issues)..."
+	cd tools && golangci-lint run --color=always --max-same-issues 0
 FORCE:
