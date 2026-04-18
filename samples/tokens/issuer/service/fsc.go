@@ -156,7 +156,7 @@ func (v *IssueCashView) Call(vctx view.Context) (interface{}, error) {
 	logger.Infof("submitting fabric transaction to orderer for final settlemement: [%s]", tx.ID())
 	_, err = vctx.RunView(ttx.NewOrderingAndFinalityView(tx))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed asking ordering")
+		return "", errors.Wrap(err, "failed asking ordering")
 	}
 
 	return tx.ID(), nil
