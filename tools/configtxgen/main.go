@@ -72,7 +72,8 @@ func main() {
 					"which contains configtx.yaml with the specified profile")
 				os.Exit(1)
 			}
-			logger.Panic(err)
+			logger.Errorf("unhandled error: %v", err)
+			os.Exit(1)
 		}
 	}()
 

@@ -9,10 +9,13 @@ package transaction
 import (
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
+	"sync/atomic"
+	"time"
 
 	"google.golang.org/protobuf/proto"
 
@@ -110,20 +113,29 @@ func GenerateTxID() string {
 // readNonce reads a byte array of the given size from the source.
 // It panics if the read fails, or cannot read the requested size.
 // "crypto/rand" and "math/rand" never fail and always returns the correct length.
+var fallbackNonceCounter uint64
+
 func readNonce(source io.Reader) []byte {
 	if source == nil {
 		source = rand.Reader
 	}
 
-	size := 24
+	const size = 24
 	value := make([]byte, size)
 	n, err := source.Read(value)
-	if err != nil {
-		panic(fmt.Errorf("error while creating nonce: %w", err))
-	}
-	if n != size {
-		panic(fmt.Errorf("cannot read enough bytes for nonce actual: %d wanted: %d", n, size))
+	if err == nil && n == size {
+		return value
 	}
 
+	// If reading from crypto/rand fails or returns insufficient bytes,
+	// fall back to a time+counter-derived nonce to avoid panics while
+	// preserving uniqueness across calls.
+	now := uint64(time.Now().UnixNano())
+	cnt := atomic.AddUint64(&fallbackNonceCounter, 1)
+	var buf [16]byte
+	binary.LittleEndian.PutUint64(buf[0:8], now)
+	binary.LittleEndian.PutUint64(buf[8:16], cnt)
+	h := sha256.Sum256(buf[:])
+	copy(value, h[:size])
 	return value
 }

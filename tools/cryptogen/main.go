@@ -55,7 +55,8 @@ func main() {
 	case versionCmd.FullCommand():
 		_, _ = fmt.Println(getVersionInfo())
 	default:
-		panic("programming error")
+		fmt.Fprintln(os.Stderr, "unknown command or programming error; see usage")
+		os.Exit(1)
 	}
 
 	if err != nil {
