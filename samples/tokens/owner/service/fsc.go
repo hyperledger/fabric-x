@@ -133,8 +133,31 @@ func (f FabricSmartClient) Transfer(ctx context.Context, tokenType string, quant
 	return txID, nil
 }
 
+// Redeem redeems (burns) tokens. The tokens are removed from circulation.
 func (f FabricSmartClient) Redeem(ctx context.Context, tokenType string, quantity uint64, sender string, message string) (txID string, err error) {
-	return "", fmt.Errorf("not implemented: %s", "/owner/redeem") // TODO: Implement
+	logger.Infof("going to redeem %d %s from [%s] with message [%s]", quantity, tokenType, sender, message)
+	mgr, err := viewregistry.GetManager(f.node)
+	if err != nil {
+		return "", err
+	}
+	res, err := mgr.InitiateView(&RedeemView{
+		RedeemOptions: &RedeemOptions{
+			Wallet:    sender,
+			TokenType: tokenType,
+			Quantity:  quantity,
+			Message:   message,
+		},
+	}, ctx)
+	if err != nil {
+		logger.Errorf("error redeeming: %s", err.Error())
+		return "", err
+	}
+	txID, ok := res.(string)
+	if !ok {
+		return "", errors.New("cannot parse redeem response")
+	}
+	logger.Infof("redeemed %d %s from [%s] with message [%s]. ID: [%s]", quantity, tokenType, sender, message, txID)
+	return txID, nil
 }
 
 // GetTransactions returns the full transaction history for an owner.
@@ -256,6 +279,70 @@ func (v *TransferView) Call(vctx view.Context) (interface{}, error) {
 
 	// The issuer sends the transaction for ordering.
 	logger.Infof("submitting fabric transaction to orderer for final settlemement: [%s]", tx.ID())
+	_, err = vctx.RunView(ttx.NewOrderingAndFinalityView(tx))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed asking ordering")
+	}
+
+	return tx.ID(), nil
+}
+
+type RedeemOptions struct {
+	// Wallet is the identifier of the wallet that owns the tokens to redeem
+	Wallet string
+	// TokenType of tokens to redeem
+	TokenType string
+	// Quantity to redeem
+	Quantity uint64
+	// Message is an optional user message sent with the transaction.
+	// It's stored in the ApplicationMetadata and is sent in the transient field.
+	Message string
+}
+
+type RedeemView struct {
+	*RedeemOptions
+}
+
+func (v *RedeemView) Call(vctx view.Context) (interface{}, error) {
+	// The sender will select tokens owned by this wallet to redeem
+	senderWallet := ttx.GetWallet(vctx, v.Wallet)
+	if senderWallet == nil {
+		return "", errors.Errorf("sender wallet [%s] not found", v.Wallet)
+	}
+
+	// Create the envelope for the transaction
+	tx, err := ttx.NewTransaction(vctx, nil)
+	if err != nil {
+		return tx, errors.Wrap(err, "failed to create transaction")
+	}
+	if v.Message != "" {
+		// You can set any metadata you want. It is shared with all parties.
+		tx.SetApplicationMetadata("message", []byte(v.Message))
+	}
+
+	// The sender adds a redeem operation to the transaction.
+	err = tx.Redeem(
+		senderWallet,
+		tok.Type(v.TokenType),
+		v.Quantity,
+	)
+	if err != nil {
+		if strings.Contains(err.Error(), "insufficient funds") {
+			return "", ErrInsufficientFunds
+		}
+		return "", errors.Wrap(err, "failed preparing redeem")
+	}
+
+	// The sender is ready to collect all the required signatures.
+	// This includes the auditor (if provided) and the endorsers.
+	logger.Infof("collecting signatures and submitting transaction to chaincode: [%s]", tx.ID())
+	_, err = vctx.RunView(ttx.NewCollectEndorsementsView(tx))
+	if err != nil {
+		return "", errors.Wrap(err, "failed to sign transaction")
+	}
+
+	// The sender sends the transaction for ordering.
+	logger.Infof("submitting fabric transaction to orderer for final settlement: [%s]", tx.ID())
 	_, err = vctx.RunView(ttx.NewOrderingAndFinalityView(tx))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed asking ordering")
