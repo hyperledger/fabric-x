@@ -55,7 +55,7 @@ type LoggingConfig struct {
 // It specifies which organization identity to use for signing transactions.
 type MSPConfig struct {
 	LocalMspID string      `mapstructure:"localMspID" yaml:"localMspID,omitempty" desc:"MSP ID of the organization"`
-	ConfigPath string      `mapstructure:"configPath" yaml:"configPath,omitempty" desc:"Path to MSP configuration directory"`
+	ConfigPath string      `mapstructure:"configPath" yaml:"configPath,omitempty" desc:"Path to MSP config directory"`
 	BCCSP      BCCSPConfig `mapstructure:"bccsp" yaml:"bccsp,omitempty"`
 }
 

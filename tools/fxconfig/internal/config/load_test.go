@@ -9,7 +9,6 @@ package config
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -69,37 +68,36 @@ func TestLoad_WithConfigFile(t *testing.T) {
 
 	tmpDir := t.TempDir()
 	configPath := filepath.Join(tmpDir, "config.yaml")
-	configContent := strings.Join([]string{
-		"msp:",
-		"  localMspID: TestMSP",
-		"  configPath: /path/to/msp",
-		"  bccsp:",
-		"    default: SW",
-		"    sw:",
-		"      security: 384",
-		"      hash: SHA3",
-		"      fileKeyStore:",
-		"        keyStorePath: /path/to/custom/keystore",
-		"",
-		"orderer:",
-		"  address: orderer.example.com:7050",
-		"  connectionTimeout: 45s",
-		"  tls:",
-		"    rootCerts:",
-		"      - /path/to/ca.pem",
-		"    clientCert: /path/to/cert.pem",
-		"    clientKey: /path/to/key.pem",
-		"    serverNameOverride: orderer.override.com",
-		"",
-		"queries:",
-		"  address: query.example.com:7001",
-		"  connectionTimeout: 60s",
-		"",
-		"notifications:",
-		"  address: notify.example.com:7002",
-		"  connectionTimeout: 90s",
-		"",
-	}, "\n")
+	configContent := `
+msp:
+  localMspID: TestMSP
+  configPath: /path/to/msp
+  bccsp:
+    default: SW
+    sw:
+      security: 384
+      hash: SHA3
+      fileKeyStore:
+        keyStorePath: /path/to/custom/keystore
+
+orderer:
+  address: orderer.example.com:7050
+  connectionTimeout: 45s
+  tls:
+    rootCerts:
+      - /path/to/ca.pem
+    clientCert: /path/to/cert.pem
+    clientKey: /path/to/key.pem
+    serverNameOverride: orderer.override.com
+
+queries:
+  address: query.example.com:7001
+  connectionTimeout: 60s
+
+notifications:
+  address: notify.example.com:7002
+  connectionTimeout: 90s
+`
 	err := os.WriteFile(configPath, []byte(configContent), 0o600)
 	require.NoError(t, err)
 

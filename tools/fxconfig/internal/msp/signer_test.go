@@ -108,6 +108,25 @@ func TestGetSignerIdentityFromMSP(t *testing.T) {
 		require.Equal(t, "Org1MSP", sid.GetMSPIdentifier())
 	})
 
+	t.Run("success with default bccsp config", func(t *testing.T) {
+		t.Parallel()
+
+		cfg := config.MSPConfig{
+			LocalMspID: "Org1MSP",
+			ConfigPath: testdataMSPDir(),
+		}
+
+		sid, err := GetSignerIdentityFromMSP(cfg)
+
+		require.NoError(t, err)
+		require.NotNil(t, sid)
+		require.Equal(t, "Org1MSP", sid.GetMSPIdentifier())
+
+		sig, err := sid.Sign([]byte("test with defaults"))
+		require.NoError(t, err)
+		require.NotEmpty(t, sig)
+	})
+
 	t.Run("signer can serialize identity", func(t *testing.T) {
 		t.Parallel()
 
