@@ -155,6 +155,53 @@ func TestNotificationClient_Subscribe_ContextCanceled(t *testing.T) {
 	require.ErrorIs(t, err, context.Canceled)
 }
 
+func TestNotificationClient_Subscribe_NoStaleSubscriberOnContextCancel(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Second)
+	txID := "tx1"
+
+	// First call with canceled context
+	ctx1, cancel1 := context.WithCancel(context.Background())
+	cancel1()
+	_, err1 := nc.Subscribe(ctx1, txID)
+	require.ErrorIs(t, err1, context.Canceled)
+
+	// Verify no subscriber was added
+	nc.subscribersMu.RLock()
+	subscribersAfterFirstCall := len(nc.subscribers[txID])
+	nc.subscribersMu.RUnlock()
+	require.Equal(t, 0, subscribersAfterFirstCall, "No subscriber should be added when context is canceled")
+
+	// Second call with active context - should send a request
+	go func() { <-nc.requestQueue }()
+	ch2, err2 := nc.Subscribe(t.Context(), txID)
+	require.NoError(t, err2)
+	require.NotNil(t, ch2)
+
+	// Verify exactly one subscriber is added
+	nc.subscribersMu.RLock()
+	subscribersAfterSecondCall := len(nc.subscribers[txID])
+	nc.subscribersMu.RUnlock()
+	require.Equal(t, 1, subscribersAfterSecondCall, "Exactly one subscriber should be added on successful subscribe")
+}
+
+func TestNotificationClient_Subscribe_NoStaleSubscriberOnTimeout(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Millisecond)
+	txID := "tx-timeout"
+
+	// No consumer on requestQueue, so send should timeout.
+	_, err := nc.Subscribe(t.Context(), txID)
+	require.Error(t, err)
+
+	nc.subscribersMu.RLock()
+	subscribersAfterTimeout := len(nc.subscribers[txID])
+	nc.subscribersMu.RUnlock()
+	require.Equal(t, 0, subscribersAfterTimeout, "No subscriber should remain after subscribe timeout")
+}
+
 func TestNotificationClient_Subscribe_SendsRequest(t *testing.T) {
 	t.Parallel()
 

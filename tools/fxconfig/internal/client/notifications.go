@@ -91,7 +91,6 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	}
 
 	receiverCh := make(chan int, 1)
-
 	n.subscribersMu.Lock()
 	defer n.subscribersMu.Unlock()
 
@@ -114,6 +113,7 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	// check if our ctx is still open
 	select {
 	case <-ctx.Done():
+		delete(n.subscribers, txID)
 		return nil, ctx.Err()
 	default:
 	}
@@ -121,6 +121,7 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	// try to push to request queue
 	select {
 	case <-ctx.Done():
+		delete(n.subscribers, txID)
 		return nil, ctx.Err()
 	case n.requestQueue <- req:
 	}
