@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
@@ -27,6 +29,35 @@ func newTestNotificationClient(waitingTimeout time.Duration) *NotificationClient
 		responseQueue: make(chan *committerpb.NotificationResponse),
 		subscribers:   make(map[string][]chan int),
 	}
+}
+
+type mockNotificationStream struct {
+	sendErr  error
+	recvResp *committerpb.NotificationResponse
+	recvErr  error
+}
+
+func (m *mockNotificationStream) Send(req *committerpb.NotificationRequest) error { return m.sendErr }
+func (m *mockNotificationStream) Recv() (*committerpb.NotificationResponse, error) {
+	return m.recvResp, m.recvErr
+}
+func (*mockNotificationStream) Header() (metadata.MD, error) { return nil, nil }
+func (*mockNotificationStream) Trailer() metadata.MD         { return nil }
+func (*mockNotificationStream) CloseSend() error             { return nil }
+func (*mockNotificationStream) Context() context.Context     { return context.Background() }
+func (*mockNotificationStream) SendMsg(_ any) error          { return nil }
+func (*mockNotificationStream) RecvMsg(_ any) error          { return nil }
+
+type mockNotifierClient struct {
+	stream  grpc.BidiStreamingClient[committerpb.NotificationRequest, committerpb.NotificationResponse]
+	openErr error
+}
+
+func (m *mockNotifierClient) OpenNotificationStream(
+	_ context.Context,
+	_ ...grpc.CallOption,
+) (grpc.BidiStreamingClient[committerpb.NotificationRequest, committerpb.NotificationResponse], error) {
+	return m.stream, m.openErr
 }
 
 // parseResponse tests
@@ -192,6 +223,44 @@ func TestNotificationClient_Subscribe_Timeout(t *testing.T) {
 	require.Error(t, err)
 	// Should get DeadlineExceeded since the context timeout is short.
 	require.ErrorContains(t, err, "deadline exceeded")
+}
+
+func TestNewNotificationClient_FailsFastWhenStreamStartupFails(t *testing.T) {
+	t.Parallel()
+
+	expectedErr := errors.New("stream unavailable")
+	closed := false
+
+	nc, err := newNotificationClient(
+		t.Context(),
+		config.NotificationsConfig{WaitingTimeout: time.Second},
+		&mockNotifierClient{openErr: expectedErr},
+		func() { closed = true },
+	)
+
+	require.Nil(t, nc)
+	require.ErrorIs(t, err, expectedErr)
+	require.True(t, closed)
+}
+
+func TestNotificationClient_Start_StoresStartupError(t *testing.T) {
+	t.Parallel()
+
+	expectedErr := errors.New("stream unavailable")
+	nc := &NotificationClient{
+		cfg:           config.NotificationsConfig{WaitingTimeout: time.Second},
+		notifyClient:  &mockNotifierClient{openErr: expectedErr},
+		requestQueue:  make(chan *committerpb.NotificationRequest),
+		responseQueue: make(chan *committerpb.NotificationResponse),
+		subscribers:   make(map[string][]chan int),
+	}
+
+	err := nc.start(t.Context())
+	require.ErrorIs(t, err, expectedErr)
+
+	stored := nc.streamErr.Load()
+	require.NotNil(t, stored)
+	require.ErrorIs(t, *stored, expectedErr)
 }
 
 // Close tests

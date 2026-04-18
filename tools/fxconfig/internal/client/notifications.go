@@ -49,25 +49,52 @@ func NewNotificationClient(cfg config.NotificationsConfig) (*NotificationClient,
 
 	ctx, cancel := context.WithCancel(context.Background())
 
+	nc, err := newNotificationClient(ctx, cfg, committerpb.NewNotifierClient(conn), func() {
+		cancel()
+		_ = conn.Close()
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return nc, nil
+}
+
+func newNotificationClient(
+	ctx context.Context,
+	cfg config.NotificationsConfig,
+	notifyClient committerpb.NotifierClient,
+	closeF func(),
+) (*NotificationClient, error) {
 	nc := &NotificationClient{
-		cfg:          cfg,
-		notifyClient: committerpb.NewNotifierClient(conn),
-		closeF: func() {
-			cancel()
-			_ = conn.Close()
-		},
+		cfg:           cfg,
+		notifyClient:  notifyClient,
+		closeF:        closeF,
 		requestQueue:  make(chan *committerpb.NotificationRequest),
 		responseQueue: make(chan *committerpb.NotificationResponse),
 		subscribers:   make(map[string][]chan int),
 	}
 
+	if err := nc.start(ctx); err != nil {
+		if nc.closeF != nil {
+			nc.closeF()
+		}
+		return nil, fmt.Errorf("failed to establish notification stream: %w", err)
+	}
+
+	return nc, nil
+}
+
+func (n *NotificationClient) start(ctx context.Context) error {
+	started := make(chan error, 1)
+
 	go func() {
-		if err := nc.listen(ctx); err != nil && !errors.Is(err, context.Canceled) {
+		if err := n.listen(ctx, started); err != nil && !errors.Is(err, context.Canceled) {
 			logger.Errorf("Notification listener stream terminated unexpectedly: %s", err)
 		}
 	}()
 
-	return nc, nil
+	return <-started
 }
 
 // Close terminates the gRPC connection and cancels the background listener.
@@ -156,12 +183,14 @@ func wait(ctx context.Context, subscription chan int) (int, error) {
 // and dispatching notifications to subscribers. Blocks until context is canceled.
 //
 //nolint:gocognit
-func (n *NotificationClient) listen(ctx context.Context) error {
+func (n *NotificationClient) listen(ctx context.Context, started chan<- error) error {
 	notifyStream, err := n.notifyClient.OpenNotificationStream(ctx)
 	if err != nil {
 		n.streamErr.Store(&err)
+		started <- err
 		return err
 	}
+	started <- nil
 
 	// Use the base context for errgroup
 	g, gCtx := errgroup.WithContext(ctx)
