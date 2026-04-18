@@ -41,6 +41,8 @@ func New[T any, K Validatable](
 
 // Get returns the service instance, validating the config and initializing the service instance on first call.
 // Subsequent calls return the cached instance. Thread-safe.
+//
+//nolint:revive // ctx accepted for interface compat and future async factories; unused since init is synchronous.
 func (p *Provider[T, K]) Get(ctx context.Context) (T, error) {
 	p.once.Do(func() {
 		if err := p.cfg.Validate(p.validationContext); err != nil {
