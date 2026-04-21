@@ -95,7 +95,7 @@ func (oc *OrdererClient) send(ctx context.Context, env *cb.Envelope) error {
 	}
 
 	if status.GetStatus() != cb.Status_SUCCESS {
-		return fmt.Errorf("got error %#v", status.GetStatus())
+		return fmt.Errorf("orderer rejected transaction with status %s", status.GetStatus())
 	}
 
 	return nil

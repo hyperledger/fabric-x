@@ -25,6 +25,7 @@ func newTestNotificationClient(waitingTimeout time.Duration) *NotificationClient
 		requestQueue:  make(chan *committerpb.NotificationRequest),
 		responseQueue: make(chan *committerpb.NotificationResponse),
 		subscribers:   make(map[string][]chan int),
+		done:          make(chan struct{}),
 	}
 }
 
@@ -183,4 +184,51 @@ func TestNotificationClient_Close_NilFunc(t *testing.T) {
 
 	nc := &NotificationClient{}
 	require.NoError(t, nc.Close())
+}
+
+// Stream termination tests
+
+// TestNotificationClient_ListenExit_UnblocksWaitForEvent verifies that when the
+// listener goroutine terminates (simulated by closing subscriber channels and done),
+// WaitForEvent returns ErrNotificationStreamClosed instead of hanging until the
+// caller's context deadline.
+func TestNotificationClient_ListenExit_UnblocksWaitForEvent(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(10 * time.Second)
+
+	// Register a subscriber as if Subscribe() had been called.
+	ch := make(chan int, 1)
+	nc.subscribersMu.Lock()
+	nc.subscribers["tx-orphan"] = []chan int{ch}
+	nc.subscribersMu.Unlock()
+
+	// Simulate listen() exiting: close subscriber channels, clear map, close done.
+	nc.subscribersMu.Lock()
+	for _, receivers := range nc.subscribers {
+		for _, c := range receivers {
+			close(c)
+		}
+	}
+	clear(nc.subscribers)
+	nc.subscribersMu.Unlock()
+	close(nc.done)
+
+	// WaitForEvent must return ErrNotificationStreamClosed immediately, not block
+	// for the 10-second WaitingTimeout.
+	_, err := nc.WaitForEvent(t.Context(), ch)
+	require.ErrorIs(t, err, ErrNotificationStreamClosed)
+}
+
+// TestNotificationClient_SubscribeAfterListenExit_ReturnsSentinel verifies that
+// Subscribe fails fast with ErrNotificationStreamClosed after the listener has
+// exited, rather than blocking forever on the unbuffered requestQueue.
+func TestNotificationClient_SubscribeAfterListenExit_ReturnsSentinel(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(10 * time.Second)
+	close(nc.done)
+
+	_, err := nc.Subscribe(t.Context(), "tx-dead")
+	require.ErrorIs(t, err, ErrNotificationStreamClosed)
 }

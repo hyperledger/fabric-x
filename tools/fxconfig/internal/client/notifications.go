@@ -19,6 +19,12 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
+// ErrNotificationStreamClosed is returned when the notification stream has
+// terminated, either because the gRPC stream failed or the client was closed.
+// Callers receive this from Subscribe or WaitForEvent instead of blocking until
+// their own context deadline expires.
+var ErrNotificationStreamClosed = errors.New("notification stream closed")
+
 // NotificationClient provides a gRPC client for receiving transaction status notifications.
 // It manages bidirectional streaming with the committer notification service and multiplexes
 // notifications to multiple subscribers per transaction ID.
@@ -32,6 +38,10 @@ type NotificationClient struct {
 
 	subscribers   map[string][]chan int
 	subscribersMu sync.RWMutex
+
+	// done is closed when listen() returns. Subscribers use it to fail fast
+	// instead of blocking on requestQueue or their own context deadline.
+	done chan struct{}
 }
 
 // NewNotificationClient creates a notification client with the provided configuration.
@@ -54,12 +64,12 @@ func NewNotificationClient(cfg config.NotificationsConfig) (*NotificationClient,
 		requestQueue:  make(chan *committerpb.NotificationRequest),
 		responseQueue: make(chan *committerpb.NotificationResponse),
 		subscribers:   make(map[string][]chan int),
+		done:          make(chan struct{}),
 	}
 
 	go func() {
 		if err := nc.listen(ctx); err != nil && !errors.Is(err, context.Canceled) {
-			fmt.Printf("error: Notification listener stream terminated unexpectedly: %s\n", err)
-			// logger.Errorf("Notification listener stream terminated unexpectedly for %s: %s", key, err)
+			logger.Errorf("Notification listener stream terminated unexpectedly: %s", err)
 		}
 	}()
 
@@ -76,14 +86,32 @@ func (n *NotificationClient) Close() error {
 
 // Subscribe registers interest in a transaction's status and returns a channel for notifications.
 // Multiple subscribers to the same txID share a single upstream subscription.
+// If the listener has terminated, Subscribe fails fast with ErrNotificationStreamClosed
+// instead of blocking on requestQueue.
 func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan int, error) {
+	// fast-path checks before mutating state
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+	}
+
 	receiverCh := make(chan int, 1)
 
 	n.subscribersMu.Lock()
-	defer n.subscribersMu.Unlock()
+	// Recheck done under the lock so we serialize with listen()'s cleanup: if
+	// cleanup has already closed subscriber channels and cleared the map, we
+	// must not append a stale entry that will never be delivered or closed.
+	select {
+	case <-n.done:
+		n.subscribersMu.Unlock()
+		return nil, ErrNotificationStreamClosed
+	default:
+	}
 
 	subscribers := n.subscribers[txID]
 	n.subscribers[txID] = append(subscribers, receiverCh)
+	n.subscribersMu.Unlock()
 
 	if len(subscribers) > 0 {
 		// we already have an active subscription for this txID
@@ -98,17 +126,12 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 		Timeout: durationpb.New(n.cfg.WaitingTimeout),
 	}
 
-	// check if our ctx is still open
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	default:
-	}
-
 	// try to push to request queue
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
+	case <-n.done:
+		return nil, ErrNotificationStreamClosed
 	case n.requestQueue <- req:
 	}
 
@@ -130,11 +153,13 @@ func wait(ctx context.Context, subscription chan int) (int, error) {
 	default:
 	}
 
-	// try to push to request queue
 	select {
 	case <-ctx.Done():
 		return 0, ctx.Err()
-	case status := <-subscription:
+	case status, ok := <-subscription:
+		if !ok {
+			return 0, ErrNotificationStreamClosed
+		}
 		return status, nil
 	}
 }
@@ -232,8 +257,19 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 
 	err = g.Wait()
 
-	// Cleanup subscribers map when listen() exits
+	// Signal termination first so Subscribe() can detect stream death under
+	// the lock before any new entries are appended to the map.
+	close(n.done)
+
+	// Close every waiting subscriber channel so callers in wait() unblock
+	// with ErrNotificationStreamClosed immediately, without waiting for their
+	// own context deadline to expire.
 	n.subscribersMu.Lock()
+	for _, receivers := range n.subscribers {
+		for _, ch := range receivers {
+			close(ch)
+		}
+	}
 	clear(n.subscribers)
 	n.subscribersMu.Unlock()
 
