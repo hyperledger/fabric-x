@@ -52,27 +52,27 @@ type LoggingConfig struct {
 // It specifies which organization identity to use for signing transactions.
 type MSPConfig struct {
 	LocalMspID string      `mapstructure:"localMspID" yaml:"localMspID,omitempty" desc:"MSP ID of the organization"`
-	ConfigPath string      `mapstructure:"configPath" yaml:"configPath,omitempty" desc:"Path to MSP configuration directory"`
-	BCCSP      BCCSPConfig `mapstructure:"bccsp" yaml:"bccsp,omitempty" desc:"BCCSP (crypto provider) configuration; leave empty for default file-based keystore"`
+	ConfigPath string      `mapstructure:"configPath" yaml:"configPath,omitempty" desc:"MSP config directory"`
+	BCCSP      BCCSPConfig `mapstructure:"bccsp" yaml:"bccsp,omitempty" desc:"BCCSP config; empty uses file keystore"`
 }
 
 // BCCSPConfig configures the BCCSP (Blockchain Crypto Service Provider).
 // Leaving PKCS11.Library empty falls back to the default file-based software BCCSP,
 // which reads keys from <ConfigPath>/keystore.
 type BCCSPConfig struct {
-	PKCS11 PKCS11Config `mapstructure:"pkcs11" yaml:"pkcs11,omitempty" desc:"PKCS#11 HSM/KMS provider configuration; enables PKCS11 mode when Library is set"`
+	PKCS11 PKCS11Config `mapstructure:"pkcs11" yaml:"pkcs11,omitempty" desc:"PKCS#11 config; enabled by Library"`
 }
 
 // PKCS11Config configures a PKCS#11 HSM/KMS crypto provider.
 // When Library is non-empty, PKCS11 mode is activated and keys are loaded from the HSM
 // rather than from a file-based keystore.
 type PKCS11Config struct {
-	Library        string `mapstructure:"library" yaml:"library,omitempty" desc:"Path to the PKCS#11 shared library (.so)"`
+	Library        string `mapstructure:"library" yaml:"library,omitempty" desc:"Path to the PKCS#11 shared library"`
 	Label          string `mapstructure:"label" yaml:"label,omitempty" desc:"PKCS#11 token label"`
 	Pin            string `mapstructure:"pin" yaml:"pin,omitempty" desc:"PKCS#11 user PIN"`
 	Hash           string `mapstructure:"hash" yaml:"hash,omitempty" desc:"Hash family (SHA2 or SHA3)" default:"SHA2"`
-	Security       int    `mapstructure:"security" yaml:"security,omitempty" desc:"Security level in bits (256 or 384)" default:"256"`
-	SoftwareVerify bool   `mapstructure:"softwareVerify" yaml:"softwareVerify,omitempty" desc:"Perform signature verification in software"`
+	Security       int    `mapstructure:"security" yaml:"security,omitempty" desc:"Security bits" default:"256"`
+	SoftwareVerify bool   `mapstructure:"softwareVerify" yaml:"softwareVerify,omitempty" desc:"Software verification"`
 	Immutable      bool   `mapstructure:"immutable" yaml:"immutable,omitempty" desc:"Treat keys as immutable"`
 }
 

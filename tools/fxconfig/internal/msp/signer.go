@@ -8,6 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 package msp
 
 import (
+	"errors"
 	"fmt"
 	"path"
 
@@ -119,12 +120,13 @@ func newPKCS11BCCSP(cfg config.PKCS11Config) (bccsp.BCCSP, error) {
 // PKCS11 manages keys inside the HSM/KMS; no file-based storage is needed.
 type dummyKeyStore struct{}
 
-func (ks *dummyKeyStore) ReadOnly() bool { return true }
+func (*dummyKeyStore) ReadOnly() bool { return true }
 
-func (ks *dummyKeyStore) GetKey(ski []byte) (bccsp.Key, error) {
-	return nil, fmt.Errorf("not implemented - keys are managed by PKCS11")
+//nolint:ireturn // interface return is required by the bccsp.KeyStore contract
+func (*dummyKeyStore) GetKey(_ []byte) (bccsp.Key, error) {
+	return nil, errors.New("not implemented - keys are managed by PKCS11")
 }
 
-func (ks *dummyKeyStore) StoreKey(k bccsp.Key) error {
-	return fmt.Errorf("not implemented - keys are managed by PKCS11")
+func (*dummyKeyStore) StoreKey(_ bccsp.Key) error {
+	return errors.New("not implemented - keys are managed by PKCS11")
 }
