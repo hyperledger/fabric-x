@@ -8,12 +8,22 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
+
+	"github.com/cenkalti/backoff/v5"
+	"github.com/hyperledger/fabric-lib-go/common/flogging"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
+
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 )
+
+var logger = flogging.MustGetLogger("app")
+
+const defaultBroadcastRetryTimeout = 30 * time.Second
 
 // TxStatus represents the finality status of a submitted transaction.
 type TxStatus = int
@@ -32,8 +42,9 @@ func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *appli
 		_ = sc.ordererClient.Close()
 	}()
 
-	if err := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx); err != nil {
-		return fmt.Errorf("failed to broadcast transaction: %w", err)
+	broadcastErr := broadcastTransaction(ctx, sc, txID, tx)
+	if broadcastErr != nil {
+		return fmt.Errorf("failed to broadcast transaction: %w", broadcastErr)
 	}
 
 	return nil
@@ -65,8 +76,9 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 		return UnknownStatus, fmt.Errorf("failed to subscribe to transaction events: %w", err)
 	}
 
-	if err := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx); err != nil {
-		return UnknownStatus, fmt.Errorf("failed to broadcast transaction: %w", err)
+	broadcastErr := broadcastTransaction(ctx, sc, txID, tx)
+	if broadcastErr != nil {
+		return UnknownStatus, fmt.Errorf("failed to broadcast transaction: %w", broadcastErr)
 	}
 
 	status, err := nc.WaitForEvent(ctx, subscription)
@@ -80,6 +92,87 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 type submissionContext struct {
 	signingIdentity msp.SigningIdentity
 	ordererClient   adapters.OrdererClient
+	retryTimeout    time.Duration
+}
+
+func broadcastTransaction(
+	ctx context.Context,
+	sc *submissionContext,
+	txID string,
+	tx *applicationpb.Tx,
+) error {
+	bo := backoff.NewExponentialBackOff()
+	bo.InitialInterval = 100 * time.Millisecond
+	bo.Multiplier = 2
+	bo.MaxInterval = 2 * time.Second
+	maxElapsedTime := retryTimeout(sc.retryTimeout)
+
+	attempt := 0
+	// backoff/v5 binds cancellation via Retry(ctx, ...); there is no WithContext helper in v5.
+	_, err := backoff.Retry(ctx, func() (struct{}, error) {
+		attempt++
+
+		broadcastErr := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx)
+		if broadcastErr == nil {
+			if attempt > 1 {
+				logger.Info("transaction broadcast succeeded after retry",
+					"attempt", attempt,
+				)
+			}
+			return struct{}{}, nil
+		}
+
+		if !isRetryable(broadcastErr) {
+			logger.Error("non-retryable broadcast error",
+				"attempt", attempt,
+				"error", broadcastErr,
+			)
+			return struct{}{}, backoff.Permanent(broadcastErr)
+		}
+
+		return struct{}{}, broadcastErr
+	},
+		backoff.WithBackOff(bo),
+		backoff.WithMaxElapsedTime(maxElapsedTime),
+		backoff.WithNotify(func(retryErr error, nextBackOff time.Duration) {
+			if errors.Is(retryErr, context.Canceled) || errors.Is(retryErr, context.DeadlineExceeded) {
+				logger.Info("transaction broadcast canceled",
+					"attempt", attempt,
+					"error", retryErr,
+				)
+				return
+			}
+
+			logger.Warn("transaction broadcast failed",
+				"attempt", attempt,
+				"error", retryErr,
+				"next_retry_in", nextBackOff,
+			)
+		}),
+	)
+	if err != nil {
+		return fmt.Errorf("broadcast failed after %d attempts: %w", attempt, err)
+	}
+
+	return nil
+}
+
+func retryTimeout(timeout time.Duration) time.Duration {
+	if timeout <= 0 {
+		return defaultBroadcastRetryTimeout
+	}
+
+	return timeout
+}
+
+func isRetryable(err error) bool {
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return false
+	}
+
+	// TODO: refine retryable error classification based on orderer error types.
+
+	return true
 }
 
 func (d *AdminApp) prepareSubmission(_ context.Context) (*submissionContext, error) {
@@ -98,5 +191,6 @@ func (d *AdminApp) prepareSubmission(_ context.Context) (*submissionContext, err
 	return &submissionContext{
 		signingIdentity: sid,
 		ordererClient:   oc,
+		retryTimeout:    oc.ConnectionTimeout(),
 	}, nil
 }

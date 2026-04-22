@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	cb "github.com/hyperledger/fabric-protos-go-apiv2/common"
 	ab "github.com/hyperledger/fabric-protos-go-apiv2/orderer"
@@ -67,6 +68,11 @@ func (oc *OrdererClient) Broadcast(
 	}
 
 	return oc.send(ctx, env)
+}
+
+// ConnectionTimeout returns the configured connection timeout for this orderer client.
+func (oc *OrdererClient) ConnectionTimeout() time.Duration {
+	return oc.cfg.ConnectionTimeout
 }
 
 // send transmits the envelope to the orderer and waits for acknowledgment.

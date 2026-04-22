@@ -22,11 +22,31 @@ import (
 )
 
 type mockOrdererClient struct {
-	broadcastErr error
+	broadcastErr   error
+	broadcastErrs  []error
+	broadcastCalls int
+	timeout        time.Duration
 }
 
 func (m *mockOrdererClient) Broadcast(_ context.Context, _ msp.SigningIdentity, _ string, _ *applicationpb.Tx) error {
+	m.broadcastCalls++
+	if len(m.broadcastErrs) > 0 {
+		idx := m.broadcastCalls - 1
+		if idx < len(m.broadcastErrs) {
+			return m.broadcastErrs[idx]
+		}
+		return m.broadcastErrs[len(m.broadcastErrs)-1]
+	}
+
 	return m.broadcastErr
+}
+
+func (m *mockOrdererClient) ConnectionTimeout() time.Duration {
+	if m.timeout == 0 {
+		return 350 * time.Millisecond
+	}
+
+	return m.timeout
 }
 
 func (*mockOrdererClient) Close() error { return nil }
@@ -126,6 +146,44 @@ func TestSubmitTransaction_BroadcastError(t *testing.T) {
 
 	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
 	require.Error(t, err)
+}
+
+func TestSubmitTransaction_BroadcastRetrySucceeds(t *testing.T) {
+	t.Parallel()
+
+	mockClient := &mockOrdererClient{
+		broadcastErrs: []error{errors.New("temporary error"), nil},
+	}
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
+	}
+
+	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
+	require.NoError(t, err)
+	require.Equal(t, 2, mockClient.broadcastCalls)
+}
+
+func TestSubmitTransaction_BroadcastRetryExhausted(t *testing.T) {
+	t.Parallel()
+
+	mockClient := &mockOrdererClient{
+		broadcastErrs: []error{
+			errors.New("broadcast failed"),
+			errors.New("broadcast failed"),
+			errors.New("broadcast failed"),
+		},
+	}
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
+	}
+
+	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
+	require.Error(t, err)
+	require.GreaterOrEqual(t, mockClient.broadcastCalls, 2)
 }
 
 func TestSubmitTransaction_Success(t *testing.T) {
