@@ -156,7 +156,7 @@ func TestSubmitTransaction_ContextCancelled(t *testing.T) {
 
 	a := &AdminApp{
 		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+		OrdererProvider: makeOrdererProvider(&mockOrdererClient{broadcastErr: context.Canceled}, nil),
 	}
 
 	ctx, cancel := context.WithCancel(t.Context())
@@ -175,9 +175,9 @@ func TestSubmitTransaction_Timeout(t *testing.T) {
 		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Nanosecond)
+	ctx, cancel := context.WithTimeout(t.Context(), time.Nanosecond)
 	defer cancel()
-	time.Sleep(time.Millisecond)
+	<-ctx.Done()
 
 	err := a.SubmitTransaction(ctx, "tx-1", someTx())
 	require.Error(t, err)
@@ -196,6 +196,7 @@ func TestSubmitTransaction_EmptyTransactionID(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "txID is required")
 }
+
 // SubmitTransactionWithWait tests
 
 func TestSubmitTransactionWithWait_MspProviderError(t *testing.T) {
