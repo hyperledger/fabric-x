@@ -59,7 +59,7 @@ func TestPersistentPreRunE_ViaConfigFlag(t *testing.T) {
 	rootCmd := NewRootCommand(cliCtx, func(_ *config.Config) (app.Application, error) {
 		return &testApp{}, nil
 	})
-	rootCmd.SetArgs([]string{"--config", configPath, "info"})
+	rootCmd.SetArgs([]string{"--config", configPath, "version"})
 
 	require.NoError(t, rootCmd.Execute())
 
@@ -85,7 +85,7 @@ func TestPersistentPreRunE_ViaProjectConfig(t *testing.T) { //nolint:paralleltes
 	rootCmd := NewRootCommand(cliCtx, func(_ *config.Config) (app.Application, error) {
 		return &testApp{}, nil
 	})
-	rootCmd.SetArgs([]string{"info"})
+	rootCmd.SetArgs([]string{"version"})
 
 	require.NoError(t, rootCmd.Execute())
 

@@ -11,9 +11,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
-
-	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
 
 func TestVersionCommand(t *testing.T) {
@@ -21,11 +20,27 @@ func TestVersionCommand(t *testing.T) {
 
 	tests := []struct {
 		name           string
+		args           []string
 		expectedOutput []string
+		expectError    bool
 	}{
 		{
-			name:           "version command output",
+			name:           "version command with no args",
+			args:           []string{"version"},
 			expectedOutput: []string{"fxconfig", "Version:", "Go version:", "OS/Arch:"},
+			expectError:    false,
+		},
+		{
+			name:           "version command with help flag",
+			args:           []string{"version", "--help"},
+			expectedOutput: []string{"Usage:", "fxconfig version"},
+			expectError:    false,
+		},
+		{
+			name:           "version command with invalid flag",
+			args:           []string{"version", "--invalid"},
+			expectedOutput: []string{"unknown flag: --invalid"},
+			expectError:    true,
 		},
 	}
 
@@ -33,17 +48,28 @@ func TestVersionCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var outBuf bytes.Buffer
-			ctx := &CLIContext{
-				Printer: cliio.NewCLIPrinter(&outBuf, &outBuf, cliio.FormatTable),
-			}
+			rootCmd := &cobra.Command{Use: "fxconfig"}
+			rootCmd.AddCommand(NewVersionCommand())
 
-			cmd := NewVersionCommand(ctx)
-			cmd.Run(cmd, nil)
+			var outBuf, errBuf bytes.Buffer
+			rootCmd.SetOut(&outBuf)
+			rootCmd.SetErr(&errBuf)
+			rootCmd.SetArgs(tt.args)
 
-			output := outBuf.String()
-			for _, expected := range tt.expectedOutput {
-				require.Contains(t, output, expected)
+			err := rootCmd.Execute()
+
+			if tt.expectError {
+				require.Error(t, err)
+				output := errBuf.String()
+				for _, expected := range tt.expectedOutput {
+					require.Contains(t, output, expected, "error output should contain expected text")
+				}
+			} else {
+				require.NoError(t, err)
+				output := outBuf.String()
+				for _, expected := range tt.expectedOutput {
+					require.Contains(t, output, expected, "output should contain expected text")
+				}
 			}
 		})
 	}
@@ -52,19 +78,21 @@ func TestVersionCommand(t *testing.T) {
 func TestVersionCommand_OutputFormat(t *testing.T) {
 	t.Parallel()
 
-	var outBuf bytes.Buffer
-	ctx := &CLIContext{
-		Printer: cliio.NewCLIPrinter(&outBuf, &outBuf, cliio.FormatTable),
-	}
+	rootCmd := &cobra.Command{Use: "fxconfig"}
+	rootCmd.AddCommand(NewVersionCommand())
 
-	cmd := NewVersionCommand(ctx)
-	cmd.Run(cmd, nil)
+	var outBuf bytes.Buffer
+	rootCmd.SetOut(&outBuf)
+	rootCmd.SetArgs([]string{"version"})
+
+	err := rootCmd.Execute()
+	require.NoError(t, err)
 
 	output := outBuf.String()
 	lines := strings.Split(strings.TrimSpace(output), "\n")
 
 	require.GreaterOrEqual(t, len(lines), 5, "version output should have at least 5 lines")
-	require.Equal(t, "fxconfig", strings.TrimSpace(lines[0]), "first line should be 'fxconfig'")
+	require.Equal(t, "fxconfig", lines[0], "first line should be 'fxconfig'")
 
 	for i := 1; i < len(lines); i++ {
 		line := lines[i]
@@ -78,13 +106,10 @@ func TestVersionCommand_OutputFormat(t *testing.T) {
 func TestNewVersionCommand(t *testing.T) {
 	t.Parallel()
 
-	ctx := &CLIContext{
-		Printer: cliio.NewCLIPrinter(&bytes.Buffer{}, &bytes.Buffer{}, cliio.FormatTable),
-	}
-	cmd := NewVersionCommand(ctx)
+	cmd := NewVersionCommand()
 
-	require.NotNil(t, cmd)
-	require.Equal(t, "version", cmd.Use)
-	require.NotEmpty(t, cmd.Short)
-	require.NotNil(t, cmd.Run)
+	require.NotNil(t, cmd, "NewVersionCommand should return a non-nil command")
+	require.Equal(t, "version", cmd.Use, "command use should be 'version'")
+	require.NotEmpty(t, cmd.Short, "command should have a short description")
+	require.NotNil(t, cmd.Run, "command should have a Run function")
 }

@@ -72,7 +72,7 @@ Configuration can be provided via:
 		"Config file (default is $HOME/.fxconfig/config.yaml)")
 
 	// Register all subcommands
-	rootCmd.AddCommand(NewVersionCommand(cliCtx))
+	rootCmd.AddCommand(NewVersionCommand())
 	rootCmd.AddCommand(NewInfoCommand(cliCtx))
 	rootCmd.AddCommand(NewNsRootCommand(cliCtx))
 	rootCmd.AddCommand(NewTxRootCommand(cliCtx))
