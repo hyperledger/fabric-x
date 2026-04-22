@@ -138,6 +138,35 @@ func TestInfoCommand_PrintsEnvConfig(t *testing.T) {
 	require.Contains(t, output, "FXCONFIG_NOTIFICATIONS_ADDRESS=localhost:7001")
 }
 
+func TestInfoCommand_PrintsEnvConfig_MultipleCerts(t *testing.T) {
+	t.Parallel()
+
+	boolPtr := func(b bool) *bool { return &b }
+
+	var outBuf bytes.Buffer
+	ctx := &CLIContext{
+		Config: &config.Config{
+			TLS: config.TLSConfig{
+				Enabled:        boolPtr(true),
+				ClientKeyPath:  "/path/to/client.key",
+				ClientCertPath: "/path/to/client.crt",
+				RootCertPaths:  []string{"/path/to/ca1.crt", "/path/to/ca2.crt"},
+			},
+		},
+		Printer: cliio.NewCLIPrinter(&outBuf, &outBuf, cliio.FormatTable),
+	}
+
+	cmd := NewInfoCommand(ctx)
+	err := cmd.Flags().Set("format", "env")
+	require.NoError(t, err)
+
+	err = cmd.RunE(cmd, nil)
+	require.NoError(t, err)
+
+	output := outBuf.String()
+	require.Contains(t, output, "FXCONFIG_TLS_ROOTCERTS=/path/to/ca1.crt,/path/to/ca2.crt")
+}
+
 func TestInfoCommand_InvalidFormat(t *testing.T) {
 	t.Parallel()
 

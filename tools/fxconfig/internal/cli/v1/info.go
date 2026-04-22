@@ -15,6 +15,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// NewInfoCommand returns a command that displays the effective configuration.
+// The configuration is shown in the requested format (yaml or env) after applying
+// all overrides from flags, environment variables, and config files.
 func NewInfoCommand(ctx *CLIContext) *cobra.Command {
 	var format string
 	cmd := &cobra.Command{
