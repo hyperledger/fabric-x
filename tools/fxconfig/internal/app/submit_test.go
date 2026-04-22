@@ -25,7 +25,12 @@ type mockOrdererClient struct {
 	broadcastErr error
 }
 
-func (m *mockOrdererClient) Broadcast(ctx context.Context, _ msp.SigningIdentity, txID string, _ *applicationpb.Tx) error {
+func (m *mockOrdererClient) Broadcast(
+	ctx context.Context,
+	_ msp.SigningIdentity,
+	txID string,
+	_ *applicationpb.Tx,
+) error {
 	if txID == "" {
 		return errors.New("txID is required")
 	}
