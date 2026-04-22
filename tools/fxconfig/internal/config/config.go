@@ -61,9 +61,11 @@ type MSPConfig struct {
 
 // BCCSPConfig contains BCCSP (crypto provider) settings for MSP instantiation.
 // Defaults to software-based provider with SHA2-256 and file keystore.
+// To use a PKCS#11 HSM, set PKCS11.Library (requires building with -tags pkcs11).
 type BCCSPConfig struct {
-	Default string        `mapstructure:"default" yaml:"default,omitempty" default:"SW"`
-	SW      BCCSPSWConfig `mapstructure:"sw" yaml:"sw,omitempty"`
+	Default string            `mapstructure:"default" yaml:"default,omitempty" default:"SW"`
+	SW      BCCSPSWConfig     `mapstructure:"sw" yaml:"sw,omitempty"`
+	PKCS11  BCCSPPKCS11Config `mapstructure:"pkcs11" yaml:"pkcs11,omitempty"`
 }
 
 // BCCSPSWConfig contains software provider settings.
@@ -78,8 +80,23 @@ type BCCSPFileKeyStoreConfig struct {
 	KeyStorePath string `mapstructure:"keyStorePath" yaml:"keyStorePath,omitempty"`
 }
 
+// BCCSPPKCS11Config contains PKCS#11 HSM provider settings.
+// When Library is set (and the binary is built with -tags pkcs11), the signer
+// uses the HSM for key material instead of a file-based keystore.
+type BCCSPPKCS11Config struct {
+	Library        string `mapstructure:"library" yaml:"library,omitempty"`
+	Label          string `mapstructure:"label" yaml:"label,omitempty"`
+	Pin            string `mapstructure:"pin" yaml:"pin,omitempty"`
+	Hash           string `mapstructure:"hash" yaml:"hash,omitempty"`
+	Security       int    `mapstructure:"security" yaml:"security,omitempty"`
+	SoftwareVerify bool   `mapstructure:"softwareVerify" yaml:"softwareVerify,omitempty"`
+	Immutable      bool   `mapstructure:"immutable" yaml:"immutable,omitempty"`
+}
+
 // ToFactoryOpts converts fxconfig MSP BCCSP configuration into Fabric factory options.
 // If keyStorePath is not set, it defaults to <msp.configPath>/keystore.
+// If BCCSP.PKCS11.Library is set and the binary is built with -tags pkcs11, the
+// factory is configured for the PKCS#11 provider instead of SW.
 func (c MSPConfig) ToFactoryOpts() *factory.FactoryOpts {
 	opts := &factory.FactoryOpts{
 		Default: cmp.Or(c.BCCSP.Default, "SW"),
@@ -91,6 +108,8 @@ func (c MSPConfig) ToFactoryOpts() *factory.FactoryOpts {
 			},
 		},
 	}
+
+	applyPKCS11Opts(opts, c.BCCSP.PKCS11)
 
 	return opts
 }
