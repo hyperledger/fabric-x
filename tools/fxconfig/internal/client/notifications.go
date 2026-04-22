@@ -92,15 +92,16 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 
 	receiverCh := make(chan int, 1)
 	n.subscribersMu.Lock()
-	defer n.subscribersMu.Unlock()
 
 	subscribers := n.subscribers[txID]
 	n.subscribers[txID] = append(subscribers, receiverCh)
 
 	if len(subscribers) > 0 {
 		// we already have an active subscription for this txID
+		n.subscribersMu.Unlock()
 		return receiverCh, nil
 	}
+	n.subscribersMu.Unlock()
 
 	// setup request
 	req := &committerpb.NotificationRequest{
@@ -113,7 +114,7 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	// check if our ctx is still open
 	select {
 	case <-ctx.Done():
-		delete(n.subscribers, txID)
+		n.removeSubscriber(txID, receiverCh)
 		return nil, ctx.Err()
 	default:
 	}
@@ -121,12 +122,41 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	// try to push to request queue
 	select {
 	case <-ctx.Done():
-		delete(n.subscribers, txID)
+		n.removeSubscriber(txID, receiverCh)
 		return nil, ctx.Err()
 	case n.requestQueue <- req:
 	}
 
 	return receiverCh, nil
+}
+
+func (n *NotificationClient) removeSubscriber(txID string, receiverCh chan int) {
+	// removeSubscriber can race logically with dispatcher cleanup in listen(),
+	// where completed txIDs are also deleted from n.subscribers. The shared
+	// subscribersMu lock plus the missing-key guard below makes this idempotent
+	// and safe regardless of which path removes the entry first.
+	n.subscribersMu.Lock()
+	defer n.subscribersMu.Unlock()
+
+	subscribers, ok := n.subscribers[txID]
+	if !ok {
+		return
+	}
+
+	for i, ch := range subscribers {
+		if ch != receiverCh {
+			continue
+		}
+
+		subscribers = append(subscribers[:i], subscribers[i+1:]...)
+		if len(subscribers) == 0 {
+			delete(n.subscribers, txID)
+			return
+		}
+
+		n.subscribers[txID] = subscribers
+		return
+	}
 }
 
 // WaitForEvent blocks until a status notification arrives or the timeout expires.

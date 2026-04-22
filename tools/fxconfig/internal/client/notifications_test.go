@@ -155,6 +155,39 @@ func TestNotificationClient_Subscribe_ContextCanceled(t *testing.T) {
 	require.ErrorIs(t, err, context.Canceled)
 }
 
+func TestNotificationClient_Subscribe_CancelKeepsExistingSubscribers(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Second)
+	txID := "tx1"
+
+	firstCtx, cancelFirst := context.WithCancel(context.Background())
+	firstErrCh := make(chan error, 1)
+	go func() {
+		_, err := nc.Subscribe(firstCtx, txID)
+		firstErrCh <- err
+	}()
+
+	require.Eventually(t, func() bool {
+		nc.subscribersMu.RLock()
+		defer nc.subscribersMu.RUnlock()
+		return len(nc.subscribers[txID]) == 1
+	}, time.Second, time.Millisecond)
+
+	secondCh, err := nc.Subscribe(t.Context(), txID)
+	require.NoError(t, err)
+	require.NotNil(t, secondCh)
+
+	cancelFirst()
+	require.ErrorIs(t, <-firstErrCh, context.Canceled)
+
+	nc.subscribersMu.RLock()
+	subscribers := append([]chan int(nil), nc.subscribers[txID]...)
+	nc.subscribersMu.RUnlock()
+	require.Len(t, subscribers, 1)
+	require.Equal(t, secondCh, subscribers[0])
+}
+
 func TestNotificationClient_Subscribe_NoStaleSubscriberOnContextCancel(t *testing.T) {
 	t.Parallel()
 
