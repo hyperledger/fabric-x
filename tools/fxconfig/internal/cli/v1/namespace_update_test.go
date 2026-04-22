@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
@@ -69,7 +70,7 @@ func TestNsUpdateCommandRun_NoTx(t *testing.T) {
 	t.Parallel()
 
 	mockApp := &testApp{}
-	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).Return(nil, app.UnknownStatus, nil)
+	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).Return(nil, int(committerpb.Status_COMMITTED), nil)
 
 	var printerOut bytes.Buffer
 	cmd := newNsUpdateCommand(&CLIContext{
@@ -82,6 +83,28 @@ func TestNsUpdateCommandRun_NoTx(t *testing.T) {
 	err := cmd.RunE(cmd, []string{"my-namespace"})
 
 	require.NoError(t, err)
-	require.Contains(t, printerOut.String(), "Transaction status: STATUS_UNSPECIFIED")
+	require.Contains(t, printerOut.String(), "Transaction status: COMMITTED")
+	mockApp.AssertExpectations(t)
+}
+
+func TestNsUpdateCommandRun_WaitFailed(t *testing.T) {
+	t.Parallel()
+
+	mockApp := &testApp{}
+	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).Return(nil, int(committerpb.Status_ABORTED_SIGNATURE_INVALID), nil)
+
+	var printerOut bytes.Buffer
+	cmd := newNsUpdateCommand(&CLIContext{
+		App:     mockApp,
+		Printer: cliio.NewCLIPrinter(&printerOut, &printerOut, cliio.FormatTable),
+	})
+	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
+	require.NoError(t, cmd.Flags().Set("version", "0"))
+
+	err := cmd.RunE(cmd, []string{"my-namespace"})
+
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "transaction failed with status: ABORTED_SIGNATURE_INVALID")
+	require.Contains(t, printerOut.String(), "Transaction status: ABORTED_SIGNATURE_INVALID")
 	mockApp.AssertExpectations(t)
 }
