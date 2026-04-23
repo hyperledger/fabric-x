@@ -75,12 +75,10 @@ Code and more details can be found under [Fabric-X-Committer Github repository](
 
 | Tool | Version | Install |
 |------|---------|----------|
-| Go | **1.25.5+** (required) | https://go.dev/dl |
+| Go | **1.26+** | https://go.dev/dl |
 | golangci-lint | **v2.11.4+** | `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.4` |
 | Docker | 20.x+ | https://docs.docker.com/get-docker |
 | GNU Make | any | `sudo apt install make` |
-
-> ℹ️ golangci-lint v2.11.4+ is built with Go 1.25 and supports this project's Go version requirement.
 
 ## Run the network
 
@@ -103,7 +101,7 @@ To set up the network yourself, follow the tutorial in the [sample deployment sc
 
 ## Useful links
 
-- [Sample token application](https://github.com/iliecirciumaru/fabric-x/tree/main/samples/tokens)
+- [Sample token application](./samples/tokens)
 - [Fabric/Fabric-X monthly calls on the 3rd Wed of the month](https://zoom-lfx.platform.linuxfoundation.org/meetings/fabric?view=month)
 - [Fabric-X Blog](https://www.lfdecentralizedtrust.org/blog/new-major-contribution-to-hyperledger-fabric-purpose-built-implementation-for-next-gen-digital-assets)
 - [Fabric-X whitepaper](https://eprint.iacr.org/2023/1717.pdf) - detailed description of the Fabric-X. Explains motivation,implementation details and presents performance benchmarks
