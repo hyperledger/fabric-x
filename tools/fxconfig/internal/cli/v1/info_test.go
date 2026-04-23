@@ -134,6 +134,7 @@ func TestInfoCommand_PrintsEnvConfig(t *testing.T) {
 	require.Contains(t, output, "FXCONFIG_TLS_ROOTCERTS=/path/to/ca.crt")
 	require.Contains(t, output, "FXCONFIG_ORDERER_ADDRESS=localhost:7050")
 	require.Contains(t, output, "FXCONFIG_ORDERER_CHANNEL=mychannel")
+	require.Contains(t, output, "FXCONFIG_ORDERER_CONNECTIONTIMEOUT=30s")
 	require.Contains(t, output, "FXCONFIG_QUERIES_ADDRESS=localhost:7001")
 	require.Contains(t, output, "FXCONFIG_NOTIFICATIONS_ADDRESS=localhost:7001")
 }

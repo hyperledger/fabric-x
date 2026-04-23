@@ -46,7 +46,10 @@ Examples:
 		RunE: func(_ *cobra.Command, _ []string) error {
 			switch format {
 			case "env":
-				env := toEnv("FXCONFIG", ctx.Config)
+				env, err := toEnv("FXCONFIG", ctx.Config)
+				if err != nil {
+					return err
+				}
 				slices.Sort(env)
 				ctx.Printer.Print(strings.Join(env, "\n") + "\n")
 			case "yaml":
@@ -67,20 +70,20 @@ Examples:
 	return cmd
 }
 
-func toEnv(prefix string, cfg any) []string {
+func toEnv(prefix string, cfg any) ([]string, error) {
 	// we use yaml marshaling as a shortcut to get a map representation of the config
 	// that respects all yaml tags and omitempty.
 	out, err := yaml.Marshal(cfg)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	var m map[string]any
 	if err := yaml.Unmarshal(out, &m); err != nil {
-		return nil
+		return nil, err
 	}
 
-	return flatten(prefix, m)
+	return flatten(prefix, m), nil
 }
 
 func flatten(prefix string, m map[string]any) []string {
