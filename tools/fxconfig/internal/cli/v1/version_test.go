@@ -48,6 +48,7 @@ func TestVersionCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
+			// Setup
 			rootCmd := &cobra.Command{Use: "fxconfig"}
 			rootCmd.AddCommand(NewVersionCommand())
 
@@ -56,8 +57,10 @@ func TestVersionCommand(t *testing.T) {
 			rootCmd.SetErr(&errBuf)
 			rootCmd.SetArgs(tt.args)
 
+			// Execute
 			err := rootCmd.Execute()
 
+			// Assert
 			if tt.expectError {
 				require.Error(t, err)
 				output := errBuf.String()
@@ -78,6 +81,7 @@ func TestVersionCommand(t *testing.T) {
 func TestVersionCommand_OutputFormat(t *testing.T) {
 	t.Parallel()
 
+	// Setup
 	rootCmd := &cobra.Command{Use: "fxconfig"}
 	rootCmd.AddCommand(NewVersionCommand())
 
@@ -85,15 +89,18 @@ func TestVersionCommand_OutputFormat(t *testing.T) {
 	rootCmd.SetOut(&outBuf)
 	rootCmd.SetArgs([]string{"version"})
 
+	// Execute
 	err := rootCmd.Execute()
 	require.NoError(t, err)
 
+	// Assert output format
 	output := outBuf.String()
 	lines := strings.Split(strings.TrimSpace(output), "\n")
 
 	require.GreaterOrEqual(t, len(lines), 5, "version output should have at least 5 lines")
 	require.Equal(t, "fxconfig", lines[0], "first line should be 'fxconfig'")
 
+	// Verify subsequent lines have the expected format (key: value)
 	for i := 1; i < len(lines); i++ {
 		line := lines[i]
 		if strings.TrimSpace(line) == "" {
@@ -106,8 +113,10 @@ func TestVersionCommand_OutputFormat(t *testing.T) {
 func TestNewVersionCommand(t *testing.T) {
 	t.Parallel()
 
+	// Execute
 	cmd := NewVersionCommand()
 
+	// Assert
 	require.NotNil(t, cmd, "NewVersionCommand should return a non-nil command")
 	require.Equal(t, "version", cmd.Use, "command use should be 'version'")
 	require.NotEmpty(t, cmd.Short, "command should have a short description")
