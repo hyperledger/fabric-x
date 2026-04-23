@@ -32,7 +32,7 @@ func NewVersionCommand() *cobra.Command {
 			p := cliio.NewCLIPrinter(cmd.OutOrStdout(), cmd.ErrOrStderr(), cliio.FormatTable)
 			p.Print("fxconfig\n")
 			p.Print(fmt.Sprintf(" %-16s %s\n", "Version:", metadata.Version))
-			p.Print(fmt.Sprintf(" %-16s %s\n", "Go version:", runtime.Version()))
+			p.Print(fmt.Sprintf(" %-16s %s\n", "Go Version:", runtime.Version()))
 			p.Print(fmt.Sprintf(" %-16s %s\n", "Commit:", metadata.CommitSHA))
 			p.Print(fmt.Sprintf(" %-16s %s\n", "OS/Arch:", osArch))
 		},

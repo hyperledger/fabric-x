@@ -27,7 +27,7 @@ func TestVersionCommand(t *testing.T) {
 		{
 			name:           "version command with no args",
 			args:           []string{"version"},
-			expectedOutput: []string{"fxconfig", "Version:", "Go version:", "OS/Arch:"},
+			expectedOutput: []string{"fxconfig", "Version:", "Go Version:", "OS/Arch:"},
 			expectError:    false,
 		},
 		{
