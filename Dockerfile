@@ -8,7 +8,7 @@
 ###########################################
 # Stage 1: Build image
 ###########################################
-FROM golang:1.25 AS builder
+FROM golang:1.26 AS builder
 
 # Build environment variables
 ENV CGO_ENABLED=1

@@ -13,7 +13,7 @@ services:
     environment:
       - SC_SIDECAR_ORDERER_IDENTITY_MSP_DIR=/root/config/crypto/peerOrganizations/org1.example.com/peers/SC.org1.example.com/msp
       - SC_SIDECAR_ORDERER_IDENTITY_MSP_ID=Org1MSP
-      - SC_SIDECAR_ORDERER_CHANNEL_ID=mychannel
+      - SC_SIDECAR_ORDERER_CHANNEL_ID=arma
       - SC_SIDECAR_ORDERER_SIGNED_ENVELOPES=true
       - SC_QUERY_SERVICE_SERVER_ENDPOINT=:7001
       - SC_ORDERER_BLOCK_SIZE=1

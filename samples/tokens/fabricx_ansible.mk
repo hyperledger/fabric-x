@@ -33,7 +33,7 @@ CONTAINER_CLI ?= docker
 install-prerequisites-fabric:
 	python3 -m venv $(VENV_DIR)
 	$(VENV_DIR)/bin/python -m pip install --upgrade pip
-	$(VENV_DIR)/bin/pip install -r $(ANSIBLE_PATH)/requirements.txt
+	$(VENV_DIR)/bin/python -m pip install -r $(ANSIBLE_PATH)/requirements.txt
 	ansible-galaxy collection install -r $(ANSIBLE_PATH)/requirements.yml
 	ansible-playbook "$(PLAYBOOK_PATH)/01-install-control-node-prerequisites.yaml"
 	ansible-playbook hyperledger.fabricx.install_prerequisites --extra-vars '{"target_hosts": "$(TARGET_HOSTS)"}'
