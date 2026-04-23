@@ -26,17 +26,11 @@ type mockOrdererClient struct {
 }
 
 func (m *mockOrdererClient) Broadcast(
-	ctx context.Context,
+	_ context.Context,
 	_ msp.SigningIdentity,
-	txID string,
+	_ string,
 	_ *applicationpb.Tx,
 ) error {
-	if txID == "" {
-		return errors.New("txID is required")
-	}
-	if err := ctx.Err(); err != nil {
-		return err
-	}
 	return m.broadcastErr
 }
 
@@ -172,7 +166,7 @@ func TestSubmitTransaction_Timeout(t *testing.T) {
 
 	a := &AdminApp{
 		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+		OrdererProvider: makeOrdererProvider(&mockOrdererClient{broadcastErr: context.DeadlineExceeded}, nil),
 	}
 
 	ctx, cancel := context.WithTimeout(t.Context(), time.Nanosecond)
@@ -182,19 +176,6 @@ func TestSubmitTransaction_Timeout(t *testing.T) {
 	err := a.SubmitTransaction(ctx, "tx-1", someTx())
 	require.Error(t, err)
 	require.ErrorIs(t, err, context.DeadlineExceeded)
-}
-
-func TestSubmitTransaction_EmptyTransactionID(t *testing.T) {
-	t.Parallel()
-
-	a := &AdminApp{
-		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
-	}
-
-	err := a.SubmitTransaction(t.Context(), "", someTx())
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "txID is required")
 }
 
 // SubmitTransactionWithWait tests

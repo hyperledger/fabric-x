@@ -122,10 +122,21 @@ func TestMerge_EmptyInput(t *testing.T) {
 func TestMerge_NilTransaction(t *testing.T) {
 	t.Parallel()
 
-	result, err := Merge([]*applicationpb.Tx{nil})
-	require.Error(t, err)
-	require.Nil(t, result)
-	require.Contains(t, err.Error(), "at least two transactions required")
+	t.Run("two nil transactions", func(t *testing.T) {
+		t.Parallel()
+
+		result, err := Merge([]*applicationpb.Tx{nil, nil})
+		require.Error(t, err)
+		require.Nil(t, result)
+	})
+
+	t.Run("three nil transactions", func(t *testing.T) {
+		t.Parallel()
+
+		result, err := Merge([]*applicationpb.Tx{nil, nil, nil})
+		require.Error(t, err)
+		require.Nil(t, result)
+	})
 }
 
 func TestMerge_ConflictingNamespaces(t *testing.T) {
