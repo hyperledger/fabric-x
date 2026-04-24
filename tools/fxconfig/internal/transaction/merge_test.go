@@ -108,39 +108,35 @@ func TestMerge_ErrorCases(t *testing.T) {
 		require.Nil(t, result)
 		require.Contains(t, err.Error(), "requires at least one endorsement")
 	})
+
+	t.Run("conflicting namespace writes", func(t *testing.T) {
+		t.Parallel()
+
+		tx1 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org1MSP"}})
+		tx2 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org2MSP"}})
+
+		tx1.Namespaces[0].ReadWrites = []*applicationpb.ReadWrite{{
+			Key:   []byte("asset-1"),
+			Value: []byte("value-a"),
+		}}
+		tx2.Namespaces[0].ReadWrites = []*applicationpb.ReadWrite{{
+			Key:   []byte("asset-1"),
+			Value: []byte("value-b"),
+		}}
+
+		result, err := Merge([]*applicationpb.Tx{tx1, tx2})
+		require.Error(t, err)
+		require.Nil(t, result)
+		require.Contains(t, err.Error(), "content mismatch")
+	})
 }
 
 func TestMerge_NilTransaction(t *testing.T) {
 	t.Parallel()
 
-	t.Run("two nil transactions", func(t *testing.T) {
-		t.Parallel()
-
-		result, err := Merge([]*applicationpb.Tx{nil, nil})
-		require.Error(t, err)
-		require.Nil(t, result)
-	})
-}
-
-func TestMerge_ConflictingNamespaces(t *testing.T) {
-	t.Parallel()
-
-	tx1 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org1MSP"}})
-	tx2 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org2MSP"}})
-
-	tx1.Namespaces[0].ReadWrites = []*applicationpb.ReadWrite{{
-		Key:   []byte("asset-1"),
-		Value: []byte("value-a"),
-	}}
-	tx2.Namespaces[0].ReadWrites = []*applicationpb.ReadWrite{{
-		Key:   []byte("asset-1"),
-		Value: []byte("value-b"),
-	}}
-
-	result, err := Merge([]*applicationpb.Tx{tx1, tx2})
+	result, err := Merge([]*applicationpb.Tx{nil, nil})
 	require.Error(t, err)
 	require.Nil(t, result)
-	require.Contains(t, err.Error(), "content mismatch")
 }
 
 func TestMerge_SingleNamespace(t *testing.T) {
