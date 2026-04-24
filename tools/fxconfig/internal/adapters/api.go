@@ -7,7 +7,6 @@ package adapters
 
 import (
 	"context"
-	"time"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
@@ -25,8 +24,6 @@ type MspProvider interface {
 type OrdererClient interface {
 	// Broadcast sends a signed transaction to the ordering service.
 	Broadcast(ctx context.Context, signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) error
-	// ConnectionTimeout returns the configured timeout used to bound retry behavior.
-	ConnectionTimeout() time.Duration
 	// Close releases resources held by the client.
 	Close() error
 }

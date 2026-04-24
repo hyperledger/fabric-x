@@ -25,7 +25,6 @@ type mockOrdererClient struct {
 	broadcastErr   error
 	broadcastErrs  []error
 	broadcastCalls int
-	timeout        time.Duration
 }
 
 func (m *mockOrdererClient) Broadcast(_ context.Context, _ msp.SigningIdentity, _ string, _ *applicationpb.Tx) error {
@@ -39,14 +38,6 @@ func (m *mockOrdererClient) Broadcast(_ context.Context, _ msp.SigningIdentity, 
 	}
 
 	return m.broadcastErr
-}
-
-func (m *mockOrdererClient) ConnectionTimeout() time.Duration {
-	if m.timeout == 0 {
-		return 350 * time.Millisecond
-	}
-
-	return m.timeout
 }
 
 func (*mockOrdererClient) Close() error { return nil }
