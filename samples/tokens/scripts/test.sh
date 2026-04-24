@@ -44,6 +44,39 @@ function init_fabricx() {
     curl -f -X POST http://localhost:9300/endorser/init
 }
 
+## Wait for an API endpoint to report ready
+function wait_until_ready() {
+    local service_name="$1"
+    local url="$2"
+    local max_attempts="${MAX_READY_ATTEMPTS:-30}"
+    local sleep_seconds="${READY_RETRY_SLEEP_SECONDS:-2}"
+    local attempt=1
+
+    while ! curl -fsS "$url" >/dev/null; do
+        if (( attempt >= max_attempts )); then
+            echo "Error: ${service_name} did not become ready after ${max_attempts} attempts (${url})" >&2
+            return 1
+        fi
+
+        echo "Waiting for ${service_name} readiness (${attempt}/${max_attempts}): ${url}" >&2
+        sleep "$sleep_seconds"
+        ((attempt++))
+    done
+}
+
+## Wait for all services needed by the test run
+function wait_for_services() {
+    print_section_header "Waiting for services to become ready..."
+
+    if [[ "$PLATFORM" == "fabricx" || "$PLATFORM" == "xdev" ]]; then
+        wait_until_ready "endorser" "http://localhost:9300/readyz"
+    fi
+
+    wait_until_ready "issuer" "http://localhost:9100/readyz"
+    wait_until_ready "owner1" "http://localhost:9500/readyz"
+    wait_until_ready "owner2" "http://localhost:9600/readyz"
+}
+
 ## Run tests to verify the network
 function run_test() {
     # test application
@@ -76,6 +109,7 @@ run_network
 # # currently we wait manually with a sleep.
 # # TODO: add an healthcheck within the `docker-compose`
 sleep 10
+wait_for_services
 if [[ "$PLATFORM" == "fabricx" || "$PLATFORM" == "xdev" ]]; then
     init_fabricx
 fi
