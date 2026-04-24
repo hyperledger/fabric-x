@@ -69,6 +69,8 @@ function run_test() {
 set -eE
 set -o pipefail
 trap cleanup INT ERR
+PLATFORM="${PLATFORM:-fabric3}"
+export PLATFORM
 
 run_network
 # # currently we wait manually with a sleep.
