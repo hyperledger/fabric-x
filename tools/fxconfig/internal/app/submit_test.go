@@ -25,12 +25,7 @@ type mockOrdererClient struct {
 	broadcastErr error
 }
 
-func (m *mockOrdererClient) Broadcast(
-	_ context.Context,
-	_ msp.SigningIdentity,
-	_ string,
-	_ *applicationpb.Tx,
-) error {
+func (m *mockOrdererClient) Broadcast(_ context.Context, _ msp.SigningIdentity, _ string, _ *applicationpb.Tx) error {
 	return m.broadcastErr
 }
 
