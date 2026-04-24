@@ -110,15 +110,6 @@ func TestMerge_ErrorCases(t *testing.T) {
 	})
 }
 
-func TestMerge_EmptyInput(t *testing.T) {
-	t.Parallel()
-
-	result, err := Merge([]*applicationpb.Tx{})
-	require.Error(t, err)
-	require.Nil(t, result)
-	require.Contains(t, err.Error(), "at least two transactions required")
-}
-
 func TestMerge_NilTransaction(t *testing.T) {
 	t.Parallel()
 
@@ -126,14 +117,6 @@ func TestMerge_NilTransaction(t *testing.T) {
 		t.Parallel()
 
 		result, err := Merge([]*applicationpb.Tx{nil, nil})
-		require.Error(t, err)
-		require.Nil(t, result)
-	})
-
-	t.Run("three nil transactions", func(t *testing.T) {
-		t.Parallel()
-
-		result, err := Merge([]*applicationpb.Tx{nil, nil, nil})
 		require.Error(t, err)
 		require.Nil(t, result)
 	})

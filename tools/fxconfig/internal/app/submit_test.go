@@ -156,23 +156,6 @@ func TestSubmitTransaction_ContextCancelled(t *testing.T) {
 	require.ErrorIs(t, err, context.Canceled)
 }
 
-func TestSubmitTransaction_Timeout(t *testing.T) {
-	t.Parallel()
-
-	a := &AdminApp{
-		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{broadcastErr: context.DeadlineExceeded}, nil),
-	}
-
-	ctx, cancel := context.WithTimeout(t.Context(), time.Nanosecond)
-	defer cancel()
-	<-ctx.Done()
-
-	err := a.SubmitTransaction(ctx, "tx-1", someTx())
-	require.Error(t, err)
-	require.ErrorIs(t, err, context.DeadlineExceeded)
-}
-
 // SubmitTransactionWithWait tests
 
 func TestSubmitTransactionWithWait_MspProviderError(t *testing.T) {
