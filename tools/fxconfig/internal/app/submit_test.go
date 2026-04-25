@@ -174,7 +174,7 @@ func TestSubmitTransaction_BroadcastRetryExhausted(t *testing.T) {
 
 	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
 	require.Error(t, err)
-	require.GreaterOrEqual(t, mockClient.broadcastCalls, 2)
+	require.Equal(t, maxBroadcastAttempts, mockClient.broadcastCalls)
 }
 
 func TestSubmitTransaction_Success(t *testing.T) {
@@ -203,6 +203,23 @@ func TestSubmitTransaction_ContextCancelled(t *testing.T) {
 	err := a.SubmitTransaction(ctx, "tx-1", someTx())
 	require.Error(t, err)
 	require.ErrorIs(t, err, context.Canceled)
+}
+
+func TestSubmitTransaction_NonRetryableError_NoRetry(t *testing.T) {
+	t.Parallel()
+
+	mockClient := &mockOrdererClient{
+		broadcastErr: context.Canceled, // non-retryable
+	}
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
+	}
+
+	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
+	require.Error(t, err)
+	require.Equal(t, 1, mockClient.broadcastCalls)
 }
 
 // SubmitTransactionWithWait tests

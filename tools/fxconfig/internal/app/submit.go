@@ -12,15 +12,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hyperledger/fabric-lib-go/common/flogging"
-
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 )
-
-var logger = flogging.MustGetLogger("app")
 
 const (
 	maxBroadcastAttempts = 3
@@ -46,7 +42,7 @@ func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *appli
 
 	broadcastErr := broadcastTransaction(ctx, sc, txID, tx)
 	if broadcastErr != nil {
-		return fmt.Errorf("failed to broadcast transaction: %w", broadcastErr)
+		return broadcastErr
 	}
 
 	return nil
@@ -80,7 +76,7 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 
 	broadcastErr := broadcastTransaction(ctx, sc, txID, tx)
 	if broadcastErr != nil {
-		return UnknownStatus, fmt.Errorf("failed to broadcast transaction: %w", broadcastErr)
+		return UnknownStatus, broadcastErr
 	}
 
 	status, err := nc.WaitForEvent(ctx, subscription)
@@ -115,10 +111,6 @@ func broadcastTransaction(
 		}
 
 		lastErr = err
-		logger.Warn("transaction broadcast failed",
-			"attempt", attempt,
-			"error", err,
-		)
 
 		if attempt == maxBroadcastAttempts {
 			break
@@ -131,11 +123,7 @@ func broadcastTransaction(
 		}
 	}
 
-	if lastErr == nil {
-		return errors.New("broadcast failed after retries")
-	}
-
-	return fmt.Errorf("broadcast failed after retries: %w", lastErr)
+	return lastErr
 }
 
 func isRetryable(err error) bool {
