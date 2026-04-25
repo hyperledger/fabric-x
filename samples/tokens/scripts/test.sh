@@ -41,7 +41,7 @@ function stop_network() {
 ## Initialize FabricX if needed
 function init_fabricx() {
     print_section_header "Initializing ${PLATFORM}..."
-    curl -f -X POST http://localhost:9300/endorser/init
+    curl_with_retry -X POST http://localhost:9300/endorser/init
 }
 
 ## Wait for an API endpoint to report ready
@@ -50,18 +50,14 @@ function wait_until_ready() {
     local url="$2"
     local max_attempts="${MAX_READY_ATTEMPTS:-30}"
     local sleep_seconds="${READY_RETRY_SLEEP_SECONDS:-2}"
-    local attempt=1
 
-    while ! curl -fsS "$url" >/dev/null; do
-        if (( attempt >= max_attempts )); then
-            echo "Error: ${service_name} did not become ready after ${max_attempts} attempts (${url})" >&2
-            return 1
-        fi
-
-        echo "Waiting for ${service_name} readiness (${attempt}/${max_attempts}): ${url}" >&2
-        sleep "$sleep_seconds"
-        ((attempt++))
-    done
+    echo "Waiting for ${service_name} readiness: ${url}" >&2
+    curl -fsS \
+        --retry "$max_attempts" \
+        --retry-delay "$sleep_seconds" \
+        --retry-all-errors \
+        --retry-connrefused \
+        "$url" >/dev/null
 }
 
 ## Wait for all services needed by the test run
@@ -79,25 +75,12 @@ function wait_for_services() {
 
 ## Run curl with retries for transient startup errors
 function curl_with_retry() {
-    local max_attempts="${CURL_MAX_ATTEMPTS:-6}"
-    local sleep_seconds="${CURL_RETRY_SLEEP_SECONDS:-2}"
-    local attempt=1
-
-    while true; do
-        if curl -f -X "$@"; then
-            return 0
-        fi
-
-        local exit_code=$?
-        if (( attempt >= max_attempts )); then
-            echo "Error: curl failed after ${attempt} attempts: curl -X $*" >&2
-            return "$exit_code"
-        fi
-
-        echo "Retrying curl command (${attempt}/${max_attempts}): curl -X $*" >&2
-        sleep "$sleep_seconds"
-        ((attempt++))
-    done
+    curl -fS \
+        --retry "${CURL_MAX_ATTEMPTS:-6}" \
+        --retry-delay "${CURL_RETRY_SLEEP_SECONDS:-2}" \
+        --retry-all-errors \
+        --retry-connrefused \
+        "$@"
 }
 
 ## Run tests to verify the network
@@ -105,20 +88,20 @@ function run_test() {
     # test application
     print_section_header "Run tests"
 
-    curl_with_retry POST http://localhost:9100/issuer/issue -d '{
+    curl_with_retry -X POST http://localhost:9100/issuer/issue -d '{
         "amount": {"code": "TOK","value": 1000},
         "counterparty": {"node": "owner1","account": "alice"},
         "message": "hello world!"
     }'
-    curl_with_retry GET http://localhost:9500/owner/accounts/alice | jq
-    curl_with_retry GET http://localhost:9600/owner/accounts/dan | jq
-    curl_with_retry POST http://localhost:9500/owner/accounts/alice/transfer -d '{
+    curl_with_retry -X GET http://localhost:9500/owner/accounts/alice | jq
+    curl_with_retry -X GET http://localhost:9600/owner/accounts/dan | jq
+    curl_with_retry -X POST http://localhost:9500/owner/accounts/alice/transfer -d '{
         "amount": {"code": "TOK","value": 100},
         "counterparty": {"node": "owner2","account": "dan"},
         "message": "hello dan!"
     }'
-    curl_with_retry GET http://localhost:9600/owner/accounts/dan/transactions | jq
-    curl_with_retry GET http://localhost:9500/owner/accounts/alice/transactions | jq
+    curl_with_retry -X GET http://localhost:9600/owner/accounts/dan/transactions | jq
+    curl_with_retry -X GET http://localhost:9500/owner/accounts/alice/transactions | jq
 }
 
 # Script Start

@@ -38,9 +38,10 @@ clean-fabric:
 # Start the targeted hosts (e.g. make fabric-fabric start).
 .PHONY: start-fabric
 start-fabric:
-	@"$(FABRIC_SAMPLES)/test-network/network.sh" down || true
-	@$(CONTAINER_CLI) rm -f peer0org1_token_namespace_ccaas peer0org2_token_namespace_ccaas >/dev/null 2>&1 || true
-	@$(CONTAINER_CLI) network inspect fabric_test >/dev/null 2>&1 && $(CONTAINER_CLI) network rm fabric_test || true
+	@if $(CONTAINER_CLI) network inspect fabric_test >/dev/null 2>&1; then \
+		echo "Error: existing fabric_test network detected. Run 'make teardown' first."; \
+		exit 1; \
+	fi
 	"$(FABRIC_SAMPLES)/test-network/network.sh" up createChannel -i 3.1.1
 	INIT_REQUIRED="--init-required" "$(FABRIC_SAMPLES)/test-network/network.sh" deployCCAAS  -ccn token_namespace -ccp "$(abspath $$CONF_ROOT)/namespace" -cci "init"
 	./scripts/cp_fabric3.sh
