@@ -1,0 +1,104 @@
+1. bug(configtxlator): nil pointer dereference in computeUpdt — cu.ChannelId is assigned before cu == nil check
+
+In configtxlator/main.go lines 226-228, `cu.ChannelId = channelID` executes BEFORE the `if cu == nil` guard.
+If update.Compute() returns nil, the program panics with a nil pointer dereference instead of
+returning the intended error message. The nil check on line 228 is dead code.
+Additionally, the REST server started by `startServer()` has no graceful shutdown, no signal
+handling, and no context-based cancellation. The server blocks on http.Serve indefinitely.
+Fix: reorder the nil check before field assignment, add signal-based graceful shutdown with
+context cancellation, add a /healthz endpoint, and add unit tests for computeUpdt edge cases.
+Estimated scope: ~70 lines of code changes.
+
+
+2. bug(configtxgen): fragile panic recovery using string matching instead of proper error handling
+
+In configtxgen/main.go lines 61-77, the deferred recover() catches panics from configtxgen.Load()
+and uses strings.Contains(fmt.Sprint(err), "Error reading configuration: Unsupported Config Type")
+to determine the error type. This is extremely brittle — if the upstream library changes its panic
+message format, the match silently fails and re-panics with logger.Panic(err) instead of showing
+the helpful error message. The entire control flow relies on panic/recover instead of error returns.
+Fix: wrap configtxgen.Load() calls in a helper that recovers panics and converts them to typed
+errors, replace string matching with error type checks, and add comprehensive unit tests.
+Estimated scope: ~65 lines of code changes.
+
+
+3. bug(fxconfig/provider): sync.Once permanently caches initialization failures with no retry capability
+
+In provider/provider.go, the Provider.Get() method uses sync.Once to lazily initialize service
+instances (orderer client, query client, notification client). If the first Get() call fails due
+to a transient error (e.g., temporary DNS failure, network partition, orderer not yet ready), the
+error is permanently cached and ALL subsequent Get() calls return the same stale error forever.
+There is no way to retry or reset the provider. This makes fxconfig unable to recover from any
+transient startup failure without a full process restart.
+Fix: replace sync.Once with a mutex-guarded lazy init that retries on transient errors while
+still caching permanent failures (e.g., config validation errors). Add tests for retry behavior.
+Estimated scope: ~70 lines of code changes.
+
+
+4. bug(configtxlator): --original and --updated flags not marked as required, causing nil pointer panic when omitted
+
+In configtxlator/main.go lines 64-65, the `--original` and `--updated` flags for compute_update
+are defined without .Required(). If a user runs `configtxlator compute_update --channel_id foo`
+without providing these flags, the file pointers are nil. At lines 96-97, the deferred
+`(*computeUpdateOriginal).Close()` and `(*computeUpdateUpdated).Close()` calls dereference nil
+pointers and panic. Similarly, proto_encode and proto_decode use .Default(os.Stdin.Name()) which
+can also fail silently on non-terminal environments.
+Fix: mark --original and --updated as .Required(), add nil guards before defer Close() calls,
+validate file handles before use, add proper error messages, and add CLI integration tests.
+Estimated scope: ~60 lines of code changes.
+
+
+5. security(tokens): HTTP servers missing ReadTimeout, WriteTimeout, and IdleTimeout — vulnerable to slowloris and connection exhaustion
+
+In samples/tokens/issuer/main.go, owner/main.go, and endorser/main.go, the http.Server is created
+with only Handler and Addr set. No ReadTimeout, WriteTimeout, ReadHeaderTimeout, IdleTimeout, or
+MaxHeaderBytes are configured. This makes all three token sample servers vulnerable to slowloris
+attacks (attacker sends partial HTTP headers slowly to exhaust connections) and general connection
+exhaustion. Combined with the existing binding to 0.0.0.0 (issue #25), this creates a significant
+attack surface.
+Fix: add ReadTimeout (10s), WriteTimeout (30s), ReadHeaderTimeout (5s), IdleTimeout (120s), and
+MaxHeaderBytes (1MB) to all three servers. Extract common server configuration into a shared
+helper function in the common package. Add tests.
+Estimated scope: ~60 lines of code changes across 4 files.
+
+
+6. bug(tokens/routes): API endpoints expose raw Go error strings to clients instead of structured JSON error responses with proper HTTP status codes
+
+In owner/routes/routes.go and issuer/routes/routes.go, all error paths return `(nil, err)` which
+the generated strict handler converts to generic 500 Internal Server Error responses with the raw
+Go error message exposed. Domain errors like ErrWalletNotFound, ErrInsufficientFunds, and
+ErrCounterpartyAccountNotFound should map to 404, 422, and 404 respectively. The OwnerAccounts
+endpoint returns fmt.Errorf("not implemented") which also becomes a 500. No input validation
+errors return 400. This violates REST API best practices and leaks implementation details.
+Fix: implement an error classification middleware or error-mapping helper that converts domain
+errors to appropriate HTTP status codes with structured JSON error bodies. Add error handling
+tests for each endpoint.
+Estimated scope: ~80 lines of code changes.
+
+
+7. bug(fxconfig/cli): --submit flag silently ignored when used without --endorse — no validation enforced
+
+In cli/v1/flags.go line 46, the --submit flag documentation says "requires --endorse" but this
+constraint is never enforced in code. In app/deploy.go lines 68-70, if Endorse is false, the
+function returns the unsigned transaction immediately, completely ignoring Submit and Wait flags.
+A user running `fxconfig namespace create foo --policy="..." --submit` would expect the transaction
+to be submitted but it silently saves an unsigned tx instead. Similarly, --endorse without --submit
+creates and endorses but doesn't submit, with no guidance to the user about next steps.
+Fix: add flag dependency validation in the CLI RunE functions (or cobra MarkFlagsRequiredTogether),
+return clear error messages for invalid flag combinations, add --endorse implying behavior
+documentation, and add unit tests for flag validation.
+Estimated scope: ~55 lines of code changes.
+
+
+8. bug(fxconfig/cli): info --format=env drops zero-value configuration fields due to YAML omitempty round-trip
+
+In cli/v1/info.go lines 73-87, the toEnv() function converts the Config struct to environment
+variables by first marshaling to YAML then unmarshaling to map[string]any. Because the Config
+struct fields use `yaml:"...,omitempty"` tags, zero-value fields like `enabled: false`,
+`connectionTimeout: 0s`, and empty string fields are omitted from the YAML output. This means
+the env var representation is incomplete — users cannot see which fields have default/zero values,
+making it impossible to verify the full effective configuration. This defeats the purpose of the
+`info` command which should show ALL effective values including defaults.
+Fix: implement a reflection-based struct-to-env-var converter that traverses all exported fields
+regardless of their values, respecting mapstructure tags for key naming. Add comprehensive tests.
+Estimated scope: ~75 lines of code changes.

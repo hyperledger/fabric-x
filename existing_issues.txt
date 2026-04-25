@@ -1,0 +1,58 @@
+1. fxconfig: TLSConfig.Validate silently accepts a half-configured mTLS setup and config validation has no unit tests
+
+2. fxconfig: TxID is lost when using --wait on namespace create/update
+
+3. fxconfig namespace list displays policies as raw hex instead of human-readable strings
+
+4. Orderer broadcast can hang indefinitely because client ignores configured connection timeout
+
+5. Restructure landing page
+
+6. Improve context propagation consistency in transaction submission flow
+
+7. fix(fxconfig): namespace create/update --wait returns exit code 0 on transaction failure
+
+8. fxmigrate verify performs count-only checks — corrupted key/value/version data passes verification silently
+
+9. Improve test coverage for edge cases in transaction merge and submission flows
+
+10. GUESSING 10 SECOND TIME IN SAMPLE TEST FLOW, BEFORE SERVICE APIs are called
+
+11. bug(tokens/issuer): IssueCashView.Call() returns nil instead of "" on ordering failure, masking real error
+
+12. feat: implement /owner/redeem endpoint for token sample application
+
+13. [Bug] teardown-fabric in fabricx_dev.mk is not idempotent — fails when fabric_test network is already absent
+
+14. Title: Handling CA database startup timeouts on local WSL2 environment during Fabric-X setup
+
+15. fix: add healthchecks to docker-compose token services
+
+16. Refactor hard panics to error returns in owner fsc.go service
+
+17. Contribution process proposal
+
+18. Improve resilience of transaction submission by handling transient broadcast failures
+
+19. ove samples to a separate fabric-x-samples repository
+
+20. fix(tokens): set +e in test.sh silently swallows curl failures in demo script
+
+21. fxconfig: prevent reuse of closed orderer and notification clients across submissions
+
+22. fxconfig: Subscribe leaks stale subscriber on canceled context
+
+23. gRPC clients fall back to plaintext when TLS is disabled - no certificate validation
+
+24. unhandled error from ListenAndServe in token sample servers
+
+25. Services bind to 0.0.0.0 with disabled TLS and permissive CORS + exposed Swagger UI
+
+26. testing(fxconfig): add TLS to integration tests
+
+27. fix(fxconfig): Support for meta namespace updates
+
+28. feature(fxconfig): BCCSP configuration
+
+29. Define Data Migration Path from Hyperledger Fabric Snapshot to Fabric-X
+
