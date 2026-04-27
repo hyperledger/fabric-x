@@ -9,9 +9,8 @@ package msp
 
 import (
 	"fmt"
-	"path"
 
-	"github.com/hyperledger/fabric-lib-go/bccsp/sw"
+	"github.com/hyperledger/fabric-lib-go/bccsp/factory"
 
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
@@ -38,20 +37,14 @@ func GetSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error)
 //
 //nolint:ireturn
 func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) {
-	conf, err := msp.GetLocalMspConfig(mspCfg.ConfigPath, nil, mspCfg.LocalMspID)
+	bccspOpts := mspCfg.ToFactoryOpts()
+
+	conf, err := msp.GetLocalMspConfig(mspCfg.ConfigPath, bccspOpts, mspCfg.LocalMspID)
 	if err != nil {
 		return nil, fmt.Errorf("error getting local msp config from %v: %w", mspCfg.ConfigPath, err)
 	}
 
-	// TODO: get proper BCCSP connfiguration via config
-
-	dir := path.Join(mspCfg.ConfigPath, "keystore")
-	ks, err := sw.NewFileBasedKeyStore(nil, dir, true)
-	if err != nil {
-		return nil, err
-	}
-
-	cp, err := sw.NewDefaultSecurityLevelWithKeystore(ks)
+	cp, err := factory.GetBCCSPFromOpts(bccspOpts)
 	if err != nil {
 		return nil, err
 	}
