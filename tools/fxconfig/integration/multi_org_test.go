@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package integration_test
 
 import (
+	"path"
 	"path/filepath"
 	"testing"
 
@@ -24,8 +25,8 @@ func TestMultiOrgScenarios(t *testing.T) {
 	testdata, err := filepath.Abs(filepath.Join(".", "testdata"))
 	require.NoError(t, err)
 
-	org1MspPath := filepath.Join(testdata, "crypto", "peerOrganizations", "Org1", "users", "endorser@org1.com", "msp")
-	org2MspPath := filepath.Join(testdata, "crypto", "peerOrganizations", "Org2", "users", "endorser@org2.com", "msp")
+	org1MspPath := path.Join(testdata, "crypto", "peerOrganizations", "org1.com", "users", "endorser@org1.com", "msp")
+	org2MspPath := path.Join(testdata, "crypto", "peerOrganizations", "org2.com", "users", "endorser@org2.com", "msp")
 
 	org1Config := generateConfigFile(t, "Org1MSP", org1MspPath, endpoints)
 	org2Config := generateConfigFile(t, "Org2MSP", org2MspPath, endpoints)
