@@ -87,10 +87,10 @@ To set up the network yourself, follow the tutorial in the [Fabric-X Ansible Col
 
 ### Version compatibility matrix
 
-| Orderer | Commiter | Ansible collection | Fabric CA | Fabric Smart Client | Sample Application |
-| :-----: | :------: | :----------------: | :-------: | :-----------------: | :----------------: |
-| v0.0.21 |  v0.1.7  |       v0.5.5       |  v1.5.15  |       v0.8.2        |       v0.0.8       |
-| v0.0.23 |  v0.1.9  |       v0.6.3       |  v1.5.15  |          -          |         -          |
+| Orderer | Commiter | Ansible collection | Fabric CA | Fabric Smart Client | Sample Token Application |
+| :-----: | :------: | :----------------: | :-------: | :-----------------: | :----------------------: |
+| v0.0.21 |  v0.1.7  |       v0.5.5       |  v1.5.15  |       v0.8.2        |           v0.0.1         |
+| v0.0.23 |  v0.1.9  |       v0.6.3       |  v1.5.15  |          -          |              -           |
 
 ## Fabric-X workshop series
 
@@ -102,7 +102,7 @@ To set up the network yourself, follow the tutorial in the [Fabric-X Ansible Col
 
 ## Useful links
 
-- [Sample token application](./samples/tokens)
+- [Sample applications](https://github.com/hyperledger/fabric-x-samples)
 - [Fabric/Fabric-X monthly calls on the 3rd Wed of the month](https://zoom-lfx.platform.linuxfoundation.org/meetings/fabric?view=month)
 - [Fabric-X Blog](https://www.lfdecentralizedtrust.org/blog/new-major-contribution-to-hyperledger-fabric-purpose-built-implementation-for-next-gen-digital-assets)
 - [Fabric-X whitepaper](https://eprint.iacr.org/2023/1717.pdf) - detailed description of the Fabric-X. Explains motivation,implementation details and presents performance benchmarks
