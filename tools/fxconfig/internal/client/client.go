@@ -40,8 +40,6 @@ func createSecOpts(tlsConfig *config.TLSConfig) (*comm.SecureOptions, error) {
 
 	// let's see if we use TLS
 	if !tlsConfig.IsEnabled() {
-		logger.Warn("TLS is disabled — connections will be unencrypted and " +
-			"unauthenticated. This is insecure and not recommended for production.")
 		return &secOpts, nil
 	}
 

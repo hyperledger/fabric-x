@@ -13,7 +13,11 @@ import (
 	"cmp"
 	"slices"
 	"time"
+
+	"github.com/hyperledger/fabric-lib-go/common/flogging"
 )
+
+var configLogger = flogging.MustGetLogger("config")
 
 // Config represents the complete fxconfig configuration.
 // It includes settings for logging, MSP identity, TLS, and service endpoints.
@@ -29,6 +33,7 @@ type Config struct {
 // ResolveTLS applies TLS configuration inheritance across all services.
 // Each service inherits from the parent TLS config unless it provides overrides.
 // After merging, all TLS configs are normalized to have explicit enabled flags.
+// Logs a single warning if TLS is disabled for any service.
 func (c *Config) ResolveTLS() {
 	c.TLS.Normalize()
 
@@ -40,6 +45,12 @@ func (c *Config) ResolveTLS() {
 
 	c.Notifications.TLS = c.Notifications.TLS.InheritFrom(&c.TLS)
 	c.Notifications.TLS.Normalize()
+
+	// Warn once if any service has TLS disabled
+	if !c.Orderer.TLS.IsEnabled() || !c.Queries.TLS.IsEnabled() || !c.Notifications.TLS.IsEnabled() {
+		configLogger.Warn("TLS is disabled for one or more services — " +
+			"connections will be unencrypted. This is insecure and not recommended for production.")
+	}
 }
 
 // LoggingConfig controls logging behavior.

@@ -99,7 +99,8 @@ logging:
   level: ERROR  # Default level for all loggers
   format: "%{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x}%{color:reset} %{message}"
 
-# Parent TLS configuration (can be overridden per service)
+# Parent TLS configuration (inherited by all services; can be overridden per service)
+# NOTE: TLS is enabled by default. Set `enabled: false` to disable.
 tls:
   enabled: true
   clientKey: /path/to/client.key
@@ -143,6 +144,9 @@ notifications:
 
 ### TLS Configuration
 
+> **Breaking Change (v0.4.0+):** TLS is now **enabled by default**. If you upgrade to this version and your config doesn't specify TLS certificates, you may see the error: `rootCertPaths must not be empty`. To restore the previous behavior (no TLS), explicitly set `tls.enabled: false` in your config or per service.
+
+**TLS Modes:**
 - **No TLS**: `enabled: false`
 - **Server TLS**: `enabled: true` with only `rootCerts` set (server authentication only)
 - **Mutual TLS**: `enabled: true` with `clientKey`, `clientCert`, and `rootCerts` all set (mutual authentication)
