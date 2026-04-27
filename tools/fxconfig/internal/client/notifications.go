@@ -93,14 +93,33 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	receiverCh := make(chan int, 1)
 
 	n.subscribersMu.Lock()
-	defer n.subscribersMu.Unlock()
-
 	subscribers := n.subscribers[txID]
 	n.subscribers[txID] = append(subscribers, receiverCh)
+	isFirst := len(subscribers) == 0
+	n.subscribersMu.Unlock()
 
-	if len(subscribers) > 0 {
+	if !isFirst {
 		// we already have an active subscription for this txID
 		return receiverCh, nil
+	}
+
+	// rollback removes the subscriber we just added if the context is
+	// canceled before the upstream request is queued. Without this cleanup
+	// a stale entry would prevent future subscriptions from opening a new
+	// upstream request, causing them to hang indefinitely.
+	rollback := func() {
+		n.subscribersMu.Lock()
+		defer n.subscribersMu.Unlock()
+		subs := n.subscribers[txID]
+		for i, ch := range subs {
+			if ch == receiverCh {
+				n.subscribers[txID] = append(subs[:i], subs[i+1:]...)
+				break
+			}
+		}
+		if len(n.subscribers[txID]) == 0 {
+			delete(n.subscribers, txID)
+		}
 	}
 
 	// setup request
@@ -114,6 +133,7 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	// check if our ctx is still open
 	select {
 	case <-ctx.Done():
+		rollback()
 		return nil, ctx.Err()
 	default:
 	}
@@ -121,6 +141,7 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	// try to push to request queue
 	select {
 	case <-ctx.Done():
+		rollback()
 		return nil, ctx.Err()
 	case n.requestQueue <- req:
 	}
