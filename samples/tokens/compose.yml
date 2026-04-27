@@ -5,6 +5,10 @@
 
 x-service-template: &service-template
   restart: unless-stopped
+  environment:
+    - BIND_ADDRESS=0.0.0.0
+    - ALLOWED_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
+    - ALLOW_AUTH_HEADER=true
   extra_hosts:
     - "committer-sidecar:host-gateway"
     - "committer-queryservice:host-gateway"
@@ -28,7 +32,7 @@ services:
       - 9001
       - 9101
     ports:
-      - 9100:9000/tcp
+      - 127.0.0.1:9100:9000/tcp
 
   endorser1:
     <<: *service-template
@@ -46,7 +50,7 @@ services:
       - 9001
       - 9301
     ports:
-      - 9300:9000/tcp
+      - 127.0.0.1:9300:9000/tcp
 
   owner1:
     <<: *service-template
@@ -63,7 +67,7 @@ services:
       - 9001
       - 9501
     ports:
-      - 9500:9000/tcp
+      - 127.0.0.1:9500:9000/tcp
 
   owner2:
     <<: *service-template
@@ -80,13 +84,13 @@ services:
       - 9001
       - 9601
     ports:
-      - 9600:9000/tcp
+      - 127.0.0.1:9600:9000/tcp
 
   swagger-ui:
     <<: *service-template
     image: swaggerapi/swagger-ui
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
       - URL=/swagger.yaml
     volumes:
