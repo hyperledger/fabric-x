@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
@@ -21,15 +22,23 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/provider"
 )
 
-type mockOrdererClient struct {
-	broadcastErr error
+type MockOrdererClient struct {
+	mock.Mock
 }
 
-func (m *mockOrdererClient) Broadcast(_ context.Context, _ msp.SigningIdentity, _ string, _ *applicationpb.Tx) error {
-	return m.broadcastErr
+func (m *MockOrdererClient) Broadcast(
+	ctx context.Context,
+	id msp.SigningIdentity,
+	txID string,
+	tx *applicationpb.Tx,
+) error {
+	args := m.Called(ctx, id, txID, tx)
+	return args.Error(0)
 }
 
-func (*mockOrdererClient) Close() error { return nil }
+func (*MockOrdererClient) Close() error {
+	return nil
+}
 
 type mockNotificationClient struct {
 	subscribeErr error
@@ -71,6 +80,21 @@ func makeOrdererProvider(
 	}, cfg, fakeValidationContext())
 }
 
+func expectBroadcasts(t *testing.T, mockClient *MockOrdererClient, txID any, errs ...error) {
+	t.Helper()
+
+	for _, err := range errs {
+		mockClient.
+			On("Broadcast", mock.Anything, mock.Anything, txID, mock.Anything).
+			Return(err).
+			Once()
+	}
+
+	t.Cleanup(func() {
+		mockClient.AssertExpectations(t)
+	})
+}
+
 func makeNotificationProvider(
 	client adapters.NotificationClient,
 	err error,
@@ -97,7 +121,7 @@ func TestSubmitTransaction_MspProviderError(t *testing.T) {
 
 	a := &AdminApp{
 		MspProvider:     makeMSPProvider(nil, errors.New("msp unavailable")),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+		OrdererProvider: makeOrdererProvider(&MockOrdererClient{}, nil),
 	}
 
 	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
@@ -119,21 +143,66 @@ func TestSubmitTransaction_OrdererProviderError(t *testing.T) {
 func TestSubmitTransaction_BroadcastError(t *testing.T) {
 	t.Parallel()
 
+	mockClient := new(MockOrdererClient)
+	expectBroadcasts(t, mockClient, "tx-1",
+		errors.New("broadcast failed"),
+		errors.New("broadcast failed"),
+		errors.New("broadcast failed"),
+	)
+
 	a := &AdminApp{
 		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{broadcastErr: errors.New("broadcast failed")}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
 	}
 
 	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
 	require.Error(t, err)
 }
 
-func TestSubmitTransaction_Success(t *testing.T) {
+func TestSubmitTransaction_BroadcastRetrySucceeds(t *testing.T) {
 	t.Parallel()
+
+	mockClient := new(MockOrdererClient)
+	expectBroadcasts(t, mockClient, "tx-1", errors.New("temporary error"), nil)
 
 	a := &AdminApp{
 		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
+	}
+
+	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
+	require.NoError(t, err)
+}
+
+func TestSubmitTransaction_BroadcastRetryExhausted(t *testing.T) {
+	t.Parallel()
+
+	mockClient := new(MockOrdererClient)
+	expectBroadcasts(t, mockClient, "tx-1",
+		errors.New("broadcast failed"),
+		errors.New("broadcast failed"),
+		errors.New("broadcast failed"),
+	)
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
+	}
+
+	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
+	require.Error(t, err)
+	mockClient.AssertNumberOfCalls(t, "Broadcast", maxBroadcastAttempts)
+}
+
+func TestSubmitTransaction_Success(t *testing.T) {
+	t.Parallel()
+
+	mockClient := new(MockOrdererClient)
+	expectBroadcasts(t, mockClient, "tx-1", nil)
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
 	}
 
 	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
@@ -143,9 +212,12 @@ func TestSubmitTransaction_Success(t *testing.T) {
 func TestSubmitTransaction_ContextCancelled(t *testing.T) {
 	t.Parallel()
 
+	mockClient := new(MockOrdererClient)
+	expectBroadcasts(t, mockClient, "tx-1", context.Canceled)
+
 	a := &AdminApp{
 		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{broadcastErr: context.Canceled}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
 	}
 
 	ctx, cancel := context.WithCancel(t.Context())
@@ -156,6 +228,22 @@ func TestSubmitTransaction_ContextCancelled(t *testing.T) {
 	require.ErrorIs(t, err, context.Canceled)
 }
 
+func TestSubmitTransaction_NonRetryableError_NoRetry(t *testing.T) {
+	t.Parallel()
+
+	mockClient := new(MockOrdererClient)
+	expectBroadcasts(t, mockClient, "tx-1", context.Canceled)
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
+	}
+
+	err := a.SubmitTransaction(t.Context(), "tx-1", someTx())
+	require.Error(t, err)
+	mockClient.AssertNumberOfCalls(t, "Broadcast", 1)
+}
+
 // SubmitTransactionWithWait tests
 
 func TestSubmitTransactionWithWait_MspProviderError(t *testing.T) {
@@ -163,7 +251,7 @@ func TestSubmitTransactionWithWait_MspProviderError(t *testing.T) {
 
 	a := &AdminApp{
 		MspProvider:          makeMSPProvider(nil, errors.New("msp unavailable")),
-		OrdererProvider:      makeOrdererProvider(&mockOrdererClient{}, nil),
+		OrdererProvider:      makeOrdererProvider(&MockOrdererClient{}, nil),
 		NotificationProvider: makeNotificationProvider(&mockNotificationClient{}, nil),
 	}
 
@@ -176,7 +264,7 @@ func TestSubmitTransactionWithWait_NotificationProviderError(t *testing.T) {
 
 	a := &AdminApp{
 		MspProvider:          makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider:      makeOrdererProvider(&mockOrdererClient{}, nil),
+		OrdererProvider:      makeOrdererProvider(&MockOrdererClient{}, nil),
 		NotificationProvider: makeNotificationProvider(nil, errors.New("notification unavailable")),
 	}
 
@@ -190,7 +278,7 @@ func TestSubmitTransactionWithWait_SubscribeError(t *testing.T) {
 
 	a := &AdminApp{
 		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+		OrdererProvider: makeOrdererProvider(&MockOrdererClient{}, nil),
 		NotificationProvider: makeNotificationProvider(
 			&mockNotificationClient{subscribeErr: errors.New("subscribe failed")}, nil,
 		),
@@ -204,11 +292,16 @@ func TestSubmitTransactionWithWait_SubscribeError(t *testing.T) {
 func TestSubmitTransactionWithWait_BroadcastError(t *testing.T) {
 	t.Parallel()
 
+	mockClient := new(MockOrdererClient)
+	expectBroadcasts(t, mockClient, "tx-1",
+		errors.New("broadcast failed"),
+		errors.New("broadcast failed"),
+		errors.New("broadcast failed"),
+	)
+
 	a := &AdminApp{
-		MspProvider: makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(
-			&mockOrdererClient{broadcastErr: errors.New("broadcast failed")}, nil,
-		),
+		MspProvider:          makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider:      makeOrdererProvider(mockClient, nil),
 		NotificationProvider: makeNotificationProvider(&mockNotificationClient{}, nil),
 	}
 
@@ -220,9 +313,12 @@ func TestSubmitTransactionWithWait_BroadcastError(t *testing.T) {
 func TestSubmitTransactionWithWait_WaitForEventError(t *testing.T) {
 	t.Parallel()
 
+	mockClient := new(MockOrdererClient)
+	expectBroadcasts(t, mockClient, "tx-1", nil)
+
 	a := &AdminApp{
 		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
 		NotificationProvider: makeNotificationProvider(
 			&mockNotificationClient{waitErr: errors.New("wait failed")}, nil,
 		),
@@ -238,9 +334,12 @@ func TestSubmitTransactionWithWait_Success(t *testing.T) {
 
 	const expectedStatus = 42
 
+	mockClient := new(MockOrdererClient)
+	expectBroadcasts(t, mockClient, "tx-1", nil)
+
 	a := &AdminApp{
 		MspProvider:          makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider:      makeOrdererProvider(&mockOrdererClient{}, nil),
+		OrdererProvider:      makeOrdererProvider(mockClient, nil),
 		NotificationProvider: makeNotificationProvider(&mockNotificationClient{status: expectedStatus}, nil),
 	}
 
