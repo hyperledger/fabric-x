@@ -481,4 +481,33 @@ func TestSingleOrgScenarios(t *testing.T) {
 			require.Contains(ct, nss, Namespace{Name: ns, Version: 1})
 		}, eventuallyTimeout, eventuallyTick)
 	})
+
+	t.Run("create_after_meta_namespace_version_update", func(t *testing.T) {
+		t.Parallel()
+
+		sourceNs := "s9_meta_update_source"
+		targetNs := "s9_meta_update_target"
+
+		// Create and commit the source namespace.
+		_, err := fxconfig(t, "namespace", "create", sourceNs,
+			configArg, policyArg, endorseArg, submitArg, waitArg)
+		require.NoError(t, err)
+
+		// Update and commit the source namespace, which updates the meta namespace version.
+		_, err = fxconfig(t, "namespace", "update", sourceNs,
+			configArg, policyArg, "--version=0", endorseArg, submitArg, waitArg)
+		require.NoError(t, err)
+
+		// A new namespace creation should still succeed with the updated meta namespace version.
+		_, err = fxconfig(t, "namespace", "create", targetNs,
+			configArg, policyArg, endorseArg, submitArg, waitArg)
+		require.NoError(t, err)
+
+		stdOut, err := fxconfig(t, "namespace", "list", configArg)
+		require.NoError(t, err)
+		nss, err := parseNamespaceList(stdOut)
+		require.NoError(t, err)
+		require.Contains(t, nss, Namespace{Name: sourceNs, Version: 1})
+		require.Contains(t, nss, Namespace{Name: targetNs, Version: 0})
+	})
 }
