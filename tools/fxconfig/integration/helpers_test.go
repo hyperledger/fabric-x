@@ -66,7 +66,7 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 
 	// msp configuration for sidecar orderer client
 	mspID := "Org1MSP"
-	mspDir := "/root/artifacts/crypto/peerOrganizations/Org1/users/committer@org1.com/msp"
+	mspDir := "/root/artifacts/crypto/peerOrganizations/org1.com/users/committer@org1.com/msp"
 
 	ctx := t.Context()
 	committerContainer, err := testcontainers.Run(
