@@ -423,6 +423,8 @@ queries:
 
 notifications:
   address: localhost:7002
+  tls:
+    enabled: false
 `
 	err := os.WriteFile(configPath, []byte(configContent), 0o600)
 	require.NoError(t, err)
@@ -434,8 +436,8 @@ notifications:
 
 	assert.True(t, cfg.Orderer.TLS.IsEnabled())
 	assert.Equal(t, []string{"/path/to/ca.pem"}, cfg.Orderer.TLS.RootCertPaths)
-	assert.False(t, cfg.Queries.TLS.IsEnabled())
-	assert.False(t, cfg.Notifications.TLS.IsEnabled())
+	assert.False(t, cfg.Queries.TLS.IsEnabled(), "Queries explicitly has enabled: false in config")
+	assert.False(t, cfg.Notifications.TLS.IsEnabled(), "Notifications explicitly has enabled: false in config")
 }
 
 func TestLoad_LoggingConfig(t *testing.T) {
