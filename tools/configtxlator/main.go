@@ -61,8 +61,8 @@ var (
 	protoDecodeDest   = protoDecode.Flag("output", "A file to write the JSON document to.").Default(os.Stdout.Name()).OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 
 	computeUpdate          = app.Command("compute_update", "Takes two marshaled common.Config messages and computes the config update which transitions between the two.")
-	computeUpdateOriginal  = computeUpdate.Flag("original", "The original config message.").File()
-	computeUpdateUpdated   = computeUpdate.Flag("updated", "The updated config message.").File()
+	computeUpdateOriginal  = computeUpdate.Flag("original", "The original config message.").Required().File()
+	computeUpdateUpdated   = computeUpdate.Flag("updated", "The updated config message.").Required().File()
 	computeUpdateChannelID = computeUpdate.Flag("channel_id", "The name of the channel for this update.").Required().String()
 	computeUpdateDest      = computeUpdate.Flag("output", "A file to write the JSON document to.").Default(os.Stdout.Name()).OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 
@@ -79,6 +79,12 @@ func main() {
 		startServer(fmt.Sprintf("%s:%d", *hostname, *port), *cors)
 	// "proto_encode" command
 	case protoEncode.FullCommand():
+		if *protoEncodeSource == nil {
+			app.Fatalf("Error: input file is required")
+		}
+		if *protoEncodeDest == nil {
+			app.Fatalf("Error: output file is required")
+		}
 		defer (*protoEncodeSource).Close()
 		defer (*protoEncodeDest).Close()
 		err := encodeProto(*protoEncodeType, *protoEncodeSource, *protoEncodeDest)
@@ -86,6 +92,12 @@ func main() {
 			app.Fatalf("Error decoding: %s", err)
 		}
 	case protoDecode.FullCommand():
+		if *protoDecodeSource == nil {
+			app.Fatalf("Error: input file is required")
+		}
+		if *protoDecodeDest == nil {
+			app.Fatalf("Error: output file is required")
+		}
 		defer (*protoDecodeSource).Close()
 		defer (*protoDecodeDest).Close()
 		err := decodeProto(*protoDecodeType, *protoDecodeSource, *protoDecodeDest)
@@ -93,6 +105,15 @@ func main() {
 			app.Fatalf("Error decoding: %s", err)
 		}
 	case computeUpdate.FullCommand():
+		if *computeUpdateOriginal == nil {
+			app.Fatalf("Error: original config file is required")
+		}
+		if *computeUpdateUpdated == nil {
+			app.Fatalf("Error: updated config file is required")
+		}
+		if *computeUpdateDest == nil {
+			app.Fatalf("Error: output file is required")
+		}
 		defer (*computeUpdateOriginal).Close()
 		defer (*computeUpdateUpdated).Close()
 		defer (*computeUpdateDest).Close()
@@ -196,6 +217,16 @@ func decodeProto(msgName string, input, output *os.File) error {
 }
 
 func computeUpdt(original, updated, output *os.File, channelID string) error {
+	if original == nil {
+		return errors.New("original config file is required")
+	}
+	if updated == nil {
+		return errors.New("updated config file is required")
+	}
+	if output == nil {
+		return errors.New("output file is required")
+	}
+
 	origIn, err := io.ReadAll(original)
 	if err != nil {
 		return errors.Wrapf(err, "error reading original config")
