@@ -141,3 +141,13 @@ func (t *testApp) SubmitTransactionWithWait(
 	args := t.Called(ctx, txID, tx)
 	return args.Int(0), args.Error(1)
 }
+
+func (t *testApp) Close() error {
+	for _, call := range t.ExpectedCalls {
+		if call.Method == "Close" {
+			args := t.Called()
+			return args.Error(0)
+		}
+	}
+	return nil
+}
