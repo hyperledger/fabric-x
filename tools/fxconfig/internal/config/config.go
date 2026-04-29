@@ -11,8 +11,11 @@ package config
 
 import (
 	"cmp"
+	"path/filepath"
 	"slices"
 	"time"
+
+	"github.com/hyperledger/fabric-lib-go/bccsp/factory"
 )
 
 // Config represents the complete fxconfig configuration.
@@ -51,8 +54,45 @@ type LoggingConfig struct {
 // MSPConfig contains MSP (Membership Service Provider) identity configuration.
 // It specifies which organization identity to use for signing transactions.
 type MSPConfig struct {
-	LocalMspID string `mapstructure:"localMspID" yaml:"localMspID,omitempty" desc:"MSP ID of the organization"`
-	ConfigPath string `mapstructure:"configPath" yaml:"configPath,omitempty" desc:"Path to MSP configuration directory"`
+	LocalMspID string      `mapstructure:"localMspID" yaml:"localMspID,omitempty" desc:"MSP ID of the organization"`
+	ConfigPath string      `mapstructure:"configPath" yaml:"configPath,omitempty" desc:"Path to MSP config directory"`
+	BCCSP      BCCSPConfig `mapstructure:"bccsp" yaml:"bccsp,omitempty"`
+}
+
+// BCCSPConfig contains BCCSP (crypto provider) settings for MSP instantiation.
+// Defaults to software-based provider with SHA2-256 and file keystore.
+type BCCSPConfig struct {
+	Default string        `mapstructure:"default" yaml:"default,omitempty" default:"SW"`
+	SW      BCCSPSWConfig `mapstructure:"sw" yaml:"sw,omitempty"`
+}
+
+// BCCSPSWConfig contains software provider settings.
+type BCCSPSWConfig struct {
+	Security     int                     `mapstructure:"security" yaml:"security,omitempty" default:"256"`
+	Hash         string                  `mapstructure:"hash" yaml:"hash,omitempty" default:"SHA2"`
+	FileKeyStore BCCSPFileKeyStoreConfig `mapstructure:"fileKeyStore" yaml:"fileKeyStore,omitempty"`
+}
+
+// BCCSPFileKeyStoreConfig contains key store options for the software provider.
+type BCCSPFileKeyStoreConfig struct {
+	KeyStorePath string `mapstructure:"keyStorePath" yaml:"keyStorePath,omitempty"`
+}
+
+// ToFactoryOpts converts fxconfig MSP BCCSP configuration into Fabric factory options.
+// If keyStorePath is not set, it defaults to <msp.configPath>/keystore.
+func (c MSPConfig) ToFactoryOpts() *factory.FactoryOpts {
+	opts := &factory.FactoryOpts{
+		Default: cmp.Or(c.BCCSP.Default, "SW"),
+		SW: &factory.SwOpts{
+			Security: cmp.Or(c.BCCSP.SW.Security, 256),
+			Hash:     cmp.Or(c.BCCSP.SW.Hash, "SHA2"),
+			FileKeystore: &factory.FileKeystoreOpts{
+				KeyStorePath: cmp.Or(c.BCCSP.SW.FileKeyStore.KeyStorePath, filepath.Join(c.ConfigPath, "keystore")),
+			},
+		},
+	}
+
+	return opts
 }
 
 // TLSConfig specifies TLS settings for secure communication.
