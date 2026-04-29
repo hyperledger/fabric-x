@@ -91,16 +91,48 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	}
 
 	receiverCh := make(chan int, 1)
+	isFirst := func() bool {
+		n.subscribersMu.Lock()
+		defer n.subscribersMu.Unlock()
 
-	n.subscribersMu.Lock()
-	defer n.subscribersMu.Unlock()
+		subscribers := n.subscribers[txID]
+		n.subscribers[txID] = append(subscribers, receiverCh)
 
-	subscribers := n.subscribers[txID]
-	n.subscribers[txID] = append(subscribers, receiverCh)
+		return len(subscribers) == 0
+	}()
 
-	if len(subscribers) > 0 {
+	if !isFirst {
 		// we already have an active subscription for this txID
 		return receiverCh, nil
+	}
+
+	rollback := func() {
+		// rollback can race logically with dispatcher cleanup in listen(),
+		// where completed txIDs are also deleted from n.subscribers. The shared
+		// subscribersMu lock plus the missing-key guard below makes this idempotent
+		// and safe regardless of which path removes the entry first.
+		n.subscribersMu.Lock()
+		defer n.subscribersMu.Unlock()
+
+		subscribers, ok := n.subscribers[txID]
+		if !ok {
+			return
+		}
+
+		for i, ch := range subscribers {
+			if ch != receiverCh {
+				continue
+			}
+
+			subscribers = append(subscribers[:i], subscribers[i+1:]...)
+			if len(subscribers) == 0 {
+				delete(n.subscribers, txID)
+				return
+			}
+
+			n.subscribers[txID] = subscribers
+			return
+		}
 	}
 
 	// setup request
@@ -114,6 +146,7 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	// check if our ctx is still open
 	select {
 	case <-ctx.Done():
+		rollback()
 		return nil, ctx.Err()
 	default:
 	}
@@ -121,6 +154,7 @@ func (n *NotificationClient) Subscribe(ctx context.Context, txID string) (chan i
 	// try to push to request queue
 	select {
 	case <-ctx.Done():
+		rollback()
 		return nil, ctx.Err()
 	case n.requestQueue <- req:
 	}
