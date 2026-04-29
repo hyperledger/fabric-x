@@ -423,6 +423,8 @@ queries:
 
 notifications:
   address: localhost:7002
+  tls:
+    enabled: false
 `
 	err := os.WriteFile(configPath, []byte(configContent), 0o600)
 	require.NoError(t, err)

@@ -11,10 +11,13 @@ package v1
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/hyperledger/fabric-lib-go/common/flogging"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
+
+var rootLogger = flogging.MustGetLogger("root")
 
 // NewRootCommand constructs and returns the root command for fxconfig.
 // It sets up configuration loading, flag registration, and all subcommands.
@@ -48,6 +51,12 @@ Configuration can be provided via:
 			cfg, err := config.Load(opts...)
 			if err != nil {
 				return err
+			}
+
+			// Warn if TLS is disabled for any service (secure-by-default)
+			if !cfg.Orderer.TLS.IsEnabled() || !cfg.Queries.TLS.IsEnabled() || !cfg.Notifications.TLS.IsEnabled() {
+				rootLogger.Warn("TLS is disabled for one or more services — " +
+					"connections will be unencrypted. This is insecure and not recommended for production.")
 			}
 
 			// set our config and printer in our context
