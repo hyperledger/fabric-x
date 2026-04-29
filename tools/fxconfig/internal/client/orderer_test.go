@@ -27,19 +27,24 @@ import (
 
 // mockBroadcastStream implements grpc.BidiStreamingClient[cb.Envelope, ab.BroadcastResponse].
 type mockBroadcastStream struct {
-	sendErr  error
-	recvResp *ab.BroadcastResponse
-	recvErr  error
+	sendErr         error
+	recvResp        *ab.BroadcastResponse
+	recvErr         error
+	closeSendErr    error
+	closeSendCalled bool
 }
 
 func (m *mockBroadcastStream) Send(_ *cb.Envelope) error            { return m.sendErr }
 func (m *mockBroadcastStream) Recv() (*ab.BroadcastResponse, error) { return m.recvResp, m.recvErr }
 func (*mockBroadcastStream) Header() (metadata.MD, error)           { return nil, nil }
 func (*mockBroadcastStream) Trailer() metadata.MD                   { return nil }
-func (*mockBroadcastStream) CloseSend() error                       { return nil }
-func (*mockBroadcastStream) Context() context.Context               { return context.Background() }
-func (*mockBroadcastStream) SendMsg(_ any) error                    { return nil }
-func (*mockBroadcastStream) RecvMsg(_ any) error                    { return nil }
+func (m *mockBroadcastStream) CloseSend() error {
+	m.closeSendCalled = true
+	return m.closeSendErr
+}
+func (*mockBroadcastStream) Context() context.Context { return context.Background() }
+func (*mockBroadcastStream) SendMsg(_ any) error      { return nil }
+func (*mockBroadcastStream) RecvMsg(_ any) error      { return nil }
 
 // mockAtomicBroadcastClient implements ab.AtomicBroadcastClient.
 type mockAtomicBroadcastClient struct {
@@ -113,22 +118,24 @@ func TestOrdererClient_Broadcast_NilClient(t *testing.T) {
 func TestOrdererClient_Broadcast_NilSigner(t *testing.T) {
 	t.Parallel()
 
-	oc := newTestOrdererClient(&mockAtomicBroadcastClient{
-		stream: &mockBroadcastStream{recvResp: &ab.BroadcastResponse{Status: cb.Status_SUCCESS}},
-	})
+	// Stream is never opened because createSignedEnvelope returns early on nil signer.
+	stream := &mockBroadcastStream{recvResp: &ab.BroadcastResponse{Status: cb.Status_SUCCESS}}
+	oc := newTestOrdererClient(&mockAtomicBroadcastClient{stream: stream})
 	err := oc.Broadcast(t.Context(), nil, "tx-1", someBroadcastTx())
 	require.Error(t, err)
+	require.False(t, stream.closeSendCalled, "CloseSend must not be called when stream is never opened")
 }
 
 func TestOrdererClient_Broadcast_SignerError(t *testing.T) {
 	t.Parallel()
 
-	oc := newTestOrdererClient(&mockAtomicBroadcastClient{
-		stream: &mockBroadcastStream{recvResp: &ab.BroadcastResponse{Status: cb.Status_SUCCESS}},
-	})
+	// Stream is never opened because createSignedEnvelope returns early on sign error.
+	stream := &mockBroadcastStream{recvResp: &ab.BroadcastResponse{Status: cb.Status_SUCCESS}}
+	oc := newTestOrdererClient(&mockAtomicBroadcastClient{stream: stream})
 	err := oc.Broadcast(t.Context(),
 		&testSigningIdentity{signErr: errors.New("sign failed")}, "tx-1", someBroadcastTx())
 	require.Error(t, err)
+	require.False(t, stream.closeSendCalled, "CloseSend must not be called when stream is never opened")
 }
 
 func TestOrdererClient_Broadcast_StreamError(t *testing.T) {
@@ -139,46 +146,47 @@ func TestOrdererClient_Broadcast_StreamError(t *testing.T) {
 	})
 	err := oc.Broadcast(t.Context(), &testSigningIdentity{}, "tx-1", someBroadcastTx())
 	require.Error(t, err)
+	// Stream was never obtained, so CloseSend is not called.
 }
 
 func TestOrdererClient_Broadcast_SendError(t *testing.T) {
 	t.Parallel()
 
-	oc := newTestOrdererClient(&mockAtomicBroadcastClient{
-		stream: &mockBroadcastStream{sendErr: errors.New("send failed")},
-	})
+	stream := &mockBroadcastStream{sendErr: errors.New("send failed")}
+	oc := newTestOrdererClient(&mockAtomicBroadcastClient{stream: stream})
 	err := oc.Broadcast(t.Context(), &testSigningIdentity{}, "tx-1", someBroadcastTx())
 	require.Error(t, err)
+	require.True(t, stream.closeSendCalled, "CloseSend must be called on Send error")
 }
 
 func TestOrdererClient_Broadcast_RecvError(t *testing.T) {
 	t.Parallel()
 
-	oc := newTestOrdererClient(&mockAtomicBroadcastClient{
-		stream: &mockBroadcastStream{recvErr: errors.New("recv failed")},
-	})
+	stream := &mockBroadcastStream{recvErr: errors.New("recv failed")}
+	oc := newTestOrdererClient(&mockAtomicBroadcastClient{stream: stream})
 	err := oc.Broadcast(t.Context(), &testSigningIdentity{}, "tx-1", someBroadcastTx())
 	require.Error(t, err)
+	require.True(t, stream.closeSendCalled, "CloseSend must be called on Recv error")
 }
 
 func TestOrdererClient_Broadcast_NonSuccessStatus(t *testing.T) {
 	t.Parallel()
 
-	oc := newTestOrdererClient(&mockAtomicBroadcastClient{
-		stream: &mockBroadcastStream{recvResp: &ab.BroadcastResponse{Status: cb.Status_BAD_REQUEST}},
-	})
+	stream := &mockBroadcastStream{recvResp: &ab.BroadcastResponse{Status: cb.Status_BAD_REQUEST}}
+	oc := newTestOrdererClient(&mockAtomicBroadcastClient{stream: stream})
 	err := oc.Broadcast(t.Context(), &testSigningIdentity{}, "tx-1", someBroadcastTx())
 	require.Error(t, err)
+	require.True(t, stream.closeSendCalled, "CloseSend must be called on non-success status")
 }
 
 func TestOrdererClient_Broadcast_Success(t *testing.T) {
 	t.Parallel()
 
-	oc := newTestOrdererClient(&mockAtomicBroadcastClient{
-		stream: &mockBroadcastStream{recvResp: &ab.BroadcastResponse{Status: cb.Status_SUCCESS}},
-	})
+	stream := &mockBroadcastStream{recvResp: &ab.BroadcastResponse{Status: cb.Status_SUCCESS}}
+	oc := newTestOrdererClient(&mockAtomicBroadcastClient{stream: stream})
 	err := oc.Broadcast(t.Context(), &testSigningIdentity{}, "tx-1", someBroadcastTx())
 	require.NoError(t, err)
+	require.True(t, stream.closeSendCalled, "CloseSend must be called on success")
 }
 
 func TestOrdererClient_Close_CallsCloseFunc(t *testing.T) {
