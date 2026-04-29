@@ -86,11 +86,11 @@ func (d *AdminApp) DeployNamespace(
 		if err != nil {
 			return nil, UnknownStatus, err
 		}
-		return nil, status, nil
+		return &DeployNamespaceOutput{TxID: out.TxID}, status, nil
 	}
 	if err := d.SubmitTransaction(ctx, out.TxID, out.Tx); err != nil {
 		return nil, UnknownStatus, err
 	}
 
-	return nil, UnknownStatus, nil
+	return &DeployNamespaceOutput{TxID: out.TxID}, UnknownStatus, nil
 }
