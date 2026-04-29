@@ -141,6 +141,14 @@ notifications:
     enabled: false
 ```
 
+> **TLS is enabled by default (secure-by-default).** Each service (`orderer`, `queries`, `notifications`) must therefore either:
+> - provide at least `tls.rootCerts` (server-side TLS) — and additionally `tls.clientCert` / `tls.clientKey` for mutual TLS; or
+> - explicitly opt out with `tls.enabled: false`.
+>
+> A service with `tls.enabled: true` but no `rootCerts` will fail to load with `rootCertPaths must not be empty`.
+>
+> **Breaking change (v0.4.0+):** prior versions defaulted to `tls.enabled: false`. Configs upgraded from older versions that omit the `tls` section will now attempt TLS — set `tls.enabled: false` per service to keep the previous plaintext behavior.
+
 ### TLS Configuration
 
 - **No TLS**: `enabled: false` or all TLS fields empty
