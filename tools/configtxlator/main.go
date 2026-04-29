@@ -7,13 +7,17 @@ SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"reflect"
 	"runtime"
+	"syscall"
+	"time"
 
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/cockroachdb/errors"
@@ -114,20 +118,49 @@ func startServer(address string, cors []string) {
 		app.Fatalf("Could not bind to address '%s': %s", address, err)
 	}
 
+	router := rest.NewRouter()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	mux.Handle("/", router)
+
+	var handler http.Handler = mux
+
 	if len(cors) > 0 {
 		origins := handlers.AllowedOrigins(cors)
 		// Note, configtxlator only exposes POST APIs for the time being, this
 		// list will need to be expanded if new non-POST APIs are added
-		methods := handlers.AllowedMethods([]string{http.MethodPost})
+		methods := handlers.AllowedMethods([]string{http.MethodPost, http.MethodGet})
 		headers := handlers.AllowedHeaders([]string{"Content-Type"})
+		handler = handlers.CORS(origins, methods, headers)(mux)
 		logger.Infof("Serving HTTP requests on %s with CORS %v", listener.Addr(), cors)
-		err = http.Serve(listener, handlers.CORS(origins, methods, headers)(rest.NewRouter()))
 	} else {
 		logger.Infof("Serving HTTP requests on %s", listener.Addr())
-		err = http.Serve(listener, rest.NewRouter())
 	}
 
-	app.Fatalf("Error starting server:[%s]\n", err)
+	srv := &http.Server{Handler: handler}
+
+	go func() {
+		if err := srv.Serve(listener); err != nil && err != http.ErrServerClosed {
+			logger.Fatalf("Error starting server: %s", err)
+		}
+	}()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	<-ctx.Done()
+	logger.Infof("Shutting down server gracefully...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		logger.Fatalf("Server shutdown failed: %s", err)
+	}
+	logger.Infof("Server stopped")
 }
 
 func encodeProto(msgName string, input, output *os.File) error {
@@ -223,11 +256,11 @@ func computeUpdt(original, updated, output *os.File, channelID string) error {
 		return errors.Wrapf(err, "error computing config update")
 	}
 
-	cu.ChannelId = channelID
-
 	if cu == nil {
 		return errors.New("error marshaling computed config update: proto: Marshal called with nil")
 	}
+
+	cu.ChannelId = channelID
 	outBytes, err := proto.Marshal(cu)
 	if err != nil {
 		return errors.Wrapf(err, "error marshaling computed config update")
