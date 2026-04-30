@@ -140,15 +140,21 @@ orderer:
   address: ` + endpoints["orderer"] + `
   channel: ` + channelID + `
   connectionTimeout: 30s
+  tls:
+    enabled: false
 
 queries:
   address: ` + endpoints["query"] + `
   connectionTimeout: 20s
+  tls:
+    enabled: false
 
 notifications:
   address: ` + endpoints["sidecar"] + `
   connectionTimeout: 15s
   waitingTimeout: 15s
+  tls:
+    enabled: false
 `
 	err := os.WriteFile(configPath, []byte(configContent), 0o600)
 	require.NoError(tb, err)
