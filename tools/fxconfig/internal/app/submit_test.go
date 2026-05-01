@@ -1,6 +1,5 @@
 /*
 Copyright IBM Corp. All Rights Reserved.
-
 SPDX-License-Identifier: Apache-2.0
 */
 
@@ -12,13 +11,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/provider"
+
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 type mockOrdererClient struct {
@@ -149,6 +149,7 @@ func TestSubmitTransaction_ContextCancelled(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
 	cancel()
 
 	err := a.SubmitTransaction(ctx, "tx-1", someTx())
@@ -247,4 +248,126 @@ func TestSubmitTransactionWithWait_Success(t *testing.T) {
 	status, err := a.SubmitTransactionWithWait(t.Context(), "tx-1", someTx())
 	require.NoError(t, err)
 	require.Equal(t, expectedStatus, status)
+}
+
+// Additional mocks and tests for context cancellation behavior
+
+type MockOrdererClient struct {
+	mock.Mock
+}
+
+func (m *MockOrdererClient) Broadcast(
+	ctx context.Context,
+	_ msp.SigningIdentity,
+	txID string,
+	tx *applicationpb.Tx,
+) error {
+	args := m.Called(ctx, txID, tx)
+	return args.Error(0)
+}
+
+func (*MockOrdererClient) Close() error { return nil }
+
+type MockNotificationClient struct {
+	mock.Mock
+}
+
+func (m *MockNotificationClient) Subscribe(ctx context.Context, txID string) (chan int, error) {
+	args := m.Called(ctx, txID)
+	v := args.Get(0)
+	if v == nil {
+		return nil, args.Error(1)
+	}
+	ch, ok := v.(chan int)
+	if !ok {
+		return nil, args.Error(1)
+	}
+	return ch, args.Error(1)
+}
+
+func (m *MockNotificationClient) WaitForEvent(ctx context.Context, ch chan int) (int, error) {
+	args := m.Called(ctx, ch)
+	return args.Int(0), args.Error(1)
+}
+
+func (*MockNotificationClient) Close() error { return nil }
+
+// removed: helper not used anymore
+
+func TestSubmitTransaction_ContextCanceledBeforeStart(t *testing.T) {
+	t.Parallel()
+
+	mockClient := new(MockOrdererClient)
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
+	}
+
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	cancel()
+
+	err := a.SubmitTransaction(ctx, "tx-1", someTx())
+	require.Error(t, err)
+	require.ErrorIs(t, err, context.Canceled)
+
+	// Ensure no broadcast attempt happened
+	mockClient.AssertNotCalled(t, "Broadcast", mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestSubmitTransactionWithWait_ContextCanceledBeforeStart(t *testing.T) {
+	t.Parallel()
+
+	mockClient := new(MockOrdererClient)
+
+	a := &AdminApp{
+		MspProvider:          makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider:      makeOrdererProvider(mockClient, nil),
+		NotificationProvider: makeNotificationProvider(&mockNotificationClient{}, nil),
+	}
+
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	cancel()
+
+	status, err := a.SubmitTransactionWithWait(ctx, "tx-1", someTx())
+	require.Error(t, err)
+	require.ErrorIs(t, err, context.Canceled)
+	require.Equal(t, UnknownStatus, status)
+	// Ensure no broadcast attempt happened
+	mockClient.AssertNotCalled(t, "Broadcast", mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestSubmitTransaction_ContextCanceledDuringRetry(t *testing.T) {
+	t.Parallel()
+
+	mockClient := new(MockOrdererClient)
+
+	// Simulate a broadcast that blocks until the context is cancelled
+	mockClient.On("Broadcast", mock.Anything, "tx-1", mock.Anything).Run(func(args mock.Arguments) {
+		v := args.Get(0)
+		if ctxArg, ok := v.(context.Context); ok {
+			<-ctxArg.Done()
+		}
+	}).Return(context.Canceled).Once()
+
+	a := &AdminApp{
+		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider: makeOrdererProvider(mockClient, nil),
+	}
+
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		cancel()
+	}()
+
+	err := a.SubmitTransaction(ctx, "tx-1", someTx())
+	require.Error(t, err)
+	require.ErrorIs(t, err, context.Canceled)
+	// Ensure Broadcast was called exactly once (no accidental retries)
+	mockClient.AssertNumberOfCalls(t, "Broadcast", 1)
 }
