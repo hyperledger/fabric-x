@@ -10,7 +10,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -155,8 +154,7 @@ func TestDeployNamespace_EndorseError(t *testing.T) {
 func TestDeployNamespace_EndorseAndSubmit(t *testing.T) {
 	t.Parallel()
 
-	mockClient := new(MockOrdererClient)
-	expectBroadcasts(t, mockClient, mock.Anything, nil)
+	mockClient := newMockOrdererClient(t, nil)
 
 	a := &AdminApp{
 		Validators:      fakeValidationContext(),
@@ -177,8 +175,7 @@ func TestDeployNamespace_EndorseAndSubmit(t *testing.T) {
 func TestDeployNamespace_EndorseAndSubmitError(t *testing.T) {
 	t.Parallel()
 
-	mockClient := new(MockOrdererClient)
-	expectBroadcasts(t, mockClient, mock.Anything,
+	mockClient := newMockOrdererClient(t,
 		errors.New("orderer unavailable"),
 		errors.New("orderer unavailable"),
 		errors.New("orderer unavailable"),
@@ -202,8 +199,7 @@ func TestDeployNamespace_EndorseAndSubmitWithWait(t *testing.T) {
 	t.Parallel()
 
 	const expectedStatus = 1
-	mockClient := new(MockOrdererClient)
-	expectBroadcasts(t, mockClient, mock.Anything, nil)
+	mockClient := newMockOrdererClient(t, nil)
 
 	a := &AdminApp{
 		Validators:           fakeValidationContext(),
@@ -228,7 +224,7 @@ func TestDeployNamespace_EndorseAndSubmitWithWaitError(t *testing.T) {
 	a := &AdminApp{
 		Validators:           fakeValidationContext(),
 		MspProvider:          makeMSPProvider(&testSigningIdentity{}, nil),
-		OrdererProvider:      makeOrdererProvider(&MockOrdererClient{}, nil),
+		OrdererProvider:      makeOrdererProvider(newMockOrdererClient(t), nil),
 		NotificationProvider: makeNotificationProvider(nil, errors.New("notification service unavailable")),
 	}
 	input := validDeployInput()
