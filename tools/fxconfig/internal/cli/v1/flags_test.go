@@ -88,3 +88,87 @@ func TestWaitFlag_Bind(t *testing.T) {
 	require.NotNil(t, flag)
 	require.Equal(t, "false", flag.DefValue)
 }
+
+func TestNamespaceDeployFlags_Validate(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		flags   namespaceDeployFlags
+		wantErr string
+	}{
+		{
+			name: "valid: none",
+			flags: namespaceDeployFlags{
+				endorse: false,
+				submit:  false,
+				wait:    false,
+			},
+		},
+		{
+			name: "valid: endorse only",
+			flags: namespaceDeployFlags{
+				endorse: true,
+				submit:  false,
+				wait:    false,
+			},
+		},
+		{
+			name: "valid: endorse and submit",
+			flags: namespaceDeployFlags{
+				endorse: true,
+				submit:  true,
+				wait:    false,
+			},
+		},
+		{
+			name: "valid: all flags",
+			flags: namespaceDeployFlags{
+				endorse: true,
+				submit:  true,
+				wait:    true,
+			},
+		},
+		{
+			name: "invalid: submit without endorse",
+			flags: namespaceDeployFlags{
+				endorse: false,
+				submit:  true,
+				wait:    false,
+			},
+			wantErr: "the --submit flag requires --endorse",
+		},
+		{
+			name: "invalid: wait without submit",
+			flags: namespaceDeployFlags{
+				endorse: true,
+				submit:  false,
+				wait:    true,
+			},
+			wantErr: "the --wait flag requires --submit",
+		},
+		{
+			name: "invalid: wait without submit and endorse",
+			flags: namespaceDeployFlags{
+				endorse: false,
+				submit:  false,
+				wait:    true,
+			},
+			wantErr: "the --wait flag requires --submit",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			err := tt.flags.Validate()
+			if tt.wantErr != "" {
+				require.Error(t, err)
+				require.Contains(t, err.Error(), tt.wantErr)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
