@@ -37,6 +37,12 @@ type NotificationClient struct {
 	// streamErr holds the error that caused the stream to terminate.
 	// Atomically stored; checked by Subscribe() before sending requests.
 	streamErr atomic.Pointer[error]
+
+	// droppedNotifications counts status events that the dispatcher could not
+	// deliver because the subscriber's channel buffer was full or the receiver
+	// had already given up. Exposed via DroppedNotifications for diagnostics
+	// and tests.
+	droppedNotifications atomic.Uint64
 }
 
 // NewNotificationClient creates a notification client with the provided configuration.
@@ -236,11 +242,6 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 
 	// spawn notification dispatcher
 	g.Go(func() error {
-		type notificationCall struct {
-			receiverQueue chan int
-			status        int
-		}
-
 		var resp *committerpb.NotificationResponse
 		for {
 			select {
@@ -249,33 +250,7 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 			case resp = <-n.responseQueue:
 			}
 
-			res := parseResponse(resp)
-
-			// Collect subscribers under lock, then release before spawning goroutines.
-			// This minimizes lock hold time — only map lookups and deletes happen
-			// under the lock. Goroutine scheduling happens entirely outside.
-			var notifications []notificationCall
-
-			n.subscribersMu.Lock()
-			for txID, v := range res {
-				receivers, ok := n.subscribers[txID]
-				if !ok {
-					continue
-				}
-				delete(n.subscribers, txID)
-				for _, q := range receivers {
-					notifications = append(notifications, notificationCall{receiverQueue: q, status: v})
-				}
-			}
-			n.subscribersMu.Unlock()
-
-			for _, c := range notifications {
-				select {
-				case c.receiverQueue <- c.status:
-				default:
-					// message dropped
-				}
-			}
+			n.dispatchNotifications(n.collectNotifications(parseResponse(resp)))
 		}
 	})
 
@@ -292,6 +267,67 @@ func (n *NotificationClient) listen(ctx context.Context) error {
 	n.subscribersMu.Unlock()
 
 	return err
+}
+
+// notificationCall is a single status event ready for delivery to a subscriber.
+type notificationCall struct {
+	txID          string
+	receiverQueue chan int
+	status        int
+}
+
+// collectNotifications snapshots and removes all subscribers whose txIDs
+// appear in res, returning one notificationCall per subscriber. Holding the
+// subscribers lock only for the duration of the lookup/delete keeps the
+// dispatcher hot path short.
+func (n *NotificationClient) collectNotifications(res map[string]int) []notificationCall {
+	var notifications []notificationCall
+
+	n.subscribersMu.Lock()
+	defer n.subscribersMu.Unlock()
+
+	for txID, v := range res {
+		receivers, ok := n.subscribers[txID]
+		if !ok {
+			continue
+		}
+		delete(n.subscribers, txID)
+		for _, q := range receivers {
+			notifications = append(notifications, notificationCall{
+				txID:          txID,
+				receiverQueue: q,
+				status:        v,
+			})
+		}
+	}
+
+	return notifications
+}
+
+// dispatchNotifications sends each pending status to its subscriber. The send
+// is non-blocking so a single slow subscriber cannot stall the dispatcher
+// goroutine, but every dropped event is logged and counted — the txID has
+// already been removed from the subscribers map, so a drop is unrecoverable
+// and must be observable.
+func (n *NotificationClient) dispatchNotifications(notifications []notificationCall) {
+	for _, c := range notifications {
+		select {
+		case c.receiverQueue <- c.status:
+		default:
+			n.droppedNotifications.Add(1)
+			logger.Warnf(
+				"notification dropped (unrecoverable): txID=%s status=%d (subscriber buffer full or receiver gone)",
+				c.txID, c.status,
+			)
+		}
+	}
+}
+
+// DroppedNotifications returns the cumulative count of status events that the
+// dispatcher could not deliver to a subscriber (buffer full or receiver
+// already gone). Useful for end-of-run diagnostics and tests.
+func (n *NotificationClient) DroppedNotifications() uint64 {
+	return n.droppedNotifications.Load()
 }
 
 // parseResponse extracts transaction statuses from a notification response,
