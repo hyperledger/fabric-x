@@ -185,3 +185,65 @@ func TestInfoCommand_InvalidFormat(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "invalid --format: json (want yaml|env)")
 }
+
+func TestInfoCommand_EnvPreservesZeroValues(t *testing.T) {
+	t.Parallel()
+
+	boolPtr := func(b bool) *bool { return &b }
+
+	var outBuf bytes.Buffer
+	ctx := &CLIContext{
+		Config: &config.Config{
+			Logging: config.LoggingConfig{
+				Level:  "",
+				Format: "",
+			},
+			TLS: config.TLSConfig{
+				Enabled:       boolPtr(false),
+				ClientKeyPath: "",
+			},
+			Orderer: config.OrdererConfig{
+				EndpointServiceConfig: config.EndpointServiceConfig{
+					Address:           "",
+					ConnectionTimeout: 0,
+				},
+				Channel: "",
+			},
+		},
+		Printer: cliio.NewCLIPrinter(&outBuf, &outBuf, cliio.FormatTable),
+	}
+
+	cmd := NewInfoCommand(ctx)
+	err := cmd.Flags().Set("format", "env")
+	require.NoError(t, err)
+
+	err = cmd.RunE(cmd, nil)
+	require.NoError(t, err)
+
+	output := outBuf.String()
+
+	// These zero-value fields were previously dropped by the YAML omitempty round-trip.
+	// The reflection-based approach must preserve them all.
+	require.Contains(t, output, "FXCONFIG_LOGGING_LEVEL=")
+	require.Contains(t, output, "FXCONFIG_LOGGING_FORMAT=")
+	require.Contains(t, output, "FXCONFIG_TLS_ENABLED=false")
+	require.Contains(t, output, "FXCONFIG_TLS_CLIENTKEY=")
+	require.Contains(t, output, "FXCONFIG_ORDERER_ADDRESS=")
+	require.Contains(t, output, "FXCONFIG_ORDERER_CONNECTIONTIMEOUT=0s")
+	require.Contains(t, output, "FXCONFIG_ORDERER_CHANNEL=")
+}
+
+func TestStructToEnv_NilConfig(t *testing.T) {
+	t.Parallel()
+
+	result := structToEnv("FXCONFIG", (*config.Config)(nil))
+	require.Empty(t, result)
+}
+
+func TestStructToEnv_NonStruct(t *testing.T) {
+	t.Parallel()
+
+	result := structToEnv("FXCONFIG", "not a struct")
+	require.Empty(t, result)
+}
+
