@@ -103,6 +103,8 @@ func main() {
 	// "version" command
 	case versionCmd.FullCommand():
 		fmt.Println(getVersionInfo())
+	default:
+		app.Fatalf("Unknown command")
 	}
 }
 
