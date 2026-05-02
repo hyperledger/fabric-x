@@ -121,7 +121,8 @@ func startServer(address string, cors []string) {
 		methods := handlers.AllowedMethods([]string{http.MethodPost})
 		headers := handlers.AllowedHeaders([]string{"Content-Type"})
 		logger.Infof("Serving HTTP requests on %s with CORS %v", listener.Addr(), cors)
-		err = http.Serve(listener, handlers.CORS(origins, methods, headers)(rest.NewRouter()))
+		corsHandler := handlers.CORS(origins, methods, headers)
+		err = http.Serve(listener, corsHandler(rest.NewRouter()))
 	} else {
 		logger.Infof("Serving HTTP requests on %s", listener.Addr())
 		err = http.Serve(listener, rest.NewRouter())
@@ -141,7 +142,11 @@ func encodeProto(msgName string, input, output *os.File) error {
 	if msgType == nil {
 		return errors.Errorf("message of type %s unknown", msgType)
 	}
-	msg := reflect.New(msgType.Elem()).Interface().(proto.Message)
+	msg, ok := reflect.New(msgType.Elem()).Interface().(proto.Message)
+
+	if !ok {
+		return errors.New("error marshaling: invalid type")
+	}
 
 	err = protolator.DeepUnmarshalJSON(input, msg)
 	if err != nil {
@@ -175,7 +180,10 @@ func decodeProto(msgName string, input, output *os.File) error {
 	if msgType == nil {
 		return errors.Errorf("message of type %s unknown", msgType)
 	}
-	msg := reflect.New(msgType.Elem()).Interface().(proto.Message)
+	msg, ok := reflect.New(msgType.Elem()).Interface().(proto.Message)
+	if !ok {
+		return errors.New("error marshaling: invalid type")
+	}
 
 	in, err := io.ReadAll(input)
 	if err != nil {
@@ -223,11 +231,12 @@ func computeUpdt(original, updated, output *os.File, channelID string) error {
 		return errors.Wrapf(err, "error computing config update")
 	}
 
-	cu.ChannelId = channelID
-
 	if cu == nil {
 		return errors.New("error marshaling computed config update: proto: Marshal called with nil")
 	}
+
+	cu.ChannelId = channelID
+
 	outBytes, err := proto.Marshal(cu)
 	if err != nil {
 		return errors.Wrapf(err, "error marshaling computed config update")
