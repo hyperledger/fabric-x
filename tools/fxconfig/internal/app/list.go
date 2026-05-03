@@ -12,8 +12,7 @@ import (
 )
 
 // ListNamespaces queries the committer service for installed namespaces.
-// It connects to the query service, retrieves all namespace policies, and formats
-// the Output showing namespace names, versions, and policy data in hexadecimal.
+// It connects to the query service and retrieves all namespace policies.
 func (d *AdminApp) ListNamespaces(ctx context.Context) ([]NamespaceQueryResult, error) {
 	// get query service instance
 	qc, err := d.QueryProvider.Get()
@@ -47,26 +46,3 @@ type NamespaceQueryResult struct {
 	Version int    `json:"version" yaml:"version"`
 	Policy  []byte `json:"policy" yaml:"policy"`
 }
-
-// parsePolicy extracts and formats policy information from serialized bytes.
-// Returns base64-encoded public key for threshold policies or string representation for MSP policies.
-// func parsePolicy(b []byte) string {
-//	var p applicationpb.NamespacePolicy
-//	if err := proto.Unmarshal(b, &p); err != nil {
-//		panic(err)
-//	}
-//
-//	switch r := p.Rule.(type) {
-//	case *applicationpb.NamespacePolicy_ThresholdRule:
-//		return base64.StdEncoding.EncodeToString(r.ThresholdRule.GetPublicKey())
-//	case *applicationpb.NamespacePolicy_MspRule:
-//		var en common.SignaturePolicy
-//		if err := proto.Unmarshal(r.MspRule, &en); err != nil {
-//			panic(err)
-//		}
-//		// TODO: some pretty print would be beautiful
-//		return en.String()
-//	default:
-//		return "error parsing policy"
-//	}
-// }
