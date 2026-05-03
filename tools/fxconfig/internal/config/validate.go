@@ -8,6 +8,7 @@ package config
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"net"
@@ -92,9 +93,17 @@ func (c *TLSConfig) Validate(vctx validation.Context) error {
 		return fmt.Errorf("invalid clientKeyPath: %w", err)
 	}
 
-	// try to load key pair
-	if _, err := tls.LoadX509KeyPair(c.ClientCertPath, c.ClientKeyPath); err != nil {
+	// try to load key pair and check certificate validity
+	cert, err := tls.LoadX509KeyPair(c.ClientCertPath, c.ClientKeyPath)
+	if err != nil {
 		return fmt.Errorf("invalid cert/key pair: %w", err)
+	}
+
+	if len(cert.Certificate) > 0 {
+		leaf, parseErr := x509.ParseCertificate(cert.Certificate[0])
+		if parseErr == nil && time.Now().After(leaf.NotAfter) {
+			return fmt.Errorf("client certificate expired at %s", leaf.NotAfter.UTC().Format(time.RFC3339))
+		}
 	}
 
 	return nil
