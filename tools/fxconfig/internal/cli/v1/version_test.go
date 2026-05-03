@@ -26,19 +26,19 @@ func TestVersionCommand(t *testing.T) {
 	}{
 		{
 			name:           "version command with no args",
-			args:           []string{"version"},
-			expectedOutput: []string{"fxconfig", "Version:", "Go Version:", "OS/Arch:"},
+			args:           []string{versionCmd},
+			expectedOutput: []string{appName, "Version:", "Go Version:", "OS/Arch:"},
 			expectError:    false,
 		},
 		{
 			name:           "version command with help flag",
-			args:           []string{"version", "--help"},
-			expectedOutput: []string{"Usage:", "fxconfig version"},
+			args:           []string{versionCmd, "--help"},
+			expectedOutput: []string{"Usage:", appName + " " + versionCmd},
 			expectError:    false,
 		},
 		{
 			name:           "version command with invalid flag",
-			args:           []string{"version", "--invalid"},
+			args:           []string{versionCmd, "--invalid"},
 			expectedOutput: []string{"unknown flag: --invalid"},
 			expectError:    true,
 		},
@@ -48,8 +48,7 @@ func TestVersionCommand(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			// Setup
-			rootCmd := &cobra.Command{Use: "fxconfig"}
+			rootCmd := &cobra.Command{Use: appName}
 			rootCmd.AddCommand(NewVersionCommand())
 
 			var outBuf, errBuf bytes.Buffer
@@ -57,10 +56,8 @@ func TestVersionCommand(t *testing.T) {
 			rootCmd.SetErr(&errBuf)
 			rootCmd.SetArgs(tt.args)
 
-			// Execute
 			err := rootCmd.Execute()
 
-			// Assert
 			if tt.expectError {
 				require.Error(t, err)
 				output := errBuf.String()
@@ -81,26 +78,22 @@ func TestVersionCommand(t *testing.T) {
 func TestVersionCommand_OutputFormat(t *testing.T) {
 	t.Parallel()
 
-	// Setup
-	rootCmd := &cobra.Command{Use: "fxconfig"}
+	rootCmd := &cobra.Command{Use: appName}
 	rootCmd.AddCommand(NewVersionCommand())
 
 	var outBuf bytes.Buffer
 	rootCmd.SetOut(&outBuf)
-	rootCmd.SetArgs([]string{"version"})
+	rootCmd.SetArgs([]string{versionCmd})
 
-	// Execute
 	err := rootCmd.Execute()
 	require.NoError(t, err)
 
-	// Assert output format
 	output := outBuf.String()
 	lines := strings.Split(strings.TrimSpace(output), "\n")
 
 	require.GreaterOrEqual(t, len(lines), 5, "version output should have at least 5 lines")
-	require.Equal(t, "fxconfig", lines[0], "first line should be 'fxconfig'")
+	require.Equal(t, appName, lines[0], "first line should be 'fxconfig'")
 
-	// Verify subsequent lines have the expected format (key: value)
 	for i := 1; i < len(lines); i++ {
 		line := lines[i]
 		if strings.TrimSpace(line) == "" {
@@ -113,12 +106,10 @@ func TestVersionCommand_OutputFormat(t *testing.T) {
 func TestNewVersionCommand(t *testing.T) {
 	t.Parallel()
 
-	// Execute
 	cmd := NewVersionCommand()
 
-	// Assert
 	require.NotNil(t, cmd, "NewVersionCommand should return a non-nil command")
-	require.Equal(t, "version", cmd.Use, "command use should be 'version'")
+	require.Equal(t, versionCmd, cmd.Use, "command use should be 'version'")
 	require.NotEmpty(t, cmd.Short, "command should have a short description")
 	require.NotNil(t, cmd.Run, "command should have a Run function")
 }

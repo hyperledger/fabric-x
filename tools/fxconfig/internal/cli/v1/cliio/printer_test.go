@@ -14,6 +14,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const testValue1 = "value1"
+
 func TestNewCLIPrinter(t *testing.T) {
 	t.Parallel()
 
@@ -34,7 +36,7 @@ func TestCLIPrinter_Print_JSON(t *testing.T) {
 		printer := NewCLIPrinter(&out, &errOut, FormatJSON)
 
 		data := map[string]any{
-			"key1": "value1",
+			"key1": testValue1,
 			"key2": 123,
 		}
 
@@ -43,7 +45,7 @@ func TestCLIPrinter_Print_JSON(t *testing.T) {
 		var result map[string]any
 		err := json.Unmarshal(out.Bytes(), &result)
 		require.NoError(t, err)
-		require.Equal(t, "value1", result["key1"])
+		require.Equal(t, testValue1, result["key1"])
 		require.InEpsilon(t, float64(123), result["key2"], 0.001)
 	})
 
@@ -84,7 +86,7 @@ func TestCLIPrinter_Print_YAML(t *testing.T) {
 		printer := NewCLIPrinter(&out, &errOut, FormatYAML)
 
 		data := map[string]any{
-			"key1": "value1",
+			"key1": testValue1,
 			"key2": 123,
 		}
 
@@ -93,7 +95,7 @@ func TestCLIPrinter_Print_YAML(t *testing.T) {
 		var result map[string]any
 		err := yaml.Unmarshal(out.Bytes(), &result)
 		require.NoError(t, err)
-		require.Equal(t, "value1", result["key1"])
+		require.Equal(t, testValue1, result["key1"])
 		require.Equal(t, 123, result["key2"])
 	})
 
@@ -135,14 +137,14 @@ func TestCLIPrinter_Print_Table(t *testing.T) {
 		}
 
 		data := testStruct{
-			Field1: "value1",
+			Field1: testValue1,
 			Field2: 42,
 		}
 
 		printer.Print(data)
 
 		output := out.String()
-		require.Contains(t, output, "value1")
+		require.Contains(t, output, testValue1)
 		require.Contains(t, output, "42")
 	})
 }

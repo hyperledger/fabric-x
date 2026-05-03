@@ -16,6 +16,8 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
+const appName = "fxconfig"
+
 // NewRootCommand constructs and returns the root command for fxconfig.
 // It sets up configuration loading, flag registration, and all subcommands.
 // Configuration is loaded in PersistentPreRunE.
@@ -23,7 +25,7 @@ func NewRootCommand(cliCtx *CLIContext, buildApp func(cfg *config.Config) (app.A
 	// cli flags
 	var cfgFile string
 	rootCmd := &cobra.Command{
-		Use:   "fxconfig",
+		Use:   appName,
 		Short: "CLI tool for managing Fabric-X namespaces and transactions",
 		Long: `fxconfig is a command-line tool for managing Fabric-X namespaces and transactions.
 
