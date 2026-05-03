@@ -14,6 +14,7 @@ import (
 	"os"
 	"reflect"
 	"runtime"
+	"time"
 
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/cockroachdb/errors"
@@ -41,30 +42,51 @@ var (
 	version   = metadata.Version
 )
 
-// command line flags
+// command line flags.
 var (
 	app = kingpin.New("configtxlator", "Utility for generating Hyperledger Fabric channel configurations")
 
 	start    = app.Command("start", "Start the configtxlator REST server")
-	hostname = start.Flag("hostname", "The hostname or IP on which the REST server will listen").Default("0.0.0.0").String()
-	port     = start.Flag("port", "The port on which the REST server will listen").Default("7059").Int()
-	cors     = start.Flag("CORS", "Allowable CORS domains, e.g. '*' or 'www.example.com' (may be repeated).").Strings()
+	hostname = start.Flag(
+		"hostname",
+		"The hostname or IP on which the REST server will listen",
+	).Default("0.0.0.0").String()
+	port = start.Flag("port", "The port on which the REST server will listen").Default("7059").Int()
+	cors = start.Flag("CORS", "Allowable CORS domains, e.g. '*' or 'www.example.com' (may be repeated).").Strings()
 
-	protoEncode       = app.Command("proto_encode", "Converts a JSON document to protobuf.")
-	protoEncodeType   = protoEncode.Flag("type", "The type of protobuf structure to encode to.  For example, 'common.Config'.").Required().String()
+	protoEncode     = app.Command("proto_encode", "Converts a JSON document to protobuf.")
+	protoEncodeType = protoEncode.Flag(
+		"type",
+		"The type of protobuf structure to encode to.  For example, 'common.Config'.",
+	).Required().String()
 	protoEncodeSource = protoEncode.Flag("input", "A file containing the JSON document.").Default(os.Stdin.Name()).File()
-	protoEncodeDest   = protoEncode.Flag("output", "A file to write the output to.").Default(os.Stdout.Name()).OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
+	protoEncodeDest   = protoEncode.Flag(
+		"output",
+		"A file to write the output to.",
+	).Default(os.Stdout.Name()).OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 
-	protoDecode       = app.Command("proto_decode", "Converts a proto message to JSON.")
-	protoDecodeType   = protoDecode.Flag("type", "The type of protobuf structure to decode from.  For example, 'common.Config'.").Required().String()
+	protoDecode     = app.Command("proto_decode", "Converts a proto message to JSON.")
+	protoDecodeType = protoDecode.Flag(
+		"type",
+		"The type of protobuf structure to decode from.  For example, 'common.Config'.",
+	).Required().String()
 	protoDecodeSource = protoDecode.Flag("input", "A file containing the proto message.").Default(os.Stdin.Name()).File()
-	protoDecodeDest   = protoDecode.Flag("output", "A file to write the JSON document to.").Default(os.Stdout.Name()).OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
+	protoDecodeDest   = protoDecode.Flag(
+		"output",
+		"A file to write the JSON document to.",
+	).Default(os.Stdout.Name()).OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 
 	computeUpdate          = app.Command("compute_update", "Takes two marshaled common.Config messages and computes the config update which transitions between the two.")
 	computeUpdateOriginal  = computeUpdate.Flag("original", "The original config message.").File()
 	computeUpdateUpdated   = computeUpdate.Flag("updated", "The updated config message.").File()
-	computeUpdateChannelID = computeUpdate.Flag("channel_id", "The name of the channel for this update.").Required().String()
-	computeUpdateDest      = computeUpdate.Flag("output", "A file to write the JSON document to.").Default(os.Stdout.Name()).OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
+	computeUpdateChannelID = computeUpdate.Flag(
+		"channel_id",
+		"The name of the channel for this update.",
+	).Required().String()
+	computeUpdateDest = computeUpdate.Flag(
+		"output",
+		"A file to write the JSON document to.",
+	).Default(os.Stdout.Name()).OpenFile(os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o600)
 
 	versionCmd = app.Command("version", "Show version information")
 )
@@ -79,23 +101,51 @@ func main() {
 		startServer(fmt.Sprintf("%s:%d", *hostname, *port), *cors)
 	// "proto_encode" command
 	case protoEncode.FullCommand():
-		defer (*protoEncodeSource).Close()
-		defer (*protoEncodeDest).Close()
+		defer func() {
+			if err := (*protoEncodeSource).Close(); err != nil {
+				logger.Warnf("error closing protoEncodeSource: %s", err)
+			}
+		}()
+		defer func() {
+			if err := (*protoEncodeDest).Close(); err != nil {
+				logger.Warnf("error closing protoEncodeDest: %s", err)
+			}
+		}()
 		err := encodeProto(*protoEncodeType, *protoEncodeSource, *protoEncodeDest)
 		if err != nil {
 			app.Fatalf("Error decoding: %s", err)
 		}
 	case protoDecode.FullCommand():
-		defer (*protoDecodeSource).Close()
-		defer (*protoDecodeDest).Close()
+		defer func() {
+			if err := (*protoDecodeSource).Close(); err != nil {
+				logger.Warnf("error closing protoDecodeSource: %s", err)
+			}
+		}()
+		defer func() {
+			if err := (*protoDecodeDest).Close(); err != nil {
+				logger.Warnf("error closing protoDecodeDest: %s", err)
+			}
+		}()
 		err := decodeProto(*protoDecodeType, *protoDecodeSource, *protoDecodeDest)
 		if err != nil {
 			app.Fatalf("Error decoding: %s", err)
 		}
 	case computeUpdate.FullCommand():
-		defer (*computeUpdateOriginal).Close()
-		defer (*computeUpdateUpdated).Close()
-		defer (*computeUpdateDest).Close()
+		defer func() {
+			if err := (*computeUpdateOriginal).Close(); err != nil {
+				logger.Warnf("error closing computeUpdateOriginal: %s", err)
+			}
+		}()
+		defer func() {
+			if err := (*computeUpdateUpdated).Close(); err != nil {
+				logger.Warnf("error closing computeUpdateUpdated: %s", err)
+			}
+		}()
+		defer func() {
+			if err := (*computeUpdateDest).Close(); err != nil {
+				logger.Warnf("error closing computeUpdateDest: %s", err)
+			}
+		}()
 		err := computeUpdt(*computeUpdateOriginal, *computeUpdateUpdated, *computeUpdateDest, *computeUpdateChannelID)
 		if err != nil {
 			app.Fatalf("Error computing update: %s", err)
@@ -114,19 +164,24 @@ func startServer(address string, cors []string) {
 		app.Fatalf("Could not bind to address '%s': %s", address, err)
 	}
 
+	server := &http.Server{
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
 	if len(cors) > 0 {
 		origins := handlers.AllowedOrigins(cors)
-		// Note, configtxlator only exposes POST APIs for the time being, this
-		// list will need to be expanded if new non-POST APIs are added
 		methods := handlers.AllowedMethods([]string{http.MethodPost})
 		headers := handlers.AllowedHeaders([]string{"Content-Type"})
 		logger.Infof("Serving HTTP requests on %s with CORS %v", listener.Addr(), cors)
-		err = http.Serve(listener, handlers.CORS(origins, methods, headers)(rest.NewRouter()))
+		server.Handler = handlers.CORS(origins, methods, headers)(rest.NewRouter())
 	} else {
 		logger.Infof("Serving HTTP requests on %s", listener.Addr())
-		err = http.Serve(listener, rest.NewRouter())
+		server.Handler = rest.NewRouter()
 	}
 
+	err = server.Serve(listener)
 	app.Fatalf("Error starting server:[%s]\n", err)
 }
 
@@ -223,11 +278,12 @@ func computeUpdt(original, updated, output *os.File, channelID string) error {
 		return errors.Wrapf(err, "error computing config update")
 	}
 
-	cu.ChannelId = channelID
-
 	if cu == nil {
 		return errors.New("error marshaling computed config update: proto: Marshal called with nil")
 	}
+
+	cu.ChannelId = channelID
+
 	outBytes, err := proto.Marshal(cu)
 	if err != nil {
 		return errors.Wrapf(err, "error marshaling computed config update")
