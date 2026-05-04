@@ -1,0 +1,222 @@
+1. bug(tokens/issuer): IssueCashView.Call returns nil on ordering failure — type mismatch causes interface conversion panic
+
+In issuer/service/fsc.go line 159, the ordering failure path returns `nil` instead of `""`:
+    return nil, errors.Wrap(err, "failed asking ordering")
+The function signature returns `(interface{}, error)` and the caller in Issue() (line 69) does a
+type assertion `res.(string)` on the result. When ordering succeeds after a prior retry or in tests,
+returning nil instead of "" causes a panic on the type assertion at line 69-71 since nil cannot be
+asserted to string. The same pattern exists in owner/service/fsc.go line 261 in TransferView.Call.
+Fix: change `return nil` to `return ""` in both ordering failure paths, and add defensive nil
+checks before the type assertion. Add unit tests for ordering failure scenarios.
+Estimated scope: ~15 lines of code changes across 2 files.
+
+
+2. bug(tokens/owner): TransferView.Call error handling relies on fragile string matching instead of typed error comparison
+
+In owner/service/fsc.go lines 243 and 282-286, error classification is done via
+`strings.Contains(err.Error(), "insufficient funds")` and `strings.Contains(err.Error(), "] not found")`
+and `strings.Contains(err.Error(), "failed to dial")`. If the upstream fabric-token-sdk library changes
+its error message formatting, these checks silently fail and the raw error propagates to the API layer
+as a generic 500 instead of the intended domain error (ErrInsufficientFunds, ErrCounterpartyAccountNotFound,
+ErrConnectionError). This is the same class of bug as configtxgen's string-based panic recovery
+(new_issues.txt #2) but applied to runtime error handling in token operations.
+Fix: use errors.Is/errors.As where possible, or define a more robust error classification function
+that wraps the upstream errors at the service boundary. Add tests for each error classification path.
+Estimated scope: ~30 lines of code changes.
+
+
+3. bug(configtxlator): start command REST server defaults to hostname 0.0.0.0 with no authentication or rate limiting
+
+In configtxlator/main.go line 49, the `--hostname` flag defaults to `"0.0.0.0"`, binding the REST
+server to all network interfaces. The server has no authentication, no rate limiting, and no request
+size limits. Combined with the fact that http.Serve (line 124/127) creates an http.Server with no
+ReadTimeout/WriteTimeout (similar to tokens issue #5 in new_issues.txt but for a different binary),
+this makes the configtxlator server vulnerable to abuse when inadvertently exposed. The server
+processes arbitrary protobuf encoding/decoding and config update computation, which are CPU-intensive
+operations that could be used for denial of service.
+Fix: default hostname to `"127.0.0.1"` (localhost only), add request body size limits via
+http.MaxBytesReader, add ReadTimeout/WriteTimeout to the http.Server, and document the security
+implications of binding to 0.0.0.0 in the --hostname flag help text.
+Estimated scope: ~25 lines of code changes.
+
+
+4. bug(configtxgen): test suite mutates global state (os.Args, flag.CommandLine) creating test pollution risks
+
+In configtxgen/main_test.go lines 24-28 and 51-54, both test functions manipulate global os.Args
+and flag.CommandLine to test CLI behavior. They directly call main() which uses logger.Fatalf()
+(line 51, 82, 87) and os.Exit(1) (lines 57, 67, 73, 75) — any of these would terminate the test
+process instead of failing the test. The tests don't run in parallel (no t.Parallel()) but share
+global state through package-level variables. There's also no test for error paths (missing config,
+missing profile, invalid flags) because those paths call os.Exit or logger.Panic which would kill
+the test runner.
+Fix: refactor main() to extract a run() function that returns errors instead of calling os.Exit
+or logger.Fatal. Use testable command patterns. Add tests for error paths using the refactored
+function.
+Estimated scope: ~60 lines of code changes.
+
+
+5. bug(cryptogen): default switch case panics with "programming error" instead of returning a proper error
+
+In cryptogen/main.go line 58, the default case in the command switch statement calls
+`panic("programming error")`. While this should be unreachable due to kingpin's command parsing,
+using panic for control flow is poor practice — it would produce an unreadable stack trace instead
+of a clean error message if triggered. Additionally, the error message at line 62 uses os.Exit(-1)
+which is non-standard (POSIX expects 0-255 range, and -1 wraps to 255). The getConfig() function
+at lines 83-101 also has a subtle bug: when running the `extend` command, it checks *genConfigFile
+first (line 86) before *extConfigFile (line 92), but both flags share the same Config struct. If
+the user runs `extend --config foo.yaml`, the genConfigFile pointer is nil, but extConfigFile gets
+set, working correctly. However, if both config flags are somehow set (e.g. via a test), genConfigFile
+takes precedence over extConfigFile silently.
+Fix: replace the panic with `app.Fatalf("unknown command")` or `fmt.Fprintf(os.Stderr, ...)` +
+`os.Exit(1)`, fix the exit code to use 1, and add a guard that the correct config flag is used
+for the active command.
+Estimated scope: ~15 lines of code changes.
+
+
+6. bug(configtxlator): encodeProto error message says "Error decoding" when encoding fails
+
+In configtxlator/main.go line 86, the error path for the proto_encode command prints
+`app.Fatalf("Error decoding: %s", err)` — but this is the encode command, not decode. The error
+message is copy-pasted from the decode path and is misleading. Similarly, at line 136, the error
+wrapping says `"error encode input"` when the operation is looking up a message type for encoding,
+and the same misleading message appears in decodeProto at line 170 where it also says
+`"error encode input"` instead of `"error decode input"`.
+Fix: correct the error messages: line 86 should say "Error encoding", line 136 should say
+"error looking up message type", and line 170 should say "error looking up message type for decode".
+Estimated scope: ~5 lines of code changes.
+
+
+7. improvement(fxconfig/cli): namespace create/update output is confusing when --wait returns transaction failure
+
+In namespace_create.go lines 80-85 and namespace_update.go lines 80-85, when --wait is used and the
+transaction is submitted, the result `res` is nil and the status is printed. However, unlike
+tx_submit.go lines 71-76 which checks `if status != int(committerpb.Status_COMMITTED)` and returns
+an error, the namespace create/update commands just print the status and return nil (success exit code)
+even when the transaction failed. This means `fxconfig namespace create foo --policy="..." --endorse
+--submit --wait` returns exit code 0 even if the transaction was rejected by the orderer. This is
+the same issue described in existing_issues.txt #7 but specifically in the --wait path, where the
+fix was likely incomplete or only applied to tx submit.
+Fix: add the same status check as tx_submit.go after printing the status in namespace_create.go
+and namespace_update.go, returning an error for non-COMMITTED statuses.
+Estimated scope: ~12 lines of code changes across 2 files.
+
+
+8. bug(tokens/samples): Go version mismatch between root Dockerfile (golang:1.26) and samples Dockerfile (golang:1.25.2)
+
+The root Dockerfile at line 11 uses `FROM golang:1.26 AS builder` while samples/tokens/Dockerfile
+at line 7 uses `FROM golang:1.25.2 AS builder`. The go.mod at line 8 specifies `go 1.26`. This
+means the samples are being built with a Go compiler version older than what the module declares,
+which can cause subtle compatibility issues or build failures when newer Go language features or
+standard library APIs are used. The samples also have their own go.mod which may drift.
+Fix: align the Go version in samples/tokens/Dockerfile with the version declared in the root go.mod.
+Consider using a build argument or extracting the Go version from go.mod to keep them in sync.
+Estimated scope: ~3 lines of code changes.
+
+
+9. improvement(fxconfig): NotificationClient creates a context.Background() that is disconnected from the caller's context
+
+In client/notifications.go line 50, NewNotificationClient creates its own `context.WithCancel(context.Background())`
+for the background listener goroutine. This context is completely disconnected from any parent context
+passed through the application. If the CLI's signal-based context (from main.go line 32) is canceled,
+the notification listener's goroutine continues running until its own cancel is called via Close().
+This creates a potential goroutine leak if Close() is never called (e.g., if the program crashes or
+exits before defer runs). Additionally, the listener goroutine at line 64-68 silently drops the
+error if it's not context.Canceled, just logging it — there's no way for the caller to know the
+listener has failed without calling Subscribe() and checking streamErr.
+Fix: accept a parent context parameter in NewNotificationClient and derive the listener's context
+from it. This ensures the listener is canceled when the application context is canceled, even if
+Close() is not explicitly called.
+Estimated scope: ~10 lines of code changes.
+
+
+10. bug(fxconfig): SubmitTransaction and SubmitTransactionWithWait close the orderer client after every call via sync.Once-cached provider
+
+In app/submit.go lines 31-33 and 49-51, both SubmitTransaction and SubmitTransactionWithWait call
+`defer func() { _ = sc.ordererClient.Close() }()`. The ordererClient is obtained from
+OrdererProvider.Get() which uses sync.Once (provider.go line 44) to cache the instance. After the
+first submission closes the client, subsequent calls to OrdererProvider.Get() return the same cached
+(now closed) client. This means the second and all subsequent transaction submissions will fail because
+they attempt to use a closed gRPC connection. The same issue applies to the notification client at
+lines 59-61 and the query client in list.go lines 23-25. This is the exact issue described in
+existing_issues.txt #21 ("prevent reuse of closed orderer and notification clients") but the code
+still exhibits this pattern.
+Fix: either remove the defer Close() calls and let the provider manage the connection lifecycle
+(closing only on application shutdown), or change the provider to create a new instance per Get()
+call. The same fix should be applied consistently to query and notification clients.
+Estimated scope: ~30 lines of code changes across 3 files.
+
+
+11. improvement(CI): lint workflow only runs on changes to main — no coverage for release branches or hotfix branches
+
+In .github/workflows/lint.yml lines 10-13 and tests.yml lines 10-13, the CI workflows only trigger
+on push/PR to the `main` branch. If the project creates release branches (e.g., release/v1.0) or
+hotfix branches, those branches will have no CI coverage for linting or unit tests. The lint workflow
+also installs golangci-lint by piping a remote script to sh (line 30), which is a supply-chain risk
+and non-reproducible. The lint target in the Makefile (line 73) uses `--new-from-rev=origin/main`
+which means it only lints changed files relative to main — existing lint issues are never caught by
+CI (as acknowledged by the TODO comment on line 69).
+Fix: broaden branch triggers to include release/** and hotfix/** patterns, pin the golangci-lint
+installer to a specific commit hash or use the official GitHub Action instead, and create a separate
+CI job for full lint (without --new-from-rev) on a scheduled basis.
+Estimated scope: ~15 lines of YAML changes.
+
+
+12. bug(tokens/owner): GetTransactions iterator loop condition has logic error causing potential missed transactions
+
+In owner/service/fsc.go lines 165, the for loop condition is:
+    for tx, err := it.Items.Next(); tx != nil || err != nil; tx, err = it.Items.Next()
+The condition `tx != nil || err != nil` means the loop continues when EITHER tx is non-nil OR err
+is non-nil. When the iterator is exhausted, Next() returns (nil, nil), which correctly stops the loop.
+However, if Next() returns (non-nil tx, non-nil err) simultaneously, the loop processes the tx and
+then on the next iteration checks the error — but by then it has already called Next() again, losing
+the error context. The idiomatic Go pattern for iterators is to check err separately after the loop.
+Fix: restructure the loop to use the standard `for { tx, err := it.Items.Next(); if err != nil { return; }
+if tx == nil { break; } }` pattern, and check for residual errors after the loop.
+Estimated scope: ~10 lines of code changes.
+
+
+13. improvement(fxconfig): config loading does not validate for negative duration values or unreasonable timeout ranges
+
+In config/validate.go lines 112-116, `errorIfZeroDuration` only checks for zero-value durations.
+A user could set `connectionTimeout: -5s` or `waitingTimeout: -30s` via config file or environment
+variable, and the negative duration would pass validation and be used in context.WithTimeout calls
+(e.g., queries.go line 52, notifications.go lines 85 and 134). A negative duration in
+context.WithTimeout means the context is immediately expired, causing all operations to fail with
+context.DeadlineExceeded. There's also no upper bound validation — a `waitingTimeout: 999h` would
+cause the CLI to hang effectively forever.
+Fix: change the validation to reject negative durations and optionally set an upper bound (e.g.,
+max 1 hour for connection timeout, max 10 minutes for waiting timeout). Add tests for negative
+and excessively large duration values.
+Estimated scope: ~15 lines of code changes.
+
+
+14. bug(fxconfig): config validation for NotificationsConfig does not call EndpointServiceConfig.Validate
+
+In config/config.go lines 131-134, NotificationsConfig embeds EndpointServiceConfig via squash but
+does not have its own Validate method. Looking at validate.go, there is no `func (c *NotificationsConfig)
+Validate(...)` method defined (unlike OrdererConfig which has one at line 36). The QueriesConfig
+also embeds EndpointServiceConfig and has no custom Validate method. When Provider.Get() calls
+p.cfg.Validate() (provider.go line 45), it calls the embedded EndpointServiceConfig.Validate() for
+QueriesConfig. But for NotificationsConfig, the additional WaitingTimeout field is never validated —
+if the user sets `waitingTimeout: 0s` or a negative value, it silently accepts it. When combined
+with issue #13 above, this means the notification client can be configured with invalid timeouts
+that cause immediate failures.
+Fix: add explicit Validate methods for NotificationsConfig and QueriesConfig that validate their
+own fields (like WaitingTimeout) and delegate to EndpointServiceConfig.Validate for shared fields.
+Estimated scope: ~20 lines of code changes.
+
+
+15. security(Dockerfile): production image runs tools as non-root but COPY --from=builder copies binaries with original permissions
+
+In the root Dockerfile, line 53 copies binaries with `COPY --from=builder /tmp/bin/* /usr/local/bin/`.
+The binaries are built with `go install` in the builder stage and have the default permissions from
+the go compiler (typically 0755 owned by root). The non-root user (UID 10001) can execute them, but
+the Dockerfile does not explicitly set permissions with `--chmod`. If the builder stage produces
+binaries with different permissions (e.g., due to umask changes in future Go versions), the production
+image could break. Additionally, CGO_ENABLED=1 is set (line 14) which means the binaries are
+dynamically linked and depend on C libraries from the builder stage (golang:1.26). The production
+image is ubi-minimal which may not have the required shared libraries, causing runtime failures.
+Fix: add `--chmod=0755` to the COPY instruction, verify that the required shared libraries are
+available in the production image, or set CGO_ENABLED=0 if the tools don't actually require CGO.
+Add a CI step that runs the production image and verifies all tools can execute.
+Estimated scope: ~10 lines of Dockerfile + CI changes.
