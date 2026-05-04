@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -24,7 +25,7 @@ func ReadHeader(path string) (*FileHeader, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot open genesis file: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	r := bufio.NewReader(f)
 	return readHeader(r)
@@ -37,7 +38,7 @@ func ReadAll(path string) (*FileHeader, []snapshot.StateEntry, error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("cannot open genesis file: %w", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	r := bufio.NewReaderSize(f, 1<<20)
 
@@ -48,22 +49,22 @@ func ReadAll(path string) (*FileHeader, []snapshot.StateEntry, error) {
 
 	entries := make([]snapshot.StateEntry, 0, hdr.EntryCount)
 	for {
-		key, err := readBytes(r)
-		if err == io.EOF {
+		key, kerr := readBytes(r)
+		if errors.Is(kerr, io.EOF) {
 			break
 		}
-		if err != nil {
-			return nil, nil, fmt.Errorf("reading key: %w", err)
+		if kerr != nil {
+			return nil, nil, fmt.Errorf("reading key: %w", kerr)
 		}
 
-		value, err := readBytes(r)
-		if err != nil {
-			return nil, nil, fmt.Errorf("reading value: %w", err)
+		value, verr := readBytes(r)
+		if verr != nil {
+			return nil, nil, fmt.Errorf("reading value: %w", verr)
 		}
 
-		version, err := readUint64(r)
-		if err != nil {
-			return nil, nil, fmt.Errorf("reading version: %w", err)
+		version, xerr := readUint64(r)
+		if xerr != nil {
+			return nil, nil, fmt.Errorf("reading version: %w", xerr)
 		}
 
 		entries = append(entries, snapshot.StateEntry{

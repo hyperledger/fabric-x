@@ -11,12 +11,12 @@ import "strings"
 // systemChaincodes is the set of Fabric system chaincode namespaces that
 // have no equivalent in Fabric-X and must be excluded from migration.
 var systemChaincodes = map[string]struct{}{
-	"lscc":        {},
-	"_lifecycle":  {},
-	"cscc":        {},
-	"qscc":        {},
-	"escc":        {},
-	"vscc":        {},
+	"lscc":       {},
+	"_lifecycle": {},
+	"cscc":       {},
+	"qscc":       {},
+	"escc":       {},
+	"vscc":       {},
 }
 
 // ShouldExcludeNamespace returns true if the given namespace should be

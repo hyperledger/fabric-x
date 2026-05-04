@@ -24,12 +24,12 @@ const signableMetadataFile = "_snapshot_signable_metadata.json"
 // Fabric writes this file at snapshot time so the receiver can verify
 // the snapshot files haven't been tampered with.
 type Manifest struct {
-	ChannelName     string            `json:"channel_name"`
-	LastBlockNumber uint64            `json:"last_block_number"`
-	LastBlockHash   string            `json:"last_block_hash"`
-	PreviousBlockHash string          `json:"previous_block_hash"`
-	StateDBType     string            `json:"state_db_type"`
-	FileHashes      map[string]string `json:"file_hashes"`
+	ChannelName       string            `json:"channel_name"`
+	LastBlockNumber   uint64            `json:"last_block_number"`
+	LastBlockHash     string            `json:"last_block_hash"`
+	PreviousBlockHash string            `json:"previous_block_hash"`
+	StateDBType       string            `json:"state_db_type"`
+	FileHashes        map[string]string `json:"file_hashes"`
 }
 
 // ReadManifest parses the signable metadata file from a snapshot directory.
@@ -78,7 +78,7 @@ func sha256File(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {

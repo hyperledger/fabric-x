@@ -20,7 +20,7 @@ func NewVersionCommand() *cobra.Command {
 		Use:   "version",
 		Short: "Print the fxmigrate version",
 		Run: func(cmd *cobra.Command, _ []string) {
-			fmt.Fprintf(cmd.OutOrStdout(), "fxmigrate v%s\n", version)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "fxmigrate v%s\n", version)
 		},
 	}
 }

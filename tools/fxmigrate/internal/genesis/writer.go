@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"time"
 
@@ -43,12 +44,16 @@ type FileHeader struct {
 //	  [key_len uint32][key bytes]
 //	  [value_len uint32][value bytes]
 //	  [version uint64]
-func Write(path, namespace string, meta *snapshot.Manifest, entries []snapshot.StateEntry) error {
+func Write(path, namespace string, meta *snapshot.Manifest, entries []snapshot.StateEntry) (err error) {
 	f, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("cannot create output file: %w", err)
 	}
-	defer f.Close()
+	defer func() {
+		if cerr := f.Close(); cerr != nil && err == nil {
+			err = fmt.Errorf("closing output file: %w", cerr)
+		}
+	}()
 
 	w := bufio.NewWriterSize(f, 1<<20)
 
@@ -65,23 +70,27 @@ func Write(path, namespace string, meta *snapshot.Manifest, entries []snapshot.S
 	if err != nil {
 		return fmt.Errorf("cannot marshal header: %w", err)
 	}
-	if err := writeUint32(w, uint32(len(hdrBytes))); err != nil {
-		return err
+	if len(hdrBytes) > math.MaxUint32 {
+		return fmt.Errorf("header too large: %d bytes", len(hdrBytes))
 	}
-	if _, err := w.Write(hdrBytes); err != nil {
-		return err
+	//nolint:gosec // G115: length is bounds-checked above against math.MaxUint32.
+	if werr := writeUint32(w, uint32(len(hdrBytes))); werr != nil {
+		return werr
+	}
+	if _, werr := w.Write(hdrBytes); werr != nil {
+		return werr
 	}
 
 	// Write entries
 	for _, e := range entries {
-		if err := writeBytes(w, []byte(e.Key)); err != nil {
-			return fmt.Errorf("writing key: %w", err)
+		if werr := writeBytes(w, []byte(e.Key)); werr != nil {
+			return fmt.Errorf("writing key: %w", werr)
 		}
-		if err := writeBytes(w, e.Value); err != nil {
-			return fmt.Errorf("writing value: %w", err)
+		if werr := writeBytes(w, e.Value); werr != nil {
+			return fmt.Errorf("writing value: %w", werr)
 		}
-		if err := writeUint64(w, e.Version); err != nil {
-			return fmt.Errorf("writing version: %w", err)
+		if werr := writeUint64(w, e.Version); werr != nil {
+			return fmt.Errorf("writing version: %w", werr)
 		}
 	}
 
@@ -94,7 +103,7 @@ func Checksum(path string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
@@ -118,6 +127,10 @@ func writeUint64(w io.Writer, v uint64) error {
 }
 
 func writeBytes(w io.Writer, b []byte) error {
+	if len(b) > math.MaxUint32 {
+		return fmt.Errorf("byte slice too large: %d bytes", len(b))
+	}
+	//nolint:gosec // G115: length is bounds-checked above against math.MaxUint32.
 	if err := writeUint32(w, uint32(len(b))); err != nil {
 		return err
 	}

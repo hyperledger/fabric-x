@@ -8,6 +8,7 @@ package snapshot
 
 import (
 	"encoding/binary"
+	"math"
 	"os"
 	"path/filepath"
 	"testing"
@@ -36,7 +37,7 @@ func buildStateFile(t *testing.T, dir string, entries []rawEntry) {
 	t.Helper()
 	f, err := os.Create(filepath.Join(dir, publicStateDataFile))
 	require.NoError(t, err)
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	write32 := func(v uint32) {
 		var buf [4]byte
@@ -51,6 +52,8 @@ func buildStateFile(t *testing.T, dir string, entries []rawEntry) {
 		require.NoError(t, err)
 	}
 	writeBytes := func(b []byte) {
+		require.LessOrEqual(t, len(b), math.MaxUint32)
+		//nolint:gosec // G115: length is bounds-checked above against math.MaxUint32.
 		write32(uint32(len(b)))
 		if len(b) > 0 {
 			_, err := f.Write(b)

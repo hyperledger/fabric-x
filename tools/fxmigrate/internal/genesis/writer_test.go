@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -20,9 +21,9 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxmigrate/internal/snapshot"
 )
 
-func testMeta(channel string, height uint64) *snapshot.Manifest {
+func testMeta(height uint64) *snapshot.Manifest {
 	return &snapshot.Manifest{
-		ChannelName:     channel,
+		ChannelName:     "mychannel",
 		LastBlockNumber: height,
 		StateDBType:     "goleveldb",
 		FileHashes:      map[string]string{},
@@ -32,7 +33,7 @@ func testMeta(channel string, height uint64) *snapshot.Manifest {
 func testEntries() []snapshot.StateEntry {
 	return []snapshot.StateEntry{
 		{Namespace: "mycc", Key: "asset1", Value: []byte("val1"), Version: (5 << 32) | 2},
-		{Namespace: "mycc", Key: "asset2", Value: []byte("val2"), Version: (10 << 32) | 0},
+		{Namespace: "mycc", Key: "asset2", Value: []byte("val2"), Version: 10 << 32},
 	}
 }
 
@@ -41,7 +42,7 @@ func readFile(t *testing.T, path string) (FileHeader, []snapshot.StateEntry) {
 	t.Helper()
 	f, err := os.Open(path)
 	require.NoError(t, err)
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	r := bufio.NewReader(f)
 
@@ -76,11 +77,11 @@ func readFile(t *testing.T, path string) (FileHeader, []snapshot.StateEntry) {
 	for {
 		keyBytes := make([]byte, 0)
 		var keyLen uint32
-		if err := binary.Read(r, binary.BigEndian, &keyLen); err == io.EOF {
+		err := binary.Read(r, binary.BigEndian, &keyLen)
+		if errors.Is(err, io.EOF) {
 			break
-		} else {
-			require.NoError(t, err)
 		}
+		require.NoError(t, err)
 		if keyLen > 0 {
 			keyBytes = make([]byte, keyLen)
 			_, err := io.ReadFull(r, keyBytes)
@@ -104,7 +105,7 @@ func TestWrite_Header(t *testing.T) {
 	t.Parallel()
 
 	path := filepath.Join(t.TempDir(), "genesis.bin")
-	meta := testMeta("mychannel", 100)
+	meta := testMeta(100)
 	entries := testEntries()
 
 	require.NoError(t, Write(path, "token", meta, entries))
@@ -123,7 +124,7 @@ func TestWrite_Entries(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "genesis.bin")
 	entries := testEntries()
 
-	require.NoError(t, Write(path, "token", testMeta("mychannel", 1), entries))
+	require.NoError(t, Write(path, "token", testMeta(1), entries))
 
 	_, got := readFile(t, path)
 	require.Len(t, got, len(entries))
@@ -138,7 +139,7 @@ func TestWrite_EmptyEntries(t *testing.T) {
 	t.Parallel()
 
 	path := filepath.Join(t.TempDir(), "genesis.bin")
-	require.NoError(t, Write(path, "token", testMeta("mychannel", 0), nil))
+	require.NoError(t, Write(path, "token", testMeta(0), nil))
 
 	hdr, entries := readFile(t, path)
 	require.Equal(t, 0, hdr.EntryCount)
@@ -152,7 +153,7 @@ func TestChecksum_Deterministic(t *testing.T) {
 	p1 := filepath.Join(dir, "a.bin")
 	p2 := filepath.Join(dir, "b.bin")
 
-	meta := testMeta("mychannel", 5)
+	meta := testMeta(5)
 	entries := testEntries()
 
 	require.NoError(t, Write(p1, "token", meta, entries))

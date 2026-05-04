@@ -9,6 +9,7 @@ package snapshot
 import (
 	"bufio"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -31,10 +32,21 @@ type StateEntry struct {
 	Version uint64
 }
 
+// rawRecord is one decoded entry from public_state.data before filtering and
+// version conversion. namespace is empty when the on-disk record uses the
+// "same namespace as previous" marker (ns_len == 0).
+type rawRecord struct {
+	namespace string
+	key       string
+	value     []byte
+	blockNum  uint64
+	txNum     uint64
+}
+
 // DiscoverNamespaces scans the public state data file and returns the unique
 // set of namespaces present, excluding any that would be filtered out.
 func DiscoverNamespaces(snapshotDir string) ([]string, error) {
-	entries, err := readStateFile(snapshotDir, true)
+	entries, err := readStateFile(snapshotDir)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +66,7 @@ func DiscoverNamespaces(snapshotDir string) ([]string, error) {
 // ExportState reads the public state data file and returns all entries that
 // pass the namespace and key filters.
 func ExportState(snapshotDir string) ([]StateEntry, error) {
-	return readStateFile(snapshotDir, false)
+	return readStateFile(snapshotDir)
 }
 
 // readStateFile reads the Fabric snapshot public_state.data file.
@@ -68,100 +80,102 @@ func ExportState(snapshotDir string) ([]StateEntry, error) {
 //
 // A zero-length namespace signals a namespace boundary marker (same namespace
 // as the previous entry continues). We handle both forms.
-//
-// If discoverOnly is true the function returns entries with empty Value/Version
-// for speed — we only need namespace names.
-func readStateFile(snapshotDir string, discoverOnly bool) ([]StateEntry, error) {
+func readStateFile(snapshotDir string) ([]StateEntry, error) {
 	path := filepath.Join(snapshotDir, publicStateDataFile)
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("cannot open %s: %w", publicStateDataFile, err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
-	r := bufio.NewReaderSize(f, 1<<20) // 1 MiB read buffer
+	r := bufio.NewReaderSize(f, 1<<20)
 
 	var (
-		entries      []StateEntry
-		currentNS    string
+		entries   []StateEntry
+		currentNS string
 	)
 
 	for {
-		// Read namespace length
-		nsLen, err := readUint32(r)
-		if err == io.EOF {
+		rec, rerr := readRawRecord(r)
+		if errors.Is(rerr, io.EOF) {
 			break
 		}
-		if err != nil {
-			return nil, fmt.Errorf("reading namespace length: %w", err)
+		if rerr != nil {
+			return nil, rerr
 		}
 
-		if nsLen > 0 {
-			nsBytes, err := readBytes(r, nsLen)
-			if err != nil {
-				return nil, fmt.Errorf("reading namespace: %w", err)
-			}
-			currentNS = string(nsBytes)
-		}
-		// nsLen == 0 means same namespace as previous entry
-
-		// Read key
-		keyLen, err := readUint32(r)
-		if err != nil {
-			return nil, fmt.Errorf("reading key length: %w", err)
-		}
-		keyBytes, err := readBytes(r, keyLen)
-		if err != nil {
-			return nil, fmt.Errorf("reading key: %w", err)
-		}
-		key := string(keyBytes)
-
-		// Read value
-		valLen, err := readUint32(r)
-		if err != nil {
-			return nil, fmt.Errorf("reading value length: %w", err)
-		}
-		valBytes, err := readBytes(r, valLen)
-		if err != nil {
-			return nil, fmt.Errorf("reading value: %w", err)
+		if rec.namespace != "" {
+			currentNS = rec.namespace
 		}
 
-		// Read version: (blockNum uint64, txNum uint64)
-		blockNum, err := readUint64(r)
-		if err != nil {
-			return nil, fmt.Errorf("reading block num: %w", err)
-		}
-		txNum, err := readUint64(r)
-		if err != nil {
-			return nil, fmt.Errorf("reading tx num: %w", err)
-		}
-
-		// Apply filters
-		if ShouldExcludeNamespace(currentNS) {
-			continue
-		}
-		if ShouldExcludeKey(key) {
-			continue
-		}
-		// Strip CouchDB internal metadata keys
-		if strings.HasPrefix(key, "~") {
+		if ShouldExcludeNamespace(currentNS) || ShouldExcludeKey(rec.key) || strings.HasPrefix(rec.key, "~") {
 			continue
 		}
 
-		entry := StateEntry{
+		entries = append(entries, StateEntry{
 			Namespace: currentNS,
-			Key:       key,
-		}
-		if !discoverOnly {
-			entry.Value = valBytes
-			// Convert (blockNum, txNum) → scalar Fabric-X version
-			entry.Version = (blockNum << 32) | (txNum & 0xFFFFFFFF)
-		}
-
-		entries = append(entries, entry)
+			Key:       rec.key,
+			Value:     rec.value,
+			Version:   (rec.blockNum << 32) | (rec.txNum & 0xFFFFFFFF),
+		})
 	}
 
 	return entries, nil
+}
+
+// readRawRecord decodes one entry from the public_state.data stream. It
+// returns io.EOF unwrapped when the stream is at a clean record boundary so
+// the caller can terminate the loop. Truncated records mid-entry surface as
+// wrapped errors.
+func readRawRecord(r *bufio.Reader) (*rawRecord, error) {
+	nsLen, err := readUint32(r)
+	if err != nil {
+		return nil, err
+	}
+
+	var ns string
+	if nsLen > 0 {
+		nsBytes, berr := readBytes(r, nsLen)
+		if berr != nil {
+			return nil, fmt.Errorf("reading namespace: %w", berr)
+		}
+		ns = string(nsBytes)
+	}
+
+	keyBytes, err := readLenPrefixed(r)
+	if err != nil {
+		return nil, fmt.Errorf("reading key: %w", err)
+	}
+
+	valBytes, err := readLenPrefixed(r)
+	if err != nil {
+		return nil, fmt.Errorf("reading value: %w", err)
+	}
+
+	blockNum, err := readUint64(r)
+	if err != nil {
+		return nil, fmt.Errorf("reading block num: %w", err)
+	}
+	txNum, err := readUint64(r)
+	if err != nil {
+		return nil, fmt.Errorf("reading tx num: %w", err)
+	}
+
+	return &rawRecord{
+		namespace: ns,
+		key:       string(keyBytes),
+		value:     valBytes,
+		blockNum:  blockNum,
+		txNum:     txNum,
+	}, nil
+}
+
+func readLenPrefixed(r io.Reader) ([]byte, error) {
+	n, err := readUint32(r)
+	if err != nil {
+		return nil, err
+	}
+	return readBytes(r, n)
 }
 
 func readUint32(r io.Reader) (uint32, error) {
