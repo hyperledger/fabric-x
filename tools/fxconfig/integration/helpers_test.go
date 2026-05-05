@@ -65,11 +65,12 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 	require.NoError(t, err)
 
 	// TLS CA certificate paths for the orderer.
-	// The container expects a list format: "[path1,path2,...]"
+	// The container mounts testdata/crypto to /root/artifacts/, so paths reference
+	// /root/artifacts/peerOrganizations/... not /root/artifacts/crypto/peerOrganizations/...
 	caCertPaths := []string{
-		"/root/artifacts/crypto/peerOrganizations/Org1/tlsca/tlsca.org1.com-cert.pem",
-		"/root/artifacts/crypto/peerOrganizations/Org2/tlsca/tlsca.org2.com-cert.pem",
-		"/root/artifacts/crypto/peerOrganizations/Org3/tlsca/tlsca.org3.com-cert.pem",
+		"/root/artifacts/peerOrganizations/Org1/tlsca/tlsca.org1.com-cert.pem",
+		"/root/artifacts/peerOrganizations/Org2/tlsca/tlsca.org2.com-cert.pem",
+		"/root/artifacts/peerOrganizations/Org3/tlsca/tlsca.org3.com-cert.pem",
 	}
 
 	// NOTE: Only CA_CERT_PATHS is required for this test.
@@ -85,6 +86,20 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 	mspID := "Org1MSP"
 	mspDir := "/root/artifacts/crypto/peerOrganizations/Org1/users/committer@org1.com/msp"
 
+	// TLS certificate paths (broken into variables for line-length compliance)
+	ordererCertPath := filepath.Join("testdata", "crypto", "ordererOrganizations",
+		"OrdererOrg", "orderers", "orderer.orderer.com", "tls", "server.crt")
+	ordererKeyPath := filepath.Join("testdata", "crypto", "ordererOrganizations",
+		"OrdererOrg", "orderers", "orderer.orderer.com", "tls", "server.key")
+	ordererCAPath := filepath.Join("testdata", "crypto", "ordererOrganizations",
+		"OrdererOrg", "orderers", "orderer.orderer.com", "tls", "ca.crt")
+	clientCertPath := filepath.Join("testdata", "crypto", "peerOrganizations", "Org1",
+		"users", "committer@org1.com", "tls", "client.crt")
+	clientKeyPath := filepath.Join("testdata", "crypto", "peerOrganizations", "Org1",
+		"users", "committer@org1.com", "tls", "client.key")
+	clientCAPath := filepath.Join("testdata", "crypto", "peerOrganizations", "Org1",
+		"users", "committer@org1.com", "tls", "ca.crt")
+
 	ctx := t.Context()
 	committerContainer, err := testcontainers.Run(
 		ctx, "ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.9",
@@ -99,6 +114,38 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 			ContainerFilePath: "/root/artifacts/",
 			FileMode:          0o755,
 		}),
+		// Mount orderer server TLS certificates
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			HostFilePath:      ordererCertPath,
+			ContainerFilePath: "/server-certs/public-key.pem",
+			FileMode:          0o600,
+		}),
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			HostFilePath:      ordererKeyPath,
+			ContainerFilePath: "/server-certs/private-key.pem",
+			FileMode:          0o600,
+		}),
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			HostFilePath:      ordererCAPath,
+			ContainerFilePath: "/server-certs/ca-certificate.pem",
+			FileMode:          0o600,
+		}),
+		// Mount client TLS certificates for sidecar
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			HostFilePath:      clientCertPath,
+			ContainerFilePath: "/client-certs/public-key.pem",
+			FileMode:          0o600,
+		}),
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			HostFilePath:      clientKeyPath,
+			ContainerFilePath: "/client-certs/private-key.pem",
+			FileMode:          0o600,
+		}),
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			HostFilePath:      clientCAPath,
+			ContainerFilePath: "/client-certs/ca-certificate.pem",
+			FileMode:          0o600,
+		}),
 		testcontainers.WithExposedPorts(ordererPort, sidecarPort, queryServicePort),
 		testcontainers.WithEnv(map[string]string{
 			"SC_COORDINATOR_LOGGING_LOGSPEC":      "DEBUG",
@@ -112,8 +159,12 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 			"SC_QUERY_SERVICE_LOGGING_LOGSPEC":    "DEBUG",
 			"SC_ORDERER_BLOCK_SIZE":               "1",
 			"SC_ORDERER_LOGGING_LOGSPEC":          "DEBUG",
+			"SC_ORDERER_SERVER_TLS_MODE":          "tls",
 			// SC_ORDERER_SERVER_TLS_CA_CERT_PATHS expects a JSON list: ["path1","path2",...]
-			// Note: TLS is not enforced in integration tests (--insecure), but this ensures correct parsing.
+			// Tests use --insecure flag to bypass TLS enforcement due to testcontainers exec
+			// health-check limitations with TLS containers, but TLS configuration is fully set
+			// for production deployments.  This ensures CA_CERT_PATHS configuration parsing
+			// is validated without requiring mTLS handshake success in the test environment.
 			"SC_ORDERER_SERVER_TLS_CA_CERT_PATHS": tlsCACertPaths,
 			"SC_VC_LOGGING_LOGSPEC":               "DEBUG",
 		}),
