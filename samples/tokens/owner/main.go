@@ -59,7 +59,7 @@ func main() {
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
 	<-stop
-	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 	s.Shutdown(ctx)
 	fsc.Stop()
