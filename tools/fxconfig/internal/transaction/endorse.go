@@ -71,6 +71,16 @@ func Endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 			}
 		}
 
+		for _, existing := range tx.Endorsements[nsIdx].EndorsementsWithIdentity {
+			if existing.GetIdentity().GetMspId() == signerIdentity.GetMspId() {
+				return nil, fmt.Errorf(
+					"duplicate endorsement: signer %q already endorsed namespace %d",
+					signerIdentity.GetMspId(),
+					nsIdx,
+				)
+			}
+		}
+
 		tx.Endorsements[nsIdx].EndorsementsWithIdentity = append(tx.Endorsements[nsIdx].EndorsementsWithIdentity, eid)
 	}
 
