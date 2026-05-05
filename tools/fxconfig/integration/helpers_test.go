@@ -117,33 +117,33 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 		// Mount orderer server TLS certificates
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      ordererCertPath,
-			ContainerFilePath: "/server-certs/public-key.pem",
+			ContainerFilePath: "/server-certs/server.crt",
 			FileMode:          0o600,
 		}),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      ordererKeyPath,
-			ContainerFilePath: "/server-certs/private-key.pem",
+			ContainerFilePath: "/server-certs/server.key",
 			FileMode:          0o600,
 		}),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      ordererCAPath,
-			ContainerFilePath: "/server-certs/ca-certificate.pem",
+			ContainerFilePath: "/server-certs/ca.crt",
 			FileMode:          0o600,
 		}),
 		// Mount client TLS certificates for sidecar
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      clientCertPath,
-			ContainerFilePath: "/client-certs/public-key.pem",
+			ContainerFilePath: "/client-certs/client.crt",
 			FileMode:          0o600,
 		}),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      clientKeyPath,
-			ContainerFilePath: "/client-certs/private-key.pem",
+			ContainerFilePath: "/client-certs/client.key",
 			FileMode:          0o600,
 		}),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      clientCAPath,
-			ContainerFilePath: "/client-certs/ca-certificate.pem",
+			ContainerFilePath: "/client-certs/ca.crt",
 			FileMode:          0o600,
 		}),
 		testcontainers.WithExposedPorts(ordererPort, sidecarPort, queryServicePort),
