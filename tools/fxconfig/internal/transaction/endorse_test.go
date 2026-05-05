@@ -187,6 +187,27 @@ func TestEndorse(t *testing.T) {
 	}
 }
 
+func TestEndorse_DuplicateSignerReturnsError(t *testing.T) {
+	t.Parallel()
+
+	tx := &applicationpb.Tx{
+		Namespaces: []*applicationpb.TxNamespace{
+			{NsId: "ns1", NsVersion: 0},
+		},
+	}
+	signer := &mockSigningIdentity{mspID: "Org1MSP"}
+
+	first, err := Endorse(signer, "tx-dup", tx)
+	require.NoError(t, err)
+	require.Len(t, first.Endorsements, 1)
+	require.Len(t, first.Endorsements[0].EndorsementsWithIdentity, 1)
+
+	second, err := Endorse(signer, "tx-dup", first)
+	require.Error(t, err)
+	require.Nil(t, second)
+	require.Contains(t, err.Error(), "duplicate endorsement")
+}
+
 func TestGenerateTxID(t *testing.T) {
 	t.Parallel()
 
