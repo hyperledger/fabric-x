@@ -240,8 +240,8 @@ func (v *TransferView) Call(vctx view.Context) (interface{}, error) {
 		// token.WithPublicTransferMetadata("pub."+tx.ID(), []byte("public data")),
 	)
 	if err != nil {
-		if strings.Contains(err.Error(), "insufficient funds") {
-			return "", ErrInsufficientFunds
+		if mappedErr := classifyError(err); mappedErr != err {
+			return "", mappedErr
 		}
 		return "", errors.Wrap(err, "failed preparing transfer")
 	}
@@ -279,11 +279,8 @@ func getRemoteIdentity(vctx view.Context, recipientID, recipientNode string) (vi
 	logger.Infof("requesting [%s] identity from [%s]", recipientID, recipientNode)
 	recipient, err = ttx.RequestRecipientIdentity(vctx, view.Identity(recipientID))
 	if err != nil {
-		if strings.Contains(err.Error(), "] not found") {
-			return recipient, ErrCounterpartyAccountNotFound
-		}
-		if strings.Contains(err.Error(), "failed to dial") {
-			return recipient, ErrConnectionError
+		if mappedErr := classifyError(err); mappedErr != err {
+			return recipient, mappedErr
 		}
 		return recipient, fmt.Errorf("failed getting recipient identity from %s: %w", recipientNode, err)
 	}
@@ -292,4 +289,21 @@ func getRemoteIdentity(vctx view.Context, recipientID, recipientNode string) (vi
 	}
 
 	return recipient, nil
+}
+
+func classifyError(err error) error {
+	if err == nil {
+		return nil
+	}
+	errMsg := err.Error()
+	if strings.Contains(errMsg, "insufficient funds") {
+		return fmt.Errorf("%w: %v", ErrInsufficientFunds, err)
+	}
+	if strings.Contains(errMsg, "] not found") {
+		return fmt.Errorf("%w: %v", ErrCounterpartyAccountNotFound, err)
+	}
+	if strings.Contains(errMsg, "failed to dial") {
+		return fmt.Errorf("%w: %v", ErrConnectionError, err)
+	}
+	return err
 }
