@@ -64,6 +64,23 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 	dataDirectory, err := filepath.Abs(filepath.Join(".", "testdata", "crypto"))
 	require.NoError(t, err)
 
+	// TLS CA certificate paths for the orderer.
+	// The container expects a list format: "[path1,path2,...]"
+	caCertPaths := []string{
+		"/root/artifacts/crypto/peerOrganizations/Org1/tlsca/tlsca.org1.com-cert.pem",
+		"/root/artifacts/crypto/peerOrganizations/Org2/tlsca/tlsca.org2.com-cert.pem",
+		"/root/artifacts/crypto/peerOrganizations/Org3/tlsca/tlsca.org3.com-cert.pem",
+	}
+
+	// NOTE: Only CA_CERT_PATHS is required for this test.
+	// Do NOT override server cert/key paths — container provides defaults.
+	// Format as JSON array with quoted paths: ["path1","path2","path3"]
+	quotedPaths := make([]string, len(caCertPaths))
+	for i, p := range caCertPaths {
+		quotedPaths[i] = fmt.Sprintf("%q", p)
+	}
+	tlsCACertPaths := fmt.Sprintf("[%s]", strings.Join(quotedPaths, ","))
+
 	// msp configuration for sidecar orderer client
 	mspID := "Org1MSP"
 	mspDir := "/root/artifacts/crypto/peerOrganizations/Org1/users/committer@org1.com/msp"
@@ -95,6 +112,9 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 			"SC_QUERY_SERVICE_LOGGING_LOGSPEC":    "DEBUG",
 			"SC_ORDERER_BLOCK_SIZE":               "1",
 			"SC_ORDERER_LOGGING_LOGSPEC":          "DEBUG",
+			// SC_ORDERER_SERVER_TLS_CA_CERT_PATHS expects a JSON list: ["path1","path2",...]
+			// Note: TLS is not enforced in integration tests (--insecure), but this ensures correct parsing.
+			"SC_ORDERER_SERVER_TLS_CA_CERT_PATHS": tlsCACertPaths,
 			"SC_VC_LOGGING_LOGSPEC":               "DEBUG",
 		}),
 		testcontainers.WithWaitStrategy(
