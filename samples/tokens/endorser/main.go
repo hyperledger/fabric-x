@@ -25,7 +25,10 @@ import (
 
 func main() {
 	// Flags
-	cwd, _ := os.Getwd()
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
 	pth := flag.String("conf", cwd, "the directory that contains the core.yaml configuration file")
 	port := flag.String("port", "9000", "the API port for the application")
 	flag.Parse()
