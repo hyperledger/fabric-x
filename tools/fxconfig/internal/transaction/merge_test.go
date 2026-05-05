@@ -109,6 +109,50 @@ func TestMerge_ErrorCases(t *testing.T) {
 		require.Contains(t, err.Error(), "requires at least one endorsement")
 	})
 
+	t.Run("endorsements count mismatch", func(t *testing.T) {
+		t.Parallel()
+
+		tx1 := &applicationpb.Tx{
+			Namespaces: []*applicationpb.TxNamespace{
+				{NsId: "ns1", NsVersion: 1},
+			},
+			Endorsements: []*applicationpb.Endorsements{
+				{
+					EndorsementsWithIdentity: []*applicationpb.EndorsementWithIdentity{
+						{Endorsement: []byte("sig-a1"), Identity: &msppb.Identity{MspId: "Org1MSP"}},
+					},
+				},
+				{
+					EndorsementsWithIdentity: []*applicationpb.EndorsementWithIdentity{
+						{Endorsement: []byte("sig-a2"), Identity: &msppb.Identity{MspId: "Org2MSP"}},
+					},
+				},
+			},
+		}
+		tx2 := &applicationpb.Tx{
+			Namespaces: []*applicationpb.TxNamespace{
+				{NsId: "ns1", NsVersion: 1},
+			},
+			Endorsements: []*applicationpb.Endorsements{
+				{
+					EndorsementsWithIdentity: []*applicationpb.EndorsementWithIdentity{
+						{Endorsement: []byte("sig-b1"), Identity: &msppb.Identity{MspId: "Org3MSP"}},
+					},
+				},
+				{
+					EndorsementsWithIdentity: []*applicationpb.EndorsementWithIdentity{
+						{Endorsement: []byte("sig-b2"), Identity: &msppb.Identity{MspId: "Org4MSP"}},
+					},
+				},
+			},
+		}
+
+		result, err := Merge([]*applicationpb.Tx{tx1, tx2})
+		require.Error(t, err)
+		require.Nil(t, result)
+		require.Contains(t, err.Error(), "endorsements count")
+	})
+
 	t.Run("conflicting namespace writes", func(t *testing.T) {
 		t.Parallel()
 
