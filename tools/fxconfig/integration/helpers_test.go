@@ -420,49 +420,7 @@ func integrationTestdataReady(baseDir string) bool {
 		"orderers",
 	)
 
-	if !dirExists(orderersRoot) {
-		return false
-	}
-
-	hostOrdererDir := resolveHostOrdererDir(cryptoDir)
-	if hostOrdererDir == "" {
-		return false
-	}
-
-	hostOrdererMSPDir := filepath.Join(hostOrdererDir, "msp")
-	hostOrdererSigncertPath := findExistingFile(
-		filepath.Join(hostOrdererMSPDir, "signcerts", "orderer.orderer.com-cert.pem"),
-		filepath.Join(hostOrdererMSPDir, "signcerts", "consenter-rg-cert.pem"),
-	)
-	if hostOrdererSigncertPath == "" {
-		return false
-	}
-
-	if !fileExists(filepath.Join(hostOrdererMSPDir, "cacerts", "ca.orderer.com-cert.pem")) {
-		return false
-	}
-	if !fileExists(filepath.Join(hostOrdererMSPDir, "tlscacerts", "tlsca.orderer.com-cert.pem")) {
-		return false
-	}
-	if !fileExists(filepath.Join(hostOrdererMSPDir, "keystore", "priv_sk")) {
-		return false
-	}
-	if !fileExists(filepath.Join(hostOrdererMSPDir, "admincerts", "Admin@orderer.com-cert.pem")) {
-		return false
-	}
-
-	hostOrdererTLSDir := filepath.Join(hostOrdererDir, "tls")
-	if !fileExists(filepath.Join(hostOrdererTLSDir, "server.crt")) {
-		return false
-	}
-	if !fileExists(filepath.Join(hostOrdererTLSDir, "server.key")) {
-		return false
-	}
-	if !fileExists(filepath.Join(hostOrdererTLSDir, "ca.crt")) {
-		return false
-	}
-
-	return true
+	return dirExists(orderersRoot)
 }
 
 func resolveHostOrdererDir(dataDirectory string) string {
