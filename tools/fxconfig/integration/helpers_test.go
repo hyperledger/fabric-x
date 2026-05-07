@@ -8,8 +8,6 @@ package integration_test
 
 import (
 	"bytes"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 	"os"
 	"os/exec"
@@ -432,12 +430,6 @@ func integrationTestdataReady(baseDir string) bool {
 	if !fileExists(filepath.Join(hostOrdererMSPDir, "admincerts", "Admin@orderer.com-cert.pem")) {
 		return false
 	}
-	if !certSignedBy(
-		filepath.Join(hostOrdererMSPDir, "admincerts", "Admin@orderer.com-cert.pem"),
-		filepath.Join(hostOrdererMSPDir, "cacerts", "ca.orderer.com-cert.pem"),
-	) {
-		return false
-	}
 
 	hostOrdererTLSDir := filepath.Join(hostOrdererDir, "tls")
 	if !fileExists(filepath.Join(hostOrdererTLSDir, "server.crt")) {
@@ -448,15 +440,6 @@ func integrationTestdataReady(baseDir string) bool {
 	}
 	if !fileExists(filepath.Join(hostOrdererTLSDir, "ca.crt")) {
 		return false
-	}
-
-	// Some generated testdata variants do not populate OrdererOrg/msp/admincerts.
-	// Those files are not required by setup(), so only verify them when present.
-	ordererOrgMSPDir := filepath.Join(cryptoDir, "ordererOrganizations", "OrdererOrg", "msp")
-	ordererOrgAdmin := filepath.Join(ordererOrgMSPDir, "admincerts", "Admin@orderer.com-cert.pem")
-	ordererOrgCA := filepath.Join(ordererOrgMSPDir, "cacerts", "ca.orderer.com-cert.pem")
-	if fileExists(ordererOrgAdmin) && fileExists(ordererOrgCA) {
-		return certSignedBy(ordererOrgAdmin, ordererOrgCA)
 	}
 
 	return true
@@ -511,39 +494,6 @@ func findExistingFile(paths ...string) string {
 	}
 
 	return ""
-}
-
-func certSignedBy(certPath, caPath string) bool {
-	certPEM, err := os.ReadFile(certPath)
-	if err != nil {
-		return false
-	}
-	certBlock, _ := pem.Decode(certPEM)
-	if certBlock == nil {
-		return false
-	}
-	cert, err := x509.ParseCertificate(certBlock.Bytes)
-	if err != nil {
-		return false
-	}
-
-	caPEM, err := os.ReadFile(caPath)
-	if err != nil {
-		return false
-	}
-	caBlock, _ := pem.Decode(caPEM)
-	if caBlock == nil {
-		return false
-	}
-	caCert, err := x509.ParseCertificate(caBlock.Bytes)
-	if err != nil {
-		return false
-	}
-
-	roots := x509.NewCertPool()
-	roots.AddCert(caCert)
-	_, err = cert.Verify(x509.VerifyOptions{Roots: roots})
-	return err == nil
 }
 
 func generateConfigFile(
