@@ -331,7 +331,10 @@ func ensureIntegrationTestdata(t *testing.T) {
 			return
 		}
 
-		t.Logf("integration testdata not ready yet under %s; regenerating", filepath.Join(baseDir, "testdata", "crypto"))
+		t.Logf(
+			"integration testdata not ready yet under %s; regenerating",
+			filepath.Join(baseDir, "testdata", "crypto"),
+		)
 		generateIntegrationTestdata(t, baseDir)
 	}
 
