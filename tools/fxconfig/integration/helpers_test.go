@@ -348,7 +348,8 @@ func generateIntegrationTestdata(t *testing.T, baseDir string) {
 	t.Helper()
 
 	// helpers_test.go lives under tools/fxconfig/integration/; go up to repo root.
-	repoRoot := filepath.Clean(filepath.Join(baseDir, "..", "..", "..", ".."))
+	// integration -> fxconfig -> tools -> repo root
+	repoRoot := filepath.Clean(filepath.Join(baseDir, "..", "..", ".."))
 	cryptoConfigPath := "tools/fxconfig/integration/testdata/crypto-config.yaml"
 	cryptoOutputPath := "tools/fxconfig/integration/testdata/crypto"
 	testdataPath := "tools/fxconfig/integration/testdata"
