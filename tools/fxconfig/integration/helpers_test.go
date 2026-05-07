@@ -331,6 +331,7 @@ func ensureIntegrationTestdata(t *testing.T) {
 			return
 		}
 
+		t.Logf("integration testdata not ready yet under %s; regenerating", filepath.Join(baseDir, "testdata", "crypto"))
 		generateIntegrationTestdata(t, baseDir)
 	}
 
@@ -339,8 +340,9 @@ func ensureIntegrationTestdata(t *testing.T) {
 	require.Truef(
 		t,
 		integrationTestdataReady(baseDir),
-		"integration testdata preflight incomplete under %s",
+		"integration testdata preflight incomplete under %s (missing: %s)",
 		cryptoDir,
+		strings.Join(integrationTestdataMissing(baseDir), ", "),
 	)
 }
 
@@ -413,18 +415,36 @@ func integrationTestdataReady(baseDir string) bool {
 		return false
 	}
 
-	orderersRoot := filepath.Join(
-		cryptoDir,
-		"ordererOrganizations",
-		"OrdererOrg",
-		"orderers",
-	)
+	return resolveHostOrderersRoot(cryptoDir) != ""
+}
 
-	return dirExists(orderersRoot)
+func integrationTestdataMissing(baseDir string) []string {
+	cryptoDir := filepath.Join(baseDir, "testdata", "crypto")
+	missing := make([]string, 0)
+
+	if !fileExists(filepath.Join(cryptoDir, "single-org.pb.bin")) {
+		missing = append(missing, filepath.Join(cryptoDir, "single-org.pb.bin"))
+	}
+	if !fileExists(filepath.Join(cryptoDir, "multi-org.pb.bin")) {
+		missing = append(missing, filepath.Join(cryptoDir, "multi-org.pb.bin"))
+	}
+	if resolveHostOrderersRoot(cryptoDir) == "" {
+		missing = append(missing, "ordererOrganizations/*/orderers")
+	}
+
+	if len(missing) == 0 {
+		missing = append(missing, "<none>")
+	}
+
+	return missing
 }
 
 func resolveHostOrdererDir(dataDirectory string) string {
-	orderersRoot := filepath.Join(dataDirectory, "ordererOrganizations", "OrdererOrg", "orderers")
+	orderersRoot := resolveHostOrderersRoot(dataDirectory)
+	if orderersRoot == "" {
+		return ""
+	}
+
 	entries, err := os.ReadDir(orderersRoot)
 	if err != nil {
 		return ""
@@ -447,6 +467,31 @@ func resolveHostOrdererDir(dataDirectory string) string {
 	for _, candidate := range candidates {
 		if dirExists(filepath.Join(candidate, "msp")) {
 			return candidate
+		}
+	}
+
+	return ""
+}
+
+func resolveHostOrderersRoot(dataDirectory string) string {
+	ordererOrgsRoot := filepath.Join(dataDirectory, "ordererOrganizations")
+	entries, err := os.ReadDir(ordererOrgsRoot)
+	if err != nil {
+		return ""
+	}
+
+	var orgDirs []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			orgDirs = append(orgDirs, entry.Name())
+		}
+	}
+	slices.Sort(orgDirs)
+
+	for _, orgDir := range orgDirs {
+		orderersRoot := filepath.Join(ordererOrgsRoot, orgDir, "orderers")
+		if dirExists(orderersRoot) {
+			return orderersRoot
 		}
 	}
 
