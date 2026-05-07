@@ -347,9 +347,8 @@ func ensureIntegrationTestdata(t *testing.T) {
 func generateIntegrationTestdata(t *testing.T, baseDir string) {
 	t.Helper()
 
-	// helpers_test.go lives under tools/fxconfig/integration/; go up to repo root.
-	// integration -> fxconfig -> tools -> repo root
-	repoRoot := filepath.Clean(filepath.Join(baseDir, "..", "..", ".."))
+	repoRoot := resolveRepoRoot(baseDir)
+	require.NotEmpty(t, repoRoot, "failed to locate repository root from %s", baseDir)
 	cryptoConfigPath := "tools/fxconfig/integration/testdata/crypto-config.yaml"
 	cryptoOutputPath := "tools/fxconfig/integration/testdata/crypto"
 	testdataPath := "tools/fxconfig/integration/testdata"
@@ -383,6 +382,25 @@ func generateIntegrationTestdata(t *testing.T, baseDir string) {
 		cmd.Dir = repoRoot
 		output, err := cmd.CombinedOutput()
 		require.NoErrorf(t, err, "failed to generate integration testdata with %v:\n%s", args, string(output))
+	}
+}
+
+func resolveRepoRoot(baseDir string) string {
+	dir, err := filepath.Abs(baseDir)
+	if err != nil {
+		return ""
+	}
+
+	for {
+		if fileExists(filepath.Join(dir, "go.mod")) {
+			return dir
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return ""
+		}
+		dir = parent
 	}
 }
 
