@@ -34,6 +34,8 @@ const (
 	sidecarPort      = "4001"
 	queryServicePort = "7001"
 	channelID        = "mychannel"
+
+	testContainerImg = "ghcr.io/hyperledger/fabric-x-committer-test-node:1.0.0-alpha.1"
 )
 
 // setupSingleOrgAdmin spawns a committer test container with a single org admin lifecycle policy
@@ -68,13 +70,22 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 	mspID := "Org1MSP"
 	mspDir := "/root/artifacts/crypto/peerOrganizations/org1.com/users/committer@org1.com/msp"
 
+	// configure mock orderer
+	mockOrdererConfigPath := generateMockOrdererConfigFile(t)
+
 	ctx := t.Context()
 	committerContainer, err := testcontainers.Run(
-		ctx, "ghcr.io/hyperledger/fabric-x-committer-test-node:0.1.9",
+		ctx, testContainerImg,
 		testcontainers.WithCmd("run", "db", "orderer", "committer", "--insecure"),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
 			HostFilePath:      genesisPath,
 			ContainerFilePath: "/root/artifacts/config-block.pb.bin",
+			FileMode:          0o700,
+		}),
+		testcontainers.WithFiles(testcontainers.ContainerFile{
+			// override the mock orderer config
+			HostFilePath:      mockOrdererConfigPath,
+			ContainerFilePath: "/root/config/mock-orderer.yaml",
 			FileMode:          0o700,
 		}),
 		testcontainers.WithFiles(testcontainers.ContainerFile{
@@ -122,15 +133,48 @@ func setup(t *testing.T, genesisPath string) map[string]string {
 	return endpoints
 }
 
-func generateConfigFile(
+func generateMockOrdererConfigFile(
+	tb testing.TB,
+) string {
+	tb.Helper()
+	configContent := `
+logging:
+  logSpec: info:grpc=error
+  format: >-
+    %{color}%{time:2006-01-02 15:04:05.000 MST} [%{module}] %{shortfunc}
+    -> %{level:.4s}%{color:reset} %{message}
+server:
+  endpoint: :7050
+  tls:
+    mode: none
+    cert-path: /some/server.crt
+    key-path: /some/server.key
+    ca-cert-paths:
+      - /some/CA-cert.pem
+block-size: 1024
+block-timeout: 30s
+out-block-capacity: 1024
+payload-cache-size: 1024
+send-genesis-block: true
+artifacts-path:
+
+# note that genesis-block-path and consenter-msp-identities cannot be set via env var,
+# as they must be set via the config yaml in order to override via env vars
+genesis-block-path: /root/artifacts/config-block.pb.bin
+consenter-msp-identities:
+  - msp-id: OrdererMSP
+    msp-dir: /root/artifacts/crypto/ordererOrganizations/orderer.com/orderers/orderer.orderer.com/msp
+`
+	return generateConfigFile(tb, []byte(configContent))
+}
+
+func generateFxConfigFile(
 	tb testing.TB,
 	localMspID string,
 	mspConfigPath string,
 	endpoints map[string]string,
 ) string {
 	tb.Helper()
-	tmpDir := tb.TempDir()
-	configPath := filepath.Join(tmpDir, "config.yaml")
 	configContent := `
 msp:
   localMspID: ` + localMspID + `
@@ -150,7 +194,17 @@ notifications:
   connectionTimeout: 15s
   waitingTimeout: 15s
 `
-	err := os.WriteFile(configPath, []byte(configContent), 0o600)
+	return generateConfigFile(tb, []byte(configContent))
+}
+
+func generateConfigFile(
+	tb testing.TB,
+	content []byte,
+) string {
+	tb.Helper()
+	tmpDir := tb.TempDir()
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	err := os.WriteFile(configPath, content, 0o600)
 	require.NoError(tb, err)
 	return configPath
 }

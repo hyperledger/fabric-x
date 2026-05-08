@@ -28,8 +28,8 @@ func TestMultiOrgScenarios(t *testing.T) {
 	org1MspPath := path.Join(testdata, "crypto", "peerOrganizations", "org1.com", "users", "endorser@org1.com", "msp")
 	org2MspPath := path.Join(testdata, "crypto", "peerOrganizations", "org2.com", "users", "endorser@org2.com", "msp")
 
-	org1Config := generateConfigFile(t, "Org1MSP", org1MspPath, endpoints)
-	org2Config := generateConfigFile(t, "Org2MSP", org2MspPath, endpoints)
+	org1Config := generateFxConfigFile(t, "Org1MSP", org1MspPath, endpoints)
+	org2Config := generateFxConfigFile(t, "Org2MSP", org2MspPath, endpoints)
 
 	t.Run("multi_org_create_2of2", func(t *testing.T) {
 		t.Parallel()

@@ -48,7 +48,7 @@ func TestSingleOrgScenarios(t *testing.T) {
 
 	// endorser MSP configuration
 	org1MspPath := path.Join(testdata, "crypto", "peerOrganizations", "org1.com", "users", "endorser@org1.com", "msp")
-	org1Config := generateConfigFile(t, "Org1MSP", org1MspPath, endpoints)
+	org1Config := generateFxConfigFile(t, "Org1MSP", org1MspPath, endpoints)
 
 	configArg := "--config=" + org1Config
 
