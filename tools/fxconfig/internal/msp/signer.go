@@ -33,7 +33,7 @@ func GetSignerIdentityFromMSP(cfg config.MSPConfig) (msp.SigningIdentity, error)
 	return sid, nil
 }
 
-// setupMSP creates an MSP instance with file-based BCCSP keystore from the given configuration.
+// setupMSP creates an MSP instance using the BCCSP crypto provider derived from the given configuration.
 //
 //nolint:ireturn
 func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) {
@@ -46,7 +46,7 @@ func setupMSP(mspCfg config.MSPConfig) (msp.MSP, error) {
 
 	cp, err := factory.GetBCCSPFromOpts(bccspOpts)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error creating bccsp from opts: %w", err)
 	}
 
 	mspOpts := &msp.BCCSPNewOpts{

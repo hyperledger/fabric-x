@@ -62,14 +62,14 @@ type MSPConfig struct {
 // BCCSPConfig contains BCCSP (crypto provider) settings for MSP instantiation.
 // Defaults to software-based provider with SHA2-256 and file keystore.
 type BCCSPConfig struct {
-	Default string        `mapstructure:"default" yaml:"default,omitempty" default:"SW"`
+	Default string        `mapstructure:"default" yaml:"default,omitempty"`
 	SW      BCCSPSWConfig `mapstructure:"sw" yaml:"sw,omitempty"`
 }
 
 // BCCSPSWConfig contains software provider settings.
 type BCCSPSWConfig struct {
-	Security     int                     `mapstructure:"security" yaml:"security,omitempty" default:"256"`
-	Hash         string                  `mapstructure:"hash" yaml:"hash,omitempty" default:"SHA2"`
+	Security     int                     `mapstructure:"security" yaml:"security,omitempty"`
+	Hash         string                  `mapstructure:"hash" yaml:"hash,omitempty"`
 	FileKeyStore BCCSPFileKeyStoreConfig `mapstructure:"fileKeyStore" yaml:"fileKeyStore,omitempty"`
 }
 
