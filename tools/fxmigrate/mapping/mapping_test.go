@@ -39,7 +39,7 @@ func TestDeterminism(t *testing.T) {
 	}
 
 	if !bytes.Equal(b1, b2) {
-		t.Fatalf("determinism failed: outputs differ")
+		t.Fatal("determinism failed: outputs differ")
 	}
 }
 
@@ -50,7 +50,7 @@ func TestCollisionDetection(t *testing.T) {
 
 	_, err := TransformMany([]ChannelSnapshot{s1, s2})
 	if err == nil {
-		t.Fatalf("expected collision error, got nil")
+		t.Fatal("expected collision error, got nil")
 	}
 	if !errors.Is(err, ErrNamespaceCollision) {
 		t.Fatalf("expected ErrNamespaceCollision, got: %v", err)
@@ -159,6 +159,6 @@ func TestDuplicateNamespaceMerge(t *testing.T) {
 		t.Fatalf("json write failed: %v", err)
 	}
 	if !bytes.Equal(b1, b2) {
-		t.Fatalf("determinism failed for merged namespace: outputs differ")
+		t.Fatal("determinism failed for merged namespace: outputs differ")
 	}
 }
