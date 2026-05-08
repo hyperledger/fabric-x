@@ -19,7 +19,7 @@ Fabric-X proves that permissioned DLTs can be engineered for national-scale paym
 - [Fabric-X-Committer](https://github.com/hyperledger/fabric-x-committer) - is a post‑ordering transaction processing system built as microservices. [Docs](https://hyperledger.github.io/fabric-x-committer/), [Issues](https://github.com/hyperledger/fabric-x-committer/issues)
 - [Fabric-X-Samples](https://github.com/hyperledger/fabric-x-samples) - is the official home repository for sample applications built on top of Hyperledger Fabric-X.
 - [Fabric-X-EVM](https://github.com/hyperledger/fabric-x-evm) - makes Hyperledger Fabric-x (and Fabric) compatible with the Ethereum ecosystem. [Docs](https://github.com/hyperledger/fabric-x-evm/blob/main/docs/ARCHITECTURE.md), [Issues](https://github.com/hyperledger/fabric-x-evm/issues)
-- [Fabric-X Ansible](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection) - is an Ansible collection which can be used to deploy a Hyperledger Fabric-X network locally, on Kubernetes, or across multiple nodes. [Docs](https://lf-decentralized-trust-labs.github.io/fabric-x-ansible-collection/), [Continue automating with us](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection/issues)
+- [Fabric-X Ansible](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection) - is an Ansible collection for deploying Fabric-X. [Docs](https://lf-decentralized-trust-labs.github.io/fabric-x-ansible-collection/), [Issues](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection/issues)
 
 
 ## Architecture Overview
