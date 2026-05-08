@@ -148,6 +148,31 @@ notifications:
     enabled: false
 ```
 
+### BCCSP / HSM (PKCS#11)
+
+By default fxconfig uses the software BCCSP with a file-based keystore. To
+sign with keys stored in an HSM (or any PKCS#11 token such as SoftHSM2),
+build fxconfig with `-tags pkcs11` and configure the `msp.bccsp.pkcs11`
+section:
+
+```yaml
+msp:
+  localMspID: Org1MSP
+  configPath: /path/to/msp
+  bccsp:
+    pkcs11:
+      library: /usr/local/lib/libsofthsm2.so
+      label: TokenLabel
+      pin: ${HSM_PIN}
+      hash: SHA2       # optional, defaults to SHA2
+      security: 256    # optional, defaults to 256
+      softwareVerify: true  # optional
+```
+
+When `pkcs11.library` is non-empty, the signer loads keys from the HSM and
+the `sw` / `fileKeyStore` section is ignored. Without `-tags pkcs11` the
+`pkcs11` block is accepted but has no effect (the SW provider is used).
+
 ### TLS Configuration
 
 - **No TLS**: `enabled: false` or all TLS fields empty
