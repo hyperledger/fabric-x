@@ -226,3 +226,27 @@ func TestDeployNamespace_EndorseAndSubmitWithWaitError(t *testing.T) {
 	_, _, err := a.DeployNamespace(t.Context(), input)
 	require.Error(t, err)
 }
+
+func TestDeployNamespace_DryRunSkipsSubmission(t *testing.T) {
+	t.Parallel()
+
+	a := &AdminApp{
+		Validators:           fakeValidationContext(),
+		MspProvider:          makeMSPProvider(&testSigningIdentity{}, nil),
+		OrdererProvider:      makeOrdererProvider(nil, errors.New("orderer should not be used")),
+		NotificationProvider: makeNotificationProvider(nil, errors.New("notification should not be used")),
+	}
+	input := validDeployInput()
+	input.Endorse = true
+	input.Submit = true
+	input.Wait = true
+	input.DryRun = true
+
+	out, status, err := a.DeployNamespace(t.Context(), input)
+	require.NoError(t, err)
+	require.NotNil(t, out)
+	require.NotEmpty(t, out.TxID)
+	require.NotNil(t, out.Tx)
+	require.Equal(t, UnknownStatus, status)
+	require.NotEmpty(t, out.Tx.Endorsements, "dry-run should still allow endorsement before skipping submission")
+}
