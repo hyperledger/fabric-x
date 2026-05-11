@@ -75,7 +75,13 @@ fxconfig version
 
 # Display effective configuration
 fxconfig info
+
+# Display effective configuration as environment variables
+fxconfig info --format env
 ```
+
+**`info` Flags:**
+- `--format=<yaml|env>` - Output format: `yaml` (default) or `env` (flat `FXCONFIG_*=value` pairs)
 
 ## Configuration
 
@@ -365,8 +371,11 @@ fxconfig tx submit --help          # Submit command help
 ### Check Configuration
 
 ```bash
-# Display effective configuration
+# Display effective configuration (yaml)
 fxconfig info
+
+# Display effective configuration as environment variables
+fxconfig info --format env
 
 # Test connectivity
 fxconfig namespace list

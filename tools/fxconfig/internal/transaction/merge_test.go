@@ -108,6 +108,35 @@ func TestMerge_ErrorCases(t *testing.T) {
 		require.Nil(t, result)
 		require.Contains(t, err.Error(), "requires at least one endorsement")
 	})
+
+	t.Run("conflicting namespace writes", func(t *testing.T) {
+		t.Parallel()
+
+		tx1 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org1MSP"}})
+		tx2 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org2MSP"}})
+
+		tx1.Namespaces[0].ReadWrites = []*applicationpb.ReadWrite{{
+			Key:   []byte("asset-1"),
+			Value: []byte("value-a"),
+		}}
+		tx2.Namespaces[0].ReadWrites = []*applicationpb.ReadWrite{{
+			Key:   []byte("asset-1"),
+			Value: []byte("value-b"),
+		}}
+
+		result, err := Merge([]*applicationpb.Tx{tx1, tx2})
+		require.Error(t, err)
+		require.Nil(t, result)
+		require.Contains(t, err.Error(), "content mismatch")
+	})
+}
+
+func TestMerge_NilTransaction(t *testing.T) {
+	t.Parallel()
+
+	result, err := Merge([]*applicationpb.Tx{nil, nil})
+	require.Error(t, err)
+	require.Nil(t, result)
 }
 
 func TestMerge_SingleNamespace(t *testing.T) {
@@ -320,4 +349,34 @@ func TestMerge_PreservesTransactionContent(t *testing.T) {
 		// But endorsements should be merged
 		require.Len(t, result.Endorsements[0].EndorsementsWithIdentity, 2)
 	})
+}
+
+func TestMerge_EmptyReadWriteSetIsValid(t *testing.T) {
+	t.Parallel()
+
+	tx1 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org1MSP"}})
+	tx2 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org2MSP"}})
+
+	result, err := Merge([]*applicationpb.Tx{tx1, tx2})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Len(t, result.Namespaces, 1)
+	require.Empty(t, result.Namespaces[0].ReadWrites)
+	require.Len(t, result.Endorsements[0].EndorsementsWithIdentity, 2)
+}
+
+func TestMerge_DuplicateEndorsements(t *testing.T) {
+	t.Parallel()
+
+	tx1 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org1MSP", "Org1MSP", "Org2MSP"}})
+	tx2 := createTestTx([]string{"ns1"}, map[string][]string{"ns1": {"Org2MSP", "Org3MSP"}})
+
+	result, err := Merge([]*applicationpb.Tx{tx1, tx2})
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Len(t, result.Endorsements, 1)
+	require.Len(t, result.Endorsements[0].EndorsementsWithIdentity, 3)
+	require.Equal(t, "Org1MSP", result.Endorsements[0].EndorsementsWithIdentity[0].Identity.GetMspId())
+	require.Equal(t, "Org2MSP", result.Endorsements[0].EndorsementsWithIdentity[1].Identity.GetMspId())
+	require.Equal(t, "Org3MSP", result.Endorsements[0].EndorsementsWithIdentity[2].Identity.GetMspId())
 }

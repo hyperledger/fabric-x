@@ -9,6 +9,7 @@ package integration_test
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
 	"time"
@@ -46,8 +47,8 @@ func TestSingleOrgScenarios(t *testing.T) {
 	require.NoError(t, err)
 
 	// endorser MSP configuration
-	org1MspPath := filepath.Join(testdata, "crypto", "peerOrganizations", "Org1", "users", "endorser@org1.com", "msp")
-	org1Config := generateConfigFile(t, "Org1MSP", org1MspPath, endpoints)
+	org1MspPath := path.Join(testdata, "crypto", "peerOrganizations", "org1.com", "users", "endorser@org1.com", "msp")
+	org1Config := generateFxConfigFile(t, "Org1MSP", org1MspPath, endpoints)
 
 	configArg := "--config=" + org1Config
 
@@ -85,7 +86,7 @@ func TestSingleOrgScenarios(t *testing.T) {
 			testdata,
 			"crypto",
 			"peerOrganizations",
-			"Org1",
+			"org1.com",
 			"users",
 			"endorser@org1.com",
 			"msp",

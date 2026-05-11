@@ -3,7 +3,7 @@ Organizations:
   - &Org1MSP
     Name: Org1
     ID: Org1MSP
-    MSPDir: ./crypto/peerOrganizations/Org1/msp
+    MSPDir: ./crypto/peerOrganizations/org1.com/msp
     Policies:
       Readers:
         Type: Signature
@@ -20,7 +20,7 @@ Organizations:
   - &Org2MSP
     Name: Org2
     ID: Org2MSP
-    MSPDir: ./crypto/peerOrganizations/Org2/msp
+    MSPDir: ./crypto/peerOrganizations/org2.com/msp
     Policies:
       Readers:
         Type: Signature
@@ -37,7 +37,7 @@ Organizations:
   - &Org3MSP
     Name: Org3
     ID: Org3MSP
-    MSPDir: ./crypto/peerOrganizations/Org3/msp
+    MSPDir: ./crypto/peerOrganizations/org3.com/msp
     Policies:
       Readers:
         Type: Signature
@@ -54,7 +54,7 @@ Organizations:
   - &OrdererMSP
     Name: OrdererOrg
     ID: OrdererMSP
-    MSPDir: ./crypto/ordererOrganizations/OrdererOrg/msp
+    MSPDir: ./crypto/ordererOrganizations/orderer.com/msp
     Policies:
       Readers:
         Type: Signature
@@ -87,8 +87,8 @@ Channel: &ChannelDefaults
       Consenters:
         - Host: 127.0.0.1
           Port: 5427
-          ClientTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/server.crt
-          ServerTLSCert: ./crypto/ordererOrganizations/OrdererOrg/orderers/orderer.orderer.com/tls/server.crt
+          ClientTLSCert: ./crypto/ordererOrganizations/orderer.com/orderers/orderer.orderer.com/tls/server.crt
+          ServerTLSCert: ./crypto/ordererOrganizations/orderer.com/orderers/orderer.orderer.com/tls/server.crt
     Organizations:
       - *OrdererMSP
     Policies:
@@ -183,4 +183,3 @@ Profiles:
         Endorsement:
           Type: ImplicitMeta
           Rule: ANY Endorsement
-

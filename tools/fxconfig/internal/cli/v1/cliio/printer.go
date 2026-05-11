@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"io"
 
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 // Format specifies the output format for CLI printing.
