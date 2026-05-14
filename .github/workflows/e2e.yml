@@ -78,6 +78,7 @@ jobs:
           COMMITTER_IMAGE: ${{ steps.images.outputs.committer_image }}
           LOADGEN_IMAGE: ${{ steps.images.outputs.loadgen_image }}
           FABRIC_X_BIN: ${{ github.workspace }}/integration/test/.build/fabric-x/bin
+          SKIP_CLEANUP_PROMPT: "1"
         run: ./integration/test/run-e2e.sh
 
       # Failure logs are emitted by run-e2e.sh via an ERR trap before cleanup.
