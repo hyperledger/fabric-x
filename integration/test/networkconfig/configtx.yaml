@@ -135,14 +135,11 @@ Organizations:
 #
 ################################################################################
 Capabilities:
-  Channel: &ChannelCapabilities
-    V3_0: true
+  Channel: &ChannelCapabilities {}
 
-  Orderer: &OrdererCapabilities
-    V2_0: true
+  Orderer: &OrdererCapabilities {}
 
-  Application: &ApplicationCapabilities
-    V2_5: true
+  Application: &ApplicationCapabilities {}
 
 ################################################################################
 #

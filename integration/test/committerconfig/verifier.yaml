@@ -18,11 +18,10 @@ monitoring:
     requests-per-second: 0
     burst: 0
 
-parallel-executor:
-  batch-size-cutoff: 50
-  batch-time-cutoff: 10ms
-  channel-buffer-size: 50
-  parallelism: 40
+batch-size-cutoff: 50
+batch-time-cutoff: 10ms
+channel-buffer-size: 50
+parallelism: 40
 
 logging:
   logSpec: info:grpc=error
