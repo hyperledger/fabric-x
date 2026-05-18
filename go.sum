@@ -153,8 +153,8 @@ github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7 h1:sQ5qv8vQQfwewa1JlCiSCC8d
 github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7/go.mod h1:bJnwzfv03oZQeCc863pdGTDgf5nmCy6Za3RAE7d2XsQ=
 github.com/hyperledger/fabric-x-committer v1.0.0-alpha.1 h1:9/+wvR9VomUnWKSDvpvYURnRSCKex0f/jNffUC+vx3E=
 github.com/hyperledger/fabric-x-committer v1.0.0-alpha.1/go.mod h1:8HXBP3zPPBHYyf2KiGvl6nAHfWP/2IoWjTwCr2kQIWk=
-github.com/hyperledger/fabric-x-common v0.2.2 h1:4eACv0SdNZVyQYnUW8qrHOOnbRO64zjHRlfn7b9I+Yw=
-github.com/hyperledger/fabric-x-common v0.2.2/go.mod h1:EdyBG6jVFYYxJ5DgjxGVLE/Lav3GPhdftABZv5j+ttg=
+github.com/hyperledger/fabric-x-common v0.2.3 h1:NWTrD6reBWgZYaU6zqD9EOS1KwiVt1La+sCR39cPuIM=
+github.com/hyperledger/fabric-x-common v0.2.3/go.mod h1:EdyBG6jVFYYxJ5DgjxGVLE/Lav3GPhdftABZv5j+ttg=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=
