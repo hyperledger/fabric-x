@@ -1,0 +1,135 @@
+# SPDX-License-Identifier: Apache-2.0
+site_name: Fabric-X Documentation
+site_description: Enterprise-grade permissioned distributed ledger with horizontal scalability
+site_author: Hyperledger Fabric-X Contributors
+copyright: Copyright 2026 Hyperledger Fabric-X Contributors
+
+theme:
+  name: material
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_div_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - tables
+  - toc:
+      permalink: true
+
+exclude_docs: |
+  wrappers/**
+  superpowers/**
+
+plugins:
+  - search
+  - multirepo:
+      cleanup: true
+      nav_repos:
+        - name: orderer
+          import_url: https://github.com/hyperledger/fabric-x-orderer?branch=v1.0.0&edit_uri=/
+          imports:
+            - docs/architecture.md
+            - docs/cli/arma.md
+            - docs/cli/armageddon.md
+        - name: committer
+          import_url: https://github.com/hyperledger/fabric-x-committer?branch=v1.0.0&edit_uri=/
+          imports:
+            - docs/index.md
+            - docs/architecture.md
+            - docs/sidecar.md
+            - docs/coordinator.md
+            - docs/verification-service.md
+            - docs/validator-committer.md
+            - docs/namespace-policy.md
+            - docs/notification-service.md
+            - docs/query-service.md
+            - docs/cli/committer.md
+            - docs/coordinator-block-diagram.md
+            - docs/sidecar-block-diagram.md
+            - docs/verifier-block-diagram.md
+            - docs/validator-committer-block-diagram.md
+            - docs/query-block-diagram.md
+            - docs/core-concurrency-pattern.md
+            - docs/performance-tuning.md
+            - docs/loadgen-artifacts.md
+            - docs/metrics_reference.md
+            - docs/tls-configurations.md
+            - docs/deployment-guide.md
+            - docs/setup.md
+            - docs/logging.md
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+  - javascripts/mermaid.js
+
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - index.md
+  - Key Concepts:
+    - concepts/index.md
+    - Blockchain Basics: concepts/blockchain.md
+    - Network Structure: concepts/network/network.md
+    - Identity Management: concepts/identity/identity.md
+    - Membership (MSP): concepts/membership/membership.md
+    - Policies: concepts/policies/policies.md
+    - Ledger: concepts/ledger/ledger.md
+  - Architecture:
+    - architecture/index.md
+    - Transaction Flow: concepts/transaction-flow.md
+    - "Ordering Service Components":
+      - Orderer Architecture Overview: orderer/docs/architecture.md
+    - "Committer Components":
+      - Committer Architecture Overview: committer/docs/architecture.md
+      - Sidecar: committer/docs/sidecar.md
+      - Coordinator: committer/docs/coordinator.md
+      - Verifier: committer/docs/verification-service.md
+      - Validator-Committer: committer/docs/validator-committer.md
+      - Query Service: committer/docs/query-service.md
+  - Core Development:
+    - Committer:
+      - Sidecar: committer/docs/sidecar-block-diagram.md
+      - Coordinator: committer/docs/coordinator-block-diagram.md
+      - Verifier: committer/docs/verifier-block-diagram.md
+      - Validator-Committer: committer/docs/validator-committer-block-diagram.md
+      - Query: committer/docs/query-block-diagram.md
+      - Core Concurrency Pattern: committer/docs/core-concurrency-pattern.md
+  - Getting Started:
+    - getting_started/index.md
+  - Tutorials:
+    - tutorials/index.md
+  - Deployment:
+    - deployment/index.md
+    - Committer Deployment Guide: committer/docs/deployment-guide.md
+    - Committer Setup: committer/docs/setup.md
+  - Operations:
+    - operations/index.md
+    - Committer Logging: committer/docs/logging.md
+    - Committer Metrics: committer/docs/metrics_reference.md
+    - Committer TLS: committer/docs/tls-configurations.md
+    - Committer Performance Tuning: committer/docs/performance-tuning.md
+  - CLI Reference:
+    - cli/index.md
+    - cli/cryptogen.md
+    - cli/configtxgen.md
+    - cli/fxconfig.md
+    - orderer/docs/cli/arma.md
+    - orderer/docs/cli/armageddon.md
+    - committer/docs/cli/committer.md
+  - Application Development:
+    - apps/index_placeholder.md
+  - Load Testing:
+    - committer/docs/loadgen-artifacts.md
+  - Reference:
+    - reference/glossary.md
+    - reference/faq.md
+    - reference/contributing.md
