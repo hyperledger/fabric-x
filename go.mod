@@ -20,7 +20,7 @@ require (
 	github.com/hyperledger/fabric-lib-go v1.1.3
 	github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7
 	github.com/hyperledger/fabric-x-committer v1.0.0-alpha.1
-	github.com/hyperledger/fabric-x-common v0.2.3
+	github.com/hyperledger/fabric-x-common v0.2.4
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
