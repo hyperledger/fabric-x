@@ -136,6 +136,45 @@ services:
       - e2e
 
   # ---------------------------------------------------------------------------
+  # PostgreSQL (explorer backing store)
+  # ---------------------------------------------------------------------------
+  # Minimal Postgres instance used exclusively by the block explorer.
+  # The committer uses its own embedded DB; this is a separate instance.
+  # Started only when the explorer smoke check runs (EXPLORER_AVAILABLE=true).
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: explorer
+    networks:
+      - e2e
+
+  # ---------------------------------------------------------------------------
+  # Fabric-X Block Explorer
+  # ---------------------------------------------------------------------------
+  # Connects to the committer sidecar (port 4001, no TLS in this test env)
+  # and to the postgres service above. Exposes the REST API on port 8080.
+  # Started only when the explorer smoke check runs (EXPLORER_AVAILABLE=true).
+  #
+  # Port mapping:
+  #   8080 = REST API + Swagger UI (/docs) + health check (/healthz)
+  explorer:
+    image: ${EXPLORER_IMAGE:-ghcr.io/lf-decentralized-trust-labs/fabric-x-block-explorer:latest}
+    container_name: explorer
+    command: ["start", "--config", "/config/explorer.yaml"]
+    volumes:
+      - ./explorerconfig/explorer.yaml:/config/explorer.yaml
+    ports:
+      - "8080:8080"
+    depends_on:
+      - committer
+      - postgres
+    networks:
+      - e2e
+
+  # ---------------------------------------------------------------------------
   # Prometheus
   # ---------------------------------------------------------------------------
   # Scrapes metrics from all Fabric-X services on the e2e network.

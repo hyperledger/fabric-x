@@ -101,6 +101,8 @@ SKIP_CLEANUP_PROMPT=1 ./run-e2e.sh
 | `COMMITTER_IMAGE` | `docker.io/hyperledger/${COMMITTER_IMAGE_NAME}:${COMMITTER_REF}` | Resolved from `refs.conf` |
 | `LOADGEN_IMAGE` | `docker.io/hyperledger/fabric-x-loadgen:${COMMITTER_REF}` | Versioned with `COMMITTER_REF` |
 | `FABRIC_X_BIN` | `integration/test/.build/fabric-x/bin` | Built by `build-e2e.sh` |
+| `EXPLORER_IMAGE` | `ghcr.io/lf-decentralized-trust-labs/fabric-x-block-explorer:latest` | Pulled as `:latest` — non-blocking if unavailable |
+| `EXPLORER_AVAILABLE` | `false` | Set to `true` by `build-e2e.sh` when pull succeeds |
 
 **Steps performed:**
 
@@ -114,7 +116,9 @@ SKIP_CLEANUP_PROMPT=1 ./run-e2e.sh
 8. Create namespace using `fxconfig` with multi-org endorsement (both peer-org-0 and peer-org-1 sign)
 9. Run loadgen (submits ~10,000 TXs)
 10. Verify >= 5000 committed transactions via VC Prometheus metrics
-11. Prompt user before cleanup (so they can view Grafana dashboards)
+11. Explorer smoke check — start explorer + postgres, wait for /healthz (non-blocking)
+12. Explorer block ingestion check — poll /blocks/height > 0 (non-blocking)
+13. Prompt user before cleanup (so they can view Grafana dashboards)
 
 ### `clean.sh`
 
@@ -267,6 +271,8 @@ integration/test/
 │   ├── verifier.yaml           #   Transaction signature verification
 │   ├── vc.yaml                 #   Read-set validation + DB commit
 │   └── query.yaml              #   Read-only state access
+├── explorerconfig/             # Explorer config files (mounted into explorer container)
+│   └── explorer.yaml           #   DB + sidecar + REST server config
 ├── prometheus/                 # Prometheus configuration
 │   └── prometheus.yml          #   Scrape targets for all Fabric-X services
 └── grafana/                    # Grafana dashboards and provisioning

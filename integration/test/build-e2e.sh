@@ -219,6 +219,27 @@ docker build \
   "${COMMITTER_DIR}"
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Pull explorer image (:latest — independently released, non-blocking)
+# If the pull fails the E2E test continues without the explorer smoke check.
+# ──────────────────────────────────────────────────────────────────────────────
+EXPLORER_IMAGE="${EXPLORER_REPO:-}/${EXPLORER_IMAGE_NAME:-}:latest"
+EXPLORER_AVAILABLE="false"
+if [[ -n "${EXPLORER_REPO:-}" && -n "${EXPLORER_IMAGE_NAME:-}" ]]; then
+  echo "Pulling explorer image: ${EXPLORER_IMAGE}..."
+  if docker pull "${EXPLORER_IMAGE}" 2>/dev/null; then
+    EXPLORER_AVAILABLE="true"
+    echo "  ✅ ${EXPLORER_IMAGE}"
+  else
+    echo "  ⚠️  Explorer image unavailable — smoke check will be skipped"
+  fi
+fi
+
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "explorer_image=${EXPLORER_IMAGE}" >> "${GITHUB_OUTPUT}"
+  echo "explorer_available=${EXPLORER_AVAILABLE}" >> "${GITHUB_OUTPUT}"
+fi
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Summary
 # ──────────────────────────────────────────────────────────────────────────────
 echo ""

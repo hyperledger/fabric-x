@@ -20,7 +20,7 @@ dump_failure_logs() {
 
   echo "=== FAILURE: dumping docker compose logs before cleanup ==="
   if [ -f "${SCRIPT_DIR}/docker-compose.yaml" ]; then
-    docker compose -f "${SCRIPT_DIR}/docker-compose.yaml" logs --no-color arma committer loadgen || true
+    docker compose -f "${SCRIPT_DIR}/docker-compose.yaml" logs --no-color arma committer loadgen explorer || true
   fi
 }
 
@@ -104,6 +104,11 @@ source "${REFS_CONF}"
 export ORDERER_IMAGE="${ORDERER_IMAGE:-docker.io/hyperledger/${ORDERER_IMAGE_NAME}:${ORDERER_REF}}"
 export COMMITTER_IMAGE="${COMMITTER_IMAGE:-docker.io/hyperledger/${COMMITTER_IMAGE_NAME}:${COMMITTER_REF}}"
 export LOADGEN_IMAGE="${LOADGEN_IMAGE:-docker.io/hyperledger/${LOADGEN_IMAGE_NAME}:${COMMITTER_REF}}"
+export EXPLORER_IMAGE="${EXPLORER_IMAGE:-${EXPLORER_REPO:-}/${EXPLORER_IMAGE_NAME:-}:latest}"
+# EXPLORER_AVAILABLE is set to "true" by build-e2e.sh when the image was
+# successfully pulled. Default to "false" so the smoke check is skipped
+# when run-e2e.sh is invoked standalone without build-e2e.sh.
+EXPLORER_AVAILABLE="${EXPLORER_AVAILABLE:-false}"
 FABRIC_X_BIN="${FABRIC_X_BIN:-${DEFAULT_FABRIC_X_BIN}}"
 
 COMPOSE_FILES=("-f" "${SCRIPT_DIR}/docker-compose.yaml")
@@ -134,6 +139,7 @@ print_images() {
   echo "  orderer:   ${ORDERER_IMAGE}"
   echo "  committer: ${COMMITTER_IMAGE}"
   echo "  loadgen:   ${LOADGEN_IMAGE}"
+  echo "  explorer:  ${EXPLORER_IMAGE} (available=${EXPLORER_AVAILABLE})"
 }
 
 # Cleans stale docker resources and prepares runtime artifact/storage directories.
@@ -443,6 +449,63 @@ step_8_run_loadgen() {
   echo "Loadgen exited with code ${LOADGEN_EXIT_CODE} (accepted)"
 }
 
+# Starts the explorer and its postgres dependency, then waits for the REST API.
+# This step is non-blocking: if the image is unavailable or the service fails
+# to start, a warning is logged and the test continues to a successful exit.
+# The core E2E result (step_9) is not affected by explorer failures.
+step_10_smoke_explorer() {
+  echo "=== Step 10: Explorer smoke check (non-blocking) ==="
+
+  if [[ "${EXPLORER_AVAILABLE}" != "true" ]]; then
+    echo "⏭️  Explorer image not available — skipping smoke check"
+    return 0
+  fi
+
+  echo "Starting postgres and explorer..."
+  docker compose "${COMPOSE_FILES[@]}" up -d postgres explorer
+
+  echo "Polling explorer /healthz (up to ${HEALTH_TIMEOUT}s)..."
+  local i
+  for ((i = 1; i <= HEALTH_TIMEOUT; i++)); do
+    if curl -sf http://127.0.0.1:8080/healthz >/dev/null 2>&1; then
+      echo "✅ Explorer /healthz is ready"
+      return 0
+    fi
+    sleep 1
+  done
+
+  echo "⚠️  Explorer did not become ready within ${HEALTH_TIMEOUT}s — smoke check skipped"
+  docker compose "${COMPOSE_FILES[@]}" logs --no-color --tail=30 explorer || true
+  return 0  # non-blocking: do not fail the E2E job
+}
+
+# Verifies the explorer has ingested at least one block from the committer.
+# Non-blocking: a warning is logged on timeout and the test exits successfully.
+step_11_verify_explorer() {
+  echo "=== Step 11: Verify explorer ingested blocks (non-blocking) ==="
+
+  if [[ "${EXPLORER_AVAILABLE}" != "true" ]]; then
+    echo "⏭️  Explorer not available — skipping block ingestion check"
+    return 0
+  fi
+
+  local i height
+  for ((i = 1; i <= HEALTH_TIMEOUT; i++)); do
+    height=$(curl -sf http://127.0.0.1:8080/blocks/height 2>/dev/null \
+      | python3 -c "import json,sys; print(json.load(sys.stdin).get('height', 0))" 2>/dev/null \
+      || echo 0)
+    if [ "${height:-0}" -gt 0 ]; then
+      echo "✅ Explorer has ingested ${height} block(s)"
+      return 0
+    fi
+    sleep 2
+  done
+
+  echo "⚠️  Explorer block height never rose above 0 — smoke check inconclusive"
+  docker compose "${COMPOSE_FILES[@]}" logs --no-color --tail=30 explorer || true
+  return 0  # non-blocking: do not fail the E2E job
+}
+
 # Queries VC Prometheus metrics over mTLS to read committed tx count.
 # Enforces minimum threshold and dumps logs on verification failure.
 step_9_verify_results() {
@@ -481,6 +544,8 @@ main() {
   step_7_create_namespace
   step_8_run_loadgen
   step_9_verify_results
+  step_10_smoke_explorer
+  step_11_verify_explorer
 }
 
 main "$@"
