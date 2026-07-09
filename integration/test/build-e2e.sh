@@ -15,13 +15,14 @@
 #   ./build-e2e.sh --fabric-x-ref=abc123        # override fabric-x tools ref
 #   ./build-e2e.sh --committer-ref=v1.2.3       # override committer ref
 #   ./build-e2e.sh --orderer-ref=abc123         # override orderer ref
+#   ./build-e2e.sh --explorer-ref=v1.0.0        # override explorer image tag
 #   ./build-e2e.sh --fabric-x-repo=URL          # custom fabric-x repo URL
 #   ./build-e2e.sh --fabric-x-local-path=PATH   # build fabric-x tools from local working copy
 #   ./build-e2e.sh --orderer-local-path=PATH    # build orderer from local working copy
 #   ./build-e2e.sh --committer-local-path=PATH  # build committer from local working copy
 #
 # Output:
-#   Prints export commands for ORDERER_IMAGE and COMMITTER_IMAGE.
+#   Prints image names for ORDERER_IMAGE, COMMITTER_IMAGE, LOADGEN_IMAGE, and EXPLORER_IMAGE.
 #   When GITHUB_OUTPUT is set (CI), also writes image names there.
 #
 set -euo pipefail
@@ -61,6 +62,7 @@ for arg in "$@"; do
   --fabric-x-ref=*) FABRIC_X_REF="${arg#*=}" ;;
   --committer-ref=*) COMMITTER_REF="${arg#*=}" ;;
   --orderer-ref=*) ORDERER_REF="${arg#*=}" ;;
+  --explorer-ref=*) EXPLORER_REF="${arg#*=}" ;;
   --fabric-x-repo=*) FABRIC_X_REPO="${arg#*=}" ;;
   --committer-repo=*) COMMITTER_REPO="${arg#*=}" ;;
   --orderer-repo=*) ORDERER_REPO="${arg#*=}" ;;
@@ -71,15 +73,16 @@ for arg in "$@"; do
     echo "Usage: ./build-e2e.sh [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --fabric-x-ref=REF    Tag, branch, or commit for fabric-x tools"
-    echo "  --committer-ref=REF   Tag, branch, or commit for fabric-x-committer"
-    echo "  --orderer-ref=REF     Tag, branch, or commit for fabric-x-orderer"
-    echo "  --fabric-x-repo=URL        Override default fabric-x GitHub repo URL"
-    echo "  --committer-repo=URL       Override default committer GitHub repo URL"
-    echo "  --orderer-repo=URL         Override default orderer GitHub repo URL"
-    echo "  --fabric-x-local-path=PATH Build fabric-x tools from local working copy"
+    echo "  --fabric-x-ref=REF          Tag, branch, or commit for fabric-x tools"
+    echo "  --committer-ref=REF         Tag, branch, or commit for fabric-x-committer"
+    echo "  --orderer-ref=REF           Tag, branch, or commit for fabric-x-orderer"
+    echo "  --explorer-ref=REF          Tag for the explorer image (default: refs.conf)"
+    echo "  --fabric-x-repo=URL         Override default fabric-x GitHub repo URL"
+    echo "  --committer-repo=URL        Override default committer GitHub repo URL"
+    echo "  --orderer-repo=URL          Override default orderer GitHub repo URL"
+    echo "  --fabric-x-local-path=PATH  Build fabric-x tools from local working copy"
     echo "  --committer-local-path=PATH Build committer/loadgen from local working copy"
-    echo "  --orderer-local-path=PATH  Build orderer from local working copy"
+    echo "  --orderer-local-path=PATH   Build orderer from local working copy"
     echo ""
     echo "Refs are loaded from refs.conf by default and can be overridden via CLI."
     exit 0
@@ -103,9 +106,12 @@ require_var() {
 require_var "FABRIC_X_REF" "FABRIC_X_REF is not set. Please specify --fabric-x-ref or set it in refs.conf"
 require_var "COMMITTER_REF" "COMMITTER_REF is not set. Please specify --committer-ref or set it in refs.conf"
 require_var "ORDERER_REF" "ORDERER_REF is not set. Please specify --orderer-ref or set it in refs.conf"
+require_var "EXPLORER_REF" "EXPLORER_REF is not set. Please specify --explorer-ref or set it in refs.conf"
 require_var "ORDERER_IMAGE_NAME" "ORDERER_IMAGE_NAME is not set. Check refs.conf"
 require_var "COMMITTER_IMAGE_NAME" "COMMITTER_IMAGE_NAME is not set. Check refs.conf"
 require_var "LOADGEN_IMAGE_NAME" "LOADGEN_IMAGE_NAME is not set. Check refs.conf"
+require_var "EXPLORER_IMAGE_NAME" "EXPLORER_IMAGE_NAME is not set. Check refs.conf"
+require_var "EXPLORER_REPO" "EXPLORER_REPO is not set. Check refs.conf"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Helper functions
@@ -219,24 +225,18 @@ docker build \
   "${COMMITTER_DIR}"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Pull explorer image (:latest — independently released, non-blocking)
+# Pull explorer image
+# The explorer is independently released; pull it at the configured ref.
 # If the pull fails the E2E test continues without the explorer smoke check.
 # ──────────────────────────────────────────────────────────────────────────────
-EXPLORER_IMAGE="${EXPLORER_REPO:-}/${EXPLORER_IMAGE_NAME:-}:latest"
+EXPLORER_IMAGE="${EXPLORER_REPO}/${EXPLORER_IMAGE_NAME}:${EXPLORER_REF}"
 EXPLORER_AVAILABLE="false"
-if [[ -n "${EXPLORER_REPO:-}" && -n "${EXPLORER_IMAGE_NAME:-}" ]]; then
-  echo "Pulling explorer image: ${EXPLORER_IMAGE}..."
-  if docker pull "${EXPLORER_IMAGE}" 2>/dev/null; then
-    EXPLORER_AVAILABLE="true"
-    echo "  ✅ ${EXPLORER_IMAGE}"
-  else
-    echo "  ⚠️  Explorer image unavailable — smoke check will be skipped"
-  fi
-fi
-
-if [ -n "${GITHUB_OUTPUT:-}" ]; then
-  echo "explorer_image=${EXPLORER_IMAGE}" >> "${GITHUB_OUTPUT}"
-  echo "explorer_available=${EXPLORER_AVAILABLE}" >> "${GITHUB_OUTPUT}"
+echo "Pulling explorer image: ${EXPLORER_IMAGE}..."
+if docker pull "${EXPLORER_IMAGE}" 2>/dev/null; then
+  EXPLORER_AVAILABLE="true"
+  echo "  ✅ ${EXPLORER_IMAGE}"
+else
+  echo "  ⚠️  Explorer image unavailable — smoke check will be skipped"
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -248,10 +248,11 @@ echo "Run the E2E test with:"
 echo ""
 echo "  ./run-e2e.sh"
 echo ""
-echo "Resolved local tags for run-e2e.sh:"
+echo "Resolved images for run-e2e.sh:"
 echo "  ${ORDERER_IMAGE}"
 echo "  ${COMMITTER_IMAGE}"
 echo "  ${LOADGEN_IMAGE}"
+echo "  ${EXPLORER_IMAGE} (available=${EXPLORER_AVAILABLE})"
 
 # When running in GitHub Actions, write resolved image names to GITHUB_OUTPUT
 # so downstream workflow steps can reference them without parsing stdout.
@@ -259,4 +260,6 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "orderer_image=${ORDERER_IMAGE}" >>"${GITHUB_OUTPUT}"
   echo "committer_image=${COMMITTER_IMAGE}" >>"${GITHUB_OUTPUT}"
   echo "loadgen_image=${LOADGEN_IMAGE}" >>"${GITHUB_OUTPUT}"
+  echo "explorer_image=${EXPLORER_IMAGE}" >>"${GITHUB_OUTPUT}"
+  echo "explorer_available=${EXPLORER_AVAILABLE}" >>"${GITHUB_OUTPUT}"
 fi
