@@ -47,7 +47,7 @@ func Endorse(signer msp.SigningIdentity, txID string, tx *applicationpb.Tx) (*ap
 		// Note that a default msp signer hash the msg before signing.
 		// For that reason we use the TxNamespace message as ASN1 encoded msg
 
-		msg, err := tx.Namespaces[nsIdx].ASN1Marshal(txID)
+		msg, err := tx.Namespaces[nsIdx].ASN1Marshal(txID, nil)
 		if err != nil {
 			return nil, fmt.Errorf("failed asn1 marshal tx: %w", err)
 		}

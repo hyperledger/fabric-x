@@ -30,7 +30,7 @@ func CreateNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, ns
 
 	// note that we only set the version if we update a namespace policy
 	if nsVersion >= 0 {
-		rw.Version = applicationpb.NewVersion(uint64(nsVersion))
+		rw.Version = new(uint64(nsVersion))
 	}
 
 	writeToMetaNs.ReadWrites = append(writeToMetaNs.ReadWrites, rw)
