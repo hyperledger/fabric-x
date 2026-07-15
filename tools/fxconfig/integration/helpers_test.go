@@ -35,7 +35,7 @@ const (
 	queryServicePort = "7001"
 	channelID        = "mychannel"
 
-	testContainerImg = "ghcr.io/hyperledger/fabric-x-committer-test-node:1.0.3"
+	testContainerImg = "ghcr.io/hyperledger/fabric-x-committer-test-node:1.0.4"
 )
 
 // setupSingleOrgAdmin spawns a committer test container with a single org admin lifecycle policy
