@@ -100,6 +100,7 @@ To set up the network yourself, follow the tutorial in the [Fabric-X Ansible Col
 | :-----: | :------: | :----------------: | :-------: | :-----------------: | :----------------------: |
 | v0.0.21 |  v0.1.7  |       v0.5.5       |  v1.5.15  |       v0.8.2        |           v0.0.1         |
 | v0.0.23 |  v0.1.9  |       v0.6.3       |  v1.5.15  |          -          |              -           |
+| v1.0.3  |  v1.0.4  |       v0.8.8       |  v1.5.20  |       v0.15.0       |              -           |
 
 ## Fabric-X workshop series
 
@@ -128,7 +129,7 @@ To set up the network yourself, follow the tutorial in the [Fabric-X Ansible Col
 
 - [x] [Sample token application on top of Fabric-X](https://github.com/hyperledger/fabric-x-samples)
 - [x] [Fabric-X on Kubernetes](https://github.com/LF-Decentralized-Trust-labs/fabric-x-ansible-collection/blob/main/examples/README.md#kubernetes-inventories)
-- [ ] Fabric-X on OpenShift
+- [x] Fabric-X on OpenShift
 - [ ] Fabric-X Kubernetes operator
-- [ ] [Fabric-x blockchain explorer (wip)](https://github.com/LF-Decentralized-Trust-labs/fabric-x-block-explorer)
+- [x] [Fabric-x blockchain explorer](https://github.com/LF-Decentralized-Trust-labs/fabric-x-block-explorer)
 - [x] [Fabric meets EVM](https://github.com/hyperledger/fabric-x-evm)
