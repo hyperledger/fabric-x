@@ -6,9 +6,9 @@
 #
 # Build Docker images for E2E integration testing.
 #
-# This script builds the orderer (arma-4p1s) and committer (committer-test-node)
-# Docker images needed by run-e2e.sh. It clones the repos at specific refs
-# and builds the images locally.
+# This script builds the orderer (arma-4p1s), committer (committer-test-node),
+# loadgen, and explorer (fabric-x-block-explorer) Docker images needed by
+# run-e2e.sh. It clones each repo at the specified ref and builds locally.
 #
 # Usage:
 #   ./build-e2e.sh                              # build using refs from refs.conf
@@ -21,6 +21,7 @@
 #   ./build-e2e.sh --fabric-x-local-path=PATH   # build fabric-x tools from local working copy
 #   ./build-e2e.sh --orderer-local-path=PATH    # build orderer from local working copy
 #   ./build-e2e.sh --committer-local-path=PATH  # build committer from local working copy
+#   ./build-e2e.sh --explorer-local-path=PATH   # build explorer from local working copy
 #
 # Output:
 #   Prints image names for ORDERER_IMAGE, COMMITTER_IMAGE, LOADGEN_IMAGE, and EXPLORER_IMAGE.
@@ -71,6 +72,7 @@ for arg in "$@"; do
   --fabric-x-local-path=*) FABRIC_X_LOCAL_PATH="${arg#*=}" ;;
   --committer-local-path=*) COMMITTER_LOCAL_PATH="${arg#*=}" ;;
   --orderer-local-path=*) ORDERER_LOCAL_PATH="${arg#*=}" ;;
+  --explorer-local-path=*) EXPLORER_LOCAL_PATH="${arg#*=}" ;;
   --help)
     echo "Usage: ./build-e2e.sh [OPTIONS]"
     echo ""
@@ -86,6 +88,7 @@ for arg in "$@"; do
     echo "  --fabric-x-local-path=PATH  Build fabric-x tools from local working copy"
     echo "  --committer-local-path=PATH Build committer/loadgen from local working copy"
     echo "  --orderer-local-path=PATH   Build orderer from local working copy"
+    echo "  --explorer-local-path=PATH  Build explorer from local working copy"
     echo ""
     echo "Refs are loaded from refs.conf by default and can be overridden via CLI."
     exit 0
@@ -114,7 +117,6 @@ require_var "ORDERER_IMAGE_NAME" "ORDERER_IMAGE_NAME is not set. Check refs.conf
 require_var "COMMITTER_IMAGE_NAME" "COMMITTER_IMAGE_NAME is not set. Check refs.conf"
 require_var "LOADGEN_IMAGE_NAME" "LOADGEN_IMAGE_NAME is not set. Check refs.conf"
 require_var "EXPLORER_IMAGE_NAME" "EXPLORER_IMAGE_NAME is not set. Check refs.conf"
-require_var "EXPLORER_REPO" "EXPLORER_REPO is not set. Check refs.conf"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Helper functions
@@ -228,12 +230,21 @@ docker build \
   "${COMMITTER_DIR}"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Build explorer image
-# Clone the explorer repo at the configured ref and build the image locally,
-# consistent with how orderer and committer images are built.
+# Build explorer image (fabric-x-block-explorer)
+#
+# The explorer image packages the block explorer server (REST API + /healthz),
+# the block ingestion worker (connects to the committer sidecar), and the
+# Swagger UI (/docs) into a single container. It uses the Dockerfile at the
+# root of the explorer repo and is started via "start --config /config/explorer.yaml".
+# Supports --explorer-local-path for local fork/branch testing.
+#
+# The explorer is published under the LF-Decentralized-Trust-labs org (not
+# hyperledger), so the image is tagged under localhost/ rather than
+# docker.io/hyperledger/. run-e2e.sh resolves the same localhost/ tag from
+# refs.conf, so no registry pull is needed.
 # ──────────────────────────────────────────────────────────────────────────────
 EXPLORER_DIR="${BUILD_DIR}/fabric-x-block-explorer"
-clone_at_ref "${EXPLORER_REPO}" "${EXPLORER_REF}" "${EXPLORER_DIR}"
+checkout_source "${EXPLORER_REPO}" "${EXPLORER_REF}" "${EXPLORER_DIR}" "${EXPLORER_LOCAL_PATH:-}" "fabric-x-block-explorer"
 
 EXPLORER_IMAGE="localhost/${EXPLORER_IMAGE_NAME}:${EXPLORER_REF}"
 echo "Building ${EXPLORER_IMAGE_NAME} image from ${EXPLORER_DIR}..."

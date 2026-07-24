@@ -5,8 +5,9 @@
 #
 # E2E Integration Test workflow.
 #
-# Uses integration/test/build-e2e.sh to build orderer+committer+loadgen images
-# and runs the full E2E pipeline test.
+# Uses integration/test/build-e2e.sh to build all component images
+# (orderer, committer, loadgen, explorer) and fabric-x tools, then
+# runs the full E2E pipeline test.
 # All refs default to values in integration/test/refs.conf when not provided.
 #
 
@@ -47,11 +48,11 @@ jobs:
           go-version-file: go.mod
 
       # ---------------------------------------------------------------
-      # Resolve/build orderer+committer images and fabric-x tools.
-      # build-e2e.sh writes orderer_image and committer_image to
-      # GITHUB_OUTPUT so downstream steps can reference them directly.
-      # It also builds fabric-x tools (cryptogen, configtxgen, fxconfig)
-      # at the specified fabric-x-ref for artifact generation.
+      # Build all component images (orderer, committer, loadgen, explorer)
+      # and fabric-x tools (cryptogen, configtxgen, fxconfig).
+      # build-e2e.sh clones each repo at the configured ref, builds the
+      # image locally, and writes resolved image names to GITHUB_OUTPUT
+      # so downstream steps can reference them without parsing stdout.
       # ---------------------------------------------------------------
       - name: Build E2E images and tools
         id: images

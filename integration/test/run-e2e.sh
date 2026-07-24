@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # =============================================================================
-# E2E Integration Test: Arma Orderer + Committer Pipeline + Loadgen
+# E2E Integration Test: Arma Orderer + Committer Pipeline + Loadgen + Block Explorer
 # =============================================================================
 set -euo pipefail
 
@@ -20,7 +20,7 @@ dump_failure_logs() {
 
   echo "=== FAILURE: dumping docker compose logs before cleanup ==="
   if [ -f "${SCRIPT_DIR}/docker-compose.yaml" ]; then
-    docker compose -f "${SCRIPT_DIR}/docker-compose.yaml" logs --no-color arma committer loadgen explorer || true
+    docker compose -f "${SCRIPT_DIR}/docker-compose.yaml" logs --no-color arma committer loadgen explorer postgres || true
   fi
 }
 
@@ -37,6 +37,9 @@ cleanup() {
     echo ""
     echo "  Grafana dashboard: http://localhost:3000  (admin/admin)"
     echo "  Prometheus:        http://localhost:9090"
+    if [ "${ENABLE_EXPLORER:-true}" = "true" ]; then
+      echo "  Block explorer:    http://localhost:8080"
+    fi
     echo "============================================================"
     echo ""
     echo "Press ENTER to clean up containers and artifacts, or Ctrl+C to keep them running..."
@@ -110,6 +113,7 @@ FABRIC_X_BIN="${FABRIC_X_BIN:-${DEFAULT_FABRIC_X_BIN}}"
 COMPOSE_FILES=("-f" "${SCRIPT_DIR}/docker-compose.yaml")
 HEALTH_TIMEOUT="120"
 ENABLE_MONITORING="${ENABLE_MONITORING:-true}"
+ENABLE_EXPLORER="${ENABLE_EXPLORER:-true}"
 
 # Validates required host binaries and generated fabric-x tools are present.
 # Fails fast with clear errors to avoid partial E2E setup.
@@ -135,7 +139,7 @@ print_images() {
   echo "  orderer:   ${ORDERER_IMAGE}"
   echo "  committer: ${COMMITTER_IMAGE}"
   echo "  loadgen:   ${LOADGEN_IMAGE}"
-  echo "  explorer:  ${EXPLORER_IMAGE}"
+  echo "  explorer:  ${EXPLORER_IMAGE} (enabled: ${ENABLE_EXPLORER})"
 }
 
 # Cleans stale docker resources and prepares runtime artifact/storage directories.
@@ -327,7 +331,21 @@ step_5_1_start_monitoring() {
   echo "  Prometheus: http://localhost:9090"
 }
 
-# Waits for key Arma/committer ports to become reachable.
+# Starts block explorer and its postgres dependency.
+# Skipped when ENABLE_EXPLORER=false.
+step_5_2_start_explorer() {
+  if [ "${ENABLE_EXPLORER}" != "true" ]; then
+    echo "=== Step 5.2: Explorer disabled (ENABLE_EXPLORER=${ENABLE_EXPLORER}) ==="
+    return 0
+  fi
+
+  echo "=== Step 5.2: Start block explorer (postgres + explorer) ==="
+  docker compose "${COMPOSE_FILES[@]}" up -d postgres explorer
+
+  echo "  Explorer REST API: http://localhost:8080"
+}
+
+# Waits for key Arma/committer/explorer ports to become reachable.
 # Verifies TCP port availability and TLS handshake completion.
 # TLS readiness check ensures services are fully initialized before
 # fxconfig attempts mTLS connections, which can fail if the server's
@@ -378,6 +396,14 @@ step_6_wait_health() {
     docker compose "${COMPOSE_FILES[@]}" logs committer
     exit 1
   }
+
+  if [ "${ENABLE_EXPLORER}" = "true" ]; then
+    wait_for_port 8080 "Explorer REST API" || {
+      echo "Explorer failed to start"
+      docker compose "${COMPOSE_FILES[@]}" logs explorer postgres
+      exit 1
+    }
+  fi
 }
 
 # Creates namespace 0 using multi-org endorsement with fxconfig workflow.
@@ -445,59 +471,6 @@ step_8_run_loadgen() {
   echo "Loadgen exited with code ${LOADGEN_EXIT_CODE} (accepted)"
 }
 
-# Starts the explorer and its postgres dependency, then waits for the REST API.
-# This step is non-blocking: if the service fails to start, a warning is logged
-# and the test continues to a successful exit.
-# The core E2E result (step_9) is not affected by explorer failures.
-step_10_smoke_explorer() {
-  echo "=== Step 10: Explorer smoke check (non-blocking) ==="
-
-  echo "Starting postgres and explorer..."
-  docker compose "${COMPOSE_FILES[@]}" up -d postgres explorer
-
-  echo "Polling explorer /healthz (up to ${HEALTH_TIMEOUT}s)..."
-  local i
-  for ((i = 1; i <= HEALTH_TIMEOUT; i++)); do
-    if curl -sf http://127.0.0.1:8080/healthz >/dev/null 2>&1; then
-      echo "✅ Explorer /healthz is ready"
-      return 0
-    fi
-    sleep 1
-  done
-
-  echo "⚠️  Explorer did not become ready within ${HEALTH_TIMEOUT}s — smoke check skipped"
-  docker compose "${COMPOSE_FILES[@]}" logs --no-color --tail=30 explorer || true
-  return 0  # non-blocking: do not fail the E2E job
-}
-
-# Verifies the explorer has ingested transactions from the committer by polling
-# GET /blocks (summing tx_count fields) until the total reaches >= 10002 or the
-# timeout expires. 10002 = 10000 loadgen TXs + 1 config TX + 1 namespace TX.
-# Non-blocking: a warning is logged on timeout and the test exits successfully.
-step_11_verify_explorer() {
-  echo "=== Step 11: Verify explorer transaction count >= 10002 (non-blocking) ==="
-
-  local i tx_total
-  for ((i = 1; i <= HEALTH_TIMEOUT; i++)); do
-    tx_total=$(curl -sf "http://127.0.0.1:8080/blocks?limit=10000" 2>/dev/null \
-      | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-print(sum(b.get('tx_count', 0) for b in data.get('blocks', [])))
-" 2>/dev/null \
-      || echo 0)
-    if [ "${tx_total:-0}" -ge 10002 ]; then
-      echo "✅ Explorer has ingested ${tx_total} transactions (>= 10002)"
-      return 0
-    fi
-    sleep 2
-  done
-
-  echo "⚠️  Explorer transaction count did not reach 10002 within ${HEALTH_TIMEOUT}s — smoke check inconclusive"
-  docker compose "${COMPOSE_FILES[@]}" logs --no-color --tail=30 explorer || true
-  return 0  # non-blocking: do not fail the E2E job
-}
-
 # Queries VC Prometheus metrics over mTLS to read committed tx count.
 # Enforces minimum threshold and dumps logs on verification failure.
 step_9_verify_results() {
@@ -520,6 +493,62 @@ step_9_verify_results() {
   fi
 }
 
+# Waits for the explorer REST API /healthz endpoint to become ready.
+# Mirrors the wait_for_port pattern: returns 1 on timeout so callers can
+# apply the same "|| { log; exit 1 }" handling used by step_6_wait_health.
+wait_for_explorer_health() {
+  echo "Waiting for explorer /healthz (up to ${HEALTH_TIMEOUT}s)..."
+  local i
+  for ((i = 1; i <= HEALTH_TIMEOUT; i++)); do
+    if curl -sf http://127.0.0.1:8080/healthz >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+# Waits for the explorer REST API to become healthy, then verifies it has
+# ingested all expected transactions (>= 10002).
+# Skipped when ENABLE_EXPLORER=false.
+# 10002 = 10000 loadgen TXs + 1 config TX + 1 namespace TX.
+step_10_verify_explorer() {
+  if [ "${ENABLE_EXPLORER}" != "true" ]; then
+    echo "=== Step 10: Explorer verification skipped (ENABLE_EXPLORER=${ENABLE_EXPLORER}) ==="
+    return 0
+  fi
+
+  echo "=== Step 10: Verify block explorer ==="
+
+  wait_for_explorer_health || {
+    echo "Explorer failed to become ready within ${HEALTH_TIMEOUT}s"
+    docker compose "${COMPOSE_FILES[@]}" logs --no-color --tail=50 explorer postgres
+    exit 1
+  }
+  echo "Explorer /healthz is ready"
+
+  echo "Polling explorer transaction count (>= 10002, up to ${HEALTH_TIMEOUT}s)..."
+  local i tx_total
+  for ((i = 1; i <= HEALTH_TIMEOUT; i++)); do
+    tx_total=$(curl -sf "http://127.0.0.1:8080/blocks?limit=10000" 2>/dev/null \
+      | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+print(sum(b.get('tx_count', 0) for b in data.get('blocks', [])))
+" 2>/dev/null \
+      || echo 0)
+    if [ "${tx_total:-0}" -ge 10002 ]; then
+      echo "SUCCESS: Explorer has ingested ${tx_total} transactions (>= 10002)"
+      return 0
+    fi
+    sleep 2
+  done
+
+  echo "FAILURE: Explorer transaction count did not reach 10002 within ${HEALTH_TIMEOUT}s (got ${tx_total:-0})"
+  docker compose "${COMPOSE_FILES[@]}" logs --no-color --tail=50 explorer postgres
+  exit 1
+}
+
 # Orchestrates the full E2E lifecycle in deterministic step order.
 # Keeps control flow concise and makes each phase easy to locate.
 main() {
@@ -532,12 +561,12 @@ main() {
   step_4_generate_config_block
   step_5_start_services
   step_5_1_start_monitoring
+  step_5_2_start_explorer
   step_6_wait_health
   step_7_create_namespace
   step_8_run_loadgen
   step_9_verify_results
-  step_10_smoke_explorer
-  step_11_verify_explorer
+  step_10_verify_explorer
 }
 
 main "$@"
