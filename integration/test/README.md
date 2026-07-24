@@ -72,15 +72,17 @@ All refs and image names default to values in `refs.conf` and can be overridden 
 | `--fabric-x-ref=REF` | Tag, branch, or commit for fabric-x tools |
 | `--committer-ref=REF` | Tag, branch, or commit for fabric-x-committer |
 | `--orderer-ref=REF` | Tag, branch, or commit for fabric-x-orderer |
+| `--explorer-ref=REF` | Tag, branch, or commit for fabric-x-block-explorer |
 | `--fabric-x-repo=URL` | Override default fabric-x GitHub repo URL |
 | `--committer-repo=URL` | Override default committer GitHub repo URL |
 | `--orderer-repo=URL` | Override default orderer GitHub repo URL |
+| `--explorer-repo=URL` | Override default explorer GitHub repo URL |
 
 On completion, the script prints the resolved image tags used by `run-e2e.sh`. In GitHub Actions, the resolved image names are also written to `GITHUB_OUTPUT`.
 
 ### `run-e2e.sh`
 
-Runs the full E2E test. Generates all artifacts on the host, starts containers, runs the loadgen, and verifies that >= 5000 transactions were committed.
+Runs the full E2E test. Generates all artifacts on the host, starts containers, runs the loadgen, and verifies that >= 10002 transactions were committed.
 
 ```bash
 # Use refs and image names from refs.conf (monitoring enabled by default)
@@ -101,8 +103,7 @@ SKIP_CLEANUP_PROMPT=1 ./run-e2e.sh
 | `COMMITTER_IMAGE` | `docker.io/hyperledger/${COMMITTER_IMAGE_NAME}:${COMMITTER_REF}` | Resolved from `refs.conf` |
 | `LOADGEN_IMAGE` | `docker.io/hyperledger/fabric-x-loadgen:${COMMITTER_REF}` | Versioned with `COMMITTER_REF` |
 | `FABRIC_X_BIN` | `integration/test/.build/fabric-x/bin` | Built by `build-e2e.sh` |
-| `EXPLORER_IMAGE` | `ghcr.io/lf-decentralized-trust-labs/fabric-x-block-explorer:latest` | Pulled as `:latest` — non-blocking if unavailable |
-| `EXPLORER_AVAILABLE` | `false` | Set to `true` by `build-e2e.sh` when pull succeeds |
+| `EXPLORER_IMAGE` | `localhost/fabric-x-block-explorer:${EXPLORER_REF}` | Built locally by `build-e2e.sh` |
 
 **Steps performed:**
 
@@ -115,10 +116,10 @@ SKIP_CLEANUP_PROMPT=1 ./run-e2e.sh
 7. Wait for health (router port 6022, batcher port 6024, sidecar port 4001)
 8. Create namespace using `fxconfig` with multi-org endorsement (both peer-org-0 and peer-org-1 sign)
 9. Run loadgen (submits ~10,000 TXs)
-10. Verify >= 5000 committed transactions via VC Prometheus metrics
+10. Verify >= 10002 committed transactions via VC Prometheus metrics
 11. Explorer smoke check — start explorer + postgres, wait for /healthz (non-blocking)
-12. Explorer block ingestion check — poll /blocks/height > 0 (non-blocking)
-13. Prompt user before cleanup (so they can view Grafana dashboards)
+12. Explorer transaction count check — poll /blocks and verify total tx_count >= 10002 (non-blocking)
+13. Prompt user before cleanup (so they can view Grafana dashboards and block explorer)
 
 ### `clean.sh`
 

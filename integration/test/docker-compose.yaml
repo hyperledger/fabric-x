@@ -140,7 +140,7 @@ services:
   # ---------------------------------------------------------------------------
   # Minimal Postgres instance used exclusively by the block explorer.
   # The committer uses its own embedded DB; this is a separate instance.
-  # Started only when the explorer smoke check runs (EXPLORER_AVAILABLE=true).
+  # Started as part of the explorer smoke check (step 10).
   postgres:
     image: postgres:16-alpine
     container_name: postgres
@@ -156,12 +156,12 @@ services:
   # ---------------------------------------------------------------------------
   # Connects to the committer sidecar (port 4001, no TLS in this test env)
   # and to the postgres service above. Exposes the REST API on port 8080.
-  # Started only when the explorer smoke check runs (EXPLORER_AVAILABLE=true).
+  # Started as part of the explorer smoke check (step 10).
   #
   # Port mapping:
   #   8080 = REST API + Swagger UI (/docs) + health check (/healthz)
   explorer:
-    image: ${EXPLORER_IMAGE:-ghcr.io/lf-decentralized-trust-labs/fabric-x-block-explorer:latest}
+    image: ${EXPLORER_IMAGE:-localhost/fabric-x-block-explorer:latest}
     container_name: explorer
     command: ["start", "--config", "/config/explorer.yaml"]
     volumes:
