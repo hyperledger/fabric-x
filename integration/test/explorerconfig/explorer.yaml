@@ -1,0 +1,42 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Explorer config for the fabric-x E2E integration test.
+# Connects to the committer sidecar (no TLS) and to the postgres service.
+# Mounted at /config/explorer.yaml inside the explorer container.
+---
+database:
+  endpoints:
+    - host: postgres
+      port: 5432
+  user: postgres
+  password: postgres
+  dbname: explorer
+  max_conns: 10
+
+sidecar:
+  connection:
+    endpoint:
+      host: committer
+      port: 4001
+    tls:
+      mode: none
+  start_block: 0
+
+buffer:
+  raw_channel_size: 500
+  proc_channel_size: 500
+
+workers:
+  processor_count: 4
+  writer_count: 4
+
+server:
+  rest:
+    endpoint:
+      host: 0.0.0.0
+      port: 8080
+    read_header_timeout: 10s
+    default_tx_limit: 50

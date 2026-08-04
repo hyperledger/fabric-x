@@ -5,8 +5,9 @@
 #
 # E2E Integration Test workflow.
 #
-# Uses integration/test/build-e2e.sh to build orderer+committer+loadgen images
-# and runs the full E2E pipeline test.
+# Uses integration/test/build-e2e.sh to build all component images
+# (orderer, committer, loadgen, explorer) and fabric-x tools, then
+# runs the full E2E pipeline test.
 # All refs default to values in integration/test/refs.conf when not provided.
 #
 
@@ -27,6 +28,10 @@ on:
         description: "fabric-x-committer ref. Empty=use refs.conf default"
         required: false
         default: ""
+      explorer-ref:
+        description: "fabric-x-block-explorer ref. Empty=use refs.conf default"
+        required: false
+        default: ""
 
 jobs:
   e2e:
@@ -43,11 +48,11 @@ jobs:
           go-version-file: go.mod
 
       # ---------------------------------------------------------------
-      # Resolve/build orderer+committer images and fabric-x tools.
-      # build-e2e.sh writes orderer_image and committer_image to
-      # GITHUB_OUTPUT so downstream steps can reference them directly.
-      # It also builds fabric-x tools (cryptogen, configtxgen, fxconfig)
-      # at the specified fabric-x-ref for artifact generation.
+      # Build all component images (orderer, committer, loadgen, explorer)
+      # and fabric-x tools (cryptogen, configtxgen, fxconfig).
+      # build-e2e.sh clones each repo at the configured ref, builds the
+      # image locally, and writes resolved image names to GITHUB_OUTPUT
+      # so downstream steps can reference them without parsing stdout.
       # ---------------------------------------------------------------
       - name: Build E2E images and tools
         id: images
@@ -55,6 +60,7 @@ jobs:
           INPUT_FABRIC_X_REF: ${{ inputs.fabric-x-ref }}
           INPUT_ORDERER_REF: ${{ inputs.orderer-ref }}
           INPUT_COMMITTER_REF: ${{ inputs.committer-ref }}
+          INPUT_EXPLORER_REF: ${{ inputs.explorer-ref }}
         run: |
           args=()
           if [ -n "${INPUT_FABRIC_X_REF}" ]; then
@@ -65,6 +71,9 @@ jobs:
           fi
           if [ -n "${INPUT_COMMITTER_REF}" ]; then
             args+=("--committer-ref=${INPUT_COMMITTER_REF}")
+          fi
+          if [ -n "${INPUT_EXPLORER_REF}" ]; then
+            args+=("--explorer-ref=${INPUT_EXPLORER_REF}")
           fi
 
           ./integration/test/build-e2e.sh "${args[@]}"
@@ -77,6 +86,7 @@ jobs:
           ORDERER_IMAGE: ${{ steps.images.outputs.orderer_image }}
           COMMITTER_IMAGE: ${{ steps.images.outputs.committer_image }}
           LOADGEN_IMAGE: ${{ steps.images.outputs.loadgen_image }}
+          EXPLORER_IMAGE: ${{ steps.images.outputs.explorer_image }}
           FABRIC_X_BIN: ${{ github.workspace }}/integration/test/.build/fabric-x/bin
           SKIP_CLEANUP_PROMPT: "1"
         run: ./integration/test/run-e2e.sh

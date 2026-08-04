@@ -18,14 +18,14 @@ Loadgen → Arma Routers (BFT broadcast)
 - Docker (with compose plugin)
 - `cryptogen`, `configtxgen`, and `fxconfig` built from this repo (`make tools` from fabric-x root)
 - `curl` and `nc` (netcat) on the host
-- Docker images: `arma-4p1s`, `committer-test-node`, `fabric-x-loadgen`
+- Docker images built by `build-e2e.sh`: `arma-4p1s`, `committer-test-node`, `fabric-x-loadgen`, `fabric-x-block-explorer`
 
 ## Quick Start
 
 ```bash
 cd integration/test
 
-# Build/resolve orderer + committer images and tools
+# Build all component images (orderer, committer, loadgen, explorer) and tools
 ./build-e2e.sh
 
 # Run the test
@@ -36,11 +36,11 @@ cd integration/test
 
 ### `build-e2e.sh`
 
-Builds the orderer (`arma-4p1s`) and committer (`committer-test-node`) Docker images needed by `run-e2e.sh`. Also clones fabric-x at a specific ref to build host tools (`cryptogen`, `configtxgen`, `fxconfig`).
+Builds all Docker images needed by `run-e2e.sh`: orderer (`arma-4p1s`), committer (`committer-test-node`), loadgen (`fabric-x-loadgen`), and explorer (`fabric-x-block-explorer`). Also clones fabric-x at a specific ref to build host tools (`cryptogen`, `configtxgen`, `fxconfig`).
 
 Image build strategy per component:
 
-1. **Local build** — clones the component repo at the specified ref and builds locally.
+1. **Local build** — clones the component repo at the specified ref (or copies from a local path) and builds locally.
 2. **Tag normalization** — tags local images with the refs from `refs.conf` so `run-e2e.sh` can resolve them deterministically.
 
 All refs and image names default to values in `refs.conf` and can be overridden via CLI flags.
@@ -55,11 +55,20 @@ All refs and image names default to values in `refs.conf` and can be overridden 
 # Build orderer from a specific commit hash
 ./build-e2e.sh --orderer-ref=abc123
 
-# Build both from refs
+# Build explorer from a specific tag
+./build-e2e.sh --explorer-ref=v0.2.0
+
+# Build both committer and orderer from refs
 ./build-e2e.sh --orderer-ref=main --committer-ref=my-feature-branch
 
-# Use a custom repo URL (e.g., a fork)
+# Use a custom repo URL for committer (e.g., a fork)
 ./build-e2e.sh --committer-repo=https://github.com/myorg/fabric-x-committer.git --committer-ref=my-branch
+
+# Use a custom repo URL for explorer (e.g., a fork)
+./build-e2e.sh --explorer-repo=https://github.com/myorg/fabric-x-block-explorer.git --explorer-ref=my-branch
+
+# Build explorer from a local working copy
+./build-e2e.sh --explorer-local-path=../fabric-x-block-explorer --explorer-ref=dev
 
 # Then run the test
 ./run-e2e.sh
@@ -72,22 +81,31 @@ All refs and image names default to values in `refs.conf` and can be overridden 
 | `--fabric-x-ref=REF` | Tag, branch, or commit for fabric-x tools |
 | `--committer-ref=REF` | Tag, branch, or commit for fabric-x-committer |
 | `--orderer-ref=REF` | Tag, branch, or commit for fabric-x-orderer |
+| `--explorer-ref=REF` | Tag, branch, or commit for fabric-x-block-explorer |
 | `--fabric-x-repo=URL` | Override default fabric-x GitHub repo URL |
 | `--committer-repo=URL` | Override default committer GitHub repo URL |
 | `--orderer-repo=URL` | Override default orderer GitHub repo URL |
+| `--explorer-repo=URL` | Override default explorer GitHub repo URL |
+| `--fabric-x-local-path=PATH` | Build fabric-x tools from local working copy |
+| `--committer-local-path=PATH` | Build committer/loadgen from local working copy |
+| `--orderer-local-path=PATH` | Build orderer from local working copy |
+| `--explorer-local-path=PATH` | Build explorer from local working copy |
 
 On completion, the script prints the resolved image tags used by `run-e2e.sh`. In GitHub Actions, the resolved image names are also written to `GITHUB_OUTPUT`.
 
 ### `run-e2e.sh`
 
-Runs the full E2E test. Generates all artifacts on the host, starts containers, runs the loadgen, and verifies that >= 5000 transactions were committed.
+Runs the full E2E test. Generates all artifacts on the host, starts containers, runs the loadgen, and verifies that >= 10002 transactions were committed.
 
 ```bash
-# Use refs and image names from refs.conf (monitoring enabled by default)
+# Use refs and image names from refs.conf (monitoring and explorer enabled by default)
 ./run-e2e.sh
 
 # Disable monitoring stack
 ENABLE_MONITORING=false ./run-e2e.sh
+
+# Disable block explorer
+ENABLE_EXPLORER=false ./run-e2e.sh
 
 # Skip the cleanup prompt (e.g., for CI)
 SKIP_CLEANUP_PROMPT=1 ./run-e2e.sh
@@ -101,6 +119,7 @@ SKIP_CLEANUP_PROMPT=1 ./run-e2e.sh
 | `COMMITTER_IMAGE` | `docker.io/hyperledger/${COMMITTER_IMAGE_NAME}:${COMMITTER_REF}` | Resolved from `refs.conf` |
 | `LOADGEN_IMAGE` | `docker.io/hyperledger/fabric-x-loadgen:${COMMITTER_REF}` | Versioned with `COMMITTER_REF` |
 | `FABRIC_X_BIN` | `integration/test/.build/fabric-x/bin` | Built by `build-e2e.sh` |
+| `EXPLORER_IMAGE` | `localhost/fabric-x-block-explorer:${EXPLORER_REF}` | Built locally by `build-e2e.sh` |
 
 **Steps performed:**
 
@@ -109,12 +128,14 @@ SKIP_CLEANUP_PROMPT=1 ./run-e2e.sh
 3. Generate orderer local configs from templates
 4. Generate channel genesis block (`configtxgen`)
 5. Start Arma orderer and committer containers
-6. Start Prometheus + Grafana monitoring stack
-7. Wait for health (router port 6022, batcher port 6024, sidecar port 4001)
-8. Create namespace using `fxconfig` with multi-org endorsement (both peer-org-0 and peer-org-1 sign)
-9. Run loadgen (submits ~10,000 TXs)
-10. Verify >= 5000 committed transactions via VC Prometheus metrics
-11. Prompt user before cleanup (so they can view Grafana dashboards)
+6. Start Prometheus + Grafana monitoring stack (skipped when `ENABLE_MONITORING=false`)
+7. Start block explorer + postgres (skipped when `ENABLE_EXPLORER=false`)
+8. Wait for health (router port 6022, batcher port 6024, sidecar port 4001, explorer port 8080)
+9. Create namespace using `fxconfig` with multi-org endorsement (both peer-org-0 and peer-org-1 sign)
+10. Run loadgen (submits ~10,000 TXs)
+11. Verify >= 10002 committed transactions via VC Prometheus metrics
+12. Verify block explorer — wait for `/healthz`, then confirm tx count >= 10002 (skipped when `ENABLE_EXPLORER=false`)
+13. Prompt user before cleanup (so they can view Grafana dashboards and block explorer)
 
 ### `clean.sh`
 
@@ -137,7 +158,7 @@ You can run the GitHub Actions workflow from github.com or with the GitHub CLI.
 1. Open: `https://github.com/hyperledger/fabric-x/actions/workflows/e2e.yml`
 2. Click **Run workflow**.
 3. Select the branch that contains your workflow/code changes.
-4. Enter `fabric-x-ref`, `orderer-ref`, and `committer-ref` (or leave empty for refs.conf defaults).
+4. Enter `fabric-x-ref`, `orderer-ref`, `committer-ref`, and `explorer-ref` (or leave empty for refs.conf defaults).
 5. Click **Run workflow**.
 
 ### Workflow inputs
@@ -147,10 +168,11 @@ You can run the GitHub Actions workflow from github.com or with the GitHub CLI.
 | `fabric-x-ref` | Ref for `fabric-x` tools (cryptogen, configtxgen, fxconfig). `""` = refs.conf default |
 | `orderer-ref` | Ref for `fabric-x-orderer` (`""` = refs.conf default; any ref is built from source) |
 | `committer-ref` | Ref for `fabric-x-committer` (`""` = refs.conf default; any ref is built from source) |
+| `explorer-ref` | Ref for `fabric-x-block-explorer` (`""` = refs.conf default; any ref is built from source) |
 
 Notes:
 
-- The workflow delegates orderer + committer image resolution/build and tools build to `integration/test/build-e2e.sh`.
+- The workflow delegates all image builds and tools build to `integration/test/build-e2e.sh`.
 - `build-e2e.sh` writes resolved image names to `GITHUB_OUTPUT` for downstream workflow steps.
 - The loadgen image tag matches the committer-ref (explicit or from refs.conf).
 - The fabric-x tools (cryptogen, configtxgen, fxconfig) are built at the specified `fabric-x-ref` and placed in `integration/test/.build/fabric-x/bin`.
@@ -165,25 +187,29 @@ gh workflow run e2e.yml
 gh workflow run e2e.yml \
   -f fabric-x-ref=abc123 \
   -f orderer-ref=f1dfdd7b4e3c5d9ff6c1843da0bf78155262d4f2 \
-  -f committer-ref=d35655cc
+  -f committer-ref=d35655cc \
+  -f explorer-ref=e7a91f2c
 
 # 3) Build all components from release tags
 gh workflow run e2e.yml \
   -f fabric-x-ref=v1.0.0 \
   -f orderer-ref=v1.2.3 \
-  -f committer-ref=v1.2.3
+  -f committer-ref=v1.2.3 \
+  -f explorer-ref=v0.1.0
 
 # 4) Build all components from branch names
 gh workflow run e2e.yml \
   -f fabric-x-ref=main \
   -f orderer-ref=main \
-  -f committer-ref=feature/e2e-fix
+  -f committer-ref=feature/e2e-fix \
+  -f explorer-ref=main
 
-# 5) Mixed: tools from tag, orderer from commit, committer from tag
+# 5) Mixed: tools from tag, orderer from commit, committer from tag, explorer from branch
 gh workflow run e2e.yml \
   -f fabric-x-ref=v1.0.0 \
   -f orderer-ref=f1dfdd7b4e3c5d9ff6c1843da0bf78155262d4f2 \
-  -f committer-ref=v1.2.3
+  -f committer-ref=v1.2.3 \
+  -f explorer-ref=fix/ingest-bug
 
 # 6) Test with specific fabric-x tools version only
 gh workflow run e2e.yml \
@@ -233,9 +259,10 @@ The E2E test deploys a monitoring stack by default with Prometheus and Grafana c
 | Variable | Default | Description |
 |---|---|---|
 | `ENABLE_MONITORING` | `true` | Set to `false` to skip Prometheus + Grafana deployment |
+| `ENABLE_EXPLORER` | `true` | Set to `false` to skip block explorer + postgres deployment |
 | `SKIP_CLEANUP_PROMPT` | _(unset)_ | Set to `1` to skip the post-test cleanup prompt (e.g., CI) |
 
-**On test success**, the script pauses before cleanup and prints the Grafana/Prometheus URLs so you can explore the dashboards. Press ENTER to proceed with cleanup, or Ctrl+C to leave everything running.
+**On test success**, the script pauses before cleanup and prints the Grafana/Prometheus/Explorer URLs so you can explore the dashboards and block data. Press ENTER to proceed with cleanup, or Ctrl+C to leave everything running.
 
 ## Directory Structure
 
@@ -267,6 +294,8 @@ integration/test/
 │   ├── verifier.yaml           #   Transaction signature verification
 │   ├── vc.yaml                 #   Read-set validation + DB commit
 │   └── query.yaml              #   Read-only state access
+├── explorerconfig/             # Explorer config files (mounted into explorer container)
+│   └── explorer.yaml           #   DB + sidecar + REST server config
 ├── prometheus/                 # Prometheus configuration
 │   └── prometheus.yml          #   Scrape targets for all Fabric-X services
 └── grafana/                    # Grafana dashboards and provisioning
@@ -339,3 +368,10 @@ The test runs a 4-party Arma orderer with 1 shard. All 16 orderer processes (4 p
 |---|---|---|
 | 3000 | Grafana | Dashboard UI |
 | 9090 | Prometheus | Metrics query UI |
+
+**Block explorer ports:**
+
+| Port | Service | Purpose |
+|---|---|---|
+| 8080 | Explorer | REST API + `/healthz` + Swagger UI (`/docs`) |
+| 5432 | Postgres | Explorer backing store (internal, not exposed to host) |

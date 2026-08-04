@@ -7,11 +7,15 @@
 # E2E Integration Test - Docker Compose
 # =============================================================================
 #
-# Runs three services on a shared Docker network:
+# Runs services on a shared Docker network:
 #
 #   1. arma      - Arma BFT orderer (4 parties, 1 shard, 16 processes)
 #   2. committer - Committer pipeline (embedded PostgreSQL + 5 microservices)
 #   3. loadgen   - Load generator (submits TXs, receives committed blocks)
+#   4. postgres  - PostgreSQL backing store for the block explorer
+#   5. explorer  - Fabric-X block explorer (REST API + block ingestion)
+#   6. prometheus - Metrics scraping (optional, ENABLE_MONITORING)
+#   7. grafana   - Dashboard UI (optional, ENABLE_MONITORING)
 #
 # Image names are configurable via environment variables (set by run-e2e.sh
 # or build-e2e.sh). Defaults are provided for convenience.
@@ -132,6 +136,45 @@ services:
     depends_on:
       - arma
       - committer
+    networks:
+      - e2e
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL (explorer backing store)
+  # ---------------------------------------------------------------------------
+  # Minimal Postgres instance used exclusively by the block explorer.
+  # The committer uses its own embedded DB; this is a separate instance.
+  # Started by step_5_2_start_explorer in run-e2e.sh (skipped when ENABLE_EXPLORER=false).
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: explorer
+    networks:
+      - e2e
+
+  # ---------------------------------------------------------------------------
+  # Fabric-X Block Explorer
+  # ---------------------------------------------------------------------------
+  # Connects to the committer sidecar (port 4001, no TLS in this test env)
+  # and to the postgres service above. Exposes the REST API on port 8080.
+  # Started by step_5_2_start_explorer in run-e2e.sh (skipped when ENABLE_EXPLORER=false).
+  #
+  # Port mapping:
+  #   8080 = REST API + Swagger UI (/docs) + health check (/healthz)
+  explorer:
+    image: ${EXPLORER_IMAGE:-localhost/fabric-x-block-explorer}
+    container_name: explorer
+    command: ["start", "--config", "/config/explorer.yaml"]
+    volumes:
+      - ./explorerconfig/explorer.yaml:/config/explorer.yaml
+    ports:
+      - "8080:8080"
+    depends_on:
+      - committer
+      - postgres
     networks:
       - e2e
 

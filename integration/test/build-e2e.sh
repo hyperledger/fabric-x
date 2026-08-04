@@ -6,22 +6,25 @@
 #
 # Build Docker images for E2E integration testing.
 #
-# This script builds the orderer (arma-4p1s) and committer (committer-test-node)
-# Docker images needed by run-e2e.sh. It clones the repos at specific refs
-# and builds the images locally.
+# This script builds the orderer (arma-4p1s), committer (committer-test-node),
+# loadgen, and explorer (fabric-x-block-explorer) Docker images needed by
+# run-e2e.sh. It clones each repo at the specified ref and builds locally.
 #
 # Usage:
 #   ./build-e2e.sh                              # build using refs from refs.conf
 #   ./build-e2e.sh --fabric-x-ref=abc123        # override fabric-x tools ref
 #   ./build-e2e.sh --committer-ref=v1.2.3       # override committer ref
 #   ./build-e2e.sh --orderer-ref=abc123         # override orderer ref
+#   ./build-e2e.sh --explorer-ref=v1.0.0        # override explorer ref
+#   ./build-e2e.sh --explorer-repo=URL          # custom explorer repo URL
 #   ./build-e2e.sh --fabric-x-repo=URL          # custom fabric-x repo URL
 #   ./build-e2e.sh --fabric-x-local-path=PATH   # build fabric-x tools from local working copy
 #   ./build-e2e.sh --orderer-local-path=PATH    # build orderer from local working copy
 #   ./build-e2e.sh --committer-local-path=PATH  # build committer from local working copy
+#   ./build-e2e.sh --explorer-local-path=PATH   # build explorer from local working copy
 #
 # Output:
-#   Prints export commands for ORDERER_IMAGE and COMMITTER_IMAGE.
+#   Prints image names for ORDERER_IMAGE, COMMITTER_IMAGE, LOADGEN_IMAGE, and EXPLORER_IMAGE.
 #   When GITHUB_OUTPUT is set (CI), also writes image names there.
 #
 set -euo pipefail
@@ -61,25 +64,31 @@ for arg in "$@"; do
   --fabric-x-ref=*) FABRIC_X_REF="${arg#*=}" ;;
   --committer-ref=*) COMMITTER_REF="${arg#*=}" ;;
   --orderer-ref=*) ORDERER_REF="${arg#*=}" ;;
+  --explorer-ref=*) EXPLORER_REF="${arg#*=}" ;;
   --fabric-x-repo=*) FABRIC_X_REPO="${arg#*=}" ;;
   --committer-repo=*) COMMITTER_REPO="${arg#*=}" ;;
   --orderer-repo=*) ORDERER_REPO="${arg#*=}" ;;
+  --explorer-repo=*) EXPLORER_REPO="${arg#*=}" ;;
   --fabric-x-local-path=*) FABRIC_X_LOCAL_PATH="${arg#*=}" ;;
   --committer-local-path=*) COMMITTER_LOCAL_PATH="${arg#*=}" ;;
   --orderer-local-path=*) ORDERER_LOCAL_PATH="${arg#*=}" ;;
+  --explorer-local-path=*) EXPLORER_LOCAL_PATH="${arg#*=}" ;;
   --help)
     echo "Usage: ./build-e2e.sh [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --fabric-x-ref=REF    Tag, branch, or commit for fabric-x tools"
-    echo "  --committer-ref=REF   Tag, branch, or commit for fabric-x-committer"
-    echo "  --orderer-ref=REF     Tag, branch, or commit for fabric-x-orderer"
-    echo "  --fabric-x-repo=URL        Override default fabric-x GitHub repo URL"
-    echo "  --committer-repo=URL       Override default committer GitHub repo URL"
-    echo "  --orderer-repo=URL         Override default orderer GitHub repo URL"
-    echo "  --fabric-x-local-path=PATH Build fabric-x tools from local working copy"
+    echo "  --fabric-x-ref=REF          Tag, branch, or commit for fabric-x tools"
+    echo "  --committer-ref=REF         Tag, branch, or commit for fabric-x-committer"
+    echo "  --orderer-ref=REF           Tag, branch, or commit for fabric-x-orderer"
+    echo "  --explorer-ref=REF          Tag, branch, or commit for fabric-x-explorer"
+    echo "  --fabric-x-repo=URL         Override default fabric-x GitHub repo URL"
+    echo "  --committer-repo=URL        Override default committer GitHub repo URL"
+    echo "  --orderer-repo=URL          Override default orderer GitHub repo URL"
+    echo "  --explorer-repo=URL         Override default explorer GitHub repo URL"
+    echo "  --fabric-x-local-path=PATH  Build fabric-x tools from local working copy"
     echo "  --committer-local-path=PATH Build committer/loadgen from local working copy"
-    echo "  --orderer-local-path=PATH  Build orderer from local working copy"
+    echo "  --orderer-local-path=PATH   Build orderer from local working copy"
+    echo "  --explorer-local-path=PATH  Build explorer from local working copy"
     echo ""
     echo "Refs are loaded from refs.conf by default and can be overridden via CLI."
     exit 0
@@ -103,9 +112,11 @@ require_var() {
 require_var "FABRIC_X_REF" "FABRIC_X_REF is not set. Please specify --fabric-x-ref or set it in refs.conf"
 require_var "COMMITTER_REF" "COMMITTER_REF is not set. Please specify --committer-ref or set it in refs.conf"
 require_var "ORDERER_REF" "ORDERER_REF is not set. Please specify --orderer-ref or set it in refs.conf"
+require_var "EXPLORER_REF" "EXPLORER_REF is not set. Please specify --explorer-ref or set it in refs.conf"
 require_var "ORDERER_IMAGE_NAME" "ORDERER_IMAGE_NAME is not set. Check refs.conf"
 require_var "COMMITTER_IMAGE_NAME" "COMMITTER_IMAGE_NAME is not set. Check refs.conf"
 require_var "LOADGEN_IMAGE_NAME" "LOADGEN_IMAGE_NAME is not set. Check refs.conf"
+require_var "EXPLORER_IMAGE_NAME" "EXPLORER_IMAGE_NAME is not set. Check refs.conf"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Helper functions
@@ -219,6 +230,27 @@ docker build \
   "${COMMITTER_DIR}"
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Build explorer image (fabric-x-block-explorer)
+#
+# The explorer image packages the block explorer server (REST API + /healthz),
+# the block ingestion worker (connects to the committer sidecar), and the
+# Swagger UI (/docs) into a single container. It uses the Dockerfile at the
+# root of the explorer repo and is started via "start --config /config/explorer.yaml".
+# Supports --explorer-local-path for local fork/branch testing.
+#
+# The explorer is published under the LF-Decentralized-Trust-labs org (not
+# hyperledger), so the image is tagged under localhost/ rather than
+# docker.io/hyperledger/. run-e2e.sh resolves the same localhost/ tag from
+# refs.conf, so no registry pull is needed.
+# ──────────────────────────────────────────────────────────────────────────────
+EXPLORER_DIR="${BUILD_DIR}/fabric-x-block-explorer"
+checkout_source "${EXPLORER_REPO}" "${EXPLORER_REF}" "${EXPLORER_DIR}" "${EXPLORER_LOCAL_PATH:-}" "fabric-x-block-explorer"
+
+EXPLORER_IMAGE="localhost/${EXPLORER_IMAGE_NAME}:${EXPLORER_REF}"
+echo "Building ${EXPLORER_IMAGE_NAME} image from ${EXPLORER_DIR}..."
+docker build -t "${EXPLORER_IMAGE}" "${EXPLORER_DIR}"
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Summary
 # ──────────────────────────────────────────────────────────────────────────────
 echo ""
@@ -227,10 +259,11 @@ echo "Run the E2E test with:"
 echo ""
 echo "  ./run-e2e.sh"
 echo ""
-echo "Resolved local tags for run-e2e.sh:"
+echo "Resolved images for run-e2e.sh:"
 echo "  ${ORDERER_IMAGE}"
 echo "  ${COMMITTER_IMAGE}"
 echo "  ${LOADGEN_IMAGE}"
+echo "  ${EXPLORER_IMAGE}"
 
 # When running in GitHub Actions, write resolved image names to GITHUB_OUTPUT
 # so downstream workflow steps can reference them without parsing stdout.
@@ -238,4 +271,5 @@ if [ -n "${GITHUB_OUTPUT:-}" ]; then
   echo "orderer_image=${ORDERER_IMAGE}" >>"${GITHUB_OUTPUT}"
   echo "committer_image=${COMMITTER_IMAGE}" >>"${GITHUB_OUTPUT}"
   echo "loadgen_image=${LOADGEN_IMAGE}" >>"${GITHUB_OUTPUT}"
+  echo "explorer_image=${EXPLORER_IMAGE}" >>"${GITHUB_OUTPUT}"
 fi
