@@ -16,6 +16,20 @@ import (
 	"github.com/hyperledger/fabric-x-common/common/policydsl"
 )
 
+// hasTraversalComponent reports whether the cleaned path attempts to escape
+// its base via a ".." component. After filepath.Clean, the only way ".." can
+// remain is as a leading component (either the entire path or a "../" prefix);
+// any internal "..foo" or "foo..bar" segments are legitimate filename text
+// and must not be treated as traversal. This is intentionally stricter than
+// strings.Contains(clean, ".."), which produced false positives for any
+// filename whose name contained two consecutive dots.
+func hasTraversalComponent(clean string) bool {
+	if clean == ".." {
+		return true
+	}
+	return strings.HasPrefix(clean, ".."+string(filepath.Separator))
+}
+
 // NewValidationContext creates a validation context with OS-based validators.
 // Returns a Context configured with PolicyDSLChecker, OSFileChecker, and OSDirectoryChecker.
 func NewValidationContext() Context {
@@ -50,7 +64,7 @@ func (OSFileChecker) Exists(path string) error {
 	}
 
 	clean := filepath.Clean(path)
-	if strings.Contains(clean, "..") {
+	if hasTraversalComponent(clean) {
 		return errors.New("path traversal not allowed")
 	}
 
@@ -79,7 +93,7 @@ func (OSDirectoryChecker) Exists(path string) error {
 	}
 
 	clean := filepath.Clean(path)
-	if strings.Contains(clean, "..") {
+	if hasTraversalComponent(clean) {
 		return errors.New("path traversal not allowed")
 	}
 
