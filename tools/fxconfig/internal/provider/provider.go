@@ -13,13 +13,17 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
 
+type initResult[T any] struct {
+	instance T
+	err      error
+}
+
 // Provider manages lazy initialization of service instances with validation support.
 // It ensures thread-safe, single initialization using sync.Once.
 type Provider[T any, K Validatable] struct {
 	once              sync.Once
 	factory           func(cfg K) (T, error)
-	instance          T
-	err               error
+	result            initResult[T]
 	cfg               K
 	validationContext validation.Context
 }
@@ -43,12 +47,13 @@ func New[T any, K Validatable](
 func (p *Provider[T, K]) Get() (T, error) {
 	p.once.Do(func() {
 		if err := p.cfg.Validate(p.validationContext); err != nil {
-			p.err = err
+			p.result = initResult[T]{err: err}
 			return
 		}
-		p.instance, p.err = p.factory(p.cfg)
+		inst, err := p.factory(p.cfg)
+		p.result = initResult[T]{instance: inst, err: err}
 	})
-	return p.instance, p.err
+	return p.result.instance, p.result.err
 }
 
 // Validate delegates to the configuration's Validate method.
