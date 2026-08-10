@@ -13,10 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testCmdName = "test"
+
 func TestOutputFlag_Bind(t *testing.T) {
 	t.Parallel()
 
-	cmd := &cobra.Command{Use: "test"}
+	cmd := &cobra.Command{Use: testCmdName}
 	var f outputFlag
 	f.bind(cmd)
 
@@ -28,7 +30,7 @@ func TestOutputFlag_Bind(t *testing.T) {
 func TestPolicyFlag_Bind(t *testing.T) {
 	t.Parallel()
 
-	cmd := &cobra.Command{Use: "test"}
+	cmd := &cobra.Command{Use: testCmdName}
 	var f policyFlag
 	f.bind(cmd)
 
@@ -45,7 +47,7 @@ func TestPolicyFlag_Bind(t *testing.T) {
 func TestVersionFlag_Bind(t *testing.T) {
 	t.Parallel()
 
-	cmd := &cobra.Command{Use: "test"}
+	cmd := &cobra.Command{Use: testCmdName}
 	var f versionFlag
 	f.bind(cmd)
 
@@ -62,7 +64,7 @@ func TestVersionFlag_Bind(t *testing.T) {
 func TestNamespaceDeployFlags_Bind(t *testing.T) {
 	t.Parallel()
 
-	cmd := &cobra.Command{Use: "test"}
+	cmd := &cobra.Command{Use: testCmdName}
 	var f namespaceDeployFlags
 	f.bind(cmd)
 
@@ -80,7 +82,7 @@ func TestNamespaceDeployFlags_Bind(t *testing.T) {
 func TestWaitFlag_Bind(t *testing.T) {
 	t.Parallel()
 
-	cmd := &cobra.Command{Use: "test"}
+	cmd := &cobra.Command{Use: testCmdName}
 	var f waitFlag
 	f.bind(cmd)
 

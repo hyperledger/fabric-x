@@ -26,7 +26,7 @@ func TestNewRootCommand(t *testing.T) {
 	})
 
 	require.NotNil(t, rootCmd)
-	require.Equal(t, "fxconfig", rootCmd.Use)
+	require.Equal(t, appName, rootCmd.Use)
 	require.NotEmpty(t, rootCmd.Short)
 
 	// --config flag must be registered
@@ -37,7 +37,7 @@ func TestNewRootCommand(t *testing.T) {
 	for _, sub := range rootCmd.Commands() {
 		subCmds[sub.Name()] = true
 	}
-	require.True(t, subCmds["version"])
+	require.True(t, subCmds[versionCmd])
 	require.True(t, subCmds["info"])
 	require.True(t, subCmds["namespace"])
 	require.True(t, subCmds["tx"])
@@ -59,7 +59,7 @@ func TestPersistentPreRunE_ViaConfigFlag(t *testing.T) {
 	rootCmd := NewRootCommand(cliCtx, func(_ *config.Config) (app.Application, error) {
 		return &testApp{}, nil
 	})
-	rootCmd.SetArgs([]string{"--config", configPath, "version"})
+	rootCmd.SetArgs([]string{"--config", configPath, versionCmd})
 
 	require.NoError(t, rootCmd.Execute())
 
@@ -85,7 +85,7 @@ func TestPersistentPreRunE_ViaProjectConfig(t *testing.T) { //nolint:paralleltes
 	rootCmd := NewRootCommand(cliCtx, func(_ *config.Config) (app.Application, error) {
 		return &testApp{}, nil
 	})
-	rootCmd.SetArgs([]string{"version"})
+	rootCmd.SetArgs([]string{versionCmd})
 
 	require.NoError(t, rootCmd.Execute())
 

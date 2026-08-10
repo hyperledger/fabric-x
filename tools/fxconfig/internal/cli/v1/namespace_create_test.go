@@ -19,13 +19,13 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
 
+const testNamespace = "my-namespace"
+
 func TestNewCreateCommand(t *testing.T) {
 	t.Parallel()
 
-	// Execute
 	cmd := newNsCreateCommand(&CLIContext{App: &testApp{}})
 
-	// Assert
 	require.NotNil(t, cmd, "newNsCreateCommand should return a non-nil command")
 	require.Equal(t, "create [name]", cmd.Use, "command use should be 'create [name]'")
 	require.NotEmpty(t, cmd.Short, "command should have a short description")
@@ -57,7 +57,7 @@ func TestNewCreateCommandRun_TxReturned(t *testing.T) {
 	cmd.SetOut(&cmdOut)
 	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
 
-	err := cmd.RunE(cmd, []string{"my-namespace"})
+	err := cmd.RunE(cmd, []string{testNamespace})
 
 	require.NoError(t, err)
 	require.Contains(t, cmdOut.String(), "tx-123")
@@ -78,7 +78,7 @@ func TestNewCreateCommandRun_NoTx(t *testing.T) {
 	})
 	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
 
-	err := cmd.RunE(cmd, []string{"my-namespace"})
+	err := cmd.RunE(cmd, []string{testNamespace})
 
 	require.NoError(t, err)
 	require.Contains(t, printerOut.String(), "Transaction status: STATUS_UNSPECIFIED")

@@ -21,16 +21,13 @@ import (
 func TestNewUpdateCommand(t *testing.T) {
 	t.Parallel()
 
-	// Execute
 	cmd := newNsUpdateCommand(&CLIContext{App: &testApp{}})
 
-	// Assert
 	require.NotNil(t, cmd, "newNsUpdateCommand should return a non-nil command")
 	require.Equal(t, "update [name]", cmd.Use, "command use should be 'update [name]'")
 	require.NotEmpty(t, cmd.Short, "command should have a short description")
 	require.NotNil(t, cmd.RunE, "command should have a RunE function")
 
-	// Verify command-specific required flags
 	version := cmd.Flag("version")
 	require.NotNil(t, version, "version flag should exist")
 
@@ -58,7 +55,7 @@ func TestNsUpdateCommandRun_TxReturned(t *testing.T) {
 	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
 	require.NoError(t, cmd.Flags().Set("version", "1"))
 
-	err := cmd.RunE(cmd, []string{"my-namespace"})
+	err := cmd.RunE(cmd, []string{testNamespace})
 
 	require.NoError(t, err)
 	require.Contains(t, outBuf.String(), "tx-456")
@@ -79,7 +76,7 @@ func TestNsUpdateCommandRun_NoTx(t *testing.T) {
 	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
 	require.NoError(t, cmd.Flags().Set("version", "0"))
 
-	err := cmd.RunE(cmd, []string{"my-namespace"})
+	err := cmd.RunE(cmd, []string{testNamespace})
 
 	require.NoError(t, err)
 	require.Contains(t, printerOut.String(), "Transaction status: STATUS_UNSPECIFIED")

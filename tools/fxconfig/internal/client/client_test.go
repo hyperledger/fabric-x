@@ -27,7 +27,7 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
 
-// Test helper functions
+const testLocalhost = "localhost"
 
 // boolPtr returns a pointer to a bool value.
 func boolPtr(b bool) *bool {
@@ -65,7 +65,6 @@ func generateCertificate(t *testing.T, caCert *x509.Certificate, caKey *ecdsa.Pr
 ) (keyPEM, certPEM []byte) {
 	t.Helper()
 
-	// Generate ECDSA P-256 key
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	require.NoError(t, err)
 
@@ -80,7 +79,6 @@ func generateCertificate(t *testing.T, caCert *x509.Certificate, caKey *ecdsa.Pr
 		KeyUsage:    x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 		ExtKeyUsage: []x509.ExtKeyUsage{extKeyUsage},
 	}
-	// Split dnsNames into proper DNS SANs and IP SANs
 	for _, name := range dnsNames {
 		if ip := net.ParseIP(name); ip != nil {
 			template.IPAddresses = append(template.IPAddresses, ip)
@@ -92,7 +90,6 @@ func generateCertificate(t *testing.T, caCert *x509.Certificate, caKey *ecdsa.Pr
 	certDER, err := x509.CreateCertificate(rand.Reader, template, caCert, &key.PublicKey, caKey)
 	require.NoError(t, err)
 
-	// Encode key to PEM
 	keyBytes, err := x509.MarshalECPrivateKey(key)
 	require.NoError(t, err)
 	keyPEM = pem.EncodeToMemory(&pem.Block{
@@ -100,14 +97,12 @@ func generateCertificate(t *testing.T, caCert *x509.Certificate, caKey *ecdsa.Pr
 		Bytes: keyBytes,
 	})
 
-	// Encode certificate to PEM
 	certPEM = pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
 
 	return keyPEM, certPEM
 }
 
-// generateServerConfig creates a comm.ServerConfig with generated ECDSA certificates
-// Returns the server config and paths to CA cert and client cert/key for client configuration.
+// generateServerConfig creates a comm.ServerConfig with generated ECDSA certificates.
 //
 //nolint:revive
 func generateServerConfig(t *testing.T, tlsMode string) (
@@ -119,13 +114,11 @@ func generateServerConfig(t *testing.T, tlsMode string) (
 	t.Helper()
 
 	if tlsMode == "none" {
-		// No TLS configuration needed
 		return comm.ServerConfig{}, "", "", ""
 	}
 
 	tmpDir := t.TempDir()
 
-	// Generate CA with ECDSA P-256 key
 	caKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	require.NoError(t, err)
 
@@ -147,32 +140,26 @@ func generateServerConfig(t *testing.T, tlsMode string) (
 	require.NoError(t, err)
 	caCertPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: caCertDER})
 
-	// Write CA certificate to file (for client to read)
 	caCertPath = filepath.Join(tmpDir, "ca.pem")
 	require.NoError(t, os.WriteFile(caCertPath, caCertPEM, 0o600))
 
-	// Generate server certificate
 	serverKey, serverCertPEM := generateCertificate(t, caTemplate, caKey, "server",
-		[]string{"localhost", "127.0.0.1"}, x509.ExtKeyUsageServerAuth)
+		[]string{testLocalhost, "127.0.0.1"}, x509.ExtKeyUsageServerAuth)
 
-	// Configure server with TLS
 	serverConfig.SecOpts.UseTLS = true
 	serverConfig.SecOpts.Certificate = serverCertPEM
 	serverConfig.SecOpts.Key = serverKey
 
 	if tlsMode == "mtls" {
-		// Generate client certificate for mTLS
 		clientKey, clientCertPEM := generateCertificate(t, caTemplate, caKey, "client",
 			nil, x509.ExtKeyUsageClientAuth)
 
-		// Write client key and cert to files (for client to read)
 		clientKeyPath = filepath.Join(tmpDir, "client-key.pem")
 		require.NoError(t, os.WriteFile(clientKeyPath, clientKey, 0o600))
 
 		clientCertPath = filepath.Join(tmpDir, "client-cert.pem")
 		require.NoError(t, os.WriteFile(clientCertPath, clientCertPEM, 0o600))
 
-		// Configure server to require client certificates
 		serverConfig.SecOpts.RequireClientCert = true
 		serverConfig.SecOpts.ClientRootCAs = [][]byte{caCertPEM}
 	}
@@ -184,7 +171,6 @@ func generateServerConfig(t *testing.T, tlsMode string) (
 func startTestServer(t *testing.T, serverConfig comm.ServerConfig) (address string, cleanup func()) {
 	t.Helper()
 
-	// Create listener with free port
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
 	address = lis.Addr().String()
@@ -192,12 +178,10 @@ func startTestServer(t *testing.T, serverConfig comm.ServerConfig) (address stri
 	grpcServer, err := comm.NewGRPCServerFromListener(lis, serverConfig)
 	require.NoError(t, err)
 
-	// Start server in background
 	go func() {
 		_ = grpcServer.Start()
 	}()
 
-	// Poll until the server is accepting TCP connections
 	deadline := time.Now().Add(5 * time.Second)
 	for {
 		c, dialErr := net.DialTimeout("tcp", address, 10*time.Millisecond)
@@ -215,8 +199,6 @@ func startTestServer(t *testing.T, serverConfig comm.ServerConfig) (address stri
 
 	return address, cleanup
 }
-
-// Test loadFile function
 
 func TestLoadFile_Success(t *testing.T) {
 	t.Parallel()
@@ -242,7 +224,6 @@ func TestLoadFile_Success_EmptyFile(t *testing.T) {
 func TestLoadFile_Success_LargeFile(t *testing.T) {
 	t.Parallel()
 
-	// Create 1MB file
 	content := make([]byte, 1024*1024)
 	for i := range content {
 		content[i] = byte(i % 256)
@@ -296,8 +277,6 @@ func TestLoadFile_Error_EmptyPath(t *testing.T) {
 	require.Nil(t, result)
 }
 
-// Test createSecOpts function - No TLS scenarios
-
 func TestCreateSecOpts_NoTLS_ExplicitlyDisabled(t *testing.T) {
 	t.Parallel()
 
@@ -336,8 +315,6 @@ func TestCreateSecOpts_NoTLS_EnabledFlagNil(t *testing.T) {
 	require.NotNil(t, secOpts)
 	require.False(t, secOpts.UseTLS)
 }
-
-// Test createSecOpts function - TLS scenarios
 
 func TestCreateSecOpts_TLS_Success(t *testing.T) {
 	t.Parallel()
@@ -448,8 +425,6 @@ func TestCreateSecOpts_TLS_Error_EmptyRootCertPath(t *testing.T) {
 	require.Error(t, err)
 	require.Nil(t, secOpts)
 }
-
-// Test createSecOpts function - mTLS scenarios
 
 func TestCreateSecOpts_mTLS_Success(t *testing.T) {
 	t.Parallel()
@@ -648,19 +623,13 @@ func TestCreateSecOpts_mTLS_OnlyClientCertProvided(t *testing.T) {
 	require.Nil(t, secOpts.Certificate)
 }
 
-// Test newClientConn function - No TLS
-
 func TestNewClientConn_NoTLS_Success(t *testing.T) {
 	t.Parallel()
 
-	// Generate server config without TLS
 	serverConfig, _, _, _ := generateServerConfig(t, "none")
-
-	// Start test server
 	address, cleanup := startTestServer(t, serverConfig)
 	defer cleanup()
 
-	// Create client configuration
 	cfg := &config.EndpointServiceConfig{
 		Address:           address,
 		ConnectionTimeout: 5 * time.Second,
@@ -669,96 +638,77 @@ func TestNewClientConn_NoTLS_Success(t *testing.T) {
 		},
 	}
 
-	// Attempt connection
 	conn, err := newClientConn(cfg)
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 	defer conn.Close() //nolint:errcheck
 
-	// Verify connection state
 	require.Equal(t, connectivity.Ready, conn.GetState())
 }
 
 func TestNewClientConn_NoTLS_TLSConfigNil(t *testing.T) {
 	t.Parallel()
 
-	// Generate server config without TLS
 	serverConfig, _, _, _ := generateServerConfig(t, "none")
-
-	// Start test server
 	address, cleanup := startTestServer(t, serverConfig)
 	defer cleanup()
 
-	// Create client configuration with nil TLS config
 	cfg := &config.EndpointServiceConfig{
 		Address:           address,
 		ConnectionTimeout: 5 * time.Second,
 		TLS:               nil,
 	}
 
-	// Attempt connection
 	conn, err := newClientConn(cfg)
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 	defer conn.Close() //nolint:errcheck
 }
 
-// Test newClientConn function - TLS
-
 func TestNewClientConn_TLS_Success(t *testing.T) {
 	t.Parallel()
 
-	// Generate server config with TLS and get CA cert path for client
 	serverConfig, caCertPath, _, _ := generateServerConfig(t, "tls")
-
-	// Start test server with TLS
 	address, cleanup := startTestServer(t, serverConfig)
 	defer cleanup()
 
-	// Create client configuration with server CA
 	cfg := &config.EndpointServiceConfig{
 		Address:           address,
 		ConnectionTimeout: 5 * time.Second,
 		TLS: &config.TLSConfig{
 			Enabled:            boolPtr(true),
 			RootCertPaths:      []string{caCertPath},
-			ServerNameOverride: "localhost",
+			ServerNameOverride: testLocalhost,
 		},
 	}
 
-	// Attempt connection
 	conn, err := newClientConn(cfg)
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 	defer conn.Close() //nolint:errcheck
 
-	// Verify TLS connection established
 	require.Equal(t, connectivity.Ready, conn.GetState())
 }
 
 func TestNewClientConn_TLS_MultipleRootCerts(t *testing.T) {
 	t.Parallel()
 
-	// Generate two separate CAs
 	serverConfig1, caCertPath1, _, _ := generateServerConfig(t, "tls")
 	_, caCertPath2, _, _ := generateServerConfig(t, "tls")
 
-	// Start server with first CA
 	address, cleanup := startTestServer(t, serverConfig1)
 	defer cleanup()
 
-	// Configure client with both CAs
 	cfg := &config.EndpointServiceConfig{
 		Address:           address,
 		ConnectionTimeout: 5 * time.Second,
 		TLS: &config.TLSConfig{
 			Enabled:            boolPtr(true),
 			RootCertPaths:      []string{caCertPath1, caCertPath2},
-			ServerNameOverride: "localhost",
+			ServerNameOverride: testLocalhost,
 		},
 	}
 
-	// Attempt connection
 	conn, err := newClientConn(cfg)
 	require.NoError(t, err)
 	require.NotNil(t, conn)
@@ -768,12 +718,10 @@ func TestNewClientConn_TLS_MultipleRootCerts(t *testing.T) {
 func TestNewClientConn_TLS_Error_RootCertNotFound(t *testing.T) {
 	t.Parallel()
 
-	// Start server with TLS
 	serverConfig, _, _, _ := generateServerConfig(t, "tls")
 	address, cleanup := startTestServer(t, serverConfig)
 	defer cleanup()
 
-	// Configure client with non-existent CA file
 	cfg := &config.EndpointServiceConfig{
 		Address:           address,
 		ConnectionTimeout: 5 * time.Second,
@@ -793,46 +741,34 @@ func TestNewClientConn_TLS_Error_RootCertNotFound(t *testing.T) {
 func TestNewClientConn_TLS_Error_WrongCA(t *testing.T) {
 	t.Parallel()
 
-	// Generate server with its own CA
 	serverConfig, _, _, _ := generateServerConfig(t, "tls")
 	address, cleanup := startTestServer(t, serverConfig)
 	defer cleanup()
 
-	// Generate a different CA for client (wrong CA)
 	_, wrongCACertPath, _, _ := generateServerConfig(t, "tls")
 
-	// Configure client with wrong CA
 	cfg := &config.EndpointServiceConfig{
 		Address:           address,
 		ConnectionTimeout: 2 * time.Second,
 		TLS: &config.TLSConfig{
 			Enabled:            boolPtr(true),
 			RootCertPaths:      []string{wrongCACertPath},
-			ServerNameOverride: "localhost",
+			ServerNameOverride: testLocalhost,
 		},
 	}
 
-	// Connection attempt should fail due to TLS certificate verification error.
-	// The 2s ConnectionTimeout is intentional: gRPC must attempt the handshake
-	// before the mismatch is detected, so this test will take the full timeout.
 	conn, err := newClientConn(cfg)
 	require.Error(t, err)
 	require.Nil(t, conn)
 }
 
-// Test newClientConn function - mTLS
-
 func TestNewClientConn_mTLS_Success(t *testing.T) {
 	t.Parallel()
 
-	// Generate server config with mTLS and get cert paths for client
 	serverConfig, caCertPath, clientKeyPath, clientCertPath := generateServerConfig(t, "mtls")
-
-	// Start test server with mTLS
 	address, cleanup := startTestServer(t, serverConfig)
 	defer cleanup()
 
-	// Create client configuration with full mTLS
 	cfg := &config.EndpointServiceConfig{
 		Address:           address,
 		ConnectionTimeout: 5 * time.Second,
@@ -841,60 +777,49 @@ func TestNewClientConn_mTLS_Success(t *testing.T) {
 			RootCertPaths:      []string{caCertPath},
 			ClientKeyPath:      clientKeyPath,
 			ClientCertPath:     clientCertPath,
-			ServerNameOverride: "localhost",
+			ServerNameOverride: testLocalhost,
 		},
 	}
 
-	// Attempt connection
 	conn, err := newClientConn(cfg)
 	require.NoError(t, err)
 	require.NotNil(t, conn)
 	defer conn.Close() //nolint:errcheck
 
-	// Verify mTLS connection established
 	require.Equal(t, connectivity.Ready, conn.GetState())
 }
 
 func TestNewClientConn_mTLS_NoClientCert(t *testing.T) {
 	t.Parallel()
 
-	// Start mTLS server that requires client certificates
 	serverConfig, caCertPath, _, _ := generateServerConfig(t, "mtls")
 	address, cleanup := startTestServer(t, serverConfig)
 	defer cleanup()
 
-	// Configure client with TLS but without client certificate
 	cfg := &config.EndpointServiceConfig{
 		Address:           address,
 		ConnectionTimeout: 2 * time.Second,
 		TLS: &config.TLSConfig{
 			Enabled:            boolPtr(true),
 			RootCertPaths:      []string{caCertPath},
-			ServerNameOverride: "localhost",
-			// No ClientKeyPath or ClientCertPath - server will reject this
+			ServerNameOverride: testLocalhost,
 		},
 	}
 
-	// Connection should fail: server requires client certificate
 	conn, err := newClientConn(cfg)
 	require.Error(t, err)
 	require.Nil(t, conn)
 }
 
-// Test newClientConn function - connection failure scenarios
-
 func TestNewClientConn_TLS_ClientToNoTLSServer(t *testing.T) {
 	t.Parallel()
 
-	// Start server without TLS
 	serverConfig, _, _, _ := generateServerConfig(t, "none")
 	address, cleanup := startTestServer(t, serverConfig)
 	defer cleanup()
 
-	// Generate a separate CA (any valid CA will do for this test)
 	_, caCertPath, _, _ := generateServerConfig(t, "tls")
 
-	// Configure client with TLS enabled
 	cfg := &config.EndpointServiceConfig{
 		Address:           address,
 		ConnectionTimeout: 2 * time.Second,
@@ -904,7 +829,6 @@ func TestNewClientConn_TLS_ClientToNoTLSServer(t *testing.T) {
 		},
 	}
 
-	// Connection should fail: TLS handshake against non-TLS server
 	conn, err := newClientConn(cfg)
 	require.Error(t, err)
 	require.Nil(t, conn)
