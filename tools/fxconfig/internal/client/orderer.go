@@ -83,6 +83,10 @@ func (oc *OrdererClient) send(ctx context.Context, env *cb.Envelope) error {
 	if err != nil {
 		return err
 	}
+	// Signal end-of-send so the orderer can terminate the stream and the
+	// underlying connection isn't held until ctx cancellation. Without
+	// this each error path leaked the broadcast stream (#209).
+	defer func() { _ = abc.CloseSend() }()
 
 	err = abc.Send(env)
 	if err != nil {
