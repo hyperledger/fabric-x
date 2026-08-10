@@ -23,6 +23,9 @@ const UnknownStatus TxStatus = 0
 
 // SubmitTransaction receives a transaction and sends it to the ordering service.
 func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *applicationpb.Tx) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	// get orderer client and signing identity
 	sc, err := d.prepareSubmission(ctx)
 	if err != nil {
@@ -41,6 +44,9 @@ func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *appli
 
 // SubmitTransactionWithWait receives a transaction and sends it to the ordering service.
 func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, tx *applicationpb.Tx) (TxStatus, error) {
+	if err := ctx.Err(); err != nil {
+		return UnknownStatus, err
+	}
 	// get orderer client and signing identity
 	sc, err := d.prepareSubmission(ctx)
 	if err != nil {
