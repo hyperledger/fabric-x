@@ -1,0 +1,38 @@
+Parties:
+    - ID: 1
+      AssemblerEndpoint: 0.0.0.0:6023
+      AssemblerTLSHostname: "arma"
+      ConsenterEndpoint: 0.0.0.0:6025
+      RouterEndpoint: 0.0.0.0:6022
+      RouterTLSHostname: "arma"
+      BatchersEndpoints:
+        - 127.0.0.1:6024
+    - ID: 2
+      AssemblerEndpoint: 0.0.0.0:6123
+      AssemblerTLSHostname: "arma"
+      ConsenterEndpoint: 0.0.0.0:6125
+      RouterEndpoint: 0.0.0.0:6122
+      RouterTLSHostname: "arma"
+      BatchersEndpoints:
+        - 127.0.0.1:6124
+    - ID: 3
+      AssemblerEndpoint: 0.0.0.0:6223
+      AssemblerTLSHostname: "arma"
+      ConsenterEndpoint: 0.0.0.0:6225
+      RouterEndpoint: 0.0.0.0:6222
+      RouterTLSHostname: "arma"
+      BatchersEndpoints:
+        - 127.0.0.1:6224
+    - ID: 4
+      AssemblerEndpoint: 0.0.0.0:6323
+      AssemblerTLSHostname: "arma"
+      ConsenterEndpoint: 0.0.0.0:6325
+      RouterEndpoint: 0.0.0.0:6322
+      RouterTLSHostname: "arma"
+      BatchersEndpoints:
+        - 127.0.0.1:6324
+UseTLSRouter: mTLS
+UseTLSAssembler: mTLS
+MaxPartyID: 4
+Peers:
+    - peer-org-0

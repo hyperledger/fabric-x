@@ -88,20 +88,20 @@ services:
   committer:
     image: ${COMMITTER_IMAGE:-docker.io/hyperledger/committer-test-node}
     container_name: committer
-    command: ["run", "db", "committer"]
+    command: [ "run", "db", "init-db", "committer" ]
     volumes:
       # Crypto material and config block (read by sidecar for channel config)
       - ${ARTIFACTS_DIR:-/tmp/fabric-x-test/artifacts}:/root/artifacts
       # Service-specific config files (sidecar.yaml, coordinator.yaml, etc.)
       - ./committerconfig:/root/config
     ports:
-      - "4001:4001"   # Sidecar deliver (loadgen connects here)
-      - "7001:7001"   # Coordinator gRPC
-      - "2114:2114"   # Sidecar Prometheus metrics
-      - "2115:2115"   # Verifier Prometheus metrics
-      - "2116:2116"   # VC Prometheus metrics (verified in Step 9)
-      - "2117:2117"   # Query Prometheus metrics
-      - "2119:2119"   # Coordinator Prometheus metrics
+      - "4001:4001" # Sidecar deliver (loadgen connects here)
+      - "7001:7001" # Coordinator gRPC
+      - "2114:2114" # Sidecar Prometheus metrics
+      - "2115:2115" # Verifier Prometheus metrics
+      - "2116:2116" # VC Prometheus metrics (verified in Step 9)
+      - "2117:2117" # Query Prometheus metrics
+      - "2119:2119" # Coordinator Prometheus metrics
     depends_on:
       - arma
     networks:
@@ -125,14 +125,14 @@ services:
   loadgen:
     image: ${LOADGEN_IMAGE:-docker.io/hyperledger/fabric-x-loadgen}
     container_name: loadgen
-    command: ["start", "--config", "/config/loadgen.yaml"]
+    command: [ "start", "--config", "/config/loadgen.yaml" ]
     volumes:
       # Crypto material (signing identities, TLS certs for orderer connections)
       - ${ARTIFACTS_DIR:-/tmp/fabric-x-test/artifacts}:/artifacts
       # Loadgen configuration file
       - ./loadgen.yaml:/config/loadgen.yaml
     ports:
-      - "2118:2118"   # Loadgen Prometheus metrics
+      - "2118:2118" # Loadgen Prometheus metrics
     depends_on:
       - arma
       - committer
@@ -167,7 +167,7 @@ services:
   explorer:
     image: ${EXPLORER_IMAGE:-localhost/fabric-x-block-explorer}
     container_name: explorer
-    command: ["start", "--config", "/config/explorer.yaml"]
+    command: [ "start", "--config", "/config/explorer.yaml" ]
     volumes:
       - ./explorerconfig/explorer.yaml:/config/explorer.yaml
     ports:
