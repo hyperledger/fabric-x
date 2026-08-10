@@ -281,6 +281,11 @@ fxadmin tx prepare endorsed_config_update.pb \
 fxadmin tx submit config_tx.pb \
   --config admin.yaml \
   --current-block current_block.pb
+  
+# Prepare + submit the configuration transaction
+fxadmin tx send endorsed_config_update.pb \
+   --config admin.yaml \
+   --current-block current_block.pb
 ```
 ---
 
@@ -432,7 +437,7 @@ fxadmin tx submit config_tx.pb \
 After submitting the transaction, confirm that the configuration update has been committed by reading the latest configuration block until the updated configuration block is available.
 
 ---
-### Send a Configuration Update
+#### Send a Configuration Update
 The send command prepares and submits an endorsed configuration update in a single step.
 
 It creates a configuration transaction from the endorsed configuration update, signs it using the submitting client identity defined in the admin configuration YAML file, and submits the transaction to all configured routers.
