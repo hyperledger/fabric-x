@@ -9,12 +9,15 @@ SPDX-License-Identifier: Apache-2.0
 package v1
 
 import (
+	"github.com/hyperledger/fabric-lib-go/common/flogging"
 	"github.com/spf13/cobra"
 
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
 )
+
+var rootLogger = flogging.MustGetLogger("root")
 
 // NewRootCommand constructs and returns the root command for fxconfig.
 // It sets up configuration loading, flag registration, and all subcommands.
@@ -48,6 +51,23 @@ Configuration can be provided via:
 			cfg, err := config.Load(opts...)
 			if err != nil {
 				return err
+			}
+
+			// Warn if TLS is disabled for any service (secure-by-default).
+			// Naming the services keeps the warning actionable.
+			var insecure []string
+			if !cfg.Orderer.TLS.IsEnabled() {
+				insecure = append(insecure, "orderer")
+			}
+			if !cfg.Queries.TLS.IsEnabled() {
+				insecure = append(insecure, "queries")
+			}
+			if !cfg.Notifications.TLS.IsEnabled() {
+				insecure = append(insecure, "notifications")
+			}
+			if len(insecure) > 0 {
+				rootLogger.Warnf("TLS is disabled for: %v — connections to these services "+
+					"will be unencrypted. This is insecure and not recommended for production.", insecure)
 			}
 
 			// set our config and printer in our context
