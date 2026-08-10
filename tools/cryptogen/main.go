@@ -51,16 +51,20 @@ func main() {
 	case ext.FullCommand():
 		err = extend()
 	case showtemplate.FullCommand():
-		_, _ = fmt.Print(sampleconfig.DefaultCryptoConfig)
+		if _, err = fmt.Print(sampleconfig.DefaultCryptoConfig); err != nil {
+			err = fmt.Errorf("failed to write template: %w", err)
+		}
 	case versionCmd.FullCommand():
-		_, _ = fmt.Println(getVersionInfo())
+		if _, err = fmt.Println(getVersionInfo()); err != nil {
+			err = fmt.Errorf("failed to write version info: %w", err)
+		}
 	default:
 		panic("programming error")
 	}
 
 	if err != nil {
-		fmt.Printf("error executing command %s\n%s", cmd, err)
-		os.Exit(-1)
+		_, _ = fmt.Fprintf(os.Stderr, "error executing command %s: %v\n", cmd, err)
+		os.Exit(1)
 	}
 }
 
@@ -98,7 +102,11 @@ func getConfig() (*cryptogen.Config, error) {
 	default:
 		configData = sampleconfig.DefaultCryptoConfig
 	}
-	return cryptogen.ParseConfig(configData)
+	cfg, err := cryptogen.ParseConfig(configData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse config: %w", err)
+	}
+	return cfg, nil
 }
 
 func getVersionInfo() string {
