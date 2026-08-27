@@ -415,6 +415,14 @@ The submit command submits a prepared configuration transaction to all routers v
 Broadcast API. A router forwards it into the ordering pipeline; once ordered and
 committed, the new configuration takes effect across all parties.
 
+The command broadcasts to every router and collects each router's acknowledgement, logging
+the per-router outcome. It **succeeds only when a BFT
+quorum of the routers acknowledged** the transaction: with `n` parties (read from the
+`--current-block`) the quorum is `2f+1`, where `f = (n-1)/3` is the number of faulty parties
+the network tolerates. If fewer than a quorum acknowledge — because routers rejected the
+transaction or were unreachable — the command fails, so a partial or failed delivery is
+reported rather than silently succeeding.
+
 ```bash
 fxadmin tx submit \
   <config_tx.pb> \
@@ -451,7 +459,9 @@ The send command prepares and submits an endorsed configuration update in a sing
 
 It creates a configuration transaction from the endorsed configuration update, signs it using the submitting client identity defined in the admin configuration YAML file, and submits the transaction to all configured routers.
 
-The send command is equivalent to running `prepare` followed by `submit`.
+The send command is equivalent to running `prepare` followed by `submit`. As with `submit`, it
+succeeds only when a BFT quorum (`2f+1`) of the routers acknowledged the transaction, and fails
+otherwise.
 
 ```bash
 fxadmin tx send \
