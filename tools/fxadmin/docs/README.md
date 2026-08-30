@@ -190,7 +190,8 @@ fxadmin ledger \
 ---
 ### Decode Command
 
-The decode command converts a binary ledger configuration block (.pb) into a human-readable JSON file.
+The decode command extracts the `common.Config` embedded in a binary config block
+(.pb) and writes it as a human-readable JSON file for editing.
 This command is typically used after retrieving the latest configuration from the ledger.
 
 ```bash
@@ -200,10 +201,10 @@ fxadmin decode \
 ```
 **Flags**
 
-| Flag       | Required | Description                               |
-|------------| :------: |-------------------------------------------|
-| `--block`  |   yes    | Path to the protobuf block file to decode |
-| `--output` |   yes    | Path to the output JSON file   |
+| Flag       | Required | Description                                      |
+|------------| :------: |--------------------------------------------------|
+| `--block`  |   yes    | Path to the protobuf config block file to decode |
+| `--output` |   yes    | Path to the output `common.Config` JSON file, derived from the block |
 
 ---
 ### Manual step
@@ -221,8 +222,13 @@ NOTE: this step will be automated in future versions of the CLI.
 Compute the **`ConfigUpdate`** which is the delta between the original configuration and the
 modified configuration.
 
+The channel ID is taken from the current config block supplied with `--current-block`
+and stamped onto the resulting `ConfigUpdate`. All three inputs must belong to the
+**same channel**: `current.json` should be the JSON decoded from `--current-block`,
+and `modified.json` its edited copy.
+
 ```bash
-fxadmin compute-update <current.json> <modified.json> --output <config_update.pb>
+fxadmin compute-update <current.json> <modified.json> --current-block <current_block.pb> --output <config_update.pb>
 ```
 
 Example:
@@ -230,6 +236,7 @@ Example:
 fxadmin compute-update \
    current_config.json \
    modified_config.json \
+   --current-block last_config.pb \
    --output config_update.pb
 ```
 
@@ -237,14 +244,15 @@ fxadmin compute-update \
 
 | Argument        | Required | Description            |
 |-----------------| :------: |------------------------|
-| `<current.json>`  |   yes    | Original configuration |
-| `<modified.json>` |   yes    | New configuration      |
+| `<current.json>`  |   yes    | Original configuration, as decoded from `--current-block` |
+| `<modified.json>` |   yes    | New configuration (edited copy of `current.json`) |
 
 **Flags**
 
-| Flag       | Required | Description                                    |
-|------------| :------: | ---------------------------------------------- |
-| `--output` |   yes    | Path to the output ConfigUpdate protobuf file   |
+| Flag              | Required | Description                                                           |
+|-------------------| :------: |-----------------------------------------------------------------------|
+| `--current-block` |   yes    | Path to the current config block whose channel ID the update targets  |
+| `--output`        |   yes    | Path to the output ConfigUpdate protobuf file                         |
 
 If `current.json` and `modified.json` are identical the command produces an empty
 update and reports that there is nothing to do.
@@ -285,7 +293,8 @@ fxadmin tx submit config_tx.pb \
 # Prepare + submit the configuration transaction
 fxadmin tx send endorsed_config_update.pb \
    --config admin.yaml \
-   --current-block current_block.pb
+   --current-block current_block.pb \
+   --output config_tx.pb
 ```
 ---
 
@@ -406,6 +415,14 @@ The submit command submits a prepared configuration transaction to all routers v
 Broadcast API. A router forwards it into the ordering pipeline; once ordered and
 committed, the new configuration takes effect across all parties.
 
+The command broadcasts to every router and collects each router's acknowledgement, logging
+the per-router outcome. It **succeeds** only when a BFT quorum of the routers acknowledges 
+the transaction: with `n` parties (read from the`--current-block`) the quorum is `2f+1`, 
+where `f = (n-1)/3` is the number of faulty parties the network tolerates. 
+If fewer than a quorum acknowledge — because routers rejected the
+transaction or were unreachable — the command fails, so a partial or failed delivery is
+reported rather than silently succeeding.
+
 ```bash
 fxadmin tx submit \
   <config_tx.pb> \
@@ -442,13 +459,16 @@ The send command prepares and submits an endorsed configuration update in a sing
 
 It creates a configuration transaction from the endorsed configuration update, signs it using the submitting client identity defined in the admin configuration YAML file, and submits the transaction to all configured routers.
 
-The send command is equivalent to running `prepare` followed by `submit`.
+The send command is equivalent to running `prepare` followed by `submit`. As with `submit`, it
+succeeds only when a BFT quorum (`2f+1`) of the routers acknowledged the transaction, and fails
+otherwise.
 
 ```bash
 fxadmin tx send \
  <endorsed_config_update.pb> \
  --config <admin.yaml> \
- --current-block <current_block.pb>
+ --current-block <current_block.pb> \
+ --output <config_tx.pb>
 ```
 **Arguments**
 
@@ -463,20 +483,36 @@ fxadmin tx send \
 | ------------ | :------: | ---------------------------------------------------------------------- |
 | `--current-block` |   yes    | Path to the current block protobuf file containing the router's endpoints |
 | `--config`        |   yes    | Path to the admin configuration YAML file                                 |
+| `--output`        |   yes    | Path to write the prepared configuration transaction to, for record keeping |
+
+The prepared configuration transaction is written to `--output` before it is broadcast, so a record of what was submitted is kept even if the broadcast fails.
 
 **Example**
 ```bash
 fxadmin tx send \
    endorsed_config_update.pb \
    --config admin.yaml \
-   --current-block current_block.pb
+   --current-block current_block.pb \
+   --output config_tx.pb
 ```
 ---
 ### Follow the assembler ledger
-The follow command monitors the ledgers of all assemblers defined in the current config block.
+The follow command waits for the next config block to commit across all assemblers.
 
-Starting from the specified current block, the command continuously retrieves newly committed blocks from each assembler until the configured timeout expires.
-When the timeout is reached, the command prints a summary showing whether each assembler committed the latest block observed during the monitoring period.
+It reads the current config block to learn the current config sequence `S` and the assembler
+endpoints, and waits for the block a pending update will produce once committed:
+`expected = S + 1`. A configuration update changes at most one assembler, so the endpoints in the
+current block still reach the rest; assemblers that cannot be reached are reported as unreachable.
+
+For each assembler, follow pulls blocks until it observes a config block whose sequence is
+`expected` (or higher — a later update may also have committed), which means the next config is
+committed on that assembler. An assembler whose last config sequence is still below `expected` is
+behind (the config is not committed there yet). Polling continues per assembler until it commits
+or the timeout expires. When done, the command prints, for each assembler, its last block number,
+the last config sequence in its ledger, and whether it committed.
+
+The `--timeout` is the hard upper bound on the whole command, so an unresponsive assembler cannot block
+past it. An assembler that never answers within the window is reported as `unreachable`.
 
 ```bash
 fxadmin follow \
@@ -502,12 +538,31 @@ fxadmin follow \
 ```
 **Output**
 
-| Assembler  | Last Committed Block |
-|------------|:--------------------:|
-| assembler1 |         104          |
-| assembler2 |         104          |
-| assembler3 |         104          |
-| assembler4 |         104          |
+The command logs a one-line summary, for example:
+
+```
+expected last config sequence: 5, 3 out of 4 assemblers committed a block with last config sequence 5
+```
+
+If any assembler has not committed when the timeout elapses, it also logs a warning, for example:
+
+```
+timeout of 30s elapsed with 1 of 4 assemblers not yet committed to last config sequence 5
+```
+
+It then prints the polling timeout and a per-assembler table:
+
+```
+polling timeout: 30s
+ASSEMBLER        LAST BLOCK  LAST CONFIG SEQUENCE  STATUS
+assembler1:7051  104         5                     committed
+assembler2:7053  104         5                     committed
+assembler3:7055  104         5                     committed
+assembler4:7057  103         4                     behind
+```
+
+An assembler that could not be reached during the whole window is shown with `-` for both its last
+block and last config sequence, and an `unreachable` status.
 
  ---
 
@@ -528,7 +583,7 @@ fxadmin decode --block=last_config.pb --output=current_config.json
 # 3. Edit manually: copy the current_config.json to modified_config.json and edit.
 
 # 4. Compute the update.
-fxadmin compute-update current_config.json modified_config.json --output=config_update.pb
+fxadmin compute-update current_config.json modified_config.json --current-block=last_config.pb --output=config_update.pb
 
 # 5. Endorse, prepare, submit.
 fxadmin tx endorse config_update.pb --config=admin.yaml --output=endorsed_config_update.pb
@@ -557,7 +612,7 @@ fxadmin decode --block=last_config.pb --output=current_config.json
 # 3. Edit manually: copy the current_config.json to modified_config.json and edit.
 
 # 4. Compute the update.
-fxadmin compute-update current_config.json modified_config.json --output=config_update.pb
+fxadmin compute-update current_config.json modified_config.json --current-block=last_config.pb --output=config_update.pb
 
 # 5. Each org endorses the same update independently.
 fxadmin tx endorse config_update.pb --config=admin_org1.yaml --output=endorsed_config_update1.pb
@@ -567,7 +622,7 @@ fxadmin tx endorse config_update.pb --config=admin_org2.yaml --output=endorsed_c
 fxadmin tx merge endorsed_config_update1.pb endorsed_config_update2.pb --output=endorsed_config_update.pb
 
 # 7. Prepare and submit in one step with send (prepare + submit).
-fxadmin tx send endorsed_config_update.pb --config=admin_org1.yaml --current-block=last_config.pb
+fxadmin tx send endorsed_config_update.pb --config=admin_org1.yaml --current-block=last_config.pb --output=config_tx.pb
 
 # 8. Follow the assembler ledger to make sure the config tx was committed.
 fxadmin follow --config=admin_org1.yaml --current-block=last_config.pb --timeout=60s
