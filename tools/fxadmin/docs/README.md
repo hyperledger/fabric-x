@@ -249,10 +249,10 @@ fxadmin compute-update \
 
 **Flags**
 
-| Flag              | Required | Description                                    |
-|-------------------| :------: | ---------------------------------------------- |
-| `--current-block` |   yes    | Path to the current config block whose channel ID the update targets|
-| `--output`        |   yes    | Path to the output ConfigUpdate protobuf file   |
+| Flag              | Required | Description                                                           |
+|-------------------| :------: |-----------------------------------------------------------------------|
+| `--current-block` |   yes    | Path to the current config block whose channel ID the update targets  |
+| `--output`        |   yes    | Path to the output ConfigUpdate protobuf file                         |
 
 If `current.json` and `modified.json` are identical the command produces an empty
 update and reports that there is nothing to do.
@@ -416,10 +416,10 @@ Broadcast API. A router forwards it into the ordering pipeline; once ordered and
 committed, the new configuration takes effect across all parties.
 
 The command broadcasts to every router and collects each router's acknowledgement, logging
-the per-router outcome. It **succeeds only when a BFT
-quorum of the routers acknowledged** the transaction: with `n` parties (read from the
-`--current-block`) the quorum is `2f+1`, where `f = (n-1)/3` is the number of faulty parties
-the network tolerates. If fewer than a quorum acknowledge — because routers rejected the
+the per-router outcome. It **succeeds** only when a BFT quorum of the routers acknowledges 
+the transaction: with `n` parties (read from the`--current-block`) the quorum is `2f+1`, 
+where `f = (n-1)/3` is the number of faulty parties the network tolerates. 
+If fewer than a quorum acknowledge — because routers rejected the
 transaction or were unreachable — the command fails, so a partial or failed delivery is
 reported rather than silently succeeding.
 
