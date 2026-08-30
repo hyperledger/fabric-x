@@ -497,10 +497,22 @@ fxadmin tx send \
 ```
 ---
 ### Follow the assembler ledger
-The follow command monitors the ledgers of all assemblers defined in the current config block.
+The follow command waits for the next config block to commit across all assemblers.
 
-Starting from the specified current block, the command continuously retrieves newly committed blocks from each assembler until the configured timeout expires.
-When the timeout is reached, the command prints a summary showing whether each assembler committed the latest block observed during the monitoring period.
+It reads the current config block to learn the current config sequence `S` and the assembler
+endpoints, and waits for the block a pending update will produce once committed:
+`expected = S + 1`. A configuration update changes at most one assembler, so the endpoints in the
+current block still reach the rest; assemblers that cannot be reached are reported as unreachable.
+
+For each assembler, follow pulls blocks until it observes a config block whose sequence is
+`expected` (or higher — a later update may also have committed), which means the next config is
+committed on that assembler. An assembler whose last config sequence is still below `expected` is
+behind (the config is not committed there yet). Polling continues per assembler until it commits
+or the timeout expires. When done, the command prints, for each assembler, its last block number,
+the last config sequence in its ledger, and whether it committed.
+
+The `--timeout` is the hard upper bound on the whole command, so an unresponsive assembler cannot block
+past it. An assembler that never answers within the window is reported as `unreachable`.
 
 ```bash
 fxadmin follow \
@@ -526,12 +538,31 @@ fxadmin follow \
 ```
 **Output**
 
-| Assembler  | Last Committed Block |
-|------------|:--------------------:|
-| assembler1 |         104          |
-| assembler2 |         104          |
-| assembler3 |         104          |
-| assembler4 |         104          |
+The command logs a one-line summary, for example:
+
+```
+expected last config sequence: 5, 3 out of 4 assemblers committed a block with last config sequence 5
+```
+
+If any assembler has not committed when the timeout elapses, it also logs a warning, for example:
+
+```
+timeout of 30s elapsed with 1 of 4 assemblers not yet committed to last config sequence 5
+```
+
+It then prints the polling timeout and a per-assembler table:
+
+```
+polling timeout: 30s
+ASSEMBLER        LAST BLOCK  LAST CONFIG SEQUENCE  STATUS
+assembler1:7051  104         5                     committed
+assembler2:7053  104         5                     committed
+assembler3:7055  104         5                     committed
+assembler4:7057  103         4                     behind
+```
+
+An assembler that could not be reached during the whole window is shown with `-` for both its last
+block and last config sequence, and an `unreachable` status.
 
  ---
 
