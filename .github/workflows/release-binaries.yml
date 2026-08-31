@@ -1,0 +1,113 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+name: Release Binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v1.0.0). Re-runs an existing release."
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Validate Tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.extract.outputs.tag }}
+      version: ${{ steps.extract.outputs.version }}
+    steps:
+      - name: Extract and validate version from tag
+        id: extract
+        env:
+          RAW_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          if [[ "${RAW_TAG}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            echo "tag=${RAW_TAG}" >> "$GITHUB_OUTPUT"
+            echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            echo "✅ Tag validated: ${RAW_TAG}"
+          else
+            echo "❌ Invalid tag format: ${RAW_TAG}. Expected format: v<semver>"
+            exit 1
+          fi
+
+  build:
+    name: Build (${{ matrix.os }}/${{ matrix.arch }})
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+          - os: linux
+            arch: arm64
+          - os: linux
+            arch: s390x
+          - os: darwin
+            arch: amd64
+          - os: darwin
+            arch: arm64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.prepare.outputs.tag }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Build and package binaries
+        env:
+          TARGET: ${{ matrix.os }}-${{ matrix.arch }}
+          RELEASE: ${{ needs.prepare.outputs.tag }}
+          REVISION: ${{ github.sha }}
+        run: ./scripts/create-binary-package.sh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fabric-x-tools-${{ matrix.os }}-${{ matrix.arch }}
+          path: release/*/fabric-x-tools-*.tar.gz
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs:
+      - prepare
+      - build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate checksums
+        working-directory: dist
+        run: sha256sum *.tar.gz > checksums.txt
+
+      - name: Publish release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          files: |
+            dist/*.tar.gz
+            dist/checksums.txt
+          fail_on_unmatched_files: true
