@@ -41,7 +41,7 @@ func TestNewCreateCommandRun_TxReturned(t *testing.T) {
 	mockApp := &testApp{}
 	deployOut := &app.DeployNamespaceOutput{
 		TxID: "tx-123",
-		Tx:   &applicationpb.Tx{},
+		Tx:   nil,
 	}
 	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).Return(deployOut, app.UnknownStatus, nil)
 
@@ -60,7 +60,7 @@ func TestNewCreateCommandRun_TxReturned(t *testing.T) {
 	err := cmd.RunE(cmd, []string{"my-namespace"})
 
 	require.NoError(t, err)
-	require.Contains(t, cmdOut.String(), "tx-123")
+	require.Contains(t, printerOut.String(), "tx-123")
 	mockApp.AssertExpectations(t)
 }
 
@@ -68,7 +68,10 @@ func TestNewCreateCommandRun_NoTx(t *testing.T) {
 	t.Parallel()
 
 	mockApp := &testApp{}
-	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).Return(nil, app.UnknownStatus, nil)
+	deployOut := &app.DeployNamespaceOutput{
+		TxID: "tx-456",
+	}
+	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).Return(deployOut, app.UnknownStatus, nil)
 
 	var printerOut, printerErr bytes.Buffer
 	printer := cliio.NewCLIPrinter(&printerOut, &printerErr, cliio.FormatTable)
@@ -81,6 +84,7 @@ func TestNewCreateCommandRun_NoTx(t *testing.T) {
 	err := cmd.RunE(cmd, []string{"my-namespace"})
 
 	require.NoError(t, err)
+	require.Contains(t, printerOut.String(), "tx-456")
 	require.Contains(t, printerOut.String(), "Transaction status: STATUS_UNSPECIFIED")
 	mockApp.AssertExpectations(t)
 }

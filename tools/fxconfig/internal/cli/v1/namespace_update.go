@@ -77,7 +77,11 @@ Examples:
 				return err
 			}
 
-			if res == nil {
+			if res != nil && res.TxID != "" {
+				ctx.Printer.Print(fmt.Sprintf("Transaction ID: %s", res.TxID))
+			}
+
+			if res == nil || res.Tx == nil {
 				ctx.Printer.Print(
 					fmt.Sprintf("Transaction status: %s", committerpb.Status_name[int32(status)]), //nolint:gosec
 				)
