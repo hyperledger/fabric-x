@@ -5,7 +5,7 @@
 
 module github.com/hyperledger/fabric-x
 
-go 1.26.5
+go 1.27.0
 
 tool (
 	github.com/hyperledger/fabric-x-common/cmd/configtxgen
@@ -20,7 +20,7 @@ require (
 	github.com/hyperledger/fabric-lib-go v1.1.5-0.20260708100132-163bcc919208
 	github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7
 	github.com/hyperledger/fabric-x-committer v1.0.4
-	github.com/hyperledger/fabric-x-common v0.2.9-0.20260809140511-509e9c985b34
+	github.com/hyperledger/fabric-x-common v0.2.9-0.20260831110851-6819d2ea7517
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
