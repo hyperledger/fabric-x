@@ -518,7 +518,7 @@ Once at least `f+1` assemblers report the **identical** next config block (`f = 
 is the number of faulty parties the network of `n` parties tolerates), that block is written
 to `--output`. The written block is ready to serve as the `--current-block` of the next
 reconfiguration round. Blocks are compared by their full marshaled bytes.
-If fewer than f+1 identical blocks are not reached before the timeout, follow prints the report, 
+If a quorum of `f+1` identical blocks is not reached before the timeout, follow prints the report,
 writes no output file, and exits with an error.
 
 ```bash
