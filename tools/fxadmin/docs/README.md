@@ -514,27 +514,37 @@ the last config sequence in its ledger, and whether it committed.
 The `--timeout` is the hard upper bound on the whole command, so an unresponsive assembler cannot block
 past it. An assembler that never answers within the window is reported as `unreachable`.
 
+Once at least `f+1` assemblers report the **identical** next config block (`f = (n-1)/3`
+is the number of faulty parties the network of `n` parties tolerates), that block is written
+to `--output`. The written block is ready to serve as the `--current-block` of the next
+reconfiguration round. Blocks are compared by their full marshaled bytes.
+If fewer than f+1 identical blocks are not reached before the timeout, follow prints the report, 
+writes no output file, and exits with an error.
+
 ```bash
 fxadmin follow \
    --config <admin.yaml> \
    --current-block <current_block.pb> \
-   --timeout <duration>
+   --timeout <duration> \
+   --output <next_config.pb>
 ```
 
 **Flags**
 
-| Flag              | Required | Description                                                                           |
-|-------------------| :------: |---------------------------------------------------------------------------------------|
-| `--current-block` |   yes    | Path to the current block protobuf file containing the assembler's endpoints          |
-| `--config`        |   yes    | Path to the admin configuration YAML file                                             |
-| `--timeout`       |   yes    | Maximum amount of time to pull blocks from the assemblers before reporting the results |
+| Flag              | Required | Description                                                                             |
+|-------------------| :------: |-----------------------------------------------------------------------------------------|
+| `--current-block` |   yes    | Path to the current block protobuf file containing the assembler's endpoints            |
+| `--config`        |   yes    | Path to the admin configuration YAML file                                               |
+| `--timeout`       |   yes    | Maximum amount of time to pull blocks from the assemblers before reporting the results  |
+| `--output`        |   yes    | Path to write the next committed config block to, for use as the next `--current-block` |
 
 **Example**
 ```bash
 fxadmin follow \
  --config admin.yaml \
  --current-block last_config.pb \
- --timeout 30s
+ --timeout 30s \
+ --output next_config.pb
 ```
 **Output**
 
@@ -564,6 +574,15 @@ assembler4:7057  103         4                     behind
 An assembler that could not be reached during the whole window is shown with `-` for both its last
 block and last config sequence, and an `unreachable` status.
 
+When at least f+1 assemblers agrees on the next config block, follow writes it to `--output` and logs, for example:
+
+```
+config block at last config sequence 5 agreed by 3 assemblers (quorum 3), written to next_config.pb
+```
+
+If less than f+1 agrees before the timeout, no output file is written and the command fails with an error
+such as `no config block at last config sequence 5 was agreed by a quorum of 3 assemblers`.
+
  ---
 
 ## End-to-end walkthrough
@@ -591,7 +610,9 @@ fxadmin tx prepare endorsed_config_update.pb --config=admin.yaml --output=config
 fxadmin tx submit  config_tx.pb --config=admin.yaml --current-block=last_config.pb
 
 # 6. Follow the assembler ledger to make sure the config tx was committed.
-fxadmin follow --config=admin.yaml --current-block=last_config.pb --timeout=60s
+#    The new config block is written to next_config.pb, ready to be
+#    the --current-block of the next reconfiguration round.
+fxadmin follow --config=admin.yaml --current-block=last_config.pb --timeout=60s --output=next_config.pb
 
 ```
 
@@ -625,5 +646,7 @@ fxadmin tx merge endorsed_config_update1.pb endorsed_config_update2.pb --output=
 fxadmin tx send endorsed_config_update.pb --config=admin_org1.yaml --current-block=last_config.pb --output=config_tx.pb
 
 # 8. Follow the assembler ledger to make sure the config tx was committed.
-fxadmin follow --config=admin_org1.yaml --current-block=last_config.pb --timeout=60s
+#    The new config block is written to next_config.pb, ready to be
+#    the --current-block of the next reconfiguration round.
+fxadmin follow --config=admin_org1.yaml --current-block=last_config.pb --timeout=60s --output=next_config.pb
 ```
