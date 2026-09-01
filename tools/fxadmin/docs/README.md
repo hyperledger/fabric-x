@@ -514,12 +514,14 @@ the last config sequence in its ledger, and whether it committed.
 The `--timeout` is the hard upper bound on the whole command, so an unresponsive assembler cannot block
 past it. An assembler that never answers within the window is reported as `unreachable`.
 
-Once at least `f+1` assemblers report the **identical** next config block (`f = (n-1)/3`
+Once at least `f+1` assemblers report the **same** next config block (`f = (n-1)/3`
 is the number of faulty parties the network of `n` parties tolerates), that block is written
 to `--output`. The written block is ready to serve as the `--current-block` of the next
-reconfiguration round. Blocks are compared by their full marshaled bytes.
-If a quorum of `f+1` identical blocks is not reached before the timeout, follow prints the report,
-writes no output file, and exits with an error.
+reconfiguration round. If a quorum of `f+1` matching blocks is not reached before the timeout,
+follow prints the report, writes no output file, and exits with an error.
+
+Blocks are compared by their **header and data only**, ignoring the block metadata, which
+carries the orderer signatures over the block.
 
 ```bash
 fxadmin follow \
