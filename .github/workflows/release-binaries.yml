@@ -81,7 +81,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: fabric-x-tools-${{ matrix.os }}-${{ matrix.arch }}
-          path: release/*/fabric-x-tools-*.tar.gz
+          path: release/${{ matrix.os }}-${{ matrix.arch }}/fabric-x-tools-*.tar.gz
           if-no-files-found: error
 
   release:
