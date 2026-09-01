@@ -18,12 +18,13 @@ GO_TAGS ?=
 
 go_cmd          ?= go
 
-TOOLS_EXES = configtxgen configtxlator cryptogen fxconfig
+TOOLS_EXES = configtxgen configtxlator cryptogen fxconfig fxadmin
 
 pkgmap.configtxgen    := $(PKGNAME2)/configtxgen
 pkgmap.configtxlator  := $(PKGNAME2)/configtxlator
 pkgmap.cryptogen      := $(PKGNAME2)/cryptogen
 pkgmap.fxconfig		  := $(PKGNAME2)/fxconfig
+pkgmap.fxadmin		  := $(PKGNAME2)/fxadmin
 
 .DEFAULT_GOAL := help
 
