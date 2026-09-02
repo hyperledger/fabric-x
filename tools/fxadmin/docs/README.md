@@ -195,15 +195,24 @@ The decode command extracts the `common.Config` embedded in a binary config bloc
 This command is typically used after retrieving the latest configuration from the ledger.
 
 ```bash
-fxadmin decode \
-  --block last_config.pb \
-  --output current_config.json
+fxadmin decode <config_block.pb> --output <current_config.json>
 ```
+
+Example:
+```bash
+fxadmin decode last_config.pb --output current_config.json
+```
+
+**Arguments**
+
+| Argument            | Required | Description                                      |
+|---------------------| :------: |--------------------------------------------------|
+| `<config_block.pb>` |   yes    | Path to the protobuf config block file to decode |
+
 **Flags**
 
 | Flag       | Required | Description                                      |
 |------------| :------: |--------------------------------------------------|
-| `--block`  |   yes    | Path to the protobuf config block file to decode |
 | `--output` |   yes    | Path to the output `common.Config` JSON file, derived from the block |
 
 ---
@@ -599,7 +608,7 @@ flow can be run by that admin:
 fxadmin ledger --config=admin.yaml --current-block=current_block.pb config latest --output last_config.pb
 
 # 2. Decode it to JSON.
-fxadmin decode --block=last_config.pb --output=current_config.json
+fxadmin decode last_config.pb --output=current_config.json
 
 # 3. Edit manually: copy the current_config.json to modified_config.json and edit.
 
@@ -630,7 +639,7 @@ transaction:
 fxadmin ledger --config=admin_org1.yaml --current-block=current_block.pb config latest --output last_config.pb
 
 # 2. Decode it to JSON.
-fxadmin decode --block=last_config.pb --output=current_config.json
+fxadmin decode last_config.pb --output=current_config.json
 
 # 3. Edit manually: copy the current_config.json to modified_config.json and edit.
 
