@@ -56,6 +56,9 @@ if [ -f "${REFS_CONF}" ]; then
   source "${REFS_CONF}"
 fi
 
+ENABLE_EXPLORER="${ENABLE_EXPLORER:-true}"
+ENABLE_LOADGEN="${ENABLE_LOADGEN:-true}"
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Argument parsing
 # ──────────────────────────────────────────────────────────────────────────────
@@ -112,11 +115,15 @@ require_var() {
 require_var "FABRIC_X_REF" "FABRIC_X_REF is not set. Please specify --fabric-x-ref or set it in refs.conf"
 require_var "COMMITTER_REF" "COMMITTER_REF is not set. Please specify --committer-ref or set it in refs.conf"
 require_var "ORDERER_REF" "ORDERER_REF is not set. Please specify --orderer-ref or set it in refs.conf"
-require_var "EXPLORER_REF" "EXPLORER_REF is not set. Please specify --explorer-ref or set it in refs.conf"
+if [ "${ENABLE_EXPLORER}" = "true" ]; then
+  require_var "EXPLORER_REF" "EXPLORER_REF is not set. Please specify --explorer-ref or set it in refs.conf"
+  require_var "EXPLORER_IMAGE_NAME" "EXPLORER_IMAGE_NAME is not set. Check refs.conf"
+fi
 require_var "ORDERER_IMAGE_NAME" "ORDERER_IMAGE_NAME is not set. Check refs.conf"
 require_var "COMMITTER_IMAGE_NAME" "COMMITTER_IMAGE_NAME is not set. Check refs.conf"
-require_var "LOADGEN_IMAGE_NAME" "LOADGEN_IMAGE_NAME is not set. Check refs.conf"
-require_var "EXPLORER_IMAGE_NAME" "EXPLORER_IMAGE_NAME is not set. Check refs.conf"
+if [ "${ENABLE_LOADGEN}" = "true" ]; then
+  require_var "LOADGEN_IMAGE_NAME" "LOADGEN_IMAGE_NAME is not set. Check refs.conf"
+fi
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Helper functions
@@ -214,20 +221,25 @@ docker tag "${COMMITTER_IMAGE_BASE}" "${COMMITTER_IMAGE}"
 # Build loadgen from the same committer checkout/ref. build-image-test-node
 # builds the loadgen binary as part of ./cmd/... but does not package a
 # standalone loadgen image, so build it explicitly.
-LOADGEN_IMAGE_BASE="docker.io/hyperledger/${LOADGEN_IMAGE_NAME}"
-LOADGEN_IMAGE="${LOADGEN_IMAGE_BASE}:${COMMITTER_REF}"
-LOADGEN_BUILD_ARCH="${LOADGEN_BUILD_ARCH:-$(go env GOARCH)}"
+LOADGEN_IMAGE=""
+if [ "${ENABLE_LOADGEN}" = "true" ]; then
+  LOADGEN_IMAGE_BASE="docker.io/hyperledger/${LOADGEN_IMAGE_NAME}"
+  LOADGEN_IMAGE="${LOADGEN_IMAGE_BASE}:${COMMITTER_REF}"
+  LOADGEN_BUILD_ARCH="${LOADGEN_BUILD_ARCH:-$(go env GOARCH)}"
 
-echo "Building ${LOADGEN_IMAGE_NAME} image from ${COMMITTER_DIR}..."
-docker build \
-  -f "${COMMITTER_DIR}/docker/images/release/Dockerfile" \
-  -t "${LOADGEN_IMAGE}" \
-  --build-arg BIN=loadgen \
-  --build-arg PORTS="8001 2118" \
-  --build-arg SRC_BIN_PATH="release" \
-  --build-arg TARGETOS=linux \
-  --build-arg TARGETARCH="${LOADGEN_BUILD_ARCH}" \
-  "${COMMITTER_DIR}"
+  echo "Building ${LOADGEN_IMAGE_NAME} image from ${COMMITTER_DIR}..."
+  docker build \
+    -f "${COMMITTER_DIR}/docker/images/release/Dockerfile" \
+    -t "${LOADGEN_IMAGE}" \
+    --build-arg BIN=loadgen \
+    --build-arg PORTS="8001 2118" \
+    --build-arg SRC_BIN_PATH="release" \
+    --build-arg TARGETOS=linux \
+    --build-arg TARGETARCH="${LOADGEN_BUILD_ARCH}" \
+    "${COMMITTER_DIR}"
+else
+  echo "=== Skipping loadgen build (ENABLE_LOADGEN=${ENABLE_LOADGEN}) ==="
+fi
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Build explorer image (fabric-x-block-explorer)
@@ -243,12 +255,17 @@ docker build \
 # docker.io/hyperledger/. run-e2e.sh resolves the same localhost/ tag from
 # refs.conf, so no registry pull is needed.
 # ──────────────────────────────────────────────────────────────────────────────
-EXPLORER_DIR="${BUILD_DIR}/fabric-x-block-explorer"
-checkout_source "${EXPLORER_REPO}" "${EXPLORER_REF}" "${EXPLORER_DIR}" "${EXPLORER_LOCAL_PATH:-}" "fabric-x-block-explorer"
+EXPLORER_IMAGE=""
+if [ "${ENABLE_EXPLORER}" = "true" ]; then
+  EXPLORER_DIR="${BUILD_DIR}/fabric-x-block-explorer"
+  checkout_source "${EXPLORER_REPO}" "${EXPLORER_REF}" "${EXPLORER_DIR}" "${EXPLORER_LOCAL_PATH:-}" "fabric-x-block-explorer"
 
-EXPLORER_IMAGE="localhost/${EXPLORER_IMAGE_NAME}:${EXPLORER_REF}"
-echo "Building ${EXPLORER_IMAGE_NAME} image from ${EXPLORER_DIR}..."
-docker build -t "${EXPLORER_IMAGE}" "${EXPLORER_DIR}"
+  EXPLORER_IMAGE="localhost/${EXPLORER_IMAGE_NAME}:${EXPLORER_REF}"
+  echo "Building ${EXPLORER_IMAGE_NAME} image from ${EXPLORER_DIR}..."
+  docker build -t "${EXPLORER_IMAGE}" "${EXPLORER_DIR}"
+else
+  echo "=== Skipping explorer build (ENABLE_EXPLORER=${ENABLE_EXPLORER}) ==="
+fi
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Summary
