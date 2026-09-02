@@ -530,7 +530,8 @@ reconfiguration round. If a quorum of `f+1` matching blocks is not reached befor
 follow prints the report, writes no output file, and exits with an error.
 
 Blocks are compared by their **header and data only**, ignoring the block metadata, which
-carries the orderer signatures over the block.
+carries the orderer signatures over the block. In ARMA, block metadata may contain different signer sets 
+or signature ordering, so the raw block bytes may differ.
 
 ```bash
 fxadmin follow \
