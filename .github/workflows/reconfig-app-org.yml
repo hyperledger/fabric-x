@@ -1,0 +1,84 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Reconfig App Org Integration Test workflow.
+#
+# Uses integration/test/build-e2e.sh to build the orderer and committer images,
+# then runs the TestReconfigAppOrg Go integration test.
+# All refs default to values in integration/test/refs.conf when not provided.
+#
+
+name: Reconfig App Org Integration Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      fabric-x-ref:
+        description: "fabric-x ref. Empty=use refs.conf default"
+        required: false
+        default: ""
+      orderer-ref:
+        description: "fabric-x-orderer ref. Empty=use refs.conf default"
+        required: false
+        default: ""
+      committer-ref:
+        description: "fabric-x-committer ref. Empty=use refs.conf default"
+        required: false
+        default: ""
+
+jobs:
+  reconfig-app-org:
+    name: Reconfig App Org Integration Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout fabric-x
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # ---------------------------------------------------------------
+      # Build orderer and committer images plus fabric-x tools.
+      # build-e2e.sh writes resolved image names to GITHUB_OUTPUT so
+      # the test step can reference them without parsing stdout.
+      # Explorer and loadgen are not needed for this test.
+      # ---------------------------------------------------------------
+      - name: Build images and tools
+        id: images
+        env:
+          INPUT_FABRIC_X_REF: ${{ inputs.fabric-x-ref }}
+          INPUT_ORDERER_REF: ${{ inputs.orderer-ref }}
+          INPUT_COMMITTER_REF: ${{ inputs.committer-ref }}
+        run: |
+          args=()
+          if [ -n "${INPUT_FABRIC_X_REF}" ]; then
+            args+=("--fabric-x-ref=${INPUT_FABRIC_X_REF}")
+          fi
+          if [ -n "${INPUT_ORDERER_REF}" ]; then
+            args+=("--orderer-ref=${INPUT_ORDERER_REF}")
+          fi
+          if [ -n "${INPUT_COMMITTER_REF}" ]; then
+            args+=("--committer-ref=${INPUT_COMMITTER_REF}")
+          fi
+
+          ENABLE_EXPLORER=false ENABLE_LOADGEN=false \
+            ./integration/test/build-e2e.sh "${args[@]}"
+
+      # ---------------------------------------------------------------
+      # Run TestReconfigAppOrg integration test.
+      # ORDERER_IMAGE and COMMITTER_IMAGE are read by the test via
+      # envOrDefault(), overriding the hardcoded tag defaults.
+      # ---------------------------------------------------------------
+      - name: Run TestReconfigAppOrg integration test
+        env:
+          ORDERER_IMAGE: ${{ steps.images.outputs.orderer_image }}
+          COMMITTER_IMAGE: ${{ steps.images.outputs.committer_image }}
+          SKIP_CLEANUP_PROMPT: "1"
+        run: ./integration/test/run-reconfig-test.sh
+
+      # Failure logs are emitted by testcontainers before cleanup.
