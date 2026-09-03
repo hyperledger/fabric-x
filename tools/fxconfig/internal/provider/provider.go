@@ -14,12 +14,14 @@ import (
 )
 
 // Provider manages lazy initialization of service instances with validation support.
-// It ensures thread-safe, single initialization using sync.Once.
+// It uses a mutex-guarded initialization that retries on transient errors while caching
+// permanent failures (like validation errors).
 type Provider[T any, K Validatable] struct {
-	once              sync.Once
+	mu                sync.Mutex
 	factory           func(cfg K) (T, error)
 	instance          T
 	err               error
+	initialized       bool
 	cfg               K
 	validationContext validation.Context
 }
@@ -39,15 +41,26 @@ func New[T any, K Validatable](
 }
 
 // Get returns the service instance, validating the config and initializing the service instance on first call.
-// Subsequent calls return the cached instance. Thread-safe.
+// Subsequent calls return the cached instance if initialization succeeded or failed with a permanent error.
+// If initialization fails with a transient error, subsequent calls will retry. Thread-safe.
 func (p *Provider[T, K]) Get() (T, error) {
-	p.once.Do(func() {
-		if err := p.cfg.Validate(p.validationContext); err != nil {
-			p.err = err
-			return
-		}
-		p.instance, p.err = p.factory(p.cfg)
-	})
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	if p.initialized {
+		return p.instance, p.err
+	}
+
+	if err := p.cfg.Validate(p.validationContext); err != nil {
+		p.err = err
+		p.initialized = true
+		return p.instance, p.err
+	}
+
+	p.instance, p.err = p.factory(p.cfg)
+	if p.err == nil {
+		p.initialized = true
+	}
 	return p.instance, p.err
 }
 
