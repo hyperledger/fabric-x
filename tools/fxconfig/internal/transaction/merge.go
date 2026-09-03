@@ -61,6 +61,15 @@ func validateTransactionsForMerge(txs []*applicationpb.Tx) error {
 			return fmt.Errorf("transaction %d: namespace count mismatch", i)
 		}
 
+		if len(tx.GetEndorsements()) != baseNsCount {
+			return fmt.Errorf(
+				"transaction %d: endorsements count (%d) does not match namespaces count (%d)",
+				i,
+				len(tx.GetEndorsements()),
+				baseNsCount,
+			)
+		}
+
 		for nsIdx := range baseTx.GetNamespaces() {
 			if !proto.Equal(baseTx.GetNamespaces()[nsIdx], txs[i].GetNamespaces()[nsIdx]) {
 				return fmt.Errorf("transaction %d: namespace %d content mismatch", i, nsIdx)
