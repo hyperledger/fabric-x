@@ -40,6 +40,21 @@ func (c *OrdererConfig) Validate(vctx validation.Context) error {
 	return c.EndpointServiceConfig.Validate(vctx)
 }
 
+// Validate validates Queries configuration.
+// Check endpoint service configuration.
+func (c *QueriesConfig) Validate(vctx validation.Context) error {
+	return c.EndpointServiceConfig.Validate(vctx)
+}
+
+// Validate validates Notifications configuration.
+// Check waiting timeout and endpoint service configuration.
+func (c *NotificationsConfig) Validate(vctx validation.Context) error {
+	if c.WaitingTimeout <= 0 {
+		return errors.New("waiting timeout must be greater than zero")
+	}
+	return c.EndpointServiceConfig.Validate(vctx)
+}
+
 // Validate validates service endpoint configuration.
 // Checks address, timeout, and TLS settings for a given service.
 func (c *EndpointServiceConfig) Validate(vctx validation.Context) error {
