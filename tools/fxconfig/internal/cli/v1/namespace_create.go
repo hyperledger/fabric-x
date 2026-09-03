@@ -39,9 +39,9 @@ Policy Syntax:
   • OutOf(2, 'Org1MSP.member', 'Org2MSP.member', 'Org3MSP.member') - 2 of 3 orgs
 
 Transaction Lifecycle Flags:
-  --endorse  Collect endorsement from local MSP
-  --submit   Submit transaction to ordering service
-  --wait     Wait for transaction finalization (implies --submit)
+  --endorse  Collect endorsement from local MSP (if used without --submit, only saves the endorsed tx)
+  --submit   Submit transaction to ordering service (requires --endorse)
+  --wait     Wait for transaction finalization (requires --submit)
 
 Examples:
   # Create namespace with single org policy (save to file)
@@ -61,6 +61,10 @@ Examples:
     --output=tx.json`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := namespace.Validate(); err != nil {
+				return err
+			}
+
 			p := app.PolicyConfig{}
 			p.Set(string(policy))
 
@@ -83,6 +87,10 @@ Examples:
 					fmt.Sprintf("Transaction status: %s", committerpb.Status_name[int32(status)]), //nolint:gosec
 				)
 				return nil
+			}
+
+			if namespace.endorse && !namespace.submit {
+				ctx.Printer.Print("Transaction successfully endorsed and saved. You can submit it later using 'fxconfig tx submit'.")
 			}
 
 			o, err := ctx.IOTransactionCodec.Encode(res.TxID, res.Tx)
