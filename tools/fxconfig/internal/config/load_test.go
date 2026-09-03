@@ -72,6 +72,13 @@ func TestLoad_WithConfigFile(t *testing.T) {
 msp:
   localMspID: TestMSP
   configPath: /path/to/msp
+  bccsp:
+    default: SW
+    sw:
+      security: 384
+      hash: SHA3
+      fileKeyStore:
+        keyStorePath: /path/to/custom/keystore
 
 orderer:
   address: orderer.example.com:7050
@@ -101,6 +108,10 @@ notifications:
 
 	assert.Equal(t, "TestMSP", cfg.MSP.LocalMspID)
 	assert.Equal(t, "/path/to/msp", cfg.MSP.ConfigPath)
+	assert.Equal(t, "SW", cfg.MSP.BCCSP.Default)
+	assert.Equal(t, 384, cfg.MSP.BCCSP.SW.Security)
+	assert.Equal(t, "SHA3", cfg.MSP.BCCSP.SW.Hash)
+	assert.Equal(t, "/path/to/custom/keystore", cfg.MSP.BCCSP.SW.FileKeyStore.KeyStorePath)
 
 	assert.Equal(t, "orderer.example.com:7050", cfg.Orderer.Address)
 	assert.Equal(t, 45*time.Second, cfg.Orderer.ConnectionTimeout)
