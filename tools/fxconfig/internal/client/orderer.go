@@ -83,6 +83,7 @@ func (oc *OrdererClient) send(ctx context.Context, env *cb.Envelope) error {
 	if err != nil {
 		return err
 	}
+	defer func() { _ = abc.CloseSend() }()
 
 	err = abc.Send(env)
 	if err != nil {
