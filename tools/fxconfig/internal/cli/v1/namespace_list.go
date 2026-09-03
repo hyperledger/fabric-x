@@ -24,7 +24,7 @@ func newNsListCommand(ctx *CLIContext) *cobra.Command {
 For each namespace, displays:
   • Name (namespace identifier)
   • Version (current version number)
-  • Policy (endorsement policy in hexadecimal format)
+  • Policy (endorsement policy as a human-readable expression)
 
 Use this command to:
   • Verify namespace deployment
@@ -47,10 +47,10 @@ Examples:
 			}
 
 			// print namespace policy information to the Output writer.
-			// Each namespace is displayed with its index, name, version, and policy in hexadecimal format.
+			// Each namespace is displayed with its index, name, version, and human-readable policy.
 			ctx.Printer.Print(fmt.Sprintf("Installed namespaces (%d total):\n", len(result)))
 			for i, p := range result {
-				ctx.Printer.Print(fmt.Sprintf("%d) %v: version %d policy: %x\n", i, p.NsID, p.Version, p.Policy))
+				ctx.Printer.Print(fmt.Sprintf("%d) %v: version %d policy: %s\n", i, p.NsID, p.Version, p.PolicyStr))
 			}
 
 			return nil
