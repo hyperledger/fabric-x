@@ -190,3 +190,52 @@ func TestProvider_Validate_Error(t *testing.T) {
 	err := p.Validate()
 	require.ErrorIs(t, err, expectedErr)
 }
+
+type closeableMockService struct {
+	closeErr   error
+	closeCalls int
+}
+
+func (m *closeableMockService) Close() error {
+	m.closeCalls++
+	return m.closeErr
+}
+
+func TestProvider_Close_NoOpBeforeGet(t *testing.T) {
+	t.Parallel()
+
+	cfg := &mockConfig{}
+	p := provider.New(func(*mockConfig) (*closeableMockService, error) {
+		return &closeableMockService{}, nil
+	}, cfg, validation.Context{})
+
+	require.NoError(t, p.Close())
+}
+
+func TestProvider_Close_ClosesCachedInstance(t *testing.T) {
+	t.Parallel()
+
+	expected := &closeableMockService{}
+	cfg := &mockConfig{}
+	p := provider.New(func(*mockConfig) (*closeableMockService, error) {
+		return expected, nil
+	}, cfg, validation.Context{})
+
+	_, err := p.Get()
+	require.NoError(t, err)
+	require.NoError(t, p.Close())
+	require.Equal(t, 1, expected.closeCalls)
+}
+
+func TestProvider_Close_IgnoresFailedInitialization(t *testing.T) {
+	t.Parallel()
+
+	cfg := &mockConfig{validateErr: errors.New("validation error")}
+	p := provider.New(func(*mockConfig) (*closeableMockService, error) {
+		return &closeableMockService{}, nil
+	}, cfg, validation.Context{})
+
+	_, err := p.Get()
+	require.Error(t, err)
+	require.NoError(t, p.Close())
+}
