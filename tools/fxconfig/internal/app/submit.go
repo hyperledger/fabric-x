@@ -8,11 +8,19 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
 	"github.com/hyperledger/fabric-x-common/msp"
+
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
+)
+
+const (
+	maxBroadcastAttempts = 3
+	broadcastRetryDelay  = 100 * time.Millisecond
 )
 
 // TxStatus represents the finality status of a submitted transaction.
@@ -32,8 +40,9 @@ func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *appli
 		_ = sc.ordererClient.Close()
 	}()
 
-	if err := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx); err != nil {
-		return fmt.Errorf("failed to broadcast transaction: %w", err)
+	broadcastErr := broadcastTransaction(ctx, sc, txID, tx)
+	if broadcastErr != nil {
+		return broadcastErr
 	}
 
 	return nil
@@ -65,8 +74,9 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 		return UnknownStatus, fmt.Errorf("failed to subscribe to transaction events: %w", err)
 	}
 
-	if err := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx); err != nil {
-		return UnknownStatus, fmt.Errorf("failed to broadcast transaction: %w", err)
+	broadcastErr := broadcastTransaction(ctx, sc, txID, tx)
+	if broadcastErr != nil {
+		return UnknownStatus, broadcastErr
 	}
 
 	status, err := nc.WaitForEvent(ctx, subscription)
@@ -80,6 +90,47 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 type submissionContext struct {
 	signingIdentity msp.SigningIdentity
 	ordererClient   adapters.OrdererClient
+}
+
+func broadcastTransaction(
+	ctx context.Context,
+	sc *submissionContext,
+	txID string,
+	tx *applicationpb.Tx,
+) error {
+	var lastErr error
+
+	for attempt := 1; attempt <= maxBroadcastAttempts; attempt++ {
+		err := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx)
+		if err == nil {
+			return nil
+		}
+
+		if !isRetryable(err) {
+			return err
+		}
+
+		lastErr = err
+
+		if attempt == maxBroadcastAttempts {
+			break
+		}
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(broadcastRetryDelay):
+		}
+	}
+
+	return lastErr
+}
+
+func isRetryable(err error) bool {
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		return false
+	}
+	return true
 }
 
 func (d *AdminApp) prepareSubmission(_ context.Context) (*submissionContext, error) {

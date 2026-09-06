@@ -32,11 +32,15 @@ func (m *testSigningIdentity) Sign(_ []byte) ([]byte, error) {
 	return []byte("mock-sig"), nil
 }
 
-func (*testSigningIdentity) SerializeWithIDOfCert() ([]byte, error)         { return []byte{}, nil }
-func (*testSigningIdentity) Serialize() ([]byte, error)                     { return []byte{}, nil }
-func (*testSigningIdentity) GetCertificatePEM() ([]byte, error)             { return nil, nil }
-func (*testSigningIdentity) GetIdentifier() *msp.IdentityIdentifier         { return nil }
-func (*testSigningIdentity) GetPublicVersion() msp.Identity                 { return nil } //nolint:ireturn
+func (*testSigningIdentity) SerializeWithIDOfCert() ([]byte, error) { return []byte{}, nil }
+func (*testSigningIdentity) Serialize() ([]byte, error)             { return []byte{}, nil }
+func (*testSigningIdentity) GetCertificatePEM() ([]byte, error)     { return nil, nil }
+func (*testSigningIdentity) GetIdentifier() *msp.IdentityIdentifier { return nil }
+
+//nolint:ireturn // interface return required by msp.SigningIdentity
+func (*testSigningIdentity) GetPublicVersion() msp.Identity {
+	return nil
+}
 func (*testSigningIdentity) Verify(_, _ []byte) error                       { return nil }
 func (*testSigningIdentity) GetOrganizationalUnits() []*msp.OUIdentifier    { return nil }
 func (*testSigningIdentity) Anonymous() bool                                { return false }
