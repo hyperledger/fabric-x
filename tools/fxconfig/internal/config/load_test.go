@@ -423,6 +423,8 @@ queries:
 
 notifications:
   address: localhost:7002
+  tls:
+    enabled: false
 `
 	err := os.WriteFile(configPath, []byte(configContent), 0o600)
 	require.NoError(t, err)
@@ -434,8 +436,43 @@ notifications:
 
 	assert.True(t, cfg.Orderer.TLS.IsEnabled())
 	assert.Equal(t, []string{"/path/to/ca.pem"}, cfg.Orderer.TLS.RootCertPaths)
-	assert.False(t, cfg.Queries.TLS.IsEnabled())
-	assert.False(t, cfg.Notifications.TLS.IsEnabled())
+	assert.False(t, cfg.Queries.TLS.IsEnabled(), "Queries explicitly has enabled: false in config")
+	assert.False(t, cfg.Notifications.TLS.IsEnabled(), "Notifications explicitly has enabled: false in config")
+}
+
+// TestLoad_TLSEnabledByDefault verifies that TLS is enabled by default when
+// no explicit tls.enabled is specified. This is the secure-by-default behavior.
+func TestLoad_TLSEnabledByDefault(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "config.yaml")
+	configContent := `
+msp:
+  localMspID: TestMSP
+  configPath: /tmp/msp
+
+orderer:
+  address: localhost:7050
+
+queries:
+  address: localhost:7001
+
+notifications:
+  address: localhost:7002
+`
+	err := os.WriteFile(configPath, []byte(configContent), 0o600)
+	require.NoError(t, err)
+
+	cfg, err := Load(WithConfigFile(configPath))
+
+	require.NoError(t, err)
+	require.NotNil(t, cfg)
+
+	// TLS should be enabled by default when not explicitly specified
+	assert.True(t, cfg.Orderer.TLS.IsEnabled(), "Orderer should have TLS enabled by default")
+	assert.True(t, cfg.Queries.TLS.IsEnabled(), "Queries should have TLS enabled by default")
+	assert.True(t, cfg.Notifications.TLS.IsEnabled(), "Notifications should have TLS enabled by default")
 }
 
 func TestLoad_LoggingConfig(t *testing.T) {

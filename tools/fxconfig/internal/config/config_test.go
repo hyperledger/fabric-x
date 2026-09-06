@@ -44,7 +44,7 @@ func TestTLSConfig_Normalize(t *testing.T) {
 		cfg      *TLSConfig
 		wantBool bool
 	}{
-		{"nil Enabled", &TLSConfig{}, false},
+		{"nil Enabled", &TLSConfig{}, true},
 		{"already false", &TLSConfig{Enabled: boolPtr(false)}, false},
 		{"already true", &TLSConfig{Enabled: boolPtr(true)}, true},
 	}
