@@ -4,7 +4,11 @@
 
 package v1
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+)
 
 // outputFlag represents an output file path flag.
 type outputFlag string
@@ -46,6 +50,17 @@ func (f *namespaceDeployFlags) bind(cmd *cobra.Command) {
 		"Submit transaction to ordering service (requires --endorse)")
 	cmd.Flags().BoolVar(&f.wait, "wait", false,
 		"Wait for transaction finalization (implies --submit)")
+}
+
+// Validate checks that the flag combinations are valid.
+func (f *namespaceDeployFlags) Validate() error {
+	if f.submit && !f.endorse {
+		return fmt.Errorf("the --submit flag requires --endorse")
+	}
+	if f.wait && !f.submit {
+		return fmt.Errorf("the --wait flag requires --submit")
+	}
+	return nil
 }
 
 // waitFlag represents a flag to wait for transaction finalization.
