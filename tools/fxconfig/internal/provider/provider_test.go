@@ -85,8 +85,45 @@ func TestProvider_Get_LazyInitialization(t *testing.T) {
 	require.NoError(t, err2)
 	require.NoError(t, err3)
 
-	// Validation and factory should only be called once due to sync.Once
+	// Validation and factory should only be called once
 	require.Equal(t, 1, callCount)
+}
+
+func TestProvider_Get_RetryOnTransientError(t *testing.T) {
+	t.Parallel()
+
+	callCount := 0
+	expectedErr := errors.New("transient error")
+	cfg := &mockConfig{}
+	factory := func(*mockConfig) (*mockService, error) {
+		callCount++
+		if callCount == 1 {
+			return nil, expectedErr
+		}
+		return &mockService{value: "test"}, nil
+	}
+
+	p := provider.New(factory, cfg, validation.Context{})
+
+	// First call fails with transient error
+	svc1, err1 := p.Get()
+	require.Nil(t, svc1)
+	require.ErrorIs(t, err1, expectedErr)
+
+	// Second call should retry and succeed
+	svc2, err2 := p.Get()
+	require.NoError(t, err2)
+	require.NotNil(t, svc2)
+	require.Equal(t, "test", svc2.value)
+
+	// Third call should return cached success
+	svc3, err3 := p.Get()
+	require.NoError(t, err3)
+	require.NotNil(t, svc3)
+	require.Equal(t, "test", svc3.value)
+
+	// Factory should be called exactly twice
+	require.Equal(t, 2, callCount)
 }
 
 func TestProvider_Get_ValidationError(t *testing.T) {
