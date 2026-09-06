@@ -64,6 +64,8 @@ func CreateThresholdPolicy(path string) (*applicationpb.NamespacePolicy, error) 
 // getPubKeyFromPemData extracts an ECDSA public key from PEM-encoded content.
 // It searches through multiple PEM blocks and returns the first valid ECDSA public key found.
 func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
+	var lastErr error
+
 	for {
 		block, rest := pem.Decode(pemContent)
 		if block == nil {
@@ -73,6 +75,7 @@ func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 
 		key, err := parseCertificateOrPublicKey(block.Bytes)
 		if err != nil {
+			lastErr = err
 			continue
 		}
 
@@ -80,6 +83,10 @@ func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 			Type:  "PUBLIC KEY",
 			Bytes: key,
 		}), nil
+	}
+
+	if lastErr != nil {
+		return nil, fmt.Errorf("no ECDSA public key in pem file: %w", lastErr)
 	}
 
 	return nil, errors.New("no ECDSA public key in pem file")
@@ -90,18 +97,23 @@ func parseCertificateOrPublicKey(blockBytes []byte) ([]byte, error) {
 	cert, err := x509.ParseCertificate(blockBytes)
 	var publicKey any
 	if err == nil {
-		if cert.PublicKey != nil && cert.PublicKeyAlgorithm == x509.ECDSA {
-			publicKey = cert.PublicKey
+		if cert.PublicKeyAlgorithm != x509.ECDSA {
+			return nil, fmt.Errorf("certificate uses %s algorithm, expected ECDSA", cert.PublicKeyAlgorithm)
 		}
+		publicKey = cert.PublicKey
 	} else {
 		// If fails, try reading public key
 		anyPublicKey, err2 := x509.ParsePKIXPublicKey(blockBytes)
-		if err2 == nil && anyPublicKey != nil {
-			var ok bool
-			publicKey, ok = anyPublicKey.(*ecdsa.PublicKey)
-			if !ok {
-				return nil, errors.New("public key is not a ecdsa public key")
-			}
+		if err2 != nil {
+			return nil, fmt.Errorf("failed to parse public key: %w", err2)
+		}
+		if anyPublicKey == nil {
+			return nil, errors.New("public key is nil")
+		}
+		var ok bool
+		publicKey, ok = anyPublicKey.(*ecdsa.PublicKey)
+		if !ok {
+			return nil, errors.New("public key is not an ECDSA public key")
 		}
 	}
 
@@ -111,7 +123,7 @@ func parseCertificateOrPublicKey(blockBytes []byte) ([]byte, error) {
 
 	key, err := x509.MarshalPKIXPublicKey(publicKey)
 	if err != nil {
-		return nil, fmt.Errorf("marshalling public key from failed: %w", err)
+		return nil, fmt.Errorf("marshalling public key failed: %w", err)
 	}
 	return key, nil
 }
