@@ -46,5 +46,6 @@ for img in "${ORDERER_IMAGE}" "${COMMITTER_IMAGE}"; do
     exit 1
   fi
 done
-#nop
-:
+
+cd "${SCRIPT_DIR}"
+go test -v -run TestReconfigAppOrg -timeout 10m .
