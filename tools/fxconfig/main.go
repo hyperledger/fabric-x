@@ -8,6 +8,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/signal"
 
@@ -74,5 +75,10 @@ func run() error {
 		},
 	)
 
-	return cmd.ExecuteContext(ctx)
+	err := cmd.ExecuteContext(ctx)
+	if cliCtx.App != nil {
+		err = errors.Join(err, cliCtx.App.Close())
+	}
+
+	return err
 }
