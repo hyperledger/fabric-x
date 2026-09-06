@@ -274,6 +274,93 @@ func TestNotificationClient_Subscribe_Timeout(t *testing.T) {
 	require.ErrorContains(t, err, "deadline exceeded")
 }
 
+// dispatchNotifications / collectNotifications tests
+
+func TestDispatchNotifications_DeliversToSubscriber(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Second)
+	ch := make(chan int, 1)
+
+	nc.dispatchNotifications([]notificationCall{
+		{txID: "tx1", receiverQueue: ch, status: 7},
+	})
+
+	require.Equal(t, 7, <-ch)
+	require.Equal(t, uint64(0), nc.DroppedNotifications())
+}
+
+func TestDispatchNotifications_DropsWhenBufferFull(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Second)
+	ch := make(chan int, 1)
+	ch <- 1 // pre-fill the single-slot buffer
+
+	nc.dispatchNotifications([]notificationCall{
+		{txID: "tx1", receiverQueue: ch, status: 2},
+	})
+
+	require.Equal(t, uint64(1), nc.DroppedNotifications())
+	// Original value is preserved; the drop did not corrupt the buffer.
+	require.Equal(t, 1, <-ch)
+}
+
+func TestDispatchNotifications_CountsEachDropIndependently(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Second)
+	full1 := make(chan int, 1)
+	full1 <- 0
+	full2 := make(chan int, 1)
+	full2 <- 0
+	open := make(chan int, 1)
+
+	nc.dispatchNotifications([]notificationCall{
+		{txID: "tx1", receiverQueue: full1, status: 1},
+		{txID: "tx2", receiverQueue: full2, status: 2},
+		{txID: "tx3", receiverQueue: open, status: 3},
+	})
+
+	require.Equal(t, uint64(2), nc.DroppedNotifications())
+	require.Equal(t, 3, <-open)
+}
+
+func TestCollectNotifications_RemovesSubscribersAndCarriesTxID(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Second)
+	chA := make(chan int, 1)
+	chB := make(chan int, 1)
+	nc.subscribers["tx1"] = []chan int{chA}
+	nc.subscribers["tx2"] = []chan int{chB}
+
+	got := nc.collectNotifications(map[string]int{"tx1": 11, "tx2": 22})
+
+	require.Len(t, got, 2)
+	// Subscribers must be removed so a future drop is correctly observable.
+	require.Empty(t, nc.subscribers)
+
+	byTxID := map[string]notificationCall{}
+	for _, c := range got {
+		byTxID[c.txID] = c
+	}
+	require.Equal(t, 11, byTxID["tx1"].status)
+	require.Equal(t, chA, byTxID["tx1"].receiverQueue)
+	require.Equal(t, 22, byTxID["tx2"].status)
+	require.Equal(t, chB, byTxID["tx2"].receiverQueue)
+}
+
+func TestCollectNotifications_IgnoresUnknownTxIDs(t *testing.T) {
+	t.Parallel()
+
+	nc := newTestNotificationClient(time.Second)
+	got := nc.collectNotifications(map[string]int{"unknown": 1})
+
+	require.Empty(t, got)
+	require.Equal(t, uint64(0), nc.DroppedNotifications())
+}
+
 // Close tests
 
 func TestNotificationClient_Close_CallsCloseFunc(t *testing.T) {
