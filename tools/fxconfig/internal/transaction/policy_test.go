@@ -35,7 +35,7 @@ func TestGetPubKeyFromPemData(t *testing.T) {
 
 	// Create PEM encoded public key
 	pubKeyPEM := pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
+		Type:  publicKeyPEMType,
 		Bytes: pubKeyDER,
 	})
 
@@ -115,7 +115,7 @@ MIIBogIBAAJBALRiMLAA
 				// Verify result is valid PEM
 				block, _ := pem.Decode(result)
 				require.NotNil(t, block)
-				require.Equal(t, "PUBLIC KEY", block.Type)
+				require.Equal(t, publicKeyPEMType, block.Type)
 			}
 		})
 	}
@@ -163,7 +163,7 @@ func TestCreateThresholdPolicy(t *testing.T) {
 	pubKeyDER, err := x509.MarshalPKIXPublicKey(&privateKey.PublicKey)
 	require.NoError(t, err)
 
-	pubKeyPEM := pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: pubKeyDER})
+	pubKeyPEM := pem.EncodeToMemory(&pem.Block{Type: publicKeyPEMType, Bytes: pubKeyDER})
 
 	tmpDir := t.TempDir()
 	keyFile := filepath.Join(tmpDir, "key.pem")

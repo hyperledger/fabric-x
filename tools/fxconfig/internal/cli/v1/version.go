@@ -16,11 +16,13 @@ import (
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
 
+const versionCmd = "version"
+
 // NewVersionCommand returns a command that displays version information.
 // It shows the fxconfig version, Go version, commit SHA, and OS/architecture.
 func NewVersionCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "version",
+		Use:   versionCmd,
 		Short: "Display version information",
 		Long: `Display detailed version information including:
   • fxconfig version
@@ -30,7 +32,7 @@ func NewVersionCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, _ []string) {
 			osArch := fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
 			p := cliio.NewCLIPrinter(cmd.OutOrStdout(), cmd.ErrOrStderr(), cliio.FormatTable)
-			p.Print("fxconfig\n")
+			p.Print(appName + "\n")
 			p.Print(fmt.Sprintf(" %-16s %s\n", "Version:", metadata.Version))
 			p.Print(fmt.Sprintf(" %-16s %s\n", "Go Version:", runtime.Version()))
 			p.Print(fmt.Sprintf(" %-16s %s\n", "Commit:", metadata.CommitSHA))

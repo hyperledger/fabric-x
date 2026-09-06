@@ -21,6 +21,13 @@ import (
 	"github.com/hyperledger/fabric-x-common/msp"
 )
 
+const (
+	testNs1   = "ns1"
+	testNs2   = "ns2"
+	testNs3   = "ns3"
+	testOrg1  = "Org1MSP"
+)
+
 // mockSigningIdentity is a mock signing identity for testing.
 type mockSigningIdentity struct {
 	signFunc    func([]byte) ([]byte, error)
@@ -120,7 +127,7 @@ func TestEndorse(t *testing.T) {
 				},
 			},
 			signer: &mockSigningIdentity{
-				mspID: "Org1MSP",
+				mspID: testOrg1,
 			},
 			txID:        "tx-123",
 			expectError: false,
@@ -130,13 +137,13 @@ func TestEndorse(t *testing.T) {
 			name: "successful endorsement with multiple namespaces",
 			tx: &applicationpb.Tx{
 				Namespaces: []*applicationpb.TxNamespace{
-					{NsId: "ns1", NsVersion: 0},
-					{NsId: "ns2", NsVersion: 1},
-					{NsId: "ns3", NsVersion: 2},
+					{NsId: testNs1, NsVersion: 0},
+					{NsId: testNs2, NsVersion: 1},
+					{NsId: testNs3, NsVersion: 2},
 				},
 			},
 			signer: &mockSigningIdentity{
-				mspID: "Org1MSP",
+				mspID: testOrg1,
 			},
 			txID:        "tx-456",
 			expectError: false,
@@ -150,7 +157,7 @@ func TestEndorse(t *testing.T) {
 				},
 			},
 			signer: &mockSigningIdentity{
-				mspID: "Org1MSP",
+				mspID: testOrg1,
 				signFunc: func([]byte) ([]byte, error) {
 					return nil, errors.New("signing failed")
 				},

@@ -19,6 +19,8 @@ import (
 	"github.com/hyperledger/fabric-x-common/protoutil"
 )
 
+const publicKeyPEMType = "PUBLIC KEY"
+
 // CreateMspPolicy creates an MSP-based namespace policy from a DSL expression.
 // Example: "OR('Org1MSP.member', 'Org2MSP.member')" or "AND('Org1MSP.admin', 'Org2MSP.admin')".
 func CreateMspPolicy(policy string) (*applicationpb.NamespacePolicy, error) {
@@ -77,7 +79,7 @@ func getPubKeyFromPemData(pemContent []byte) ([]byte, error) {
 		}
 
 		return pem.EncodeToMemory(&pem.Block{
-			Type:  "PUBLIC KEY",
+			Type:  publicKeyPEMType,
 			Bytes: key,
 		}), nil
 	}
