@@ -72,14 +72,15 @@ func main() {
 					"which contains configtx.yaml with the specified profile")
 				os.Exit(1)
 			}
-			logger.Panic(err)
+			logger.Errorf("Unexpected error during config generation: %v", err)
+os.Exit(1)
 		}
 	}()
 
 	logger.Info("Loading configuration")
 	err := factory.InitFactories(nil)
 	if err != nil {
-		logger.Fatalf("Error on initFactories: %s", err)
+		logger.Fatalf("Failed to initialize crypto factories: %v", err)
 	}
 	var profileConfig *configtxgen.Profile
 	if outputBlock != "" || outputChannelCreateTx != "" {
@@ -108,25 +109,25 @@ func main() {
 
 	if outputBlock != "" {
 		if err := configtxgen.DoOutputBlock(profileConfig, channelID, outputBlock); err != nil {
-			logger.Fatalf("Error on outputBlock: %s", err)
+			logger.Fatalf("Error on outputBlock: %v", err)
 		}
 	}
 
 	if outputChannelCreateTx != "" {
 		if err := configtxgen.DoOutputChannelCreateTx(profileConfig, baseProfile, channelID, outputChannelCreateTx); err != nil {
-			logger.Fatalf("Error on outputChannelCreateTx: %s", err)
+			logger.Fatalf("Error on outputChannelCreateTx: %v", err)
 		}
 	}
 
 	if inspectBlock != "" {
 		if err := configtxgen.DoInspectBlock(inspectBlock); err != nil {
-			logger.Fatalf("Error on inspectBlock: %s", err)
+			logger.Fatalf("Error on inspectBlock: %v", err)
 		}
 	}
 
 	if inspectChannelCreateTx != "" {
 		if err := configtxgen.DoInspectChannelCreateTx(inspectChannelCreateTx); err != nil {
-			logger.Fatalf("Error on inspectChannelCreateTx: %s", err)
+			logger.Fatalf("Error on inspectChannelCreateTx: %v", err)
 		}
 	}
 
@@ -139,7 +140,7 @@ func main() {
 		}
 
 		if err := configtxgen.DoPrintOrg(topLevelConfig, printOrg); err != nil {
-			logger.Fatalf("Error on printOrg: %s", err)
+			logger.Fatalf("Error on printOrg: %v", err)
 		}
 	}
 }
