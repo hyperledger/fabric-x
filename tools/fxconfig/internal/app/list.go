@@ -8,7 +8,12 @@ package app
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
+
+	"github.com/hyperledger/fabric-protos-go-apiv2/common"
+	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"google.golang.org/protobuf/proto"
 )
 
 // ListNamespaces queries the committer service for installed namespaces.
@@ -32,9 +37,10 @@ func (d *AdminApp) ListNamespaces(ctx context.Context) ([]NamespaceQueryResult, 
 	results := make([]NamespaceQueryResult, len(res.GetPolicies()))
 	for i, p := range res.GetPolicies() {
 		results[i] = NamespaceQueryResult{
-			NsID:    p.GetNamespace(),
-			Version: int(p.GetVersion()), //nolint:gosec
-			Policy:  p.GetPolicy(),
+			NsID:      p.GetNamespace(),
+			Version:   int(p.GetVersion()), //nolint:gosec
+			Policy:    p.GetPolicy(),
+			PolicyStr: parsePolicy(p.GetPolicy()),
 		}
 	}
 
@@ -43,30 +49,33 @@ func (d *AdminApp) ListNamespaces(ctx context.Context) ([]NamespaceQueryResult, 
 
 // NamespaceQueryResult represents a namespace retrieved from the query service.
 type NamespaceQueryResult struct {
-	NsID    string `json:"name" yaml:"name"`
-	Version int    `json:"version" yaml:"version"`
-	Policy  []byte `json:"policy" yaml:"policy"`
+	NsID      string `json:"name" yaml:"name"`
+	Version   int    `json:"version" yaml:"version"`
+	Policy    []byte `json:"-" yaml:"-"`
+	PolicyStr string `json:"policy" yaml:"policy"`
 }
 
 // parsePolicy extracts and formats policy information from serialized bytes.
 // Returns base64-encoded public key for threshold policies or string representation for MSP policies.
-// func parsePolicy(b []byte) string {
-//	var p applicationpb.NamespacePolicy
-//	if err := proto.Unmarshal(b, &p); err != nil {
-//		panic(err)
-//	}
-//
-//	switch r := p.Rule.(type) {
-//	case *applicationpb.NamespacePolicy_ThresholdRule:
-//		return base64.StdEncoding.EncodeToString(r.ThresholdRule.GetPublicKey())
-//	case *applicationpb.NamespacePolicy_MspRule:
-//		var en common.SignaturePolicy
-//		if err := proto.Unmarshal(r.MspRule, &en); err != nil {
-//			panic(err)
-//		}
-//		// TODO: some pretty print would be beautiful
-//		return en.String()
-//	default:
-//		return "error parsing policy"
-//	}
-// }
+func parsePolicy(b []byte) string {
+	var p applicationpb.NamespacePolicy
+	if err := proto.Unmarshal(b, &p); err != nil {
+		return "invalid policy"
+	}
+
+	switch r := p.Rule.(type) {
+	case *applicationpb.NamespacePolicy_ThresholdRule:
+		return base64.StdEncoding.EncodeToString(r.ThresholdRule.GetPublicKey())
+
+	case *applicationpb.NamespacePolicy_MspRule:
+		var en common.SignaturePolicyEnvelope
+		if err := proto.Unmarshal(r.MspRule, &en); err != nil {
+			return "invalid MSP policy"
+		}
+
+		return en.String()
+
+	default:
+		return "error parsing policy"
+	}
+}
