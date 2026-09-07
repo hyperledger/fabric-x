@@ -260,9 +260,17 @@ if [ "${ENABLE_EXPLORER}" = "true" ]; then
   EXPLORER_DIR="${BUILD_DIR}/fabric-x-block-explorer"
   checkout_source "${EXPLORER_REPO}" "${EXPLORER_REF}" "${EXPLORER_DIR}" "${EXPLORER_LOCAL_PATH:-}" "fabric-x-block-explorer"
 
+  # The release Dockerfile expects pre-built binaries under release/linux-<arch>/.
+  # Run make build-release first to produce them, then build the image.
+  echo "Building explorer release binaries in ${EXPLORER_DIR}..."
+  make -C "${EXPLORER_DIR}" build-release
+
   EXPLORER_IMAGE="localhost/${EXPLORER_IMAGE_NAME}:${EXPLORER_REF}"
   echo "Building ${EXPLORER_IMAGE_NAME} image from ${EXPLORER_DIR}..."
-  docker build -t "${EXPLORER_IMAGE}" "${EXPLORER_DIR}"
+  docker build \
+    -t "${EXPLORER_IMAGE}" \
+    -f "${EXPLORER_DIR}/docker/images/release/Dockerfile" \
+    "${EXPLORER_DIR}"
 else
   echo "=== Skipping explorer build (ENABLE_EXPLORER=${ENABLE_EXPLORER}) ==="
 fi
