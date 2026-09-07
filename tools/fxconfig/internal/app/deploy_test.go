@@ -11,7 +11,18 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/adapters"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/config"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/provider"
 )
+
+func makeMetaNamespaceQueryProvider(version uint64) *provider.Provider[adapters.QueryClient, *config.QueriesConfig] {
+	return makeQueryProvider(&mockQueryClient{policies: &applicationpb.NamespacePolicies{Policies: []*applicationpb.PolicyItem{
+		{Namespace: "_meta", Version: version, Policy: []byte("meta-policy")},
+	}}}, nil)
+}
 
 func TestDeployNamespaceInputValidate(t *testing.T) {
 	t.Parallel()
@@ -78,7 +89,7 @@ func TestDeployNamespaceInputValidate(t *testing.T) {
 func TestDeployNamespace_CreateOnly(t *testing.T) {
 	t.Parallel()
 
-	a := &AdminApp{Validators: fakeValidationContext()}
+	a := &AdminApp{Validators: fakeValidationContext(), QueryProvider: makeMetaNamespaceQueryProvider(0)}
 	input := &DeployNamespaceInput{
 		NsID:    "testns",
 		Version: -1,
@@ -95,10 +106,35 @@ func TestDeployNamespace_CreateOnly(t *testing.T) {
 	require.Equal(t, UnknownStatus, status)
 }
 
+func TestDeployNamespace_CreateOnly_NoMetaNamespacePresent(t *testing.T) {
+	t.Parallel()
+
+	a := &AdminApp{
+		Validators:    fakeValidationContext(),
+		QueryProvider: makeQueryProvider(&mockQueryClient{policies: &applicationpb.NamespacePolicies{}}, nil),
+	}
+	input := &DeployNamespaceInput{
+		NsID:    "testns",
+		Version: -1,
+		Policy:  PolicyConfig{Type: mspPolicyType, MSP: &MSPPolicyConfig{Expression: "OR('Org1MSP.member')"}},
+		Endorse: false,
+		Submit:  false,
+	}
+
+	out, status, err := a.DeployNamespace(t.Context(), input)
+	require.NoError(t, err)
+	require.NotNil(t, out)
+	require.NotEmpty(t, out.TxID)
+	require.NotNil(t, out.Tx)
+	require.Len(t, out.Tx.Namespaces, 1)
+	require.Equal(t, uint64(0), out.Tx.Namespaces[0].NsVersion)
+	require.Equal(t, UnknownStatus, status)
+}
+
 func TestDeployNamespace_ValidationError(t *testing.T) {
 	t.Parallel()
 
-	a := &AdminApp{Validators: fakeValidationContext()}
+	a := &AdminApp{Validators: fakeValidationContext(), QueryProvider: makeMetaNamespaceQueryProvider(0)}
 	input := &DeployNamespaceInput{
 		NsID:    "testns",
 		Version: -2, // invalid
@@ -121,8 +157,9 @@ func TestDeployNamespace_EndorseOnly(t *testing.T) {
 	t.Parallel()
 
 	a := &AdminApp{
-		Validators:  fakeValidationContext(),
-		MspProvider: makeMSPProvider(&testSigningIdentity{}, nil),
+		Validators:    fakeValidationContext(),
+		QueryProvider: makeMetaNamespaceQueryProvider(0),
+		MspProvider:   makeMSPProvider(&testSigningIdentity{}, nil),
 	}
 	input := validDeployInput()
 	input.Endorse = true
@@ -141,8 +178,9 @@ func TestDeployNamespace_EndorseError(t *testing.T) {
 	t.Parallel()
 
 	a := &AdminApp{
-		Validators:  fakeValidationContext(),
-		MspProvider: makeMSPProvider(nil, errors.New("msp not configured")),
+		Validators:    fakeValidationContext(),
+		QueryProvider: makeMetaNamespaceQueryProvider(0),
+		MspProvider:   makeMSPProvider(nil, errors.New("msp not configured")),
 	}
 	input := validDeployInput()
 	input.Endorse = true
@@ -156,6 +194,7 @@ func TestDeployNamespace_EndorseAndSubmit(t *testing.T) {
 
 	a := &AdminApp{
 		Validators:      fakeValidationContext(),
+		QueryProvider:   makeMetaNamespaceQueryProvider(0),
 		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
 		OrdererProvider: makeOrdererProvider(&mockOrdererClient{}, nil),
 	}
@@ -175,6 +214,7 @@ func TestDeployNamespace_EndorseAndSubmitError(t *testing.T) {
 
 	a := &AdminApp{
 		Validators:      fakeValidationContext(),
+		QueryProvider:   makeMetaNamespaceQueryProvider(0),
 		MspProvider:     makeMSPProvider(&testSigningIdentity{}, nil),
 		OrdererProvider: makeOrdererProvider(&mockOrdererClient{broadcastErr: errors.New("orderer unavailable")}, nil),
 	}
@@ -194,6 +234,7 @@ func TestDeployNamespace_EndorseAndSubmitWithWait(t *testing.T) {
 
 	a := &AdminApp{
 		Validators:           fakeValidationContext(),
+		QueryProvider:        makeMetaNamespaceQueryProvider(0),
 		MspProvider:          makeMSPProvider(&testSigningIdentity{}, nil),
 		OrdererProvider:      makeOrdererProvider(&mockOrdererClient{}, nil),
 		NotificationProvider: makeNotificationProvider(&mockNotificationClient{status: expectedStatus}, nil),
@@ -214,6 +255,7 @@ func TestDeployNamespace_EndorseAndSubmitWithWaitError(t *testing.T) {
 
 	a := &AdminApp{
 		Validators:           fakeValidationContext(),
+		QueryProvider:        makeMetaNamespaceQueryProvider(0),
 		MspProvider:          makeMSPProvider(&testSigningIdentity{}, nil),
 		OrdererProvider:      makeOrdererProvider(&mockOrdererClient{}, nil),
 		NotificationProvider: makeNotificationProvider(nil, errors.New("notification service unavailable")),
