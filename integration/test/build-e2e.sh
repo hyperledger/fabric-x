@@ -263,6 +263,7 @@ if [ "${ENABLE_EXPLORER}" = "true" ]; then
   # The release Dockerfile expects pre-built binaries under release/linux-<arch>/.
   # Run make build-release first to produce them, then build the image.
   echo "Building explorer release binaries in ${EXPLORER_DIR}..."
+  (cd "${EXPLORER_DIR}" && go get google.golang.org/grpc@v1.82.1 golang.org/x/net@v0.57.0)
   make -C "${EXPLORER_DIR}" build-release
 
   EXPLORER_IMAGE="localhost/${EXPLORER_IMAGE_NAME}:${EXPLORER_REF}"
