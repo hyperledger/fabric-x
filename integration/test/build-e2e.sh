@@ -266,10 +266,12 @@ if [ "${ENABLE_EXPLORER}" = "true" ]; then
   make -C "${EXPLORER_DIR}" build-release
 
   EXPLORER_IMAGE="localhost/${EXPLORER_IMAGE_NAME}:${EXPLORER_REF}"
+  EXPLORER_BUILD_ARCH="${EXPLORER_BUILD_ARCH:-$(go env GOARCH)}"
   echo "Building ${EXPLORER_IMAGE_NAME} image from ${EXPLORER_DIR}..."
-  docker build \
+  DOCKER_BUILDKIT=1 docker build \
     -t "${EXPLORER_IMAGE}" \
     -f "${EXPLORER_DIR}/docker/images/release/Dockerfile" \
+    --build-arg TARGETARCH="${EXPLORER_BUILD_ARCH}" \
     "${EXPLORER_DIR}"
 else
   echo "=== Skipping explorer build (ENABLE_EXPLORER=${ENABLE_EXPLORER}) ==="
