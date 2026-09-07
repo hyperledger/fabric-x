@@ -37,6 +37,7 @@ type namespaceDeployFlags struct {
 	endorse bool
 	submit  bool
 	wait    bool
+	dryRun  bool
 }
 
 func (f *namespaceDeployFlags) bind(cmd *cobra.Command) {
@@ -46,6 +47,8 @@ func (f *namespaceDeployFlags) bind(cmd *cobra.Command) {
 		"Submit transaction to ordering service (requires --endorse)")
 	cmd.Flags().BoolVar(&f.wait, "wait", false,
 		"Wait for transaction finalization (implies --submit)")
+	cmd.Flags().BoolVar(&f.dryRun, "dry-run", false,
+		"Validate and preview changes without submitting")
 }
 
 // waitFlag represents a flag to wait for transaction finalization.

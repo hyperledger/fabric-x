@@ -42,10 +42,14 @@ Transaction Lifecycle Flags:
   --endorse  Collect endorsement from local MSP
   --submit   Submit transaction to ordering service
   --wait     Wait for transaction finalization (implies --submit)
+	--dry-run  Validate and preview changes without submitting
 
 Examples:
   # Create namespace with single org policy (save to file)
   fxconfig namespace create hello --policy="OR('Org1MSP.member')" --output=tx.json
+
+	# Preview a namespace creation without submitting
+	fxconfig namespace create payments --config config.yaml --dry-run
 
   # Create and immediately deploy (endorse + submit + wait)
   fxconfig namespace create hello --policy="OR('Org1MSP.member')" --endorse --submit --wait
@@ -71,6 +75,7 @@ Examples:
 				Endorse: namespace.endorse,
 				Submit:  namespace.submit,
 				Wait:    namespace.wait,
+				DryRun:  namespace.dryRun,
 			}
 
 			res, status, err := ctx.App.DeployNamespace(cmd.Context(), &input)
@@ -83,6 +88,17 @@ Examples:
 					fmt.Sprintf("Transaction status: %s", committerpb.Status_name[int32(status)]), //nolint:gosec
 				)
 				return nil
+			}
+
+			if input.DryRun {
+				printDryRun(cmd, ctx, dryRunPreview{
+					operation: "create",
+					namespace: args[0],
+					txID:      res.TxID,
+				})
+				if output == "" {
+					return nil
+				}
 			}
 
 			o, err := ctx.IOTransactionCodec.Encode(res.TxID, res.Tx)

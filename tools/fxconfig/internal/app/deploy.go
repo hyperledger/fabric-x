@@ -23,6 +23,7 @@ type DeployNamespaceInput struct {
 	Endorse bool
 	Submit  bool
 	Wait    bool
+	DryRun  bool
 }
 
 // Validate validates namespace configuration.
@@ -73,6 +74,10 @@ func (d *AdminApp) DeployNamespace(
 	out.Tx, err = d.EndorseTransaction(ctx, out.TxID, out.Tx)
 	if err != nil {
 		return nil, UnknownStatus, err
+	}
+
+	if input.DryRun {
+		return out, UnknownStatus, nil
 	}
 
 	// note that we enforce submit if wait is set
