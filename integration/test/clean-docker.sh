@@ -17,7 +17,7 @@ set -euo pipefail
 
 # Stop and remove containers directly — avoids 'docker compose down -v' hanging
 # indefinitely on macOS + Podman due to network cleanup blocking in compose CLI.
-docker rm -f arma committer loadgen prometheus grafana 2>/dev/null || true
+docker rm -f arma committer loadgen prometheus grafana explorer postgres 2>/dev/null || true
 
 # Remove the compose-managed bridge network (project name defaults to dir name "test").
 docker network rm test_e2e 2>/dev/null || true

@@ -103,7 +103,10 @@ for arg in "$@"; do
   esac
 done
 
-# Verify required refs are set
+# Default to local fabric-x workspace if available and not overridden
+if [ -z "${FABRIC_X_LOCAL_PATH:-}" ] && [ -z "${FABRIC_X_REF:-}" ]; then
+  FABRIC_X_LOCAL_PATH="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+fi
 require_var() {
   local name="$1" message="$2"
   if [ -z "${!name:-}" ]; then

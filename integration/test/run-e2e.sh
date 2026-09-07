@@ -30,6 +30,9 @@ dump_failure_logs() {
 # view Grafana dashboards. On failure, cleans up immediately.
 cleanup() {
   local exit_code=$?
+  if [ "${exit_code}" -ne 0 ]; then
+    dump_failure_logs
+  fi
   if [ "${exit_code}" -eq 0 ] && [ "${SKIP_CLEANUP_PROMPT:-}" != "1" ]; then
     echo ""
     echo "============================================================"

@@ -65,6 +65,8 @@ jobs:
           args=()
           if [ -n "${INPUT_FABRIC_X_REF}" ]; then
             args+=("--fabric-x-ref=${INPUT_FABRIC_X_REF}")
+          else
+            args+=("--fabric-x-local-path=${{ github.workspace }}")
           fi
           if [ -n "${INPUT_ORDERER_REF}" ]; then
             args+=("--orderer-ref=${INPUT_ORDERER_REF}")
