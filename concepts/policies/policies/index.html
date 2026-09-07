@@ -1,0 +1,3018 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../../membership/membership/">
+      
+      
+        <link rel="next" href="../../ledger/ledger/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Policies - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#policies" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Policies
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-a-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-are-policies-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why are policies needed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-are-policies-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How are policies implemented
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How are policies implemented">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access-control-lists-acls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access control lists (ACLs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-contract-endorsement-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smart contract endorsement policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modification-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modification policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-do-you-write-a-policy-in-fabric" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How do you write a policy in Fabric
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How do you write a policy in Fabric">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signature-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signature policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implicitmeta-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ImplicitMeta policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#an-example-channel-configuration-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An example: channel configuration policy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="An example: channel configuration policy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#member-organizations-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Member Organizations Section
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-a-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-are-policies-needed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why are policies needed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-are-policies-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How are policies implemented
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How are policies implemented">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#access-control-lists-acls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Access control lists (ACLs)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#smart-contract-endorsement-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Smart contract endorsement policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modification-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modification policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-do-you-write-a-policy-in-fabric" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How do you write a policy in Fabric
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How do you write a policy in Fabric">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#signature-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signature policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implicitmeta-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ImplicitMeta policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#an-example-channel-configuration-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        An example: channel configuration policy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="An example: channel configuration policy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#member-organizations-section" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Member Organizations Section
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<h1 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">&para;</a></h1>
+<p><strong>Audience</strong>: Architects, application and smart contract developers,
+administrators</p>
+<p>In this topic, we'll cover:</p>
+<ul>
+<li><a href="#what-is-a-policy">What is a policy</a></li>
+<li><a href="#why-are-policies-needed">Why are policies needed</a></li>
+<li><a href="#how-are-policies-implemented">How are policies implemented</a></li>
+<li><a href="#how-do-you-write-a-policy-in-fabric">How do you write a policy in Fabric</a></li>
+<li><a href="#fabric-chaincode-lifecycle">Fabric chaincode lifecycle</a></li>
+<li><a href="#overriding-policy-definitions">Overriding policy definitions</a></li>
+</ul>
+<h2 id="what-is-a-policy">What is a policy<a class="headerlink" href="#what-is-a-policy" title="Permanent link">&para;</a></h2>
+<p>At its most basic level, a policy is a set of rules that define the structure
+for how decisions are made and specific outcomes are reached. To that end,
+policies typically describe a <strong>who</strong> and a <strong>what</strong>, such as the access or
+rights that an individual has over an <strong>asset</strong>. We can see that policies are
+used throughout our daily lives to protect assets of value to us, from car
+rentals, health, our homes, and many more.</p>
+<p>For example, an insurance policy defines the conditions, terms, limits, and
+expiration under which an insurance payout will be made. The policy is
+agreed to by the policy holder and the insurance company, and defines the rights
+and responsibilities of each party.</p>
+<p>Whereas an insurance policy is put in place for risk management, in Hyperledger
+Fabric, policies are the mechanism for infrastructure management. Fabric policies
+represent how members come to agreement on accepting or rejecting changes to the
+network, a channel, or a smart contract. Policies are agreed to by the channel
+members when the channel is originally configured, but they can also be modified
+as the channel evolves. For example, they describe the criteria for adding or
+removing members from a channel, change how blocks are formed, or specify the
+number of organizations required to endorse a smart contract. All of these
+actions are described by a policy which defines who can perform the action.
+Simply put, everything you want to do on a Fabric network is controlled by a
+policy.</p>
+<h2 id="why-are-policies-needed">Why are policies needed<a class="headerlink" href="#why-are-policies-needed" title="Permanent link">&para;</a></h2>
+<p>Policies are one of the things that make Hyperledger Fabric different from other
+blockchains like Ethereum or Bitcoin. In those systems, transactions can be
+generated and validated by any node in the network. The policies that govern the
+network are fixed at any point in time and can only be changed using the same
+process that governs the code. Because Fabric is a permissioned blockchain whose
+users are recognized by the underlying infrastructure, those users have the
+ability to decide on the governance of the network before it is launched, and
+change the governance of a running network.</p>
+<p>Policies allow members to decide which organizations can access or update a Fabric
+network, and provide the mechanism to enforce those decisions. Policies contain
+the lists of organizations that have access to a given resource, such as a
+user or system chaincode. They also specify how many organizations need to agree
+on a proposal to update a resource, such as a channel or smart contracts. Once
+they are written, policies evaluate the collection of signatures attached to
+transactions and proposals and validate if the signatures fulfill the governance
+agreed to by the network.</p>
+<h2 id="how-are-policies-implemented">How are policies implemented<a class="headerlink" href="#how-are-policies-implemented" title="Permanent link">&para;</a></h2>
+<p>Policies are defined within the relevant administrative domain of a particular action defined by the policy. For example, the policy for adding a peer organization to a channel is defined within the administrative domain of the peer organizations (known as the <code>Application</code> group). Similarly, adding ordering nodes in the consenter set of the channel is controlled by a policy inside the <code>Orderer</code> group. Actions that cross both the peer and orderer organizational domains are contained in the <code>Channel</code> group.</p>
+<p>Typically, these policies default to the "majority of admins" of the group they fall under (a majority of peer organization admins for example, or in the case of <code>Channel</code> policies, a majority of both peer organizations and orderer organizations), though they can be specified to any rule a user wishes to define. Check out <a href="#signature-policies">Signature policies</a> for more information.</p>
+<h3 id="access-control-lists-acls">Access control lists (ACLs)<a class="headerlink" href="#access-control-lists-acls" title="Permanent link">&para;</a></h3>
+<p>Network administrators will be especially interested in the Fabric use of ACLs,
+which provide the ability to configure access to resources by associating those
+resources with existing policies. These "resources" could be functions on system
+chaincode (e.g., "GetBlockByNumber" on the "qscc" system chaincode) or other
+resources (e.g.,who can receive Block events). ACLs refer to policies
+defined in an application channel configuration and extends them to control
+additional resources. The default set of Fabric ACLs is visible in the
+<code>configtx.yaml</code> file under the <code>Application: &amp;ApplicationDefaults</code> section but
+they can and should be overridden in a production environment. The list of
+resources named in <code>configtx.yaml</code> is the complete set of all internal resources
+currently defined by Fabric.</p>
+<p>In that file, ACLs are expressed using the following format:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a># ACL policy for chaincode to chaincode invocation
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>peer/ChaincodeToChaincode: /Channel/Application/Writers
+</code></pre></div>
+<p>Where <code>peer/ChaincodeToChaincode</code> represents the resource being secured and
+<code>/Channel/Application/Writers</code> refers to the policy which must be satisfied for
+the associated transaction to be considered valid.</p>
+<p>For a deeper dive into ACLS, refer to the topic in the Operations Guide on <a href="../../access_control/">ACLs</a>.</p>
+<h3 id="smart-contract-endorsement-policies">Smart contract endorsement policies<a class="headerlink" href="#smart-contract-endorsement-policies" title="Permanent link">&para;</a></h3>
+<p>Every smart contract inside a chaincode package has an endorsement policy that
+specifies how many peers belonging to different channel members need to execute
+and validate a transaction against a given smart contract in order for the
+transaction to be considered valid. Hence, the endorsement policies define the
+organizations (through their peers) who must “endorse” (i.e., approve of) the
+execution of a proposal.</p>
+<h3 id="modification-policies">Modification policies<a class="headerlink" href="#modification-policies" title="Permanent link">&para;</a></h3>
+<p>There is one last type of policy that is crucial to how policies work in Fabric,
+the <code>Modification policy</code>. Modification policies specify the group of identities
+required to sign (approve) any configuration <em>update</em>. It is the policy that
+defines how the policy is updated. Thus, each channel configuration element
+includes a reference to a policy which governs its modification.</p>
+<h2 id="how-do-you-write-a-policy-in-fabric">How do you write a policy in Fabric<a class="headerlink" href="#how-do-you-write-a-policy-in-fabric" title="Permanent link">&para;</a></h2>
+<p>If you want to change anything in Fabric, the policy associated with the resource
+describes <strong>who</strong> needs to approve it, either with an explicit sign off from
+individuals, or an implicit sign off by a group. In the insurance domain, an
+explicit sign off could be a single member of the homeowners insurance agents
+group. And an implicit sign off would be analogous to requiring approval from a
+majority of the managerial members of the homeowners insurance group. This is
+particularly useful because the members of that group can change over time
+without requiring that the policy be updated. In Hyperledger Fabric, explicit
+sign offs in policies are expressed using the <code>Signature</code> syntax and implicit
+sign offs use the <code>ImplicitMeta</code> syntax.</p>
+<h3 id="signature-policies">Signature policies<a class="headerlink" href="#signature-policies" title="Permanent link">&para;</a></h3>
+<p><code>Signature</code> policies define specific types of users who must sign in order for a
+policy to be satisfied such as <code>OR('Org1.peer', 'Org2.peer')</code>. These policies are
+considered the most versatile because they allow for the construction of
+extremely specific rules like: “An admin of org A and 2 other admins, or 5 of 6
+organization admins”. The syntax supports arbitrary combinations of <code>AND</code>, <code>OR</code>
+and <code>NOutOf</code>. For example, a policy can be easily expressed by using
+<code>AND('Org1.member', 'Org2.member')</code> which means that a signature from at least
+one member in Org1 AND one member in Org2 is required for the policy to be satisfied.</p>
+<h3 id="implicitmeta-policies">ImplicitMeta policies<a class="headerlink" href="#implicitmeta-policies" title="Permanent link">&para;</a></h3>
+<p><code>ImplicitMeta</code> policies are only valid in the context of channel configuration
+which is based on a tiered hierarchy of policies in a configuration tree. ImplicitMeta
+policies aggregate the result of policies deeper in the configuration tree that
+are ultimately defined by Signature policies. They are <code>Implicit</code> because they
+are constructed implicitly based on the current organizations in the
+channel configuration, and they are <code>Meta</code> because their evaluation is not
+against specific MSP principals, but rather against other sub-policies below
+them in the configuration tree.</p>
+<p>The following diagram illustrates the tiered policy structure for an application
+channel and shows how the <code>ImplicitMeta</code> channel configuration admins policy,
+named <code>/Channel/Admins</code>, is resolved when the sub-policies named <code>Admins</code> below it
+in the configuration hierarchy are satisfied where each check mark represents that
+the conditions of the sub-policy were satisfied.</p>
+<p><img alt="policies.policies" src="../FabricPolicyHierarchy-6.png" /></p>
+<p>As you can see in the diagram above, <code>ImplicitMeta</code> policies, Type = 3, use a
+different syntax, <code>"&lt;ANY|ALL|MAJORITY&gt; &lt;SubPolicyName&gt;"</code>, for example:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>`MAJORITY sub policy: Admins`
+</code></pre></div>
+The diagram shows a sub-policy <code>Admins</code>, which refers to all the <code>Admins</code> policy
+below it in the configuration tree. You can create your own sub-policies
+and name them whatever you want and then define them in each of your
+organizations.</p>
+<p>As mentioned above, a key benefit of an <code>ImplicitMeta</code> policy such as <code>MAJORITY
+Admins</code> is that when you add a new admin organization to the channel, you do not
+have to update the channel policy. Therefore <code>ImplicitMeta</code> policies are
+considered to be more flexible as organizations are added. Recall that <code>ImplicitMeta</code> policies ultimately resolve the
+<code>Signature</code> sub-policies underneath them in the configuration tree as the
+diagram shows.</p>
+<p>You can also define an application level implicit policy to operate across
+organizations, in a channel for example, and either require that ANY of them
+are satisfied, that ALL are satisfied, or that a MAJORITY are satisfied. This
+format lends itself to much better, more natural defaults, so that each
+organization can decide what it means for a valid endorsement.</p>
+<p>Further granularity and control can be achieved if you include <a href="../../msp/#organizational-units">NodeOUs</a> in your
+organization definition. Organization Units (OUs) are defined in the Fabric CA
+client configuration file and can be associated with an identity when it is
+created. In Fabric, <code>NodeOUs</code> provide a way to classify identities in a digital
+certificate hierarchy. For instance, an organization having specific <code>NodeOUs</code>
+enabled could require that a 'peer' sign for it to be a valid endorsement,
+whereas an organization without any might simply require that any member can
+sign.</p>
+<h2 id="an-example-channel-configuration-policy">An example: channel configuration policy<a class="headerlink" href="#an-example-channel-configuration-policy" title="Permanent link">&para;</a></h2>
+<p>Understanding policies begins with examining the <code>configtx.yaml</code> where the
+channel policies are defined. We can use the <code>configtx.yaml</code> file in the Fabric
+test network to see examples of both policy syntax types. We are going to examine
+the <code>configtx.yaml</code> file used by the <a href="https://github.com/hyperledger/fabric-samples/blob/main/test-network/configtx/configtx.yaml">fabric-samples/test-network</a> sample.</p>
+<h3 id="member-organizations-section">Member Organizations Section<a class="headerlink" href="#member-organizations-section" title="Permanent link">&para;</a></h3>
+<p>The first section of the file defines the organizations that will be members of the channel. Inside each
+organization definition are the default policies for that organization, <code>Readers</code>, <code>Writers</code>,
+<code>Admins</code>, and <code>Endorsement</code>, although you can name your policies anything you want.
+Each policy has a <code>Type</code> which describes how the policy is expressed (<code>Signature</code>
+or <code>ImplicitMeta</code>) and a <code>Rule</code>.</p>
+<p>The test network example below shows the Org1 organization definition in the
+channel, where the policy <code>Type</code> is <code>Signature</code> and the <code>Endorsement:</code> policy rule
+is defined as <code>"OR('Org1MSP.peer')"</code>. This policy specifies that a peer that is
+a member of <code>Org1MSP</code> is required to sign. It is these signature policies that
+become the sub-policies that the <code>ImplicitMeta</code> policies point to.</p>
+<details>
+  <summary>
+    <strong>Click here to see an example of an organization defined with signature policies</strong>
+  </summary>
+
+  ```
+- &Org1
+       # DefaultOrg defines the organization which is used in the sampleconfig
+       # of the fabric.git development environment
+       Name: Org1MSP
+
+       # ID to load the MSP definition as
+       ID: Org1MSP
+
+       MSPDir: ../organizations/peerOrganizations/org1.example.com/msp
+
+       # Policies defines the set of policies at this level of the config tree
+       # For organization policies, their canonical path is usually
+       #   /Channel/<Application|Orderer>/<OrgName>/<PolicyName>
+       Policies:
+           Readers:
+               Type: Signature
+               Rule: "OR('Org1MSP.admin', 'Org1MSP.peer', 'Org1MSP.client')"
+           Writers:
+               Type: Signature
+               Rule: "OR('Org1MSP.admin', 'Org1MSP.client')"
+           Admins:
+               Type: Signature
+               Rule: "OR('Org1MSP.admin')"
+           Endorsement:
+               Type: Signature
+               Rule: "OR('Org1MSP.peer')"
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>&lt;/details&gt;
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>### Application and Roles Section
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>The next example shows the `ImplicitMeta` policy type used in the `Application`
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>section of the `configtx.yaml`. These set of policies lie on the
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>`/Channel/Application/` path. If you use the default set of Fabric ACLs, these
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>policies define the behavior of many important features of application channels,
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>such as who can query the channel ledger, invoke a chaincode, or update a channel
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>config. These policies point to the sub-policies defined for each organization.
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>The Org1 defined in the section above contains `Reader`, `Writer`, and `Admin`
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>sub-policies that are evaluated by the `Reader`, `Writer`, and `Admin` `ImplicitMeta`
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>policies in the `Application` section. Because the test network is built with the
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>default policies, you can use the example Org1 to query the channel ledger, invoke a
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>chaincode, and approve channel updates for any test network channel that you
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>create.
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>&lt;details&gt;
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>  &lt;summary&gt;
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>    &lt;strong&gt;Click here to see an example of ImplicitMeta policies&lt;/strong&gt;
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>  &lt;/summary&gt;
+</code></pre></div>
+################################################################################
+#
+#   SECTION: Application
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for application related parameters
+#
+################################################################################
+Application: &ApplicationDefaults
+
+    # Organizations is the list of orgs which are defined as participants on
+    # the application side of the network
+    Organizations:
+
+    # Policies defines the set of policies at this level of the config tree
+    # For Application policies, their canonical path is
+    #   /Channel/Application/<PolicyName>
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>&lt;/details&gt;
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>## Fabric chaincode lifecycle
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>The Fabric chaincode lifecycle utilizes policies
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>when chaincode is **approved** by organization members, and when it is **committed**
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>to the channel.
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>The `Application` section of  the `configtx.yaml` file includes the default
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>chaincode lifecycle endorsement policy. In a production environment you would
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>customize this definition for your own use case.
+</code></pre></div>
+################################################################################
+#
+#   SECTION: Application
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for application related parameters
+#
+################################################################################
+Application: &ApplicationDefaults
+
+    # Organizations is the list of orgs which are defined as participants on
+    # the application side of the network
+    Organizations:
+
+    # Policies defines the set of policies at this level of the config tree
+    # For Application policies, their canonical path is
+    #   /Channel/Application/<PolicyName>
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+```
+
+- The `LifecycleEndorsement` policy governs who needs to _approve a chaincode
+definition_.
+- The `Endorsement` policy is the _default endorsement policy for
+a chaincode_. More on this below.
+
+## Chaincode endorsement policies
+
+The endorsement policy is specified for a **chaincode** when it is approved
+and committed to the channel using the Fabric chaincode lifecycle (that is, one
+endorsement policy covers all of the state associated with a chaincode). The
+endorsement policy can be specified either by reference to an endorsement policy
+defined in the channel configuration or by explicitly specifying a Signature policy.
+
+If an endorsement policy is not explicitly specified during the approval step,
+the channel `Endorsement` policy is used which by default is `"MAJORITY Endorsement"`,
+meaning that a peer from a majority of the organizations belonging to a channel
+need to execute a transaction against the chaincode
+in order for the transaction to be considered valid. This default policy allows
+organizations that join the channel to become automatically added to the chaincode
+endorsement policy. If you don't want to use the default endorsement
+policy, use the Signature policy format to specify a more complex endorsement
+policy (such as requiring that a chaincode be endorsed by one organization, and
+then one of the other organizations on the channel).
+
+Signature policies also allow you to include `principals` which are simply a way
+of matching an identity to a role. Principals are just like user IDs or group
+IDs, but they are more versatile because they can include a wide range of
+properties of an actor’s identity, such as the actor’s organization,
+organizational unit, role or even the actor’s specific identity. When we talk
+about principals, they are the properties which determine their permissions.
+Principals are described as `'MSP.ROLE'`, where `MSP` represents the required MSP
+ID (the organization), and `ROLE` represents one of the four accepted roles:
+Member, Admin, Client, and Peer. A role is associated to an identity when a user
+enrolls with a CA. You can customize the list of roles available on your Fabric
+CA.
+
+Some examples of valid principals are:
+* 'Org0.Admin': an administrator of the Org0 MSP
+* 'Org1.Member': a member of the Org1 MSP
+* 'Org1.Client': a client of the Org1 MSP
+* 'Org1.Peer': a peer of the Org1 MSP
+* 'OrdererOrg.Orderer': an orderer in the OrdererOrg MSP
+
+There are cases where it may be necessary for a particular state
+(a particular key-value pair, in other words) to have a different endorsement
+policy. This **state-based endorsement** allows the default chaincode-level
+endorsement policies to be overridden by a different policy for the specified
+keys.
+
+For a deeper dive on how to write an endorsement policy refer to the topic on
+Endorsement policies in the Operations Guide.
+
+## Overriding policy definitions
+
+Hyperledger Fabric includes default policies which are useful for getting started,
+developing, and testing your blockchain, but they are meant to be customized
+in a production environment. You should be aware of the default policies
+in the `configtx.yaml` file. Channel configuration policies can be extended
+with arbitrary verbs, beyond the default `Readers, Writers, Admins` in
+`configtx.yaml`.
+
+For more information on overriding policy definitions when creating a channel, check out Channel policies and Creating a channel.
+
+For information about how to update a channel, check out Updating a channel configuration for more information.
+
+<!--- Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/) -->
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

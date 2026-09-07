@@ -1,0 +1,3867 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../tls-configurations/">
+      
+      
+        <link rel="next" href="../../../cli/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Committer Performance Tuning - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#performance-tuning-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Committer Performance Tuning
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-pipeline-flow-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Pipeline Flow Control
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-identifying-the-bottleneck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Identifying the Bottleneck
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-sidecar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Sidecar
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Sidecar">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#waiting-txs-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        waiting-txs-limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ledgersync-interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ledger.sync-interval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#channel-buffer-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        channel-buffer-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#last-committed-block-set-interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        last-committed-block-set-interval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationmax-active-tx-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        notification.max-active-tx-ids
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationmax-tx-ids-per-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        notification.max-tx-ids-per-request
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#servermax-concurrent-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        server.max-concurrent-streams
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-coordinator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Coordinator
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Coordinator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dependency-graphnum-of-local-dep-constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dependency-graph.num-of-local-dep-constructors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-graphwaiting-txs-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dependency-graph.waiting-txs-limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-channel-buffer-size-per-goroutine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        per-channel-buffer-size-per-goroutine
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-verifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Verifier
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Verifier">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-executorparallelism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parallel-executor.parallelism
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-executorbatch-size-cutoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parallel-executor.batch-size-cutoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-executorbatch-time-cutoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parallel-executor.batch-time-cutoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-executorchannel-buffer-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parallel-executor.channel-buffer-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-validator-committer-vc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Validator-Committer (VC)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Validator-Committer (VC)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitsmax-workers-for-preparer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.max-workers-for-preparer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitsmax-workers-for-validator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.max-workers-for-validator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitsmax-workers-for-committer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.max-workers-for-committer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitsmin-transaction-batch-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.min-transaction-batch-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitstimeout-for-min-transaction-batch-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.timeout-for-min-transaction-batch-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databasemax-connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.max-connections
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databasemin-connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.min-connections
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databaseload-balance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.load-balance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databasetable-pre-split-tablets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.table-pre-split-tablets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databaseretry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.retry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-query-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Query Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Query Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#min-batch-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        min-batch-keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-batch-wait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-batch-wait
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-aggregation-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        view-aggregation-window
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-aggregated-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-aggregated-views
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-active-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-active-views
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-view-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-view-timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-request-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-request-keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databasemax-connections-query-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.max-connections (Query Service)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Database
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#yugabytedb-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        YugabyteDB Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postgresql-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PostgreSQL Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-co-location-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Co-location Impact
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-benchmarking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Benchmarking
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Table of Contents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-pipeline-flow-control" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Pipeline Flow Control
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-identifying-the-bottleneck" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Identifying the Bottleneck
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-sidecar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Sidecar
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Sidecar">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#waiting-txs-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        waiting-txs-limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ledgersync-interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ledger.sync-interval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#channel-buffer-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        channel-buffer-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#last-committed-block-set-interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        last-committed-block-set-interval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationmax-active-tx-ids" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        notification.max-active-tx-ids
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationmax-tx-ids-per-request" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        notification.max-tx-ids-per-request
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#servermax-concurrent-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        server.max-concurrent-streams
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-coordinator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Coordinator
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Coordinator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dependency-graphnum-of-local-dep-constructors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dependency-graph.num-of-local-dep-constructors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-graphwaiting-txs-limit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        dependency-graph.waiting-txs-limit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-channel-buffer-size-per-goroutine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        per-channel-buffer-size-per-goroutine
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-verifier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Verifier
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Verifier">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-executorparallelism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parallel-executor.parallelism
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-executorbatch-size-cutoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parallel-executor.batch-size-cutoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-executorbatch-time-cutoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parallel-executor.batch-time-cutoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallel-executorchannel-buffer-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        parallel-executor.channel-buffer-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-validator-committer-vc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Validator-Committer (VC)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Validator-Committer (VC)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitsmax-workers-for-preparer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.max-workers-for-preparer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitsmax-workers-for-validator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.max-workers-for-validator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitsmax-workers-for-committer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.max-workers-for-committer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitsmin-transaction-batch-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.min-transaction-batch-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-limitstimeout-for-min-transaction-batch-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        resource-limits.timeout-for-min-transaction-batch-size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databasemax-connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.max-connections
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databasemin-connections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.min-connections
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databaseload-balance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.load-balance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databasetable-pre-split-tablets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.table-pre-split-tablets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databaseretry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.retry
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-query-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Query Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Query Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#min-batch-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        min-batch-keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-batch-wait" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-batch-wait
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-aggregation-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        view-aggregation-window
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-aggregated-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-aggregated-views
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-active-views" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-active-views
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-view-timeout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-view-timeout
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#max-request-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        max-request-keys
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#databasemax-connections-query-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        database.max-connections (Query Service)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Database
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#yugabytedb-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        YugabyteDB Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#postgresql-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PostgreSQL Considerations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-co-location-impact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Co-location Impact
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-benchmarking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Benchmarking
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+<h1 id="performance-tuning-guide">Performance Tuning Guide<a class="headerlink" href="#performance-tuning-guide" title="Permanent link">&para;</a></h1>
+<p>This guide explains how each configuration parameter affects system performance — throughput, latency, memory, and pipeline flow. All parameters are documented with their sample values in <code>cmd/config/samples/</code>.</p>
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
+<ol>
+<li><a href="#1-pipeline-flow-control">Pipeline Flow Control</a></li>
+<li><a href="#2-identifying-the-bottleneck">Identifying the Bottleneck</a></li>
+<li><a href="#3-sidecar">Sidecar</a></li>
+<li><a href="#4-coordinator">Coordinator</a></li>
+<li><a href="#5-verifier">Verifier</a></li>
+<li><a href="#6-validator-committer-vc">Validator-Committer (VC)</a></li>
+<li><a href="#7-query-service">Query Service</a></li>
+<li><a href="#8-database">Database</a></li>
+<li><a href="#9-co-location-impact">Co-location Impact</a></li>
+<li><a href="#10-benchmarking">Benchmarking</a></li>
+</ol>
+<h2 id="1-pipeline-flow-control">1. Pipeline Flow Control<a class="headerlink" href="#1-pipeline-flow-control" title="Permanent link">&para;</a></h2>
+<p>The commit pipeline processes transactions through a sequence of stages connected by bounded channels and slot-based limits. These flow controls don't just protect memory — they directly control how much work flows through the pipeline.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Orderer → Sidecar → Coordinator → Dependency Graph → Verifier → VC → Database
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>             ↑            ↑                                      |
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>             └── status ──└──────────── status ──────────────────┘
+</code></pre></div>
+<p>Each <code>→</code> is a bounded channel or gRPC stream. The system uses three types of flow control:</p>
+<ul>
+<li><strong>Slot-based limits</strong> act as per-transaction semaphores. Slots are acquired before processing and released only when transactions complete downstream. When exhausted, channels fill up and the Sidecar stops pulling blocks.</li>
+<li><strong>Channel buffers</strong> connect adjacent stages within a process. When full, the producer blocks.</li>
+<li><strong>gRPC flow control</strong> operates at the transport layer between services. gRPC uses HTTP/2 flow control windows — when a receiver is slow, its window fills up and the sender is blocked from writing more data. This prevents a fast producer (e.g., Sidecar) from overwhelming a slow consumer (e.g., Coordinator) at the network level, independent of the application-level slot and channel limits.</li>
+</ul>
+<p>Setting any limit too low starves the pipeline — stages run in lock-step rather than streaming, and throughput drops. Setting limits too high increases memory usage and queuing latency. The goal is finding the balance where the pipeline has enough in-flight work to sustain throughput without excessive queuing.</p>
+<h2 id="2-identifying-the-bottleneck">2. Identifying the Bottleneck<a class="headerlink" href="#2-identifying-the-bottleneck" title="Permanent link">&para;</a></h2>
+<p>Monitor queue length gauges to find the bottleneck. A growing queue means the downstream stage cannot keep up. Tune that stage first. The full list of queue metrics and other observability metrics can be found in the <a href="../metrics_reference/">Metrics Reference</a>. Key queues to watch:</p>
+<table>
+<thead>
+<tr>
+<th>Queue Metric</th>
+<th>Stage</th>
+<th>Growing Queue Means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sidecar_relay_input_block_queue_size</code></td>
+<td>Block Ingestion</td>
+<td>Coordinator not consuming blocks fast enough</td>
+</tr>
+<tr>
+<td><code>sidecar_relay_waiting_transactions_queue_size</code></td>
+<td>Relay</td>
+<td>Transactions waiting for commit statuses to return</td>
+</tr>
+<tr>
+<td><code>sidecar_relay_output_committed_block_queue_size</code></td>
+<td>Committed Blocks</td>
+<td>Committed blocks backing up; downstream consumers slow</td>
+</tr>
+<tr>
+<td><code>coordinator_sigverifier_input_tx_batch_queue_size</code></td>
+<td>Signature Verification</td>
+<td>Verifiers cannot keep up; add instances or CPU</td>
+</tr>
+<tr>
+<td><code>coordinator_sigverifier_output_validated_tx_batch_queue_size</code></td>
+<td>Verified → VC</td>
+<td>VC services not consuming verified transactions fast enough</td>
+</tr>
+<tr>
+<td><code>coordinator_vcservice_output_validated_tx_batch_queue_size</code></td>
+<td>VC → Dep Graph</td>
+<td>Dependency graph not processing validated results fast enough</td>
+</tr>
+<tr>
+<td><code>coordinator_vcservice_output_tx_status_batch_queue_size</code></td>
+<td>Status Response</td>
+<td>Status responses backing up between VC and Coordinator</td>
+</tr>
+<tr>
+<td><code>vcservice_preparer_input_queue_size</code></td>
+<td>VC Preparation</td>
+<td>Preparer workers saturated</td>
+</tr>
+<tr>
+<td><code>vcservice_validator_input_queue_size</code></td>
+<td>VC Validation</td>
+<td>DB validation queries too slow; check connections or co-location</td>
+</tr>
+<tr>
+<td><code>vcservice_committer_input_queue_size</code></td>
+<td>VC Commit</td>
+<td>DB commit throughput is the bottleneck; most common</td>
+</tr>
+<tr>
+<td><code>vcservice_txstatus_output_queue_size</code></td>
+<td>VC Status Output</td>
+<td>Status responses backing up; Coordinator not consuming fast enough</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-sidecar">3. Sidecar<a class="headerlink" href="#3-sidecar" title="Permanent link">&para;</a></h2>
+<h3 id="waiting-txs-limit"><code>waiting-txs-limit</code><a class="headerlink" href="#waiting-txs-limit" title="Permanent link">&para;</a></h3>
+<p>Maximum number of transactions the Sidecar has sent to the Coordinator and is awaiting status for. The Sidecar acquires one slot per transaction before sending a block. Slots are released only when the Coordinator returns the transaction's final status. When all slots are occupied, the Sidecar blocks on slot acquisition, which causes the internal block channel to fill up, and eventually the Sidecar stops pulling blocks from the ordering service.</p>
+<p>This value directly controls how many transactions can be in-flight across the entire pipeline. With a low value (e.g., 100), the Sidecar sends 100 transactions and blocks until all complete — the pipeline runs in lock-step and throughput drops dramatically. With a very high value, more transactions queue across the pipeline, increasing memory and queuing latency. Config blocks trigger a full drain regardless of this value. Default: 20,000,000.</p>
+<h3 id="ledgersync-interval"><code>ledger.sync-interval</code><a class="headerlink" href="#ledgersync-interval" title="Permanent link">&para;</a></h3>
+<p>How often the block store calls <code>fsync</code> to durable storage. Every Nth block triggers a full sync; intermediate blocks are written without fsync. Config blocks and file rollovers always sync.</p>
+<p>Each fsync is an expensive I/O operation. A low value (e.g., 1) syncs every block, which can bottleneck the block ingestion path. Higher values (100, 500+) significantly improve block append throughput by amortizing I/O cost. The tradeoff is durability — blocks lost on crash are recoverable from the ordering service. Default: 100.</p>
+<h3 id="channel-buffer-size"><code>channel-buffer-size</code><a class="headerlink" href="#channel-buffer-size" title="Permanent link">&para;</a></h3>
+<p>Buffer size for internal Go channels in the Sidecar — block delivery, committed blocks, and status updates. When a channel is full, the producing goroutine blocks until the consumer reads.</p>
+<p>A small buffer (e.g., 1-10) tightly couples the Sidecar's internal stages: any slowdown in the relay to the Coordinator immediately stalls block delivery from the orderer. A larger buffer absorbs temporary throughput variations but uses more memory. Default: 100.</p>
+<h3 id="last-committed-block-set-interval"><code>last-committed-block-set-interval</code><a class="headerlink" href="#last-committed-block-set-interval" title="Permanent link">&para;</a></h3>
+<p>How often the Sidecar sends the latest committed block number to the Coordinator. The Coordinator uses this for dependency resolution.</p>
+<p>Minimal effect on steady-state throughput. Shorter intervals improve recovery speed after failures. Default: 5s.</p>
+<h3 id="notificationmax-active-tx-ids"><code>notification.max-active-tx-ids</code><a class="headerlink" href="#notificationmax-active-tx-ids" title="Permanent link">&para;</a></h3>
+<p>Global limit on active transaction ID subscriptions across all notification streams. When exhausted, new subscriptions are partially rejected.</p>
+<p>Too low causes clients to receive rejections under moderate load, forcing retries that increase end-to-end latency. Default: 100,000.</p>
+<h3 id="notificationmax-tx-ids-per-request"><code>notification.max-tx-ids-per-request</code><a class="headerlink" href="#notificationmax-tx-ids-per-request" title="Permanent link">&para;</a></h3>
+<p>Maximum transaction IDs per single notification request. Requests exceeding this are rejected entirely.</p>
+<p>Prevents individual clients from consuming a disproportionate share of the subscription budget in a single call. Default: 1,000.</p>
+<h3 id="servermax-concurrent-streams"><code>server.max-concurrent-streams</code><a class="headerlink" href="#servermax-concurrent-streams" title="Permanent link">&para;</a></h3>
+<p>Maximum concurrent streaming RPCs (Deliver + Notification) per client connection. Each stream holds server resources (goroutines, buffers).</p>
+<p>Too low limits client concurrency and can cause connection failures under load. Default: 10.</p>
+<h2 id="4-coordinator">4. Coordinator<a class="headerlink" href="#4-coordinator" title="Permanent link">&para;</a></h2>
+<h3 id="dependency-graphnum-of-local-dep-constructors"><code>dependency-graph.num-of-local-dep-constructors</code><a class="headerlink" href="#dependency-graphnum-of-local-dep-constructors" title="Permanent link">&para;</a></h3>
+<p>Number of goroutines that process transaction batches in parallel to construct batch-level dependency graphs. Each worker processes one batch at a time, and output is serialized in FIFO order.</p>
+<p>Increasing this parallelizes the CPU work of building dependency graphs. However, since output order is enforced via a condition variable, gains diminish beyond 2-4 workers. Default: 1.</p>
+<h3 id="dependency-graphwaiting-txs-limit"><code>dependency-graph.waiting-txs-limit</code><a class="headerlink" href="#dependency-graphwaiting-txs-limit" title="Permanent link">&para;</a></h3>
+<p>Maximum number of transactions in the global dependency graph. The Coordinator acquires one slot per transaction before adding it to the graph. Slots are released when the VC returns validation results. When exhausted, the dependency graph construction blocks, channels fill up, and the Sidecar stops pulling blocks.</p>
+<p>The dependency graph is what enables parallel dispatch to Verifier and VC services. A small graph (e.g., 100) means once transactions are dispatched, no new ones enter until results return — creating idle gaps and reducing throughput. A very large graph increases memory for dependency tracking state and queuing latency. Incoming blocks are chunked into batches of <code>min(waiting-txs-limit, 500)</code> to prevent a single block from consuming all slots. Default: 100,000.</p>
+<h3 id="per-channel-buffer-size-per-goroutine"><code>per-channel-buffer-size-per-goroutine</code><a class="headerlink" href="#per-channel-buffer-size-per-goroutine" title="Permanent link">&para;</a></h3>
+<p>Base buffer size for internal Go channels connecting the Coordinator's pipeline stages. The actual buffer for each channel is computed as base × number of endpoints (or constructors):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Coordinator → DepGraph:  base × num-of-local-dep-constructors
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>DepGraph → Verifier:     base × number-of-vc-endpoints
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Verifier → VC:           base × number-of-verifier-endpoints
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>VC → DepGraph:           base × number-of-vc-endpoints
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>VC → Coordinator:        base × number-of-vc-endpoints
+</code></pre></div>
+<p>When a channel is full, the producing stage blocks. A small buffer means any momentary downstream slowdown immediately stalls all upstream stages. A larger buffer absorbs temporary throughput variations but increases memory and queuing latency. With 3 verifiers and 6 VCs, the defaults produce 30-60 item buffers per channel. Default: 10.</p>
+<h2 id="5-verifier">5. Verifier<a class="headerlink" href="#5-verifier" title="Permanent link">&para;</a></h2>
+<h3 id="parallel-executorparallelism"><code>parallel-executor.parallelism</code><a class="headerlink" href="#parallel-executorparallelism" title="Permanent link">&para;</a></h3>
+<p>Number of goroutines that verify signatures in parallel. Signature verification is CPU-bound. Each stream from the Coordinator creates an independent executor with this many workers.</p>
+<p>Set this to match the number of CPU cores available on the Verifier node. Under-setting leaves CPU idle, reducing verification throughput and causing transactions to queue at the Coordinator. Over-setting causes context switching overhead with no throughput gain. The default of 40 assumes a 32+ core machine.</p>
+<h3 id="parallel-executorbatch-size-cutoff"><code>parallel-executor.batch-size-cutoff</code><a class="headerlink" href="#parallel-executorbatch-size-cutoff" title="Permanent link">&para;</a></h3>
+<p>Minimum number of verification results to collect before emitting a batch to the Coordinator. Results are buffered until this threshold is reached or <code>batch-time-cutoff</code> expires, whichever comes first.</p>
+<p>Setting this too low causes many small batches to be emitted, increasing per-batch overhead in channel writes and gRPC communication. Setting this too high delays results — individual transactions wait longer for the batch to fill, increasing end-to-end latency.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Throughput</th>
+<th>Latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10-20</td>
+<td>Lower (more frequent, smaller batches)</td>
+<td>Lower</td>
+</tr>
+<tr>
+<td>50 (default)</td>
+<td>Good balance</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>100-200</td>
+<td>Higher (fewer, larger batches)</td>
+<td>Higher</td>
+</tr>
+</tbody>
+</table>
+<h3 id="parallel-executorbatch-time-cutoff"><code>parallel-executor.batch-time-cutoff</code><a class="headerlink" href="#parallel-executorbatch-time-cutoff" title="Permanent link">&para;</a></h3>
+<p>Maximum time to wait for a batch to reach <code>batch-size-cutoff</code> before emitting a partial batch. This is the latency safety valve — without it, a partially filled batch under low load would wait indefinitely.</p>
+<p>Setting this too low defeats batching (batches emit before they can fill). Setting this too high adds latency during periods of low or variable transaction arrival rates.</p>
+<p>The default of 10ms ensures results are emitted promptly even under low load. Increase to 50-100ms only if batching efficiency is more important than latency.</p>
+<h3 id="parallel-executorchannel-buffer-size"><code>parallel-executor.channel-buffer-size</code><a class="headerlink" href="#parallel-executorchannel-buffer-size" title="Permanent link">&para;</a></h3>
+<p>Buffer size for internal channels in the verification pipeline. The actual channel capacity is computed as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>capacity = channel-buffer-size × parallelism
+</code></pre></div>
+<p>With the defaults (50 buffer × 40 parallelism = 2,000 capacity). When the input channel is full, the Coordinator's dispatch to the Verifier blocks, which stalls the dependency graph. When the output channel is full, verification workers block, reducing effective parallelism.</p>
+<p>Setting this too low causes frequent blocking that reduces the effective parallelism of the verification workers. Setting this too high increases memory usage proportionally. The defaults provide enough buffering for sustained high throughput.</p>
+<h2 id="6-validator-committer-vc">6. Validator-Committer (VC)<a class="headerlink" href="#6-validator-committer-vc" title="Permanent link">&para;</a></h2>
+<p>The VC processes transactions through three pipeline stages: preparation, validation, and commit. Each stage has an independent worker pool. The overall throughput is limited by the slowest stage.</p>
+<h3 id="resource-limitsmax-workers-for-preparer"><code>resource-limits.max-workers-for-preparer</code><a class="headerlink" href="#resource-limitsmax-workers-for-preparer" title="Permanent link">&para;</a></h3>
+<p>Number of goroutines that extract read/write sets from transactions and organize them for validation. Preparation is <strong>CPU-bound</strong> — it parses transaction payloads, builds namespace-to-reads maps, and categorizes writes.</p>
+<p>Setting this too low makes the preparer the bottleneck — transactions queue up waiting for preparation while the validator and committer workers sit idle. Setting this higher than needed wastes CPU on goroutine overhead.</p>
+<p>The default of 1 is sufficient for most workloads because preparation is fast relative to the database-bound stages. Increase to 2-4 if you observe the preparer queue growing while validator and committer queues are empty.</p>
+<h3 id="resource-limitsmax-workers-for-validator"><code>resource-limits.max-workers-for-validator</code><a class="headerlink" href="#resource-limitsmax-workers-for-validator" title="Permanent link">&para;</a></h3>
+<p>Number of goroutines that perform MVCC validation against the database. Each worker calls a stored procedure (<code>validate_reads_ns_&lt;namespace&gt;</code>) that checks whether read set versions still match the committed state.</p>
+<p>Validation is <strong>database-bound</strong> — each call makes at least one database round-trip per namespace in the transaction's read set. Each active validator worker holds a database connection for the duration of its query.</p>
+<p>Setting this too low causes transactions to queue at the validator stage while the database has spare capacity. Setting this too high exhausts the connection pool — workers compete for connections, and the overhead of connection acquisition negates the parallelism benefit.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (default)</td>
+<td>Serialized validation; minimal DB load; may under-utilize DB</td>
+</tr>
+<tr>
+<td>2-4</td>
+<td>Parallel validation; higher throughput; needs more DB connections</td>
+</tr>
+<tr>
+<td>&gt;4</td>
+<td>Diminishing returns unless DB can sustain the concurrent queries</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-limitsmax-workers-for-committer"><code>resource-limits.max-workers-for-committer</code><a class="headerlink" href="#resource-limitsmax-workers-for-committer" title="Permanent link">&para;</a></h3>
+<p>Number of goroutines that commit validated transactions to the database using stored procedures (<code>insert_tx_status</code>, <code>insert_ns_&lt;namespace&gt;</code>, <code>update_ns_&lt;namespace&gt;</code>). Each commit involves multiple database round-trips within a transaction: writing transaction status, inserting new keys, and updating existing keys.</p>
+<p>The committer is typically the <strong>pipeline bottleneck</strong> because it performs the most database work per transaction. Each active committer worker holds a database connection for the duration of the commit. When transactions complete here, slots are released in the Coordinator's dependency graph and the Sidecar's waiting-txs pool — so committer throughput directly controls how fast the entire pipeline can flow.</p>
+<p>Setting this too low starves the pipeline — the Coordinator's dependency graph fills up, backpressure reaches the Sidecar, and block ingestion stalls. Setting this too high overwhelms the database with concurrent transactions, causing contention and increased retry rates.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1-2</td>
+<td>Low throughput; database under-utilized; pipeline stalls</td>
+</tr>
+<tr>
+<td>10-20 (default: 20)</td>
+<td>Good throughput; recommended starting point</td>
+</tr>
+<tr>
+<td>&gt;20</td>
+<td>Diminishing returns; may overwhelm the database with contention</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-limitsmin-transaction-batch-size"><code>resource-limits.min-transaction-batch-size</code><a class="headerlink" href="#resource-limitsmin-transaction-batch-size" title="Permanent link">&para;</a></h3>
+<p>Minimum number of transactions that must accumulate before the batch is forwarded to the preparation stage. The VC waits for this many transactions or until <code>timeout-for-min-transaction-batch-size</code> expires, whichever comes first. Config blocks are always sent immediately regardless of batch size.</p>
+<p>Larger batches improve efficiency — stored procedures process keys in bulk, reducing per-transaction overhead. But larger batches also increase latency because early-arriving transactions wait for the batch to fill.</p>
+<p>Setting this too high under low transaction rates causes transactions to sit idle until the timeout expires, adding <code>timeout-for-min-transaction-batch-size</code> of latency to every batch. Setting this to 1 (default) disables batching entirely — every transaction is forwarded immediately for lowest latency.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Throughput</th>
+<th>Latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 (default)</td>
+<td>Lower (no batching benefit)</td>
+<td>Lowest</td>
+</tr>
+<tr>
+<td>10-50</td>
+<td>Higher (bulk stored procedure operations)</td>
+<td>Higher (waits for batch to fill)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-limitstimeout-for-min-transaction-batch-size"><code>resource-limits.timeout-for-min-transaction-batch-size</code><a class="headerlink" href="#resource-limitstimeout-for-min-transaction-batch-size" title="Permanent link">&para;</a></h3>
+<p>Maximum time to wait for a batch to reach <code>min-transaction-batch-size</code>. This is the latency safety valve for batching — without it, a partially filled batch under low load would wait indefinitely.</p>
+<p>When <code>min-transaction-batch-size</code> is 1, this timeout has no effect (batches are sent immediately). When <code>min-transaction-batch-size</code> is higher, this timeout determines the worst-case additional latency during low-throughput periods.</p>
+<p>The default of 2s pairs with the default batch size of 1 (effectively unused). If you increase the batch size, consider reducing the timeout to 100-500ms to bound the latency impact.</p>
+<h3 id="databasemax-connections"><code>database.max-connections</code><a class="headerlink" href="#databasemax-connections" title="Permanent link">&para;</a></h3>
+<p>Maximum number of connections in the database connection pool. The validator and committer stages share this pool (the preparer does not use the database — it performs in-memory parsing only). If the pool is exhausted, workers block waiting for a free connection, reducing effective parallelism.</p>
+<p>Size the pool to accommodate concurrent usage:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Required connections &gt;= max-workers-for-validator + max-workers-for-committer
+</code></pre></div>
+<p>Setting this too low causes connection starvation — workers sit idle waiting for connections while the database has spare capacity. Setting this too high wastes database server memory and can cause connection-level contention.</p>
+<p>The default of 10 is conservative and likely insufficient for production workloads with the default committer worker count of 20. Size this to at least match the total validator + committer worker count.</p>
+<h3 id="databasemin-connections"><code>database.min-connections</code><a class="headerlink" href="#databasemin-connections" title="Permanent link">&para;</a></h3>
+<p>Minimum number of idle connections maintained in the pool. Keeps connections warm to avoid the overhead of establishing new connections (TCP handshake + TLS negotiation + authentication) under sudden load spikes. Set to roughly 50% of <code>max-connections</code>.</p>
+<h3 id="databaseload-balance"><code>database.load-balance</code><a class="headerlink" href="#databaseload-balance" title="Permanent link">&para;</a></h3>
+<p>Enables client-side load balancing across multiple database endpoints. When enabled, each new connection is distributed across the configured endpoints.</p>
+<ul>
+<li><strong><code>true</code></strong>: Required for YugabyteDB clusters to distribute operations across nodes and avoid hotspots. Without this, all connections go to the first endpoint, overloading one node while others sit idle.</li>
+<li><strong><code>false</code></strong>: Use for single-node deployments.</li>
+</ul>
+<h3 id="databasetable-pre-split-tablets"><code>database.table-pre-split-tablets</code><a class="headerlink" href="#databasetable-pre-split-tablets" title="Permanent link">&para;</a></h3>
+<p>Number of tablets to pre-split each table into at creation time (YugabyteDB only). Pre-splitting distributes data across tablet servers from the start, preventing the "hot tablet" bottleneck where a single tablet handles all initial writes before automatic splitting kicks in.</p>
+<p>Without pre-splitting, the first hours of operation can see severe write latency spikes as all writes converge on a single tablet. Pre-splitting eliminates this problem entirely.</p>
+<p>Set this to match the number of tablet servers in the cluster, or a small multiple (1x-2x). For example, with 9 tablet servers, set to 9 or 18.</p>
+<p>When the database is PostgreSQL, this setting is automatically ignored.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 (default)</td>
+<td>No pre-splitting; hot tablet during initial writes; latency spikes</td>
+</tr>
+<tr>
+<td>= tserver count</td>
+<td>Even distribution from the start; predictable latency</td>
+</tr>
+<tr>
+<td>2x tserver count</td>
+<td>Finer distribution; slightly more per-tablet overhead</td>
+</tr>
+</tbody>
+</table>
+<h3 id="databaseretry"><code>database.retry</code><a class="headerlink" href="#databaseretry" title="Permanent link">&para;</a></h3>
+<p>Exponential backoff retry strategy for database operations. Required for YugabyteDB to handle retryable transaction conflicts (e.g., serialization failures from concurrent MVCC operations).</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>initial-interval</code></td>
+<td>500ms</td>
+<td>First retry delay</td>
+</tr>
+<tr>
+<td><code>randomization-factor</code></td>
+<td>0.5</td>
+<td>Jitter range (+/- 50%) to avoid thundering herd</td>
+</tr>
+<tr>
+<td><code>multiplier</code></td>
+<td>1.5</td>
+<td>Exponential backoff factor</td>
+</tr>
+<tr>
+<td><code>max-interval</code></td>
+<td>60s</td>
+<td>Cap on any single retry delay</td>
+</tr>
+<tr>
+<td><code>max-elapsed-time</code></td>
+<td>15m</td>
+<td>Total retry duration before giving up</td>
+</tr>
+</tbody>
+</table>
+<p>For high-throughput workloads with frequent transaction conflicts, reduce <code>initial-interval</code> to 100-200ms and <code>max-interval</code> to 10-30s to retry faster. Too-aggressive retries (very short intervals) can amplify contention under heavy load.</p>
+<h2 id="7-query-service">7. Query Service<a class="headerlink" href="#7-query-service" title="Permanent link">&para;</a></h2>
+<h3 id="min-batch-keys"><code>min-batch-keys</code><a class="headerlink" href="#min-batch-keys" title="Permanent link">&para;</a></h3>
+<p>Minimum number of keys that must accumulate in a query batch before executing against the database. The batch is submitted when this threshold is reached or <code>max-batch-wait</code> expires, whichever comes first.</p>
+<p>Batching reduces database round-trips by combining keys from multiple concurrent requests into a single query. Setting this too low sends many small queries, increasing per-query overhead. Setting this too high delays queries waiting for the batch to fill, increasing latency for individual requests.</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Throughput</th>
+<th>Latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>256-512</td>
+<td>Lower (smaller batches, more round-trips)</td>
+<td>Lower</td>
+</tr>
+<tr>
+<td>1024 (default)</td>
+<td>Good balance</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>2048-4096</td>
+<td>Higher (larger batches, fewer round-trips)</td>
+<td>Higher</td>
+</tr>
+</tbody>
+</table>
+<h3 id="max-batch-wait"><code>max-batch-wait</code><a class="headerlink" href="#max-batch-wait" title="Permanent link">&para;</a></h3>
+<p>Maximum time to wait for a batch to reach <code>min-batch-keys</code>. This bounds the worst-case latency during low-load periods when keys accumulate slowly. Setting this too low defeats batching (queries execute before batches can fill). Setting this too high adds latency during quiet periods.</p>
+<p>The default of 100ms is appropriate for most deployments. Reduce to 50ms for lower latency.</p>
+<h3 id="view-aggregation-window"><code>view-aggregation-window</code><a class="headerlink" href="#view-aggregation-window" title="Permanent link">&para;</a></h3>
+<p>Time window for aggregating multiple views with the same parameters (isolation level, deferrable mode) into a single batched view. Views created within this window share the same batcher, reducing database load.</p>
+<p>Setting this too low creates many independent batchers, each holding its own database connection — increasing connection pool pressure. Setting this too high delays the first query in a window, as new views must wait for the window to open a batcher.</p>
+<p>The default of 100ms balances throughput and latency.</p>
+<h3 id="max-aggregated-views"><code>max-aggregated-views</code><a class="headerlink" href="#max-aggregated-views" title="Permanent link">&para;</a></h3>
+<p>Maximum number of views that can be aggregated into a single batcher. Once reached, a new batcher is created even if within the <code>view-aggregation-window</code>. This prevents a single batcher from becoming a contention point under very high concurrency. The default of 1024 is appropriate for most deployments.</p>
+<h3 id="max-active-views"><code>max-active-views</code><a class="headerlink" href="#max-active-views" title="Permanent link">&para;</a></h3>
+<p>Maximum concurrent active views across all clients. New <code>BeginView</code> requests are rejected with <code>RESOURCE_EXHAUSTED</code> when this limit is reached.</p>
+<p>Setting this too low causes clients to receive errors during peak load, forcing retries that amplify latency. Setting this too high allows unbounded resource consumption. Set to 0 to disable the limit (not recommended in production). The default of 4096 is permissive.</p>
+<h3 id="max-view-timeout"><code>max-view-timeout</code><a class="headerlink" href="#max-view-timeout" title="Permanent link">&para;</a></h3>
+<p>Maximum lifetime of a view from creation to completion. Views exceeding this timeout are aborted and their queries return errors. This prevents dangling views from holding resources indefinitely.</p>
+<p>Setting this too low causes legitimate long-running queries to be aborted. Setting this too high allows idle or abandoned views to hold database connections for extended periods, reducing pool availability for other views.</p>
+<p>This parameter interacts with the connection pool. The maximum number of database connections needed by the Query Service depends on:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>max connections needed = (max-view-timeout / view-aggregation-window) × view-parameter-permutations
+</code></pre></div>
+<p>There are up to 8 view parameter permutations (4 isolation levels × 2 deferrable modes). With defaults: <code>(10s / 100ms) × 8 = 800</code>. In practice, not all permutations are used simultaneously, so fewer connections are needed. Monitor connection pool wait metrics to determine the right size.</p>
+<h3 id="max-request-keys"><code>max-request-keys</code><a class="headerlink" href="#max-request-keys" title="Permanent link">&para;</a></h3>
+<p>Maximum number of keys allowed in a single query request. Applies to both <code>GetRows</code> (total keys across all namespaces) and <code>GetTransactionStatus</code> (number of transaction IDs). Setting this too low forces clients to split queries into many small requests, increasing round-trip overhead. Setting this too high allows individual requests to cause memory spikes and long-running queries that block the connection pool. The default of 10,000 is a reasonable balance.</p>
+<h3 id="databasemax-connections-query-service"><code>database.max-connections</code> (Query Service)<a class="headerlink" href="#databasemax-connections-query-service" title="Permanent link">&para;</a></h3>
+<p>The Query Service connection pool operates differently from the VC pool. Connections are held for the duration of a view's queries, which can be up to <code>max-view-timeout</code>. A view that holds a connection for 10 seconds blocks that connection from serving other views.</p>
+<p>Size the pool based on expected concurrent view load and the formula above. The default of 10 is conservative — increase for production workloads. Monitor the connection pool wait metrics to detect when views are blocking on connection acquisition.</p>
+<h2 id="8-database">8. Database<a class="headerlink" href="#8-database" title="Permanent link">&para;</a></h2>
+<h3 id="yugabytedb-considerations">YugabyteDB Considerations<a class="headerlink" href="#yugabytedb-considerations" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Tablet distribution</strong>: Use <code>table-pre-split-tablets</code> (VC config) to distribute tablets evenly across all tablet servers. Without pre-splitting, initial writes hit a single tablet, causing latency spikes until automatic splitting occurs.</li>
+<li><strong>Rebalancing</strong>: After adding new tablet servers, rebalance tablets to distribute data to the new nodes.</li>
+<li><strong>Connection load balancing</strong>: Enable <code>database.load-balance: true</code> on all services connected to YugabyteDB to distribute queries across nodes.</li>
+</ul>
+<h3 id="postgresql-considerations">PostgreSQL Considerations<a class="headerlink" href="#postgresql-considerations" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>table-pre-split-tablets</code></strong>: Automatically ignored when PostgreSQL is detected.</li>
+<li><strong>Connection pool</strong>: Same <code>max-connections</code> and <code>min-connections</code> parameters apply. Size based on concurrent query volume.</li>
+<li><strong>Replication</strong>: For read-heavy workloads, configure Query Service instances to connect to read replicas.</li>
+</ul>
+<h2 id="9-co-location-impact">9. Co-location Impact<a class="headerlink" href="#9-co-location-impact" title="Permanent link">&para;</a></h2>
+<p>MVCC validation requires multiple database round-trips per transaction — read set validation, write set application, and status updates. When VC instances are co-located with database nodes, each of these round-trips takes microseconds instead of milliseconds. Without co-location, expect significantly higher commit latency, which directly limits overall system throughput.</p>
+<p>Co-location is most impactful for the VC service because it performs the most database operations per transaction. The Query Service benefits less because its read-only queries are less latency-sensitive.</p>
+<h2 id="10-benchmarking">10. Benchmarking<a class="headerlink" href="#10-benchmarking" title="Permanent link">&para;</a></h2>
+<p>The tuning recommendations in this guide are starting points, not guarantees. Real performance depends on factors specific to your deployment:</p>
+<ul>
+<li>Transaction size and complexity (number of read/write keys per transaction)</li>
+<li>Number of namespaces and endorsement policy complexity</li>
+<li>Read set and write set sizes</li>
+<li>Network topology and latency between nodes</li>
+<li>Storage hardware characteristics</li>
+</ul>
+<p>Benchmark with your actual workload on your target hardware to establish baseline performance and identify the tuning parameters that matter most for your use case.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

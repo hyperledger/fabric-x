@@ -1,0 +1,3127 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../logging/">
+      
+      
+        <link rel="next" href="../tls-configurations/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Committer Metrics - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#metrics-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Committer Metrics
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sidecar-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sidecar Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#coordinator-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordinator Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifier-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifier Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validator-committer-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validator-Committer Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-service-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Service Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#load-generator-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Generator Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sidecar-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sidecar Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#coordinator-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordinator Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#verifier-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verifier Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validator-committer-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validator-Committer Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#query-service-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Service Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#load-generator-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Load Generator Metrics
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+<h1 id="metrics-reference">Metrics Reference<a class="headerlink" href="#metrics-reference" title="Permanent link">&para;</a></h1>
+<h2 id="sidecar-metrics">Sidecar Metrics<a class="headerlink" href="#sidecar-metrics" title="Permanent link">&para;</a></h2>
+<p>The following Sidecar metrics are exported for consumption by Prometheus.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Labels</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sidecar_grpc_coordinator_sent_transaction_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transactions sent to the coordinator service.</td>
+</tr>
+<tr>
+<td>sidecar_grpc_coordinator_received_transaction_status_total</td>
+<td>counter</td>
+<td>status</td>
+<td>Total number of transactions statuses received from the coordinator service.</td>
+</tr>
+<tr>
+<td>sidecar_relay_block_mapping_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>Time spent mapping a received block to an internal block.</td>
+</tr>
+<tr>
+<td>sidecar_relay_mapped_block_processing_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>Time spent processing an internal block and sending it to the coordinator.</td>
+</tr>
+<tr>
+<td>sidecar_relay_transaction_status_batch_processing_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>Time spent processing a received status batch from the coordinator.</td>
+</tr>
+<tr>
+<td>sidecar_relay_waiting_transactions_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>Total number of transactions waiting at the relay for statuses.</td>
+</tr>
+<tr>
+<td>sidecar_relay_input_block_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>Size of the input block queue of the relay service.</td>
+</tr>
+<tr>
+<td>sidecar_relay_output_committed_block_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>Size of the output committed block queue of the relay service.</td>
+</tr>
+<tr>
+<td>sidecar_coordinator_connection_status</td>
+<td>gauge</td>
+<td>grpc_target</td>
+<td>Connection status to coordinator service by grpc target (1 = connected, 0 = disconnected).</td>
+</tr>
+<tr>
+<td>sidecar_coordinator_connection_failure_total</td>
+<td>counter</td>
+<td>grpc_target</td>
+<td>Total number of connection failures to coordinator service. Short-lived failures may not always be captured.</td>
+</tr>
+<tr>
+<td>sidecar_ledger_append_block_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>Time spent appending a block to the ledger.</td>
+</tr>
+<tr>
+<td>sidecar_ledger_block_height</td>
+<td>gauge</td>
+<td></td>
+<td>The current block height of the ledger.</td>
+</tr>
+<tr>
+<td>sidecar_relay_transaction_in_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transactions received from the orderer.</td>
+</tr>
+<tr>
+<td>sidecar_relay_transaction_out_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transaction statuses processed from the coordinator.</td>
+</tr>
+<tr>
+<td>sidecar_notifier_active_streams</td>
+<td>gauge</td>
+<td></td>
+<td>Number of active notification streams.</td>
+</tr>
+<tr>
+<td>sidecar_notifier_pending_tx_ids</td>
+<td>gauge</td>
+<td></td>
+<td>Number of pending (txID, request) subscriptions waiting for status notification.</td>
+</tr>
+<tr>
+<td>sidecar_notifier_unique_pending_tx_ids</td>
+<td>gauge</td>
+<td></td>
+<td>Number of unique transaction IDs pending across all requests.</td>
+</tr>
+<tr>
+<td>sidecar_notifier_tx_ids_status_deliveries_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transaction IDs' status deliveries to clients.</td>
+</tr>
+<tr>
+<td>sidecar_notifier_tx_ids_timeout_deliveries_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transaction IDs' timeout deliveries to clients.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_data_source_id</td>
+<td>gauge</td>
+<td></td>
+<td>Current orderer party ID used as the data block source.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_block_number</td>
+<td>gauge</td>
+<td>stream_type</td>
+<td>Current block number by stream type (data or headers).</td>
+</tr>
+<tr>
+<td>sidecar_delivery_blocks_delivered_total</td>
+<td>counter</td>
+<td>stream_type source_id</td>
+<td>Total number of blocks delivered by stream type, and source ID.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_block_verification_seconds</td>
+<td>histogram</td>
+<td>stream_type source_id result</td>
+<td>Time spent verifying blocks by stream type, source ID, and result.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_stream_restarts_total</td>
+<td>counter</td>
+<td>reason</td>
+<td>Total number of stream restarts by reason.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_stream_starts_total</td>
+<td>counter</td>
+<td>stream_type source_id</td>
+<td>Total number of stream starts by stream type and source ID.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_stream_active</td>
+<td>gauge</td>
+<td>stream_type source_id</td>
+<td>Number of currently active streams by stream type, and source ID.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_stream_errors_total</td>
+<td>counter</td>
+<td>stream_type source_id error_type</td>
+<td>Total number of stream errors by stream type, source ID, and error type.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_withholding_suspicion_raised_total</td>
+<td>counter</td>
+<td>source_id</td>
+<td>Total number of block withholding suspicions raised by data source ID.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_withholding_suspicion_cleared_total</td>
+<td>counter</td>
+<td>source_id</td>
+<td>Total number of block withholding suspicions cleared by data source ID.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_withholding_suspicion_confirmed_total</td>
+<td>counter</td>
+<td>source_id</td>
+<td>Total number of block withholding suspicions confirmed by data source ID.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_stream_block_gap</td>
+<td>gauge</td>
+<td>source_id</td>
+<td>Current block gap between header and data streams (data - header) by data source ID.Positive value indicates that data stream is ahead of header stream.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_target_arrival_deadline_unix_milliseconds</td>
+<td>gauge</td>
+<td>source_id</td>
+<td>Unix timestamp (milliseconds) of the target block arrival deadline for withholding detection by source ID.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_config_updates_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of config block updates detected.</td>
+</tr>
+<tr>
+<td>sidecar_delivery_config_block_number</td>
+<td>gauge</td>
+<td></td>
+<td>Current config block number.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="coordinator-metrics">Coordinator Metrics<a class="headerlink" href="#coordinator-metrics" title="Permanent link">&para;</a></h2>
+<p>The following Coordinator metrics are exported for consumption by Prometheus.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Labels</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>coordinator_grpc_received_transaction_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transactions received by the coordinator service from the client.</td>
+</tr>
+<tr>
+<td>coordinator_grpc_committed_transaction_total</td>
+<td>counter</td>
+<td>status</td>
+<td>Total number of transactions committed status sent by the coordinator service to the client.</td>
+</tr>
+<tr>
+<td>coordinator_verifier_input_tx_batch_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>Size of the input transaction batch queue of the signature verifier manager.</td>
+</tr>
+<tr>
+<td>coordinator_verifier_output_validated_tx_batch_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>Size of the output validated transaction batch queue of the signature verifier manager.</td>
+</tr>
+<tr>
+<td>coordinator_vcservice_output_tx_status_batch_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>Size of the output transaction status batch queue of the validation and committer service manager.</td>
+</tr>
+<tr>
+<td>coordinator_vcservice_output_validated_tx_batch_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>Size of the output validated transaction batch queue of the validation and committer service manager.</td>
+</tr>
+<tr>
+<td>coordinator_verifier_transaction_processed_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transactions processed by the signature verifier manager.</td>
+</tr>
+<tr>
+<td>coordinator_vcservice_transaction_processed_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transactions processed by the validation and committer service manager.</td>
+</tr>
+<tr>
+<td>coordinator_verifier_connection_status</td>
+<td>gauge</td>
+<td>grpc_target</td>
+<td>Connection status to verifier service by grpc target (1 = connected, 0 = disconnected).</td>
+</tr>
+<tr>
+<td>coordinator_verifier_connection_failure_total</td>
+<td>counter</td>
+<td>grpc_target</td>
+<td>Total number of connection failures to verifier service. Short-lived failures may not always be captured.</td>
+</tr>
+<tr>
+<td>coordinator_vcservice_retired_transaction_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transactions retried by the validation and committer service manager.</td>
+</tr>
+<tr>
+<td>coordinator_vcservice_connection_status</td>
+<td>gauge</td>
+<td>grpc_target</td>
+<td>Connection status to vcservice service by grpc target (1 = connected, 0 = disconnected).</td>
+</tr>
+<tr>
+<td>coordinator_vcservice_connection_failure_total</td>
+<td>counter</td>
+<td>grpc_target</td>
+<td>Total number of connection failures to vcservice service. Short-lived failures may not always be captured.</td>
+</tr>
+<tr>
+<td>coordinator_verifier_retired_transaction_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transactions retried by the signature verifier manager.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="verifier-metrics">Verifier Metrics<a class="headerlink" href="#verifier-metrics" title="Permanent link">&para;</a></h2>
+<p>The following Verifier metrics are exported for consumption by Prometheus.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Labels</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>verifier_server_tx_input_throughput</td>
+<td>counter</td>
+<td></td>
+<td>Incoming requests for a component</td>
+</tr>
+<tr>
+<td>verifier_server_tx_output_throughput</td>
+<td>counter</td>
+<td></td>
+<td>Outgoing responses for a component</td>
+</tr>
+<tr>
+<td>verifier_server_grpc_active_streams</td>
+<td>gauge</td>
+<td></td>
+<td>The total number of started streams</td>
+</tr>
+<tr>
+<td>verifier_server_parallel_executor_active_requests</td>
+<td>gauge</td>
+<td></td>
+<td>The total number of active requests</td>
+</tr>
+</tbody>
+</table>
+<h2 id="validator-committer-metrics">Validator-Committer Metrics<a class="headerlink" href="#validator-committer-metrics" title="Permanent link">&para;</a></h2>
+<p>The following Validator-Committer metrics are exported for consumption by Prometheus.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Labels</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>vcservice_grpc_received_transaction_total</td>
+<td>counter</td>
+<td></td>
+<td>Number of transactions received by the service</td>
+</tr>
+<tr>
+<td>vcservice_grpc_processed_transaction_total</td>
+<td>counter</td>
+<td></td>
+<td>Number of transactions processed by the service</td>
+</tr>
+<tr>
+<td>vcservice_committed_transaction_total</td>
+<td>counter</td>
+<td></td>
+<td>The total number of transactions committed</td>
+</tr>
+<tr>
+<td>vcservice_mvcc_conflict_total</td>
+<td>counter</td>
+<td></td>
+<td>The total number of transactions that failed due to MVCC conflict</td>
+</tr>
+<tr>
+<td>vcservice_duplicate_transaction_total</td>
+<td>counter</td>
+<td></td>
+<td>The total number of duplicate transactions</td>
+</tr>
+<tr>
+<td>vcservice_preparer_input_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>The preparer input queue size</td>
+</tr>
+<tr>
+<td>vcservice_validator_input_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>The validator input queue size</td>
+</tr>
+<tr>
+<td>vcservice_committer_input_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>The committer input queue size</td>
+</tr>
+<tr>
+<td>vcservice_txstatus_output_queue_size</td>
+<td>gauge</td>
+<td></td>
+<td>The txstatus output queue size</td>
+</tr>
+<tr>
+<td>vcservice_preparer_tx_batch_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the preparer processing a batch of transactions</td>
+</tr>
+<tr>
+<td>vcservice_validator_tx_batch_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the validator processing a batch of transactions</td>
+</tr>
+<tr>
+<td>vcservice_committer_tx_batch_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the committer processing a batch of transactions</td>
+</tr>
+<tr>
+<td>vcservice_database_tx_batch_validation_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the database validating a batch of transactions</td>
+</tr>
+<tr>
+<td>vcservice_database_tx_batch_query_version_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the database querying version for keys in a batch of transactions</td>
+</tr>
+<tr>
+<td>vcservice_database_tx_batch_commit_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the database committing a batch of transactions</td>
+</tr>
+<tr>
+<td>vcservice_database_tx_batch_commit_txs_status_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the database committing a batch of transactions and updating their status</td>
+</tr>
+<tr>
+<td>vcservice_database_tx_batch_commit_update_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the database committing a batch of transactions which involes updating existing keys</td>
+</tr>
+<tr>
+<td>vcservice_database_tx_batch_commit_insert_new_key_with_value_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the database committing a batch of transactions which involes inserting new keys with values</td>
+</tr>
+</tbody>
+</table>
+<h2 id="query-service-metrics">Query Service Metrics<a class="headerlink" href="#query-service-metrics" title="Permanent link">&para;</a></h2>
+<p>The following Query Service metrics are exported for consumption by Prometheus.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Labels</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>queryservice_grpc_requests_total</td>
+<td>counter</td>
+<td>method</td>
+<td>Number of requests by the service</td>
+</tr>
+<tr>
+<td>queryservice_grpc_requests_latency_seconds</td>
+<td>histogram</td>
+<td>method</td>
+<td>The latency (seconds) of requests by the service</td>
+</tr>
+<tr>
+<td>queryservice_grpc_key_requested_total</td>
+<td>counter</td>
+<td></td>
+<td>Number of keys requested by the service</td>
+</tr>
+<tr>
+<td>queryservice_grpc_key_responded_total</td>
+<td>counter</td>
+<td></td>
+<td>Number of keys responded by the service</td>
+</tr>
+<tr>
+<td>queryservice_database_processing_sessions</td>
+<td>gauge</td>
+<td>session</td>
+<td>Number of processing sessions in the service</td>
+</tr>
+<tr>
+<td>queryservice_database_batch_queueing_time_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The time batches waits for execution</td>
+</tr>
+<tr>
+<td>queryservice_database_batch_query_size</td>
+<td>histogram</td>
+<td></td>
+<td>The size of submitted batches</td>
+</tr>
+<tr>
+<td>queryservice_database_batch_response_size</td>
+<td>histogram</td>
+<td></td>
+<td>The size of response for batch queries</td>
+</tr>
+<tr>
+<td>queryservice_database_request_assignment_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the query request assignment to the queue</td>
+</tr>
+<tr>
+<td>queryservice_database_query_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>The latency of the queries' batches</td>
+</tr>
+</tbody>
+</table>
+<h2 id="load-generator-metrics">Load Generator Metrics<a class="headerlink" href="#load-generator-metrics" title="Permanent link">&para;</a></h2>
+<p>The following Load Generator metrics are exported for consumption by Prometheus.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Labels</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>loadgen_block_sent_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of blocks sent by the block generator</td>
+</tr>
+<tr>
+<td>loadgen_block_received_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of blocks received by the block generator</td>
+</tr>
+<tr>
+<td>loadgen_transaction_sent_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transactions sent by the block generator</td>
+</tr>
+<tr>
+<td>loadgen_transaction_received_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transactions received by the block generator</td>
+</tr>
+<tr>
+<td>loadgen_transaction_committed_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transaction commit statuses received by the block generator</td>
+</tr>
+<tr>
+<td>loadgen_transaction_aborted_total</td>
+<td>counter</td>
+<td></td>
+<td>Total number of transaction abort statuses received by the block generator</td>
+</tr>
+<tr>
+<td>loadgen_valid_transaction_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>Latency of valid transactions in seconds</td>
+</tr>
+<tr>
+<td>loadgen_invalid_transaction_latency_seconds</td>
+<td>histogram</td>
+<td></td>
+<td>Latency of invalid transactions in seconds</td>
+</tr>
+</tbody>
+</table>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

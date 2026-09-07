@@ -1,0 +1,3157 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Endorser - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#endorsement-models-in-fabric-x" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Endorser
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-fsc-based-endorsement-primary-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. FSC-Based Endorsement (Primary Model)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. FSC-Based Endorsement (Primary Model)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fsc-view-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FSC View Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-custom-endorser-services" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Custom Endorser Services
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Custom Endorser Services">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-endorser-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Endorser Implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-fabric-compatible-endorsement-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Fabric-Compatible Endorsement Policies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Fabric-Compatible Endorsement Policies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policy-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Syntax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#principal-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Principal Format
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Examples
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-threshold-signatures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Threshold Signatures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Threshold Signatures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bls-signature-aggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BLS Signature Aggregation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-of-endorsement-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison of Endorsement Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comparison of Endorsement Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#feature-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feature Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-case-recommendations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Use Case Recommendations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-path-from-fabric-classic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Migration Path from Fabric Classic
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#endorsement-policy-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Endorsement Policy Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fsc-view-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        FSC View Development
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-endorser-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Endorser Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Troubleshooting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Issues
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-tips" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Debugging Tips
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<h1 id="endorsement-models-in-fabric-x">Endorsement Models in Fabric-X<a class="headerlink" href="#endorsement-models-in-fabric-x" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Fabric-X supports multiple endorsement models, providing flexibility for different use cases while maintaining compatibility with Hyperledger Fabric policies. This document covers the primary endorsement approaches: <strong>FSC-based endorsement</strong>, <strong>custom endorsers</strong>, <strong>Fabric-compatible policies</strong>, and <strong>threshold signatures</strong>.</p>
+<p>The endorsement model architecture brings together three distinct approaches under a unified policy framework. FSC-based endorsement serves as the primary model for most smart contract workloads, while custom endorsers enable integration with external systems and specialized cryptographic operations. Threshold signatures provide an advanced mechanism for privacy-sensitive applications requiring signer anonymity. All three models operate within Fabric-compatible policies that support familiar AND, OR, and NOutOf operators.</p>
+<div class="mermaid">flowchart TB
+    subgraph EndorsementModels["ENDORSEMENT MODELS"]
+        FSC["FSC&lt;br/&gt;(Primary)"]
+        Custom["Custom&lt;br/&gt;Endorser"]
+        Threshold["Threshold&lt;br/&gt;Signatures"]
+
+        Policies["Fabric-Compatible&lt;br/&gt;Policies&lt;br/&gt;(AND, OR, NOutOf)"]
+
+        FSC --&gt; Policies
+        Custom --&gt; Policies
+        Threshold --&gt; Policies
+    end</div>
+<h2 id="1-fsc-based-endorsement-primary-model">1. FSC-Based Endorsement (Primary Model)<a class="headerlink" href="#1-fsc-based-endorsement-primary-model" title="Permanent link">&para;</a></h2>
+<h3 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h3>
+<p>Fabric-X uses <strong>Fabric-Smart-Client (FSC) views</strong> as the primary endorsement mechanism. Unlike Hyperledger Fabric Classic where chaincode executes in Docker containers, FSC views run as native Go code, providing significant performance improvements.</p>
+<div class="mermaid">flowchart LR
+    Client["Client"]
+    FSCView["FSC View&lt;br/&gt;(Endorser)"]
+
+    Client --&gt;|Transaction Proposal| FSCView
+    FSCView --&gt;|Read/Write Set + Signature| Client
+
+    subgraph AssembledTx["ASSEMBLED TRANSACTION"]
+        direction TB
+        Header["Header&lt;br/&gt;- ChannelID: mychannel&lt;br/&gt;- NamespaceID: token-ns&lt;br/&gt;- TransactionID: tx-123&lt;br/&gt;- Timestamp: 1234567890"]
+        Payload["Payload&lt;br/&gt;- ReadSet: [{Key: account:A, Version: 5}]&lt;br/&gt;- WriteSet: [{Key: account:A, Value: 900}]"]
+        Endorsements["Endorsements&lt;br/&gt;- Org1: {Signature, Certificate}&lt;br/&gt;- Org2: {Signature, Certificate}"]
+    end
+
+    Client --&gt; AssembledTx</div>
+<h3 id="fsc-view-structure">FSC View Structure<a class="headerlink" href="#fsc-view-structure" title="Permanent link">&para;</a></h3>
+<p>An FSC view implements the endorsement logic as native Go code. The view structure encapsulates transaction parameters and implements a Call method that executes the endorsement logic. This method reads the current state from the ledger, validates the transaction against business rules, computes the new state, and produces a read-write set. The view then signs this read-write set using the FSC identity framework and returns an endorsement containing the read-write set, signature, and certificate.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// FSC View implementing endorsement logic</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kd">type</span><span class="w"> </span><span class="nx">TokenTransferView</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nx">Sender</span><span class="w">    </span><span class="kt">string</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nx">Receiver</span><span class="w">  </span><span class="kt">string</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nx">Amount</span><span class="w">    </span><span class="kt">uint64</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nx">Namespace</span><span class="w"> </span><span class="kt">string</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">}</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1">// Call executes the view and produces read/write sets</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">v</span><span class="w"> </span><span class="o">*</span><span class="nx">TokenTransferView</span><span class="p">)</span><span class="w"> </span><span class="nx">Call</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">view</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="kd">interface</span><span class="p">{},</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="c1">// 1. Read current state</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="nx">senderBalance</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">readBalance</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">Sender</span><span class="p">)</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="nx">receiverBalance</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">readBalance</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">Receiver</span><span class="p">)</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="c1">// 2. Validate transaction</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">senderBalance</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">Amount</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"insufficient funds"</span><span class="p">)</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="c1">// 3. Compute new state</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="nx">newSenderBalance</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">senderBalance</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">Amount</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="nx">newReceiverBalance</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">receiverBalance</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">Amount</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="c1">// 4. Create read-write set</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="nx">rwSet</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">RWSet</span><span class="p">{</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="nx">Reads</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">Read</span><span class="p">{</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">            </span><span class="p">{</span><span class="nx">Key</span><span class="p">:</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">accountKey</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Sender</span><span class="p">),</span><span class="w"> </span><span class="nx">Version</span><span class="p">:</span><span class="w"> </span><span class="nx">currentVersion</span><span class="p">},</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">            </span><span class="p">{</span><span class="nx">Key</span><span class="p">:</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">accountKey</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Receiver</span><span class="p">),</span><span class="w"> </span><span class="nx">Version</span><span class="p">:</span><span class="w"> </span><span class="nx">currentVersion</span><span class="p">},</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">        </span><span class="nx">Writes</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="nx">Write</span><span class="p">{</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">            </span><span class="p">{</span><span class="nx">Key</span><span class="p">:</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">accountKey</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Sender</span><span class="p">),</span><span class="w"> </span><span class="nx">Value</span><span class="p">:</span><span class="w"> </span><span class="nx">newSenderBalance</span><span class="p">},</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">            </span><span class="p">{</span><span class="nx">Key</span><span class="p">:</span><span class="w"> </span><span class="nx">v</span><span class="p">.</span><span class="nx">accountKey</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nx">Receiver</span><span class="p">),</span><span class="w"> </span><span class="nx">Value</span><span class="p">:</span><span class="w"> </span><span class="nx">newReceiverBalance</span><span class="p">},</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="w">    </span><span class="c1">// 5. Sign the read-write set</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">    </span><span class="nx">signature</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Sign</span><span class="p">(</span><span class="nx">rwSet</span><span class="p">.</span><span class="nx">Hash</span><span class="p">())</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">    </span><span class="c1">// 6. Return endorsement</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">Endorsement</span><span class="p">{</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">        </span><span class="nx">RWSet</span><span class="p">:</span><span class="w">     </span><span class="nx">rwSet</span><span class="p">,</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">        </span><span class="nx">Signature</span><span class="p">:</span><span class="w"> </span><span class="nx">signature</span><span class="p">,</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="w">        </span><span class="nx">Certificate</span><span class="p">:</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Certificate</span><span class="p">(),</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="p">}</span>
+</code></pre></div>
+<p>FSC views exhibit several key characteristics that distinguish them from traditional chaincode. Execution occurs as native Go code without Docker container overhead, resulting in approximately 25x faster performance compared to container-based chaincode. The model supports multi-round protocols between parties, enabling interactive transaction flows that were difficult to implement in Fabric Classic. State access happens through direct read-write set manipulation, giving developers fine-grained control over ledger operations. Identity management leverages the FSC identity framework, which remains MSP-based and compatible with existing Fabric certificate structures.</p>
+<p>The performance advantages of FSC-based endorsement become clear when comparing the endorsement flow to container-based approaches. In Fabric Classic, a client proposal must traverse Docker overhead before reaching chaincode execution, then return through the same path, typically requiring 50-100ms latency. FSC-based endorsement in Fabric-X eliminates the Docker layer entirely, allowing the client to communicate directly with the native FSC view. This streamlined path reduces latency to 10-20ms, enabling throughput of approximately 50,000 transactions per second.</p>
+<div class="mermaid">flowchart LR
+    subgraph Container["Container-Based (Fabric Classic)"]
+        C1["Client"] --&gt; D["Docker&lt;br/&gt;Overhead"]
+        D --&gt; CE["Chaincode&lt;br/&gt;Execute"]
+        CE --&gt; C2["Client"]
+    end
+
+    subgraph FSC["FSC-Based (Fabric-X)"]
+        FC1["Client"] --&gt; FV["FSC View&lt;br/&gt;Native"]
+        FV --&gt; FC2["Client"]
+    end
+
+    Container -.-&gt;|50-100ms latency| Container
+    FSC -.-&gt;|10-20ms latency| FSC</div>
+<h2 id="2-custom-endorser-services">2. Custom Endorser Services<a class="headerlink" href="#2-custom-endorser-services" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p><strong>⚠️ PLANNED FEATURE:</strong> Custom endorser services through gRPC are planned but <strong>not yet implemented</strong> in the current release.</p>
+</blockquote>
+<h3 id="architecture_1">Architecture<a class="headerlink" href="#architecture_1" title="Permanent link">&para;</a></h3>
+<p>Fabric-X will support <strong>custom endorser services</strong> for specialized endorsement logic that may not fit the FSC view model. Custom endorsers run as independent microservices and communicate via gRPC, allowing developers to implement endorsement logic in any programming language that supports gRPC communication.</p>
+<p>The following describes the planned implementation.</p>
+<p>The custom endorser architecture follows a client-server model where the client sends a gRPC proposal containing the transaction payload, read set, and proposer identity. The custom endorser service processes this proposal through its business logic layer, which can be implemented in any language. The service accesses state through the Fabric-X SDK, computes the read-write set, signs the result, and returns an endorsement response containing the read-write set, signature, and certificate.</p>
+<div class="mermaid">flowchart LR
+    Client["Client"]
+    Endorser["Custom&lt;br/&gt;Endorser&lt;br/&gt;Service"]
+
+    Client --&gt;|gRPC Proposal| Endorser
+    Endorser --&gt;|"gRPC Response&lt;br/&gt;RW Set + Sig"| Client
+
+    subgraph EndorserInternal[" "]
+        BL["Business Logic&lt;br/&gt;(Any Language)"]
+        SA["State Access&lt;br/&gt;(via SDK)"]
+    end
+
+    Endorser --&gt; BL
+    BL --&gt; SA</div>
+<p>Custom endorsers serve several important use cases that extend beyond the capabilities of FSC views. Legacy integration represents one primary use case, where organizations need to connect existing systems such as mainframes or legacy databases to the Fabric-X network. Specialized cryptographic operations form another use case, particularly for applications requiring zero-knowledge proof generation or other advanced cryptographic primitives not available in the standard FSC framework. External data integration enables oracle-style functionality where price feeds, weather data, or other off-chain information sources need to be incorporated into transactions. Compliance and regulatory checks, such as AML/KYC validation, often require integration with external systems that custom endorsers can facilitate. Multi-party computation protocols for privacy-preserving analytics also benefit from the flexibility that custom endorsers provide.</p>
+<h3 id="custom-endorser-implementation">Custom Endorser Implementation<a class="headerlink" href="#custom-endorser-implementation" title="Permanent link">&para;</a></h3>
+<p>Implementing a custom endorser requires defining a gRPC service with two primary methods: Endorse for producing signed read-write sets and Simulate for testing transaction outcomes without commitment. The EndorsementRequest message carries the namespace, transaction payload, read set, optional state cache, and proposer identity. The EndorsementResponse returns a success flag, the computed read-write set, signature, certificate, and any error messages that occurred during processing.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1">// Endorser gRPC Service Definition</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kd">service</span><span class="w"> </span><span class="n">Endorser</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="k">rpc</span><span class="w"> </span><span class="n">Endorse</span><span class="p">(</span><span class="n">EndorsementRequest</span><span class="p">)</span><span class="w"> </span><span class="k">returns</span><span class="w"> </span><span class="p">(</span><span class="n">EndorsementResponse</span><span class="p">);</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="k">rpc</span><span class="w"> </span><span class="n">Simulate</span><span class="p">(</span><span class="n">SimulationRequest</span><span class="p">)</span><span class="w"> </span><span class="k">returns</span><span class="w"> </span><span class="p">(</span><span class="n">SimulationResponse</span><span class="p">);</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="kd">message</span><span class="w"> </span><span class="nc">EndorsementRequest</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">namespace</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="kt">bytes</span><span class="w"> </span><span class="na">transaction_payload</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="n">ReadSet</span><span class="w"> </span><span class="na">read_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">  </span><span class="n">map</span><span class="p">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">bytes</span><span class="p">&gt;</span><span class="w"> </span><span class="na">state_cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="n">Identity</span><span class="w"> </span><span class="na">proposer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">}</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="kd">message</span><span class="w"> </span><span class="nc">EndorsementResponse</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">  </span><span class="kt">bool</span><span class="w"> </span><span class="na">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">  </span><span class="n">ReadWriteSet</span><span class="w"> </span><span class="na">rw_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">  </span><span class="kt">bytes</span><span class="w"> </span><span class="na">signature</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">  </span><span class="kt">bytes</span><span class="w"> </span><span class="na">certificate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">  </span><span class="kt">string</span><span class="w"> </span><span class="na">error_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="p">}</span>
+</code></pre></div>
+<p>The server implementation follows a four-step process. First, the endorser validates the incoming proposal to ensure it meets all requirements. Second, it executes the business logic specific to the use case, producing a read-write set. Third, the endorser signs the hash of the read-write set using its cryptographic manager. Finally, it returns an endorsement response containing the read-write set, signature, and certificate. If any step fails, the endorser returns a response with the success flag set to false and an appropriate error message.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// Custom Endorser Server Implementation</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kd">type</span><span class="w"> </span><span class="nx">CustomEndorserServer</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">pb</span><span class="p">.</span><span class="nx">UnimplementedEndorserServer</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nx">stateDB</span><span class="w">  </span><span class="o">*</span><span class="nx">StateDatabase</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nx">crypto</span><span class="w">   </span><span class="o">*</span><span class="nx">CryptoManager</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="p">}</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">s</span><span class="w"> </span><span class="o">*</span><span class="nx">CustomEndorserServer</span><span class="p">)</span><span class="w"> </span><span class="nx">Endorse</span><span class="p">(</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">    </span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="nx">req</span><span class="w"> </span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">EndorsementRequest</span><span class="p">,</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">pb</span><span class="p">.</span><span class="nx">EndorsementResponse</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="c1">// 1. Validate proposal</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">validateProposal</span><span class="p">(</span><span class="nx">req</span><span class="p">);</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">    </span><span class="c1">// 2. Execute business logic</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">    </span><span class="nx">rwSet</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">executeLogic</span><span class="p">(</span><span class="nx">req</span><span class="p">)</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">EndorsementResponse</span><span class="p">{</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">            </span><span class="nx">Success</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">            </span><span class="nx">ErrorMessage</span><span class="p">:</span><span class="w"> </span><span class="nx">err</span><span class="p">.</span><span class="nx">Error</span><span class="p">(),</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">        </span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">    </span><span class="c1">// 3. Sign the result</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">    </span><span class="nx">signature</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">crypto</span><span class="p">.</span><span class="nx">Sign</span><span class="p">(</span><span class="nx">rwSet</span><span class="p">.</span><span class="nx">Hash</span><span class="p">())</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="w">    </span><span class="c1">// 4. Return endorsement</span>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">pb</span><span class="p">.</span><span class="nx">EndorsementResponse</span><span class="p">{</span>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">        </span><span class="nx">Success</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">        </span><span class="nx">RwSet</span><span class="p">:</span><span class="w"> </span><span class="nx">rwSet</span><span class="p">,</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="w">        </span><span class="nx">Signature</span><span class="p">:</span><span class="w"> </span><span class="nx">signature</span><span class="p">,</span>
+<a id="__codelineno-2-35" name="__codelineno-2-35" href="#__codelineno-2-35"></a><span class="w">        </span><span class="nx">Certificate</span><span class="p">:</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">crypto</span><span class="p">.</span><span class="nx">Certificate</span><span class="p">(),</span>
+<a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="p">}</span>
+</code></pre></div>
+<p>Registering custom endorsers requires configuration that specifies the endorser name, type, endpoint, and the namespaces it serves. Each endorser can be configured with TLS settings for secure communication, including certificate paths. Timeout values can be set to handle slow-running endorsers appropriately. Multiple endorsers can be registered to serve different namespaces or provide redundancy for critical endorsement paths.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">#Configuration: endorser-config.yaml</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">endorsers</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"compliance-endorser"</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"custom"</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"compliance.fabric-x.svc:7052"</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">namespaces</span><span class="p">:</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"tokens"</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"assets"</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nt">tls</span><span class="p">:</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">      </span><span class="nt">cert</span><span class="p">:</span><span class="w"> </span><span class="s">"/etc/ssl/compliance.crt"</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"oracle-endorser"</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"custom"</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">    </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"oracle.fabric-x.svc:7053"</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">    </span><span class="nt">namespaces</span><span class="p">:</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"market-data"</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">    </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5s</span>
+</code></pre></div>
+<h2 id="3-fabric-compatible-endorsement-policies">3. Fabric-Compatible Endorsement Policies<a class="headerlink" href="#3-fabric-compatible-endorsement-policies" title="Permanent link">&para;</a></h2>
+<h3 id="policy-syntax">Policy Syntax<a class="headerlink" href="#policy-syntax" title="Permanent link">&para;</a></h3>
+<p>Fabric-X maintains compatibility with Hyperledger Fabric endorsement policy syntax, enabling migration of existing policies without modification. The policy language supports three fundamental operators that can be combined to express complex endorsement requirements. The AND operator requires all specified principals to endorse the transaction, ensuring unanimous agreement among the designated parties. The OR operator requires at least one principal from the list to endorse, providing flexibility in who can validate a transaction. The NOutOf operator specifies that at least n principals from a list must endorse, enabling majority or threshold-based approval schemes. These operators can be nested arbitrarily to express sophisticated endorsement logic that mirrors organizational governance structures.</p>
+<div class="mermaid">flowchart TB
+    subgraph PolicyOps["Policy Operators"]
+        AND["AND(principal1, principal2, ...)&lt;br/&gt;All specified principals must endorse"]
+        OR["OR(principal1, principal2, ...)&lt;br/&gt;At least one principal must endorse"]
+        NOutOf["NOutOf(n, principal1, principal2, ...)&lt;br/&gt;At least n principals from the list must endorse"]
+        Nested["Nested expressions supported"]
+    end</div>
+<h3 id="principal-format">Principal Format<a class="headerlink" href="#principal-format" title="Permanent link">&para;</a></h3>
+<p>Principals follow a simple syntax consisting of a namespace and role separated by a dot. The namespace identifies the organizational or functional context, while the role specifies the type of identity within that namespace. Common roles include member for any member of the namespace, admin for administrative identities, peer for peer nodes, client for client applications, and validator for endorsing validators. This format provides a clear and consistent way to reference identities across the network.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Principal Syntax:
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  &lt;namespace&gt;.&lt;role&gt;
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>Common Roles:
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  member   - Any member of the namespace
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  admin    - Administrative identities
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>  peer     - Peer nodes
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>  client   - Client applications
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>  validator - Endorsing validators
+</code></pre></div>
+<h3 id="policy-examples">Policy Examples<a class="headerlink" href="#policy-examples" title="Permanent link">&para;</a></h3>
+<p>Simple policies demonstrate the basic operators in straightforward scenarios. A policy allowing any organization to endorse uses the OR operator across organizational members. A policy requiring all organizations to endorse uses the AND operator. A majority endorsement policy, such as requiring 2 out of 3 organizations, uses the NOutOf operator to specify the threshold.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>#Any organization can endorse
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>OR(Org1.member, Org2.member, Org3.member)
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>#All organizations must endorse
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>AND(Org1.member, Org2.member, Org3.member)
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>#Majority endorsement (2 out of 3)
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>NOutOf(2, Org1.member, Org2.member, Org3.member)
+</code></pre></div>
+<p>Complex nested policies enable sophisticated governance structures that reflect real-world organizational requirements. A consortium with regulatory oversight might require endorsement from both a banking participant and a regulatory body, expressed as an AND of two OR clauses. Geographic distribution requirements can ensure that transactions receive approval from multiple regions while also requiring compliance officer sign-off. Escalation policies provide alternative approval paths, such as requiring both a manager and approver under normal circumstances, but allowing an executive to approve independently when needed.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>#Consortium with regulatory oversight
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>AND(
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  OR(Bank1.member, Bank2.member, Bank3.member),
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  OR(Regulator.member, Auditor.member)
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>)
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>#Geographic distribution requirement
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>AND(
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>  NOutOf(2, RegionUS.member, RegionEU.member, RegionAsia.member),
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>  OR(ComplianceOfficer.member, RiskOfficer.member)
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>)
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>#Escalation policy
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>OR(
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>  AND(Manager.member, Approver.member),
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>  Executive.member
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>)
+</code></pre></div>
+<p>Policy evaluation follows a systematic flow that processes transactions against the configured endorsement policy. The evaluation begins by extracting the policy from the namespace configuration and parsing the expression into an abstract syntax tree. The evaluator then traverses the tree, processing AND nodes by requiring all children to pass, OR nodes by requiring any child to pass, and NOutOf nodes by counting successful evaluations against the threshold. The final determination indicates whether the policy is satisfied, resulting in either a valid or rejected transaction status.</p>
+<div class="mermaid">flowchart TB
+    Tx["Transaction with&lt;br/&gt;endorsements"]
+    Extract["Extract Policy&lt;br/&gt;from namespace"]
+    Parse["Parse Expression&lt;br/&gt;Build AST"]
+    Eval["Evaluate AND nodes → All children must pass&lt;br/&gt;Evaluate OR nodes → Any child must pass&lt;br/&gt;Evaluate NOutOf → Count ≥ n"]
+    Decision["Policy&lt;br/&gt;Satisfied?"]
+    Valid["VALID"]
+    Rejected["REJECTED"]
+
+    Tx --&gt; Extract
+    Extract --&gt; Parse
+    Parse --&gt; Eval
+    Eval --&gt; Decision
+    Decision --&gt;|YES| Valid
+    Decision --&gt;|NO| Rejected</div>
+<p>Policy configuration occurs within the namespace definition, where the endorsement policy is specified alongside read, write, and admin policies. The endorsement policy defines who must endorse transactions, while the read and write policies control access to state. The admin policy governs administrative operations on the namespace. Policies can reference roles within the same namespace or external organizational identities, providing flexibility in access control design.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">#Namespace configuration with endorsement policy</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token-ns</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">version</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">endorsement_policy</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="no">AND(</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">      </span><span class="no">Org1.validator,</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">      </span><span class="no">NOutOf(2, Org2.member, Org3.member, Org4.member)</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="no">)</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">  </span><span class="nt">read_policy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OR(token-ns.reader, token-ns.admin)</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">  </span><span class="nt">write_policy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AND(token-ns.owner, token-ns.admin)</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="nt">admin_policy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">token-ns.superadmin</span>
+</code></pre></div>
+<h2 id="4-threshold-signatures">4. Threshold Signatures<a class="headerlink" href="#4-threshold-signatures" title="Permanent link">&para;</a></h2>
+<h3 id="overview_1">Overview<a class="headerlink" href="#overview_1" title="Permanent link">&para;</a></h3>
+<p>Fabric-X supports <strong>threshold signatures</strong> as an advanced endorsement mechanism. Threshold signatures enable a group of signers to collectively produce a single signature, where any <code>t</code> out of <code>n</code> participants can generate a valid signature. This approach differs fundamentally from traditional multi-signature schemes, where each signer produces an independent signature that must all be stored and verified separately.</p>
+<p>For detailed threshold signature documentation, see <a href="../threshold-signatures/">threshold-signatures.md</a>.</p>
+<p>The distinction between threshold signatures and traditional multi-signature schemes has significant implications for storage efficiency and verification performance. In a traditional multi-signature scheme, each of the three signers produces an independent signature, and all three signatures must be stored on the ledger, consuming 192 bytes total. With threshold signatures using a t-of-n scheme such as 2-out-of-3, each signer produces a partial signature. These partial signatures are then combined mathematically into a single aggregated signature of just 48 bytes. This aggregated signature verifies against the combined public key of all participants, providing the same security guarantees with substantially reduced storage requirements.</p>
+<div class="mermaid">flowchart TB
+    subgraph Traditional["Traditional Multi-Signature"]
+        S1["Signer1"] --&gt; Sig1["σ₁"]
+        S2["Signer2"] --&gt; Sig2["σ₂"]
+        S3["Signer3"] --&gt; Sig3["σ₃"]
+        Sig1 --&gt; AllSigs["[σ₁, σ₂, σ₃]&lt;br/&gt;All signatures stored (192 bytes)"]
+        Sig2 --&gt; AllSigs
+        Sig3 --&gt; AllSigs
+    end
+
+    subgraph Threshold["Threshold Signature (t=2, n=3)"]
+        TS1["Signer1"] --&gt; PS1["s₁&lt;br/&gt;Partial"]
+        TS2["Signer2"] --&gt; PS2["s₂&lt;br/&gt;Partial"]
+        TS3["Signer3"] --&gt; PS3["s₃&lt;br/&gt;Partial"]
+        PS1 --&gt; Combine["Combine"]
+        PS2 --&gt; Combine
+        Combine --&gt; AggSig["σ&lt;br/&gt;Single aggregated&lt;br/&gt;signature (48 bytes)"]
+    end</div>
+<h3 id="bls-signature-aggregation">BLS Signature Aggregation<a class="headerlink" href="#bls-signature-aggregation" title="Permanent link">&para;</a></h3>
+<p>Fabric-X uses <strong>BLS (Boneh-Lynn-Shacham)</strong> signatures for threshold operations. BLS signatures possess several properties that make them ideal for threshold endorsement scenarios. The linear aggregation property allows multiple signatures to be mathematically summed into a single signature. This aggregated signature maintains a constant size of 48 bytes regardless of the number of signers involved. Verification requires only a single pairing operation, providing fast validation even when many signers participate. Perhaps most importantly for certain use cases, BLS signatures provide signer privacy since the aggregated signature does not reveal which specific signers contributed their partial signatures.</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Linear Aggregation</strong></td>
+<td>Multiple signatures sum to single signature</td>
+</tr>
+<tr>
+<td><strong>Constant Size</strong></td>
+<td>48 bytes regardless of number of signers</td>
+</tr>
+<tr>
+<td><strong>Fast Verification</strong></td>
+<td>Single pairing operation</td>
+</tr>
+<tr>
+<td><strong>Signer Privacy</strong></td>
+<td>Individual signers not revealed</td>
+</tr>
+</tbody>
+</table>
+<p>The threshold endorsement flow demonstrates how partial signatures from multiple peers combine into a single verifiable signature. In a scenario with five endorsing peers where three signatures are required, any three peers can respond with their partial signatures. These partial signatures are then aggregated into a single threshold signature. The orderer validates this single signature with one verification operation, rather than verifying multiple independent signatures. This approach reduces both computational overhead and block size, improving overall network efficiency.</p>
+<div class="mermaid">flowchart TB
+    subgraph Peers["Endorsement Peers (n=5)"]
+        P1["P₁"]
+        P2["P₂"]
+        P3["P₃"]
+        P4["P₄"]
+        P5["P₅"]
+    end
+
+    P1 --&gt; Respond["t=3 respond"]
+    P2 --&gt; Respond
+    P3 --&gt; Respond
+
+    Respond --&gt; Partial["Partial Signatures&lt;br/&gt;σ₁, σ₂, σ₃"]
+    Partial --&gt; Aggregate["Aggregate to σ"]
+    Aggregate --&gt; Threshold["Single Threshold&lt;br/&gt;Signature"]
+    Threshold --&gt; Validate["Orderer Validates&lt;br/&gt;(1 verification)"]</div>
+<p>Configuration of threshold endorsement requires specifying the total number of endorsing peers, the required threshold, the cryptographic curve, and the public key shares for each participant. The BLS12-381 curve provides the mathematical foundation for the threshold signature scheme, offering strong security with efficient computation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">endorsement</span><span class="p">:</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">threshold</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">parameters</span><span class="p">:</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w">          </span><span class="c1"># Total endorsing peers</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="nt">t</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">          </span><span class="c1"># Required threshold</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nt">curve</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">BLS12-381</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="nt">key_shares</span><span class="p">:</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pk_share_1</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pk_share_2</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pk_share_3</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pk_share_4</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pk_share_5</span>
+</code></pre></div>
+<h2 id="comparison-of-endorsement-models">Comparison of Endorsement Models<a class="headerlink" href="#comparison-of-endorsement-models" title="Permanent link">&para;</a></h2>
+<h3 id="feature-comparison">Feature Comparison<a class="headerlink" href="#feature-comparison" title="Permanent link">&para;</a></h3>
+<p>The three endorsement models differ significantly across several dimensions. FSC-based endorsement implements logic as native Go code, delivering very high performance at approximately 50,000 transactions per second with standard ECDSA signature sizes. Custom endorsers offer the most flexibility by supporting any language that can communicate via gRPC, though performance depends on the specific implementation and typically reaches around 10,000 TPS. Threshold signatures use specialized cryptographic libraries to provide signer anonymity and constant-size 48-byte BLS signatures, achieving high performance around 40,000 TPS with constant-time verification regardless of the number of signers.</p>
+<p>In terms of complexity, FSC-based endorsement presents the lowest barrier to entry for developers familiar with Go. Custom endorsers introduce medium complexity due to the need to manage gRPC communication and potentially integrate with external systems. Threshold signatures carry the highest complexity because of the cryptographic key management and aggregation logic required. Each model serves distinct use cases: FSC-based endorsement works well for general smart contracts, custom endorsers excel at legacy integration and oracle scenarios, and threshold signatures address privacy-sensitive and high-scale applications.</p>
+<h3 id="performance-comparison">Performance Comparison<a class="headerlink" href="#performance-comparison" title="Permanent link">&para;</a></h3>
+<p>Performance characteristics vary considerably across the endorsement models. FSC-based endorsement achieves the lowest latency at 10-20ms and the highest throughput at approximately 50,000 TPS. Custom endorsers exhibit higher latency ranging from 20-100ms depending on the business logic complexity, with throughput around 10,000 TPS. Threshold signatures fall in between with 15-30ms latency and 40,000 TPS throughput, but offer the advantage of constant-time signature verification regardless of participant count. Fabric Classic, by comparison, shows 50-100ms latency and only 2,000 TPS throughput due to container overhead.</p>
+<p>Signature verification costs also differ meaningfully. Both FSC-based and custom endorsers require O(1) verification per signature, meaning verification time scales linearly with the number of endorsements. Threshold signatures achieve O(1) total verification time since all partial signatures aggregate into a single signature. This difference impacts block size as well: FSC-based and custom endorsers produce standard block sizes, while threshold signatures reduce block size through aggregated signatures. Fabric Classic blocks tend to be larger due to the need to store multiple independent signatures.</p>
+<h3 id="use-case-recommendations">Use Case Recommendations<a class="headerlink" href="#use-case-recommendations" title="Permanent link">&para;</a></h3>
+<p>Different application domains benefit from different endorsement models. Token transfer and supply chain applications typically favor FSC-based endorsement due to its high performance and native integration capabilities. Central Bank Digital Currency (CBDC) implementations often choose threshold signatures for their privacy properties and regulatory compliance features. Legacy integration scenarios naturally align with custom endorsers that can connect to existing systems. Oracle data feeds also suit custom endorsers that can access external data sources.</p>
+<p>Consortium voting applications benefit from threshold signatures because they provide signer privacy while maintaining efficient verification. Cross-border payment systems may employ a hybrid approach combining FSC-based endorsement for performance with threshold signatures for privacy in sensitive operations. Healthcare record systems typically require threshold signatures to meet stringent privacy requirements while ensuring that authorized parties can access information.</p>
+<h3 id="migration-path-from-fabric-classic">Migration Path from Fabric Classic<a class="headerlink" href="#migration-path-from-fabric-classic" title="Permanent link">&para;</a></h3>
+<p>Organizations migrating from Hyperledger Fabric Classic to Fabric-X can follow a phased approach that minimizes disruption while progressively realizing benefits. The first phase focuses on policy compatibility, where existing Fabric policies continue to work unchanged. The AND, OR, and NOutOf syntax remains preserved, and organizations can adopt namespace-based policy configuration without modifying their endorsement logic.</p>
+<p>The second phase involves refactoring chaincode to FSC views. This step delivers substantial performance improvements of approximately 25x by eliminating Docker container overhead. Organizations can realize immediate benefits from reduced latency and increased throughput while maintaining the same business logic.</p>
+<p>The third phase introduces advanced features that were not practical in Fabric Classic. Organizations can add threshold signatures for privacy-sensitive operations, implement custom endorsers for special cases requiring external integration, and optimize endorsement policies to better reflect their governance structures. This phased approach allows organizations to migrate incrementally while testing and validating each step before proceeding.</p>
+<div class="mermaid">flowchart TB
+    subgraph Phase1["Phase 1: Policy Compatibility"]
+        P1A["• Existing Fabric policies work unchanged"]
+        P1B["• AND, OR, NOutOf syntax preserved"]
+        P1C["• Namespace-based policy configuration"]
+    end
+
+    subgraph Phase2["Phase 2: Chaincode → FSC Views"]
+        P2A["• Refactor chaincode to FSC views"]
+        P2B["• Gain performance (25x improvement)"]
+        P2C["• No Docker container overhead"]
+    end
+
+    subgraph Phase3["Phase 3: Advanced Features"]
+        P3A["• Add threshold signatures for privacy"]
+        P3B["• Implement custom endorsers for special cases"]
+        P3C["• Optimize endorsement policies"]
+    end
+
+    Phase1 --&gt; Phase2
+    Phase2 --&gt; Phase3</div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="endorsement-policy-design">Endorsement Policy Design<a class="headerlink" href="#endorsement-policy-design" title="Permanent link">&para;</a></h3>
+<p>Designing effective endorsement policies requires balancing security requirements against performance constraints. Policies that require unanimous agreement from all organizations create single points of failure where any unavailable organization can halt transaction processing. A better approach uses NOutOf operators to establish threshold requirements, such as requiring 3 out of 5 organizations to endorse, providing a 60% threshold that tolerates up to two organizations being unavailable.</p>
+<p>Geographic distribution considerations help ensure resilience against regional outages. Policies can require endorsement from multiple geographic regions by combining OR operators within regions and AND operators across regions. This approach ensures that no single regional disruption can prevent transaction processing while maintaining appropriate governance controls.</p>
+<p>Failover planning provides alternative approval paths when primary endorsers are unavailable. Policies can specify a primary path requiring endorsement from core organizations, with an escalation path allowing backup organizations to endorse if the primary path cannot be satisfied. This approach maintains business continuity during planned maintenance or unexpected outages.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Good:  NOutOf(3, Org1, Org2, Org3, Org4, Org5)  # 60% threshold
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>Avoid: AND(Org1, Org2, Org3, Org4, Org5)       # Single point of failure
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>AND(
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  OR(RegionUS.member, RegionCA.member),
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  OR(RegionEU.member, RegionUK.member),
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>  OR(RegionAsia.member, RegionAU.member)
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>)
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>#Primary path + escalation
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>OR(
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>  NOutOf(3, PrimaryOrgs...),
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>  NOutOf(2, BackupOrgs...)
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>)
+</code></pre></div>
+<h3 id="fsc-view-development">FSC View Development<a class="headerlink" href="#fsc-view-development" title="Permanent link">&para;</a></h3>
+<p>Efficient FSC view development focuses on minimizing state access overhead, validating inputs early, and handling concurrency appropriately. State reads represent one of the most expensive operations in view execution, so batching multiple reads together significantly improves performance compared to individual read operations. The context provides batch read capabilities that should be used whenever multiple keys need to be accessed.</p>
+<p>Input validation should occur before any expensive operations to avoid wasting computational resources on invalid transactions. Simple checks for negative amounts, empty identifiers, or invalid states should happen at the beginning of the view execution. This approach provides fast failure for invalid transactions and clearer error messages for callers.</p>
+<p>Concurrency handling requires optimistic concurrency control to detect when state has changed between read and write operations. Views should check that the version of read state matches the current version before committing writes. If a version mismatch occurs, the view should fail with an appropriate error, allowing the client to retry with fresh state.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1">// Good: Batch reads</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="nx">balances</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">BatchRead</span><span class="p">(</span><span class="nx">keys</span><span class="p">)</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1">// Avoid: Multiple individual reads</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">keys</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="nx">balance</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Read</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span><span class="w">  </span><span class="c1">// Slower</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1">// Check inputs before expensive operations</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">amount</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"invalid amount"</span><span class="p">)</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1">// Use optimistic concurrency control</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">readVersion</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">currentVersion</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="s">"version mismatch"</span><span class="p">)</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="custom-endorser-deployment">Custom Endorser Deployment<a class="headerlink" href="#custom-endorser-deployment" title="Permanent link">&para;</a></h3>
+<p>Deploying custom endorsers in production requires careful attention to retry logic, health monitoring, and secure communication. Transient failures occur in distributed systems, and endorsers should implement exponential backoff retry strategies to handle temporary network issues or resource contention. The retry logic should attempt the operation multiple times with increasing delays between attempts, giving the system time to recover from transient conditions.</p>
+<p>Health monitoring enables operators to detect and respond to endorser failures quickly. Custom endorsers should expose health check endpoints that report on the service status, resource utilization, and connectivity to dependent systems. Configuration should specify the health check endpoint, polling interval, and timeout values appropriate for the deployment environment.</p>
+<p>Secure communication between clients and custom endorsers protects sensitive transaction data and prevents unauthorized access. TLS should be enabled with mutual authentication, requiring both the client and server to present valid certificates. Configuration includes certificate paths for the endorser's certificate and private key, as well as the CA certificate used to validate client certificates.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="c1">// Exponential backoff for transient failures</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">maxRetries</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">    </span><span class="nx">resp</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">endorser</span><span class="p">.</span><span class="nx">Endorse</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">req</span><span class="p">)</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">resp</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">    </span><span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="p">(</span><span class="nx">i</span><span class="o">*</span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="nx">ms</span><span class="p">)</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nt">health_check</span><span class="p">:</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"/health"</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">  </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10s</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">  </span><span class="nt">timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5s</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="nt">tls</span><span class="p">:</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">  </span><span class="nt">mutual_auth</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">  </span><span class="nt">cert_file</span><span class="p">:</span><span class="w"> </span><span class="s">"/etc/ssl/endorser.crt"</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">  </span><span class="nt">key_file</span><span class="p">:</span><span class="w"> </span><span class="s">"/etc/ssl/endorser.key"</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">  </span><span class="nt">ca_file</span><span class="p">:</span><span class="w"> </span><span class="s">"/etc/ssl/ca.crt"</span>
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h3>
+<p>Several common issues arise during endorsement operations, each with characteristic symptoms and resolutions. Insufficient endorsements typically indicate that the endorsement policy is too restrictive for the current set of available endorsers. Adjusting the NOutOf threshold to require fewer endorsements or ensuring that more endorsers are online can resolve this issue.</p>
+<p>Endorsement timeouts often stem from slow custom endorser services that exceed the configured timeout window. Increasing the timeout value provides more time for complex business logic to execute, though optimizing the endorser logic itself provides a more sustainable solution. Signature verification failures usually indicate expired MSP certificates that need renewal through the certificate authority.</p>
+<p>Policy evaluation errors result from syntax errors in the policy expression, such as mismatched parentheses or invalid principal names. Validating the policy expression using offline testing tools before deployment catches these errors early. Read-write set mismatches occur when state changes between the read and endorsement phases, indicating that another transaction modified the same keys. The client should retry the transaction with fresh state reads to resolve this condition.</p>
+<h3 id="debugging-tips">Debugging Tips<a class="headerlink" href="#debugging-tips" title="Permanent link">&para;</a></h3>
+<p>Effective debugging of endorsement issues requires appropriate logging, offline policy testing, and metrics monitoring. Enabling debug-level logging for the endorsement subsystem provides detailed information about the endorsement flow, including which principals have endorsed and how the policy evaluation proceeds. Policy logging at info level tracks policy evaluation outcomes without excessive detail.</p>
+<p>Testing policies offline before deployment helps identify syntax errors and logical issues without affecting production transactions. The policy-test command validates that a given set of endorsements satisfies a policy expression, allowing developers to verify policy behavior in isolation.</p>
+<p>Monitoring endorsement metrics provides visibility into the health and performance of the endorsement system. Key metrics include endorsement duration, which tracks how long endorsements take; success counts, which indicate the volume of successful endorsements; and failure counts, which highlight problems requiring investigation. These metrics should be collected per namespace to identify issues affecting specific applications or business domains.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nt">logging</span><span class="p">:</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="nt">endorsement</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">debug</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">  </span><span class="nt">policy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">info</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>fabric-x<span class="w"> </span>policy-test<span class="w"> </span>--policy<span class="w"> </span><span class="s2">"AND(Org1, Org2)"</span><span class="w"> </span>--endorsements<span class="w"> </span>Org1,Org2
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>endorsement_duration_seconds{namespace="tokens"}
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>endorsement_success_total{namespace="tokens"}
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>endorsement_failures_total{namespace="tokens"}
+</code></pre></div>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/hyperledger-labs/fabric-smart-client">Fabric-Smart-Client Documentation</a></li>
+<li><a href="https://github.com/hyperledger-labs/fabric-token-sdk">Fabric-Token-SDK</a></li>
+<li><a href="../threshold-signatures/">Threshold Signatures in Fabric-X</a></li>
+<li><a href="../policies/policies/">Policies and Access Control</a></li>
+<li><a href="../fabric-x-model/">Fabric-X Transaction Model</a></li>
+<li><a href="https://hackmd.io/@benjaminion/bls12-381">BLS12-381 Curve Specification</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

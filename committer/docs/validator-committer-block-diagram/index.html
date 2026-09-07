@@ -1,0 +1,4668 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../verifier-block-diagram/">
+      
+      
+        <link rel="next" href="../query-block-diagram/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Validator-Committer - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#validator-committer-architecture-and-block-diagram-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Validator-Committer
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-how-to-read-this-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. How to Read This Document
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-high-level-block-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. High-Level Block Diagram
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. High-Level Block Diagram">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input-structure-to-vc-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Input Structure to VC Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Input Structure to VC Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-complete-transaction-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Complete transaction message
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-level-architecture-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-Level Architecture Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-phase-1-prepare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Phase 1: Prepare
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Phase 1: Prepare">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-output-structure-from-preparer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Output Structure from Preparer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-prepare-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Prepare Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-write-categorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Write Categorization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-prepare-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Prepare Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 Prepare Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-preparation-output-for-complete-transaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Preparation output for complete transaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-multiple-transactions-with-shared-reads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Multiple transactions with shared reads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-implicit-meta-namespace-reads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Implicit meta-namespace reads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-config-and-meta-namespace-transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 4: Config and Meta namespace transactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-phase-2-validate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Phase 2: Validate
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Phase 2: Validate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-validate-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Validate Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-mvcc-validation-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 MVCC Validation Logic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-validation-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Validation Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.3 Validation Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-no-conflicts-all-reads-valid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: No conflicts (all reads valid)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-single-read-conflict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Single read conflict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-multiple-conflicts-across-namespaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Multiple conflicts across namespaces
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-meta-namespace-conflict-blocks-all-normal-traffic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 4: Meta-namespace conflict blocks all normal traffic
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-phase-3-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Phase 3: Commit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Phase 3: Commit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-commit-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Commit Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-blind-write-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Blind Write Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-commit-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Commit Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.3 Commit Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-simple-commit-with-no-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Simple commit with no conflicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-blind-write-becomes-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Blind write becomes update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-duplicate-transaction-id-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Duplicate transaction ID detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-new-write-collision-key-already-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 4: New write collision (key already exists)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-5-mixed-batch-with-updates-inserts-and-blind-writes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 5: Mixed batch with updates, inserts, and blind writes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-database-schema-and-stored-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Database Schema and Stored Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Database Schema and Stored Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stored-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stored Procedures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-failure-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Failure and Recovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Failure and Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-preparer-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Preparer Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-validator-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Validator Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-committer-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Committer Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-duplicate-transaction-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Duplicate Transaction Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-vc-service-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 VC Service Restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-code-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Code Map
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Code Map">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Structures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-how-to-read-this-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. How to Read This Document
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-high-level-block-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. High-Level Block Diagram
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. High-Level Block Diagram">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input-structure-to-vc-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Input Structure to VC Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Input Structure to VC Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-complete-transaction-message" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Complete transaction message
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#high-level-architecture-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-Level Architecture Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-phase-1-prepare" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Phase 1: Prepare
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Phase 1: Prepare">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-output-structure-from-preparer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Output Structure from Preparer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-prepare-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Prepare Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-write-categorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Write Categorization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-prepare-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Prepare Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4.4 Prepare Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-preparation-output-for-complete-transaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Preparation output for complete transaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-multiple-transactions-with-shared-reads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Multiple transactions with shared reads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-implicit-meta-namespace-reads" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Implicit meta-namespace reads
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-config-and-meta-namespace-transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 4: Config and Meta namespace transactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-phase-2-validate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Phase 2: Validate
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Phase 2: Validate">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-validate-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Validate Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-mvcc-validation-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 MVCC Validation Logic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-validation-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Validation Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.3 Validation Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-no-conflicts-all-reads-valid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: No conflicts (all reads valid)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-single-read-conflict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Single read conflict
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-multiple-conflicts-across-namespaces" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Multiple conflicts across namespaces
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-meta-namespace-conflict-blocks-all-normal-traffic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 4: Meta-namespace conflict blocks all normal traffic
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-phase-3-commit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Phase 3: Commit
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Phase 3: Commit">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-commit-flow-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Commit Flow Diagram
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-blind-write-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Blind Write Resolution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-commit-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Commit Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.3 Commit Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-simple-commit-with-no-conflicts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Simple commit with no conflicts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-blind-write-becomes-update" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Blind write becomes update
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-duplicate-transaction-id-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Duplicate transaction ID detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-new-write-collision-key-already-exists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 4: New write collision (key already exists)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-5-mixed-batch-with-updates-inserts-and-blind-writes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 5: Mixed batch with updates, inserts, and blind writes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-database-schema-and-stored-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Database Schema and Stored Procedures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Database Schema and Stored Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#system-tables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Tables
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stored-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stored Procedures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-failure-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Failure and Recovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Failure and Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-preparer-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Preparer Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-validator-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Validator Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-committer-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Committer Failures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#84-duplicate-transaction-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.4 Duplicate Transaction Handling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#85-vc-service-restart" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.5 VC Service Restart
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-code-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Code Map
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Code Map">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Layer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-structures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Structures
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+<h1 id="validator-committer-architecture-and-block-diagram-guide">Validator-Committer Architecture and Block Diagram Guide<a class="headerlink" href="#validator-committer-architecture-and-block-diagram-guide" title="Permanent link">&para;</a></h1>
+<ol>
+<li><a href="#1-overview">Overview</a></li>
+<li><a href="#2-how-to-read-this-document">How to Read This Document</a></li>
+<li><a href="#3-high-level-block-diagram">High-Level Block Diagram</a></li>
+<li><a href="#4-phase-1-prepare">Phase 1: Prepare</a></li>
+<li><a href="#41-output-structure-from-preparer">4.1 Output Structure from Preparer</a></li>
+<li><a href="#42-prepare-flow-diagram">4.2 Prepare Flow Diagram</a></li>
+<li><a href="#43-write-categorization">4.3 Write Categorization</a></li>
+<li><a href="#44-prepare-examples">4.4 Prepare Examples</a></li>
+<li><a href="#5-phase-2-validate">Phase 2: Validate</a></li>
+<li><a href="#51-validate-flow-diagram">5.1 Validate Flow Diagram</a></li>
+<li><a href="#52-mvcc-validation-logic">5.2 MVCC Validation Logic</a></li>
+<li><a href="#53-validation-examples">5.3 Validation Examples</a></li>
+<li><a href="#6-phase-3-commit">Phase 3: Commit</a></li>
+<li><a href="#61-commit-flow-diagram">6.1 Commit Flow Diagram</a></li>
+<li><a href="#62-blind-write-resolution">6.2 Blind Write Resolution</a></li>
+<li><a href="#63-commit-examples">6.3 Commit Examples</a></li>
+<li><a href="#7-database-schema-and-stored-procedures">Database Schema and Stored Procedures</a></li>
+<li><a href="#8-failure-and-recovery">Failure and Recovery</a></li>
+<li><a href="#9-code-map">Code Map</a></li>
+</ol>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>Validator-Committer (VC) service is the final stage in the Fabric-X transaction processing pipeline. It receives conflict-free transaction batches from the Coordinator, performs optimistic concurrency control through MVCC validation, and commits valid transactions to the state database.</p>
+<p>Main responsibilities:</p>
+<ul>
+<li>receive conflict-free transaction batches from Coordinator</li>
+<li>categorize writes into blind writes, new writes, and non-blind writes</li>
+<li>validate transaction read-sets against committed database state</li>
+<li>commit transaction statuses of valid/invalid transactions and update world state</li>
+<li>return final transaction status to Coordinator</li>
+<li>provide data access APIs for namespace policies and config recovery</li>
+</ul>
+<p>VC service does <strong>not</strong> perform signature verification or dependency tracking. Instead, it focuses on <strong>what</strong> to commit and <strong>when</strong> to mark transactions as committed versus aborted.</p>
+<h2 id="2-how-to-read-this-document">2. How to Read This Document<a class="headerlink" href="#2-how-to-read-this-document" title="Permanent link">&para;</a></h2>
+<p>Start with <a href="#3-high-level-block-diagram">high-level block diagram</a> if you need system shape. The diagram shows the three-phase pipeline with multiple parallel workers per phase. Each phase has its own detailed section with flow diagrams and worked examples.</p>
+<p>If you want implementation entry points after building mental model, jump to <a href="#9-code-map">Code Map</a>. For configuration fields, gRPC API surface, and existing service overview, also see <a href="../validator-committer/"><code>docs/validator-committer.md</code></a>.</p>
+<h2 id="3-high-level-block-diagram">3. High-Level Block Diagram<a class="headerlink" href="#3-high-level-block-diagram" title="Permanent link">&para;</a></h2>
+<p>At highest level, VC service sits between Coordinator and State DB. Coordinator streams transaction batches in and receives transaction status back. VC service processes transactions through three pipelined phases with multiple parallel workers.</p>
+<h3 id="input-structure-to-vc-service">Input Structure to VC Service<a class="headerlink" href="#input-structure-to-vc-service" title="Permanent link">&para;</a></h3>
+<p>Transactions arrive from Coordinator with three operation types per namespace:</p>
+<div class="mermaid">flowchart TD
+    subgraph Tx[VcTransaction Namespace]
+        direction TB
+        RO["Reads-Only&lt;br/&gt;Keys read but not modified&lt;br/&gt;Example: asset1 @ v5"]
+        RW["Read-Writes (Updates)&lt;br/&gt;Read then modify&lt;br/&gt;Example: asset2 @ v3 → v4"]
+        BW["Blind-Writes&lt;br/&gt;Write without reading&lt;br/&gt;Version deferred&lt;br/&gt;Example: asset3 → ?"]
+    end</div>
+<p><strong>Note</strong>: New writes (inserts) are represented as read-writes with <code>nil</code> version (omitted in protobuf).</p>
+<h4 id="example-complete-transaction-message">Example: Complete transaction message<a class="headerlink" href="#example-complete-transaction-message" title="Permanent link">&para;</a></h4>
+<p>Consider a complete <code>VcTransaction</code> message with all operation types:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">// Complete transaction message from Coordinator to VC service</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">VcTransaction</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="n">ref</span><span class="o">:</span><span class="w"> </span><span class="n">TxRef</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="n">tx_id</span><span class="o">:</span><span class="w"> </span><span class="s">"tx_001"</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="n">block_num</span><span class="o">:</span><span class="w"> </span><span class="mi">100</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="n">tx_index</span><span class="o">:</span><span class="w"> </span><span class="mi">5</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="n">namespaces</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="n">TxNamespace</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="n">ns_id</span><span class="o">:</span><span class="w"> </span><span class="s">"ns1"</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">      </span><span class="n">ns_version</span><span class="o">:</span><span class="w"> </span><span class="mi">10</span><span class="w">  </span><span class="c1">// Namespace policy version</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">      </span><span class="c1">// Reads-Only: Keys read but not modified</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">      </span><span class="n">reads_only</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">        </span><span class="n">Read</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">          </span><span class="n">key</span><span class="o">:</span><span class="w"> </span><span class="s">"asset1"</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">          </span><span class="n">version</span><span class="o">:</span><span class="w"> </span><span class="mi">5</span><span class="w">  </span><span class="c1">// Read at version 5</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">      </span><span class="p">]</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">      </span><span class="c1">// Read-Writes (Updates): Keys read and modified</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">      </span><span class="c1">// New-Writes (Inserts): Also in read_writes, but with omitted version field</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">      </span><span class="n">read_writes</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">        </span><span class="n">ReadWrite</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">          </span><span class="n">key</span><span class="o">:</span><span class="w"> </span><span class="s">"asset2"</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">          </span><span class="n">value</span><span class="o">:</span><span class="w"> </span><span class="s">"v2_new"</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">          </span><span class="n">version</span><span class="o">:</span><span class="w"> </span><span class="mi">3</span><span class="w">  </span><span class="c1">// Read at version 3, will write at version 4</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">        </span><span class="p">},</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">        </span><span class="n">ReadWrite</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">          </span><span class="n">key</span><span class="o">:</span><span class="w"> </span><span class="s">"asset4"</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">          </span><span class="n">value</span><span class="o">:</span><span class="w"> </span><span class="s">"v4_new"</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">          </span><span class="c1">// version field omitted = insert</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">      </span><span class="p">]</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="w">      </span><span class="c1">// Blind-Writes: Keys written without reading</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="w">      </span><span class="n">blind_writes</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a><span class="w">        </span><span class="n">Write</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a><span class="w">          </span><span class="n">key</span><span class="o">:</span><span class="w"> </span><span class="s">"asset3"</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a><span class="w">          </span><span class="n">value</span><span class="o">:</span><span class="w"> </span><span class="s">"v3_new"</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a><span class="w">          </span><span class="c1">// No version - endorser did not read</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a><span class="w">      </span><span class="p">]</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a><span class="w">  </span><span class="c1">// Optional: Set if Coordinator already marked as invalid</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a><span class="w">  </span><span class="n">prelim_invalid_tx_status</span><span class="o">:</span><span class="w"> </span><span class="n">null</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="high-level-architecture-flow">High-Level Architecture Flow<a class="headerlink" href="#high-level-architecture-flow" title="Permanent link">&para;</a></h3>
+<p>The VC service processes these input transactions through three pipelined phases:</p>
+<div class="mermaid">flowchart TB
+    C[Coordinator]
+
+    subgraph VC[Validator-Committer Service]
+        direction TB
+
+        subgraph Phase1[Phase 1: Prepare]
+            direction TB
+            P1[Preparer 1]
+            P2[Preparer 2]
+            P3[Preparer N]
+        end
+
+        subgraph Phase2[Phase 2: Validate]
+            direction TB
+            V1[Validator 1]
+            V2[Validator 2]
+            V3[Validator N]
+        end
+
+        subgraph Phase3[Phase 3: Commit]
+            direction TB
+            C1[Committer 1]
+            C2[Committer 2]
+            C3[Committer N]
+        end
+
+        ch1[[toPrepareTxs]]
+        ch2[[preparedTxs]]
+        ch3[[validatedTxs]]
+        ch4[[txsStatus]]
+    end
+
+    DB[(State DB)]
+
+    C --&gt;|tx batches| ch1
+    ch1 --&gt; P1 &amp; P2 &amp; P3
+    P1 &amp; P2 &amp; P3 --&gt; ch2
+    ch2 --&gt; V1 &amp; V2 &amp; V3
+    V1 &amp; V2 &amp; V3 --&gt;|read validation| DB
+    V1 &amp; V2 &amp; V3 --&gt; ch3
+    ch3 --&gt; C1 &amp; C2 &amp; C3
+    C1 &amp; C2 &amp; C3 --&gt;|commit writes| DB
+    C1 &amp; C2 &amp; C3 --&gt; ch4
+    ch4 --&gt;|TxStatusBatch| C
+</div>
+<p>Flow description:</p>
+<ol>
+<li><strong>Coordinator → Preparer:</strong> Coordinator sends conflict-free transaction batches over <code>StartValidateAndCommitStream</code> to <code>toPrepareTxs</code> channel.</li>
+<li><strong>Preparer → Validator:</strong> Preparer workers categorize reads/writes, send structured data to <code>preparedTxs</code> channel.</li>
+<li><strong>Validator → Committer:</strong> Validator workers perform MVCC read validation, remove invalid transactions, send valid writes to <code>validatedTxs</code> channel.</li>
+<li><strong>Committer → DB:</strong> Committer workers query versions for blind writes, validate reads, commit writes to database.</li>
+<li><strong>Committer → Coordinator:</strong> Committers send final <code>TxStatusBatch</code> messages to <code>txsStatus</code> channel, returned to Coordinator.</li>
+</ol>
+<p>Key design points:</p>
+<ul>
+<li><strong>Multiple workers per phase</strong>: Configurable parallelism (e.g., <code>MaxWorkersForPreparer</code>, <code>MaxWorkersForValidator</code>, <code>MaxWorkersForCommitter</code>)</li>
+<li><strong>Pipelined execution</strong>: All three phases run concurrently on different batches</li>
+<li><strong>Channel-based communication</strong>: Lock-free queues between phases</li>
+<li><strong>Stateless workers</strong>: Any worker can process any batch; no sticky assignments</li>
+</ul>
+<h2 id="4-phase-1-prepare">4. Phase 1: Prepare<a class="headerlink" href="#4-phase-1-prepare" title="Permanent link">&para;</a></h2>
+<p>The Preparer phase receives raw transaction batches from the Coordinator and transforms them into a structured format optimized for validation.</p>
+<p>See <a href="#input-structure-to-vc-service">Input Structure to VC Service</a> in Section 3 for visual representation of input transaction structure.</p>
+<p><strong>Why categorization matters</strong>:</p>
+<ul>
+<li><strong>Reads-only</strong>: Grouped by namespace for batch validation</li>
+<li><strong>Read-writes (updates)</strong>: Version already calculated; ready for commit if validation passes</li>
+<li><strong>Blind-writes</strong>: Need database query to determine if key exists (update) or not (insert)</li>
+<li><strong>New-writes (inserts)</strong>: Optimistically assume key is new; rely on database constraints to detect collisions</li>
+</ul>
+<p><strong>Details on operation types</strong>:</p>
+<ol>
+<li><strong>Reads-Only</strong>: Keys read but not modified</li>
+<li>Used for dependency tracking and MVCC validation</li>
+<li>
+<p>Example: Transaction reads <code>asset1</code> at version 5 to check balance</p>
+</li>
+<li>
+<p><strong>Read-Writes (Updates)</strong>: Keys read and then modified</p>
+</li>
+<li>Version known from read phase</li>
+<li>New version = read version + 1</li>
+<li>
+<p>Example: Transaction reads <code>asset2</code> at version 3, writes new value with version 4</p>
+</li>
+<li>
+<p><strong>Blind-Writes (Write-Only)</strong>: Keys written without reading</p>
+</li>
+<li>Endorser did not read the key before writing</li>
+<li>Version deferred to commit phase</li>
+<li>Example: Transaction writes <code>asset3</code> without knowing current version</li>
+</ol>
+<p><strong>Note</strong>: New writes (inserts) are represented as read-writes with <code>nil</code> version. They are not a separate field in the protobuf message.</p>
+<h3 id="41-output-structure-from-preparer">4.1 Output Structure from Preparer<a class="headerlink" href="#41-output-structure-from-preparer" title="Permanent link">&para;</a></h3>
+<p>Preparer transforms raw transactions into grouped data structures:</p>
+<div class="mermaid">flowchart TD
+    subgraph Reads[Row 1: Reads]
+        direction LR
+        nsToReads["nsToReads&lt;br/&gt;&lt;b&gt;Map:&lt;/b&gt; namespace →&lt;br/&gt;keys, versions&lt;br/&gt;&lt;b&gt;Holds:&lt;/b&gt; reads by namespace"]
+        readToTxIDs["readToTxIDs&lt;br/&gt;&lt;b&gt;Map:&lt;/b&gt; ns, key, version →&lt;br/&gt;txIDs&lt;br/&gt;&lt;b&gt;Holds:&lt;/b&gt; txs for each read"]
+        nsToReads ~~~ readToTxIDs
+    end
+
+    subgraph Writes[Row 2: Writes]
+        direction LR
+        nonBlind["txIDToNs&lt;br/&gt;NonBlindWrites&lt;br/&gt;&lt;b&gt;Map:&lt;/b&gt; txID → ns →&lt;br/&gt;keys, values, versions&lt;br/&gt;&lt;b&gt;Holds:&lt;/b&gt; updates"]
+        blind["txIDToNs&lt;br/&gt;BlindWrites&lt;br/&gt;&lt;b&gt;Map:&lt;/b&gt; txID → ns →&lt;br/&gt;keys, values&lt;br/&gt;&lt;b&gt;Holds:&lt;/b&gt; write-only ops"]
+        new["txIDToNs&lt;br/&gt;NewWrites&lt;br/&gt;&lt;b&gt;Map:&lt;/b&gt; txID → ns →&lt;br/&gt;keys, values&lt;br/&gt;&lt;b&gt;Holds:&lt;/b&gt; inserts"]
+        nonBlind ~~~ blind ~~~ new
+    end
+
+    subgraph Metadata[Row 3: Status and Height]
+        direction LR
+        invalid["invalidTxIDStatus&lt;br/&gt;&lt;b&gt;Map:&lt;/b&gt; txID →&lt;br/&gt;status&lt;br/&gt;&lt;b&gt;Holds:&lt;/b&gt; pre-invalid txs"]
+        height["txIDToHeight&lt;br/&gt;&lt;b&gt;Map:&lt;/b&gt; txID →&lt;br/&gt;blockNum, txIndex&lt;br/&gt;&lt;b&gt;Holds:&lt;/b&gt; tx position"]
+        invalid ~~~ height
+    end
+
+    Reads ~~~ Writes ~~~ Metadata
+
+    style Reads width:660px,min-width:660px
+    style Writes width:960px,min-width:960px
+    style Metadata width:660px,min-width:660px
+    style nsToReads width:260px,min-width:260px
+    style readToTxIDs width:260px,min-width:260px
+    style nonBlind width:260px,min-width:260px
+    style blind width:260px,min-width:260px
+    style new width:260px,min-width:260px
+    style invalid width:260px,min-width:260px
+    style height width:260px,min-width:260px</div>
+<h3 id="42-prepare-flow-diagram">4.2 Prepare Flow Diagram<a class="headerlink" href="#42-prepare-flow-diagram" title="Permanent link">&para;</a></h3>
+<p>Preparer receives raw transaction batches and transforms them into structured format optimized for validation.</p>
+<div class="mermaid">flowchart TD
+    Start[Receive tx batch] --&gt; Init[Initialize preparedTxs struct]
+    Init --&gt; Loop{For each tx}
+
+    Loop --&gt;|duplicate txID| Skip[Skip duplicate]
+    Skip --&gt; Loop
+
+    Loop --&gt;|prelim-invalid| MarkInvalid[Mark as prelim-invalid]
+    MarkInvalid --&gt; Loop
+
+    Loop --&gt;|normal tx| ProcessNS[Process namespaces]
+
+    ProcessNS --&gt; AddRO[Add reads-only to nsToReads]
+    AddRO --&gt; AddRW[Add read-writes to nsToReads&lt;br/&gt;and txIDToNsNonBlindWrites]
+    AddRW --&gt; AddBW[Add blind writes to txIDToNsBlindWrites]
+    AddBW --&gt; AddMeta[Add implicit meta-namespace reads]
+    AddMeta --&gt; Loop
+
+    Loop --&gt; Done{All txs processed?}
+    Done --&gt;|No| Loop
+    Done --&gt;|Yes| Cleanup[Remove empty namespaces]
+    Cleanup --&gt; Output[Send to preparedTxs channel]</div>
+<h3 id="43-write-categorization">4.3 Write Categorization<a class="headerlink" href="#43-write-categorization" title="Permanent link">&para;</a></h3>
+<p>Preparer categorizes writes into three types based on whether transaction read the key before writing:</p>
+<table>
+<thead>
+<tr>
+<th>Write Type</th>
+<th>Description</th>
+<th>Version Handling</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Non-Blind Writes</strong> (Read-Modify-Write)</td>
+<td>Transaction read key before writing</td>
+<td>New version = read version + 1</td>
+<td><code>T1</code> reads <code>ns1:a</code> at version 5, writes new value with version 6</td>
+</tr>
+<tr>
+<td><strong>Blind Writes</strong> (Write-Only)</td>
+<td>Transaction writes key without reading</td>
+<td>Version deferred to commit phase</td>
+<td><code>T2</code> writes <code>ns1:b</code> without reading; version determined at commit time</td>
+</tr>
+<tr>
+<td><strong>New Writes</strong> (Inserts)</td>
+<td>Transaction creates new key</td>
+<td>Version starts at 0 (DB default)</td>
+<td><code>T3</code> writes <code>ns1:c</code> assuming key does not exist</td>
+</tr>
+</tbody>
+</table>
+<p>Important detail:</p>
+<ul>
+<li>read-write operations with <code>nil</code> version are treated as <strong>new writes</strong></li>
+<li>blind writes are resolved in commit phase by querying current database state</li>
+<li>new writes rely on database unique constraints to detect collisions</li>
+</ul>
+<h3 id="44-prepare-examples">4.4 Prepare Examples<a class="headerlink" href="#44-prepare-examples" title="Permanent link">&para;</a></h3>
+<h4 id="example-1-preparation-output-for-complete-transaction">Example 1: Preparation output for complete transaction<a class="headerlink" href="#example-1-preparation-output-for-complete-transaction" title="Permanent link">&para;</a></h4>
+<p>Consider the transaction from the <a href="#input-structure-to-vc-service">Input Structure</a> section:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>T1 (tx_001, block 100, index 5):
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>  Namespace: ns1 (policy v10)
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>  Reads-Only:
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    - key: "asset1", version: 5
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  Read-Writes (Updates):
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    - key: "asset2", value: "v2_new", version: 3
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  Read-Writes (Inserts):
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    - key: "asset4", value: "v4_new", version: nil
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  Blind-Writes:
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    - key: "asset3", value: "v3_new"
+</code></pre></div>
+<p>After preparation:</p>
+<div class="mermaid">flowchart TD
+    subgraph GroupReads[Row 1: Reads]
+        direction LR
+        nsReads["nsToReads[ns1]&lt;br/&gt;keys: [asset1, asset2]&lt;br/&gt;versions: [5, 3]"]
+        r2t["readToTxIDs&lt;br/&gt;{ns1,asset1,5} → [T1]&lt;br/&gt;{ns1,asset2,3} → [T1]"]
+        nsReads ~~~ r2t
+    end
+
+    subgraph GroupWrites[Row 2: Writes]
+        direction LR
+        rw["txIDToNsNonBlindWrites[T1][ns1]&lt;br/&gt;keys: [asset2]&lt;br/&gt;values: [v2]&lt;br/&gt;versions: [4]"]
+        bw["txIDToNsBlindWrites[T1][ns1]&lt;br/&gt;keys: [asset3]&lt;br/&gt;values: [v3]"]
+        nw["txIDToNsNewWrites[T1][ns1]&lt;br/&gt;keys: [asset4]&lt;br/&gt;values: [v4]"]
+        rw ~~~ bw ~~~ nw
+    end
+
+    GroupReads ~~~ GroupWrites</div>
+<h4 id="example-2-multiple-transactions-with-shared-reads">Example 2: Multiple transactions with shared reads<a class="headerlink" href="#example-2-multiple-transactions-with-shared-reads" title="Permanent link">&para;</a></h4>
+<p>Consider two transactions <code>T1</code> and <code>T2</code> that both read the same key:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>T1:
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>  Reads:
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    - key: "asset1", version: 5
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>  Blind-Writes:
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    - key: "asset2", value: "v2_new"
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>T2:
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  Reads:
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    - key: "asset1", version: 5
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  Blind-Writes:
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    - key: "asset3", value: "v3_new"
+</code></pre></div>
+<p>After preparation:</p>
+<div class="mermaid">flowchart TD
+    subgraph SharedReads[Row 1: Reads]
+        direction LR
+        nsReads["nsToReads[ns1]&lt;br/&gt;keys: [asset1]&lt;br/&gt;versions: [5]"]
+        r2t["readToTxIDs&lt;br/&gt;{ns1,asset1,5} → [T1, T2]"]
+        nsReads ~~~ r2t
+    end
+
+    subgraph TxWrites[Row 2: Writes]
+        direction LR
+        bw1["txIDToNsBlindWrites[T1][ns1]&lt;br/&gt;keys: [asset2]&lt;br/&gt;values: [v2_new]"]
+        bw2["txIDToNsBlindWrites[T2][ns1]&lt;br/&gt;keys: [asset3]&lt;br/&gt;values: [v3_new]"]
+        bw1 ~~~ bw2
+    end
+
+    SharedReads ~~~ TxWrites</div>
+<p><strong>Key insight</strong>: If read version 5 becomes stale, <strong>both</strong> <code>T1</code> and <code>T2</code> are invalidated together. This is why <code>readToTxIDs</code> maps each read to <strong>all</strong> transactions that performed it.</p>
+<h4 id="example-3-implicit-meta-namespace-reads">Example 3: Implicit meta-namespace reads<a class="headerlink" href="#example-3-implicit-meta-namespace-reads" title="Permanent link">&para;</a></h4>
+<p>Every normal transaction implicitly reads its namespace lifecycle state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>T1 in namespace "ns1":
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  Explicit Reads:
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    - key: "asset1", version: 5
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  Explicit Read-Writes (Updates):
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    - key: "asset1", value: "v1_new", version: 5
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>Implicit addition by preparer:
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  Meta-namespace read:
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    - namespace: "__meta__"
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    - key: "ns1"
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    - version: 10
+</code></pre></div>
+<p>After preparation:</p>
+<div class="mermaid">flowchart TD
+    subgraph PreparedTxs3[preparedTxs for Meta-namespace Read]
+        direction TB
+
+        nsReads["nsToReads[__meta__]&lt;br/&gt;keys: [ns1]&lt;br/&gt;versions: [10]"]
+        r2t["readToTxIDs&lt;br/&gt;{__meta__,ns1,10} → [T1]"]
+    end
+
+    nsReads &amp; r2t</div>
+<p>This ensures namespace lifecycle transactions serialize correctly with normal traffic.</p>
+<h4 id="example-4-config-and-meta-namespace-transactions">Example 4: Config and Meta namespace transactions<a class="headerlink" href="#example-4-config-and-meta-namespace-transactions" title="Permanent link">&para;</a></h4>
+<p>Special handling for system namespaces:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>T_config in "__config__":
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  Read-Writes (Updates):
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    - key: "_config", value: "config_data", version: 2
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  // No implicit reads added for config namespace
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>T_meta in "__meta__":
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>  Read-Writes (Updates):
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    - key: "ns2", value: "policy_data", version: 5
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>  Implicit read added (namespace lifecycle):
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    - namespace: "__config__"
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    - key: "_config"
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    - version: 3
+</code></pre></div>
+<p>After preparation:</p>
+<div class="mermaid">flowchart TD
+    subgraph ConfigRow[Row 1: Config Writes]
+        direction LR
+        cfgRW["txIDToNsNonBlindWrites[T_config][__config__]&lt;br/&gt;keys: [_config]&lt;br/&gt;values: [config_data]&lt;br/&gt;versions: [3]"]
+    end
+
+    subgraph MetaRow[Row 2: Meta Reads]
+        direction LR
+        metaReads["nsToReads[__config__]&lt;br/&gt;keys: [_config]&lt;br/&gt;versions: [3]"]
+        metaR2t["readToTxIDs&lt;br/&gt;{__config__,_config,3} → [T_meta]"]
+        metaReads ~~~ metaR2t
+    end
+
+    ConfigRow ~~~ MetaRow</div>
+<h2 id="5-phase-2-validate">5. Phase 2: Validate<a class="headerlink" href="#5-phase-2-validate" title="Permanent link">&para;</a></h2>
+<p>The Validator phase receives prepared transactions from the Preparer and performs MVCC (Multi-Version Concurrency Control) validation. Its main responsibilities are:</p>
+<p><strong>Important distinction</strong>: The Validator <strong>only validates reads</strong>. It does <strong>not</strong> fetch versions for blind writes. Blind write resolution happens in the Committer phase (Phase 3).</p>
+<p><strong>Input</strong>: <code>preparedTransactions</code> structure from Preparer containing:</p>
+<ul>
+<li><code>nsToReads</code>: All reads grouped by namespace</li>
+<li><code>readToTxIDs</code>: Mapping from reads to transaction IDs</li>
+<li>Categorized writes (non-blind, blind, new)</li>
+</ul>
+<p><strong>Output</strong>: <code>validatedTransactions</code> structure containing:</p>
+<ul>
+<li><code>validTxNonBlindWrites</code>: Writes from transactions that passed validation</li>
+<li><code>validTxBlindWrites</code>: Blind writes from valid transactions (still unresolved)</li>
+<li><code>newWrites</code>: New writes from valid transactions</li>
+<li><code>invalidTxStatus</code>: Status map for invalidated transactions (e.g., <code>MVCC_CONFLICT</code>)</li>
+</ul>
+<p><strong>Validation process</strong>:</p>
+<ol>
+<li>For each namespace, batch all reads together</li>
+<li>Call stored procedure <code>validate_reads_ns_${NSID}(keys, versions)</code> for each namespace</li>
+<li>Stored procedure returns indices of conflicting reads (where committed version ≠ expected version)</li>
+<li>For each conflicting read, lookup all transaction IDs in <code>readToTxIDs</code> map</li>
+<li>Mark those transactions as invalid with <code>ABORTED_MVCC_CONFLICT</code> status</li>
+<li>Remove all writes from invalid transactions</li>
+<li>Send only valid writes to Committer phase</li>
+</ol>
+<p><strong>Key property</strong>: If multiple transactions share the same read and that read conflicts, <strong>all</strong> those transactions are invalidated together. This is why <code>readToTxIDs</code> maps each read to a list of transaction IDs.</p>
+<h3 id="51-validate-flow-diagram">5.1 Validate Flow Diagram<a class="headerlink" href="#51-validate-flow-diagram" title="Permanent link">&para;</a></h3>
+<p>Validator performs MVCC read validation and removes invalid transactions from the pipeline.</p>
+<div class="mermaid">flowchart TD
+    Start["Receive preparedTxs&lt;br/&gt;from Preparer"] --&gt; Init["Initialize&lt;br/&gt;validatedTxs struct"]
+    Init --&gt; LoopNS{"For each namespace&lt;br/&gt;in nsToReads"}
+
+    LoopNS --&gt; Fetch["Get keys and versions&lt;br/&gt;for namespace"]
+    Fetch --&gt; CallSP["Call stored procedure&lt;br/&gt;validate_reads_ns"]
+    CallSP --&gt; DB[(State DB)]
+    DB --&gt; ReturnConf["Return conflicting read&lt;br/&gt;indices 1-based"]
+    ReturnConf --&gt; Collect["Collect conflicts&lt;br/&gt;nsToReadConflicts"]
+
+    LoopNS --&gt; DoneNS{"All namespaces&lt;br/&gt;processed?"}
+    DoneNS --&gt;|No| LoopNS
+    DoneNS --&gt;|Yes| LoopConf{"For each namespace&lt;br/&gt;with conflicts"}
+
+    LoopConf --&gt; LoopReads{"For each&lt;br/&gt;conflicting read"}
+    LoopReads --&gt; Lookup["Lookup txIDs in&lt;br/&gt;readToTxIDs map"]
+    Lookup --&gt; Mark["Mark txIDs&lt;br/&gt;as invalid"]
+    Mark --&gt; Remove["Remove txID from&lt;br/&gt;valid writes"]
+    Remove --&gt; LoopReads
+
+    LoopReads --&gt; DoneReads{"All conflicting reads&lt;br/&gt;processed?"}
+    DoneReads --&gt;|No| LoopReads
+    DoneReads --&gt; DoneConf{"All conflict namespaces&lt;br/&gt;processed?"}
+
+    DoneConf --&gt;|No| LoopConf
+    DoneConf --&gt;|Yes| Output["Send validatedTxs&lt;br/&gt;to Committer phase"]
+</div>
+<h3 id="52-mvcc-validation-logic">5.2 MVCC Validation Logic<a class="headerlink" href="#52-mvcc-validation-logic" title="Permanent link">&para;</a></h3>
+<p>Validator uses stored procedures to validate reads in bulk:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="c1">-- Stored procedure signature (per namespace)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="k">CREATE</span><span class="w"> </span><span class="k">FUNCTION</span><span class="w"> </span><span class="n">validate_reads_ns_$</span><span class="err">{</span><span class="n">NSID</span><span class="err">}</span><span class="p">(</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="n">keys</span><span class="w"> </span><span class="n">BYTEA</span><span class="p">[],</span><span class="w"> </span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">  </span><span class="k">versions</span><span class="w"> </span><span class="nb">BIGINT</span><span class="p">[]</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">)</span><span class="w"> </span><span class="k">RETURNS</span><span class="w"> </span><span class="nb">INTEGER</span><span class="p">[]</span><span class="w">  </span><span class="c1">-- Array of 1-based indices for conflicting reads</span>
+</code></pre></div>
+<p>Key points:</p>
+<ul>
+<li>stored procedure runs inside database for performance (avoids network round-trips)</li>
+<li>returns <strong>indices</strong> of conflicting reads (1-based, SQL convention)</li>
+<li>validator maps indices back to transactions using <code>readToTxIDs</code></li>
+<li>all transactions sharing a conflicting read are invalidated together</li>
+<li><strong>blind writes are NOT resolved here</strong> - they remain in <code>validTxBlindWrites</code> unchanged</li>
+<li>blind write resolution happens in Committer phase (Phase 3)</li>
+</ul>
+<h3 id="53-validation-examples">5.3 Validation Examples<a class="headerlink" href="#53-validation-examples" title="Permanent link">&para;</a></h3>
+<h4 id="example-1-no-conflicts-all-reads-valid">Example 1: No conflicts (all reads valid)<a class="headerlink" href="#example-1-no-conflicts-all-reads-valid" title="Permanent link">&para;</a></h4>
+<p>Database state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>ns1 table:
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  key="asset1", version=5, value="v1"
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  key="asset2", version=3, value="v2"
+</code></pre></div>
+<p>Prepared reads:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>nsToReads["ns1"]:
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  keys:     ["asset1", "asset2"]
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  versions: [5, 3]
+</code></pre></div>
+<p>Validation result:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>validate_reads_ns_ns1(["asset1", "asset2"], [5, 3])
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  → []  (empty array, no conflicts)
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>validatedTxs:
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  validTxNonBlindWrites: [T1, T2, T3]  // All transactions remain valid
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>  invalidTxStatus: {}
+</code></pre></div>
+<h4 id="example-2-single-read-conflict">Example 2: Single read conflict<a class="headerlink" href="#example-2-single-read-conflict" title="Permanent link">&para;</a></h4>
+<p>Database state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>ns1 table:
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  key="asset1", version=7, value="v1_updated"  // Version advanced to 7
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  key="asset2", version=3, value="v2"
+</code></pre></div>
+<p>Prepared reads:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>nsToReads["ns1"]:
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>  keys:     ["asset1", "asset2"]
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>  versions: [5, 3]  // asset1 is stale: DB version is 7
+</code></pre></div>
+<p>Validation result:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>validate_reads_ns_ns1(["asset1", "asset2"], [5, 3])
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>  → [1]  (index 1, meaning "asset1" conflicts)
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>readToTxIDs[{ns1, "asset1", 5}]: [T1, T2]
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>invalidateTxsOnReadConflicts:
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>  T1.invalidTxStatus = ABORTED_MVCC_CONFLICT
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>  T2.invalidTxStatus = ABORTED_MVCC_CONFLICT
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>validatedTxs:
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>  validTxNonBlindWrites: [T3]  // T1 and T2 removed
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>  invalidTxStatus: {T1: MVCC_CONFLICT, T2: MVCC_CONFLICT}
+</code></pre></div>
+<h4 id="example-3-multiple-conflicts-across-namespaces">Example 3: Multiple conflicts across namespaces<a class="headerlink" href="#example-3-multiple-conflicts-across-namespaces" title="Permanent link">&para;</a></h4>
+<p>Database state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>ns1 table:
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>  key="asset1", version=10, value="v1_v2"
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>  key="asset3", version=5, value="v3_updated"
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>ns2 table:
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>  key="asset5", version=8, value="v5_new"
+</code></pre></div>
+<p>Prepared reads:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>nsToReads["ns1"]:
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>  keys:     ["asset1", "asset3"]
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>  versions: [5, 3]
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>nsToReads["ns2"]:
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a>  keys:     ["asset5"]
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a>  versions: [4]
+</code></pre></div>
+<p>Validation result:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>validate_reads_ns_ns1(["asset1", "asset3"], [5, 3])
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>  → [1, 2]  (both reads conflict)
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>validate_reads_ns_ns2(["asset5"], [4])
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>  → [1]  (read conflicts)
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>readToTxIDs mapping:
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>  {ns1, "asset1", 5}: [T1, T4]
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>  {ns1, "asset3", 3}: [T2]
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>  {ns2, "asset5", 4}: [T3, T4]
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>invalidateTxsOnReadConflicts:
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>  T1.invalidTxStatus = MVCC_CONFLICT
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>  T2.invalidTxStatus = MVCC_CONFLICT
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>  T3.invalidTxStatus = MVCC_CONFLICT
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>  T4.invalidTxStatus = MVCC_CONFLICT  // Conflicts on both ns1 and ns2
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>validatedTxs:
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>  validTxNonBlindWrites: []  // All transactions invalidated
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>  invalidTxStatus: {T1, T2, T3, T4: MVCC_CONFLICT}
+</code></pre></div>
+<h4 id="example-4-meta-namespace-conflict-blocks-all-normal-traffic">Example 4: Meta-namespace conflict blocks all normal traffic<a class="headerlink" href="#example-4-meta-namespace-conflict-blocks-all-normal-traffic" title="Permanent link">&para;</a></h4>
+<p>Database state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>__meta__ table:
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>  key="ns1", version=15, value="policy_v2"  // Namespace policy updated
+</code></pre></div>
+<p>Prepared reads (normal transactions):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>nsToReads["__meta__"]:
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>  keys:     ["ns1"]
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>  versions: [10]  // T1, T2, T3 read policy at version 10
+</code></pre></div>
+<p>Validation result:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>validate_reads_ns___meta__(["ns1"], [10])
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  → [1]  (namespace lifecycle conflict)
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>readToTxIDs[{__meta__, "ns1", 10}]: [T1, T2, T3]
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>invalidateTxsOnReadConflicts:
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a>  T1.invalidTxStatus = MVCC_CONFLICT
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a>  T2.invalidTxStatus = MVCC_CONFLICT
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a>  T3.invalidTxStatus = MVCC_CONFLICT
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a>Result: All three normal transactions in ns1 are aborted because
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a>        namespace policy changed after they read the policy state.
+</code></pre></div>
+<h2 id="6-phase-3-commit">6. Phase 3: Commit<a class="headerlink" href="#6-phase-3-commit" title="Permanent link">&para;</a></h2>
+<h3 id="61-commit-flow-diagram">6.1 Commit Flow Diagram<a class="headerlink" href="#61-commit-flow-diagram" title="Permanent link">&para;</a></h3>
+<p>Committer resolves blind writes, commits to database, and handles duplicates.</p>
+<div class="mermaid">flowchart TD
+    Start[Receive validatedTxs] --&gt; Resolve[Resolve blind writes]
+
+    Resolve --&gt; QueryDB[Query current versions&lt;br/&gt;for blind write keys]
+    QueryDB --&gt; DB[(State DB)]
+    DB --&gt; Categorize{Key exists?}
+
+    Categorize --&gt;|Yes, version=v| MoveToUpdate[Move to updateWrites&lt;br/&gt;version = v+1]
+    Categorize --&gt;|No| MoveToInsert[Move to newWrites&lt;br/&gt;version = 0]
+
+    MoveToUpdate --&gt; Group[Group by namespace]
+    MoveToInsert --&gt; Group
+
+    Group --&gt; PrepStatus[Prepare tx status batch]
+    PrepStatus --&gt; BeginTx[Begin DB transaction]
+
+    BeginTx --&gt; InsertIDs[Insert tx_status first]
+    InsertIDs --&gt; CheckDup{Duplicates?}
+    CheckDup --&gt;|Yes| Rollback1[Rollback, return duplicates]
+    CheckDup --&gt;|No| InsertStates[Insert new writes]
+
+    InsertStates --&gt; CheckConflict{Key conflicts?}
+    CheckConflict --&gt;|Yes| Rollback2[Rollback, return conflicts]
+    CheckConflict --&gt;|No| UpdateStates[Update existing keys]
+
+    UpdateStates --&gt; Commit[Commit transaction]
+    Commit --&gt; SendStatus[Send status to Coordinator]
+
+    Rollback1 --&gt; Retry[Retry loop]
+    Rollback2 --&gt; Retry
+    Retry --&gt; InsertIDs</div>
+<h3 id="62-blind-write-resolution">6.2 Blind Write Resolution<a class="headerlink" href="#62-blind-write-resolution" title="Permanent link">&para;</a></h3>
+<p>Before committing, committer must resolve blind writes by querying current database state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>For each namespace with blind writes:
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  1. Query current versions for all blind write keys
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a>  2. For each key:
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>     - If key exists with version v:
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a>       → Move to updateWrites with version = v + 1
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a>     - If key does not exist:
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a>       → Move to newWrites with version = 0
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>  3. Clear blind writes map
+</code></pre></div>
+<p>This step is critical because blind writes arrive without version information.</p>
+<h3 id="63-commit-examples">6.3 Commit Examples<a class="headerlink" href="#63-commit-examples" title="Permanent link">&para;</a></h3>
+<h4 id="example-1-simple-commit-with-no-conflicts">Example 1: Simple commit with no conflicts<a class="headerlink" href="#example-1-simple-commit-with-no-conflicts" title="Permanent link">&para;</a></h4>
+<p>Database state before commit:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>ns1 table:
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>  key="asset1", version=5, value="v1_old"
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>  key="asset2", version=3, value="v2_old"
+</code></pre></div>
+<p>Validated writes (after validation phase):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>validTxNonBlindWrites[T1]["ns1"]:
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>  keys:     ["asset1"]
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>  values:   ["v1_new"]
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>  versions: [6]  // 5 + 1
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>
+<a id="__codelineno-20-6" name="__codelineno-20-6" href="#__codelineno-20-6"></a>validTxBlindWrites[T2]["ns1"]:
+<a id="__codelineno-20-7" name="__codelineno-20-7" href="#__codelineno-20-7"></a>  keys:     ["asset3"]
+<a id="__codelineno-20-8" name="__codelineno-20-8" href="#__codelineno-20-8"></a>  values:   ["v3_new"]
+<a id="__codelineno-20-9" name="__codelineno-20-9" href="#__codelineno-20-9"></a>  versions: [0]  // placeholder
+<a id="__codelineno-20-10" name="__codelineno-20-10" href="#__codelineno-20-10"></a>
+<a id="__codelineno-20-11" name="__codelineno-20-11" href="#__codelineno-20-11"></a>newWrites[T3]["ns1"]:
+<a id="__codelineno-20-12" name="__codelineno-20-12" href="#__codelineno-20-12"></a>  keys:     ["asset4"]
+<a id="__codelineno-20-13" name="__codelineno-20-13" href="#__codelineno-20-13"></a>  values:   ["v4_new"]
+<a id="__codelineno-20-14" name="__codelineno-20-14" href="#__codelineno-20-14"></a>  versions: [0]
+</code></pre></div>
+<p>Blind write resolution:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>Query: SELECT key, version FROM ns_ns1 WHERE key = "asset3"
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a>Result: (no rows)  // Key does not exist
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a>Action: Move T2's write to newWrites
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a>  newWrites[T2]["ns1"]:
+<a id="__codelineno-21-6" name="__codelineno-21-6" href="#__codelineno-21-6"></a>    keys:     ["asset3"]
+<a id="__codelineno-21-7" name="__codelineno-21-7" href="#__codelineno-21-7"></a>    values:   ["v3_new"]
+<a id="__codelineno-21-8" name="__codelineno-21-8" href="#__codelineno-21-8"></a>    versions: [0]
+</code></pre></div>
+<p>Commit sequence:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>1. Insert tx_status:
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a>   INSERT INTO tx_status (tx_id, status, height)
+<a id="__codelineno-22-3" name="__codelineno-22-3" href="#__codelineno-22-3"></a>   VALUES ("T1", COMMITTED, h1), ("T2", COMMITTED, h2), ("T3", COMMITTED, h3)
+<a id="__codelineno-22-4" name="__codelineno-22-4" href="#__codelineno-22-4"></a>   → No duplicates, success
+<a id="__codelineno-22-5" name="__codelineno-22-5" href="#__codelineno-22-5"></a>
+<a id="__codelineno-22-6" name="__codelineno-22-6" href="#__codelineno-22-6"></a>2. Insert new writes:
+<a id="__codelineno-22-7" name="__codelineno-22-7" href="#__codelineno-22-7"></a>   SELECT * FROM insert_ns_ns1(["asset4", "asset3"], ["v4_new", "v3_new"])
+<a id="__codelineno-22-8" name="__codelineno-22-8" href="#__codelineno-22-8"></a>   → No violations, success
+<a id="__codelineno-22-9" name="__codelineno-22-9" href="#__codelineno-22-9"></a>
+<a id="__codelineno-22-10" name="__codelineno-22-10" href="#__codelineno-22-10"></a>3. Update existing keys:
+<a id="__codelineno-22-11" name="__codelineno-22-11" href="#__codelineno-22-11"></a>   SELECT * FROM update_ns_ns1(["asset1"], ["v1_new"], [6])
+<a id="__codelineno-22-12" name="__codelineno-22-12" href="#__codelineno-22-12"></a>   → Success (version matches)
+<a id="__codelineno-22-13" name="__codelineno-22-13" href="#__codelineno-22-13"></a>
+<a id="__codelineno-22-14" name="__codelineno-22-14" href="#__codelineno-22-14"></a>4. Commit transaction
+<a id="__codelineno-22-15" name="__codelineno-22-15" href="#__codelineno-22-15"></a>   → All writes persisted
+<a id="__codelineno-22-16" name="__codelineno-22-16" href="#__codelineno-22-16"></a>
+<a id="__codelineno-22-17" name="__codelineno-22-17" href="#__codelineno-22-17"></a>Final database state:
+<a id="__codelineno-22-18" name="__codelineno-22-18" href="#__codelineno-22-18"></a>  ns1 table:
+<a id="__codelineno-22-19" name="__codelineno-22-19" href="#__codelineno-22-19"></a>    key="asset1", version=6, value="v1_new"
+<a id="__codelineno-22-20" name="__codelineno-22-20" href="#__codelineno-22-20"></a>    key="asset2", version=3, value="v2_old"  // Unchanged
+<a id="__codelineno-22-21" name="__codelineno-22-21" href="#__codelineno-22-21"></a>    key="asset3", version=1, value="v3_new"  // New (version from 0 to 1)
+<a id="__codelineno-22-22" name="__codelineno-22-22" href="#__codelineno-22-22"></a>    key="asset4", version=1, value="v4_new"  // New
+</code></pre></div>
+<h4 id="example-2-blind-write-becomes-update">Example 2: Blind write becomes update<a class="headerlink" href="#example-2-blind-write-becomes-update" title="Permanent link">&para;</a></h4>
+<p>Database state before commit:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>ns1 table:
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a>  key="asset3", version=8, value="v3_existing"
+</code></pre></div>
+<p>Blind write to resolve:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>validTxBlindWrites[T1]["ns1"]:
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>  keys:     ["asset3"]
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>  values:   ["v3_updated"]
+<a id="__codelineno-24-4" name="__codelineno-24-4" href="#__codelineno-24-4"></a>  versions: [0]
+</code></pre></div>
+<p>Blind write resolution:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>Query: SELECT key, version FROM ns_ns1 WHERE key = "asset3"
+<a id="__codelineno-25-2" name="__codelineno-25-2" href="#__codelineno-25-2"></a>Result: ("asset3", 8)  // Key exists with version 8
+<a id="__codelineno-25-3" name="__codelineno-25-3" href="#__codelineno-25-3"></a>
+<a id="__codelineno-25-4" name="__codelineno-25-4" href="#__codelineno-25-4"></a>Action: Move to updateWrites with version = 8 + 1 = 9
+<a id="__codelineno-25-5" name="__codelineno-25-5" href="#__codelineno-25-5"></a>  validTxNonBlindWrites[T1]["ns1"]:
+<a id="__codelineno-25-6" name="__codelineno-25-6" href="#__codelineno-25-6"></a>    keys:     ["asset3"]
+<a id="__codelineno-25-7" name="__codelineno-25-7" href="#__codelineno-25-7"></a>    values:   ["v3_updated"]
+<a id="__codelineno-25-8" name="__codelineno-25-8" href="#__codelineno-25-8"></a>    versions: [9]
+</code></pre></div>
+<h4 id="example-3-duplicate-transaction-id-detection">Example 3: Duplicate transaction ID detection<a class="headerlink" href="#example-3-duplicate-transaction-id-detection" title="Permanent link">&para;</a></h4>
+<p>Scenario: <code>T1</code> was already committed in a previous batch (resubmission due to network issue).</p>
+<p>Database state before commit:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-26-1" name="__codelineno-26-1" href="#__codelineno-26-1"></a>tx_status table:
+<a id="__codelineno-26-2" name="__codelineno-26-2" href="#__codelineno-26-2"></a>  tx_id="T1", status=COMMITTED, height=(block=100, tx_index=5)
+</code></pre></div>
+<p>Current batch:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-27-1" name="__codelineno-27-1" href="#__codelineno-27-1"></a>batchStatus:
+<a id="__codelineno-27-2" name="__codelineno-27-2" href="#__codelineno-27-2"></a>  T1: COMMITTED
+<a id="__codelineno-27-3" name="__codelineno-27-3" href="#__codelineno-27-3"></a>  T2: COMMITTED
+<a id="__codelineno-27-4" name="__codelineno-27-4" href="#__codelineno-27-4"></a>  T3: MVCC_CONFLICT
+</code></pre></div>
+<p>Commit sequence:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-28-1" name="__codelineno-28-1" href="#__codelineno-28-1"></a>1. Insert tx_status:
+<a id="__codelineno-28-2" name="__codelineno-28-2" href="#__codelineno-28-2"></a>   INSERT INTO tx_status (tx_id, status, height)
+<a id="__codelineno-28-3" name="__codelineno-28-3" href="#__codelineno-28-3"></a>   VALUES ("T1", COMMITTED, h1), ("T2", COMMITTED, h2), ("T3", MVCC_CONFLICT, h3)
+<a id="__codelineno-28-4" name="__codelineno-28-4" href="#__codelineno-28-4"></a>
+<a id="__codelineno-28-5" name="__codelineno-28-5" href="#__codelineno-28-5"></a>   Stored procedure returns: ["T1"]  // Duplicate detected
+<a id="__codelineno-28-6" name="__codelineno-28-6" href="#__codelineno-28-6"></a>
+<a id="__codelineno-28-7" name="__codelineno-28-7" href="#__codelineno-28-7"></a>2. Rollback transaction
+<a id="__codelineno-28-8" name="__codelineno-28-8" href="#__codelineno-28-8"></a>
+<a id="__codelineno-28-9" name="__codelineno-28-9" href="#__codelineno-28-9"></a>3. Query correct status for T1:
+<a id="__codelineno-28-10" name="__codelineno-28-10" href="#__codelineno-28-10"></a>   SELECT tx_id, status, height FROM tx_status WHERE tx_id = "T1"
+<a id="__codelineno-28-11" name="__codelineno-28-11" href="#__codelineno-28-11"></a>   Result: ("T1", COMMITTED, (100, 5))
+<a id="__codelineno-28-12" name="__codelineno-28-12" href="#__codelineno-28-12"></a>
+<a id="__codelineno-28-13" name="__codelineno-28-13" href="#__codelineno-28-13"></a>4. Check if this is resubmission or true duplicate:
+<a id="__codelineno-28-14" name="__codelineno-28-14" href="#__codelineno-28-14"></a>   - If current height matches stored height (100, 5):
+<a id="__codelineno-28-15" name="__codelineno-28-15" href="#__codelineno-28-15"></a>     → Resubmission, reuse COMMITTED status
+<a id="__codelineno-28-16" name="__codelineno-28-16" href="#__codelineno-28-16"></a>   - If current height differs:
+<a id="__codelineno-28-17" name="__codelineno-28-17" href="#__codelineno-28-17"></a>     → True duplicate, return DUPLICATE_TXID status
+<a id="__codelineno-28-18" name="__codelineno-28-18" href="#__codelineno-28-18"></a>
+<a id="__codelineno-28-19" name="__codelineno-28-19" href="#__codelineno-28-19"></a>5. Retry commit with corrected status:
+<a id="__codelineno-28-20" name="__codelineno-28-20" href="#__codelineno-28-20"></a>   batchStatus:
+<a id="__codelineno-28-21" name="__codelineno-28-21" href="#__codelineno-28-21"></a>     T1: COMMITTED  // Reused from DB
+<a id="__codelineno-28-22" name="__codelineno-28-22" href="#__codelineno-28-22"></a>     T2: COMMITTED
+<a id="__codelineno-28-23" name="__codelineno-28-23" href="#__codelineno-28-23"></a>     T3: MVCC_CONFLICT
+<a id="__codelineno-28-24" name="__codelineno-28-24" href="#__codelineno-28-24"></a>
+<a id="__codelineno-28-25" name="__codelineno-28-25" href="#__codelineno-28-25"></a>   INSERT INTO tx_status (...)
+<a id="__codelineno-28-26" name="__codelineno-28-26" href="#__codelineno-28-26"></a>   VALUES ("T2", ...), ("T3", ...)  // T1 excluded
+<a id="__codelineno-28-27" name="__codelineno-28-27" href="#__codelineno-28-27"></a>   → Success
+</code></pre></div>
+<h4 id="example-4-new-write-collision-key-already-exists">Example 4: New write collision (key already exists)<a class="headerlink" href="#example-4-new-write-collision-key-already-exists" title="Permanent link">&para;</a></h4>
+<p>Database state before commit:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-29-1" name="__codelineno-29-1" href="#__codelineno-29-1"></a>ns1 table:
+<a id="__codelineno-29-2" name="__codelineno-29-2" href="#__codelineno-29-2"></a>  key="asset4", version=2, value="v4_existing"
+</code></pre></div>
+<p>New writes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-30-1" name="__codelineno-30-1" href="#__codelineno-30-1"></a>newWrites[T1]["ns1"]:
+<a id="__codelineno-30-2" name="__codelineno-30-2" href="#__codelineno-30-2"></a>  keys:     ["asset4"]  // T1 thinks this is a new key
+<a id="__codelineno-30-3" name="__codelineno-30-3" href="#__codelineno-30-3"></a>  values:   ["v4_new"]
+<a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a>  versions: [0]
+</code></pre></div>
+<p>Commit sequence:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a>1. Insert tx_status:
+<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a>   → Success (no duplicates)
+<a id="__codelineno-31-3" name="__codelineno-31-3" href="#__codelineno-31-3"></a>
+<a id="__codelineno-31-4" name="__codelineno-31-4" href="#__codelineno-31-4"></a>2. Insert new writes:
+<a id="__codelineno-31-5" name="__codelineno-31-5" href="#__codelineno-31-5"></a>   SELECT * FROM insert_ns_ns1(["asset4"], ["v4_new"])
+<a id="__codelineno-31-6" name="__codelineno-31-6" href="#__codelineno-31-6"></a>
+<a id="__codelineno-31-7" name="__codelineno-31-7" href="#__codelineno-31-7"></a>   Stored procedure detects primary key violation:
+<a id="__codelineno-31-8" name="__codelineno-31-8" href="#__codelineno-31-8"></a>   → Returns violating keys: ["asset4"]
+<a id="__codelineno-31-9" name="__codelineno-31-9" href="#__codelineno-31-9"></a>
+<a id="__codelineno-31-10" name="__codelineno-31-10" href="#__codelineno-31-10"></a>3. Rollback transaction
+<a id="__codelineno-31-11" name="__codelineno-31-11" href="#__codelineno-31-11"></a>
+<a id="__codelineno-31-12" name="__codelineno-31-12" href="#__codelineno-31-12"></a>4. Invalidate transaction:
+<a id="__codelineno-31-13" name="__codelineno-31-13" href="#__codelineno-31-13"></a>   T1.invalidTxStatus = REJECTED_DUPLICATE_TX_ID
+<a id="__codelineno-31-14" name="__codelineno-31-14" href="#__codelineno-31-14"></a>   (or appropriate conflict status)
+<a id="__codelineno-31-15" name="__codelineno-31-15" href="#__codelineno-31-15"></a>
+<a id="__codelineno-31-16" name="__codelineno-31-16" href="#__codelineno-31-16"></a>5. Retry commit with T1 removed:
+<a id="__codelineno-31-17" name="__codelineno-31-17" href="#__codelineno-31-17"></a>   → Success for remaining transactions
+</code></pre></div>
+<h4 id="example-5-mixed-batch-with-updates-inserts-and-blind-writes">Example 5: Mixed batch with updates, inserts, and blind writes<a class="headerlink" href="#example-5-mixed-batch-with-updates-inserts-and-blind-writes" title="Permanent link">&para;</a></h4>
+<p>Database state before commit:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a>ns1 table:
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a>  key="asset1", version=5, value="v1_old"
+<a id="__codelineno-32-3" name="__codelineno-32-3" href="#__codelineno-32-3"></a>  key="asset2", version=3, value="v2_old"
+<a id="__codelineno-32-4" name="__codelineno-32-4" href="#__codelineno-32-4"></a>  key="asset5", version=1, value="v5_old"
+<a id="__codelineno-32-5" name="__codelineno-32-5" href="#__codelineno-32-5"></a>
+<a id="__codelineno-32-6" name="__codelineno-32-6" href="#__codelineno-32-6"></a>ns2 table:
+<a id="__codelineno-32-7" name="__codelineno-32-7" href="#__codelineno-32-7"></a>  key="asset3", version=2, value="v3_old"
+</code></pre></div>
+<p>Validated writes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-33-1" name="__codelineno-33-1" href="#__codelineno-33-1"></a>// T1: Update asset1
+<a id="__codelineno-33-2" name="__codelineno-33-2" href="#__codelineno-33-2"></a>validTxNonBlindWrites[T1]["ns1"]:
+<a id="__codelineno-33-3" name="__codelineno-33-3" href="#__codelineno-33-3"></a>  keys:     ["asset1"]
+<a id="__codelineno-33-4" name="__codelineno-33-4" href="#__codelineno-33-4"></a>  values:   ["v1_new"]
+<a id="__codelineno-33-5" name="__codelineno-33-5" href="#__codelineno-33-5"></a>  versions: [6]
+<a id="__codelineno-33-6" name="__codelineno-33-6" href="#__codelineno-33-6"></a>
+<a id="__codelineno-33-7" name="__codelineno-33-7" href="#__codelineno-33-7"></a>// T2: Blind write to asset2 (exists) and asset6 (new)
+<a id="__codelineno-33-8" name="__codelineno-33-8" href="#__codelineno-33-8"></a>validTxBlindWrites[T2]["ns1"]:
+<a id="__codelineno-33-9" name="__codelineno-33-9" href="#__codelineno-33-9"></a>  keys:     ["asset2", "asset6"]
+<a id="__codelineno-33-10" name="__codelineno-33-10" href="#__codelineno-33-10"></a>  values:   ["v2_blind", "v6_blind"]
+<a id="__codelineno-33-11" name="__codelineno-33-11" href="#__codelineno-33-11"></a>  versions: [0, 0]
+<a id="__codelineno-33-12" name="__codelineno-33-12" href="#__codelineno-33-12"></a>
+<a id="__codelineno-33-13" name="__codelineno-33-13" href="#__codelineno-33-13"></a>// T3: New write
+<a id="__codelineno-33-14" name="__codelineno-33-14" href="#__codelineno-33-14"></a>newWrites[T3]["ns1"]:
+<a id="__codelineno-33-15" name="__codelineno-33-15" href="#__codelineno-33-15"></a>  keys:     ["asset4"]
+<a id="__codelineno-33-16" name="__codelineno-33-16" href="#__codelineno-33-16"></a>  values:   ["v4_new"]
+<a id="__codelineno-33-17" name="__codelineno-33-17" href="#__codelineno-33-17"></a>  versions: [0]
+<a id="__codelineno-33-18" name="__codelineno-33-18" href="#__codelineno-33-18"></a>
+<a id="__codelineno-33-19" name="__codelineno-33-19" href="#__codelineno-33-19"></a>// T4: Update in ns2
+<a id="__codelineno-33-20" name="__codelineno-33-20" href="#__codelineno-33-20"></a>validTxNonBlindWrites[T4]["ns2"]:
+<a id="__codelineno-33-21" name="__codelineno-33-21" href="#__codelineno-33-21"></a>  keys:     ["asset3"]
+<a id="__codelineno-33-22" name="__codelineno-33-22" href="#__codelineno-33-22"></a>  values:   ["v3_new"]
+<a id="__codelineno-33-23" name="__codelineno-33-23" href="#__codelineno-33-23"></a>  versions: [3]
+</code></pre></div>
+<p>Blind write resolution:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-34-1" name="__codelineno-34-1" href="#__codelineno-34-1"></a>Query ns1 for asset2 and asset6:
+<a id="__codelineno-34-2" name="__codelineno-34-2" href="#__codelineno-34-2"></a>  SELECT key, version FROM ns_ns1 WHERE key IN ("asset2", "asset6")
+<a id="__codelineno-34-3" name="__codelineno-34-3" href="#__codelineno-34-3"></a>  Result: ("asset2", 3)  // Only asset2 exists
+<a id="__codelineno-34-4" name="__codelineno-34-4" href="#__codelineno-34-4"></a>
+<a id="__codelineno-34-5" name="__codelineno-34-5" href="#__codelineno-34-5"></a>Resolution:
+<a id="__codelineno-34-6" name="__codelineno-34-6" href="#__codelineno-34-6"></a>  // asset2 becomes update
+<a id="__codelineno-34-7" name="__codelineno-34-7" href="#__codelineno-34-7"></a>  validTxNonBlindWrites[T2]["ns1"]:
+<a id="__codelineno-34-8" name="__codelineno-34-8" href="#__codelineno-34-8"></a>    keys:     ["asset2"]
+<a id="__codelineno-34-9" name="__codelineno-34-9" href="#__codelineno-34-9"></a>    values:   ["v2_blind"]
+<a id="__codelineno-34-10" name="__codelineno-34-10" href="#__codelineno-34-10"></a>    versions: [4]  // 3 + 1
+<a id="__codelineno-34-11" name="__codelineno-34-11" href="#__codelineno-34-11"></a>
+<a id="__codelineno-34-12" name="__codelineno-34-12" href="#__codelineno-34-12"></a>  // asset6 becomes new write
+<a id="__codelineno-34-13" name="__codelineno-34-13" href="#__codelineno-34-13"></a>  newWrites[T2]["ns1"]:
+<a id="__codelineno-34-14" name="__codelineno-34-14" href="#__codelineno-34-14"></a>    keys:     ["asset6"]
+<a id="__codelineno-34-15" name="__codelineno-34-15" href="#__codelineno-34-15"></a>    values:   ["v6_blind"]
+<a id="__codelineno-34-16" name="__codelineno-34-16" href="#__codelineno-34-16"></a>    versions: [0]
+</code></pre></div>
+<p>Commit sequence:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-35-1" name="__codelineno-35-1" href="#__codelineno-35-1"></a>1. Insert tx_status:
+<a id="__codelineno-35-2" name="__codelineno-35-2" href="#__codelineno-35-2"></a>   VALUES ("T1", COMMITTED), ("T2", COMMITTED), ("T3", COMMITTED), ("T4", COMMITTED)
+<a id="__codelineno-35-3" name="__codelineno-35-3" href="#__codelineno-35-3"></a>   → Success
+<a id="__codelineno-35-4" name="__codelineno-35-4" href="#__codelineno-35-4"></a>
+<a id="__codelineno-35-5" name="__codelineno-35-5" href="#__codelineno-35-5"></a>2. Insert new writes (ns1):
+<a id="__codelineno-35-6" name="__codelineno-35-6" href="#__codelineno-35-6"></a>   insert_ns_ns1(["asset4", "asset6"], ["v4_new", "v6_blind"])
+<a id="__codelineno-35-7" name="__codelineno-35-7" href="#__codelineno-35-7"></a>   → Success
+<a id="__codelineno-35-8" name="__codelineno-35-8" href="#__codelineno-35-8"></a>
+<a id="__codelineno-35-9" name="__codelineno-35-9" href="#__codelineno-35-9"></a>3. Insert new writes (ns2):
+<a id="__codelineno-35-10" name="__codelineno-35-10" href="#__codelineno-35-10"></a>   // No new writes in ns2
+<a id="__codelineno-35-11" name="__codelineno-35-11" href="#__codelineno-35-11"></a>
+<a id="__codelineno-35-12" name="__codelineno-35-12" href="#__codelineno-35-12"></a>4. Update existing keys (ns1):
+<a id="__codelineno-35-13" name="__codelineno-35-13" href="#__codelineno-35-13"></a>   update_ns_ns1(["asset1", "asset2"], ["v1_new", "v2_blind"], [6, 4])
+<a id="__codelineno-35-14" name="__codelineno-35-14" href="#__codelineno-35-14"></a>   → Success
+<a id="__codelineno-35-15" name="__codelineno-35-15" href="#__codelineno-35-15"></a>
+<a id="__codelineno-35-16" name="__codelineno-35-16" href="#__codelineno-35-16"></a>5. Update existing keys (ns2):
+<a id="__codelineno-35-17" name="__codelineno-35-17" href="#__codelineno-35-17"></a>   update_ns_ns2(["asset3"], ["v3_new"], [3])
+<a id="__codelineno-35-18" name="__codelineno-35-18" href="#__codelineno-35-18"></a>   → Success
+<a id="__codelineno-35-19" name="__codelineno-35-19" href="#__codelineno-35-19"></a>
+<a id="__codelineno-35-20" name="__codelineno-35-20" href="#__codelineno-35-20"></a>6. Commit transaction
+<a id="__codelineno-35-21" name="__codelineno-35-21" href="#__codelineno-35-21"></a>   → All writes persisted
+<a id="__codelineno-35-22" name="__codelineno-35-22" href="#__codelineno-35-22"></a>
+<a id="__codelineno-35-23" name="__codelineno-35-23" href="#__codelineno-35-23"></a>Final database state:
+<a id="__codelineno-35-24" name="__codelineno-35-24" href="#__codelineno-35-24"></a>  ns1 table:
+<a id="__codelineno-35-25" name="__codelineno-35-25" href="#__codelineno-35-25"></a>    key="asset1", version=6, value="v1_new"
+<a id="__codelineno-35-26" name="__codelineno-35-26" href="#__codelineno-35-26"></a>    key="asset2", version=4, value="v2_blind"
+<a id="__codelineno-35-27" name="__codelineno-35-27" href="#__codelineno-35-27"></a>    key="asset4", version=1, value="v4_new"
+<a id="__codelineno-35-28" name="__codelineno-35-28" href="#__codelineno-35-28"></a>    key="asset5", version=1, value="v5_old"  // Unchanged
+<a id="__codelineno-35-29" name="__codelineno-35-29" href="#__codelineno-35-29"></a>    key="asset6", version=1, value="v6_blind"
+<a id="__codelineno-35-30" name="__codelineno-35-30" href="#__codelineno-35-30"></a>
+<a id="__codelineno-35-31" name="__codelineno-35-31" href="#__codelineno-35-31"></a>  ns2 table:
+<a id="__codelineno-35-32" name="__codelineno-35-32" href="#__codelineno-35-32"></a>    key="asset3", version=3, value="v3_new"
+</code></pre></div>
+<h2 id="7-database-schema-and-stored-procedures">7. Database Schema and Stored Procedures<a class="headerlink" href="#7-database-schema-and-stored-procedures" title="Permanent link">&para;</a></h2>
+<h3 id="system-tables">System Tables<a class="headerlink" href="#system-tables" title="Permanent link">&para;</a></h3>
+<p><strong>Transaction Status Table (<code>tx_status</code>)</strong>:
+Stores final status of every transaction.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tx_id</code></td>
+<td><code>BYTEA</code></td>
+<td>Transaction ID (Primary Key)</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td><code>INTEGER</code></td>
+<td>Status code (COMMITTED, MVCC_CONFLICT, DUPLICATE_TXID, etc.)</td>
+</tr>
+<tr>
+<td><code>height</code></td>
+<td><code>BYTEA</code></td>
+<td>Block number + tx index (order-preserving encoding)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Namespace Metadata Table (<code>ns__meta</code>)</strong>:
+Stores endorsement policies for namespaces.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>key</code></td>
+<td><code>BYTEA</code></td>
+<td>Namespace ID (Primary Key)</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td><code>BYTEA</code></td>
+<td>Endorsement policy</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td><code>BIGINT</code></td>
+<td>MVCC version</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Configuration Table (<code>ns__config</code>)</strong>:
+Stores system configuration transaction.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>key</code></td>
+<td><code>BYTEA</code></td>
+<td>Fixed key <code>_config</code> (Primary Key)</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td><code>BYTEA</code></td>
+<td>Configuration transaction envelope</td>
+</tr>
+</tbody>
+</table>
+<p><strong>User Namespace Tables (<code>ns_${NSID}</code>)</strong>:
+One table per namespace storing world state.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>key</code></td>
+<td><code>BYTEA</code></td>
+<td>State key (Primary Key)</td>
+</tr>
+<tr>
+<td><code>value</code></td>
+<td><code>BYTEA</code></td>
+<td>State value</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td><code>BIGINT</code></td>
+<td>MVCC version</td>
+</tr>
+</tbody>
+</table>
+<h3 id="stored-procedures">Stored Procedures<a class="headerlink" href="#stored-procedures" title="Permanent link">&para;</a></h3>
+<p><strong><code>insert_tx_status(tx_ids, statuses, heights)</code></strong>:
+Inserts transaction statuses. Returns array of duplicate tx_ids on primary key violation.</p>
+<p><strong><code>validate_reads_ns_${NSID}(keys, versions)</code></strong>:
+Validates read versions. Returns 1-based indices of conflicting reads.</p>
+<p><strong><code>update_ns_${NSID}(keys, values, versions)</code></strong>:
+Updates existing keys. Fails if key does not exist or version mismatch.</p>
+<p><strong><code>insert_ns_${NSID}(keys, values)</code></strong>:
+Inserts new keys. Returns array of violating keys on primary key violation.</p>
+<h2 id="8-failure-and-recovery">8. Failure and Recovery<a class="headerlink" href="#8-failure-and-recovery" title="Permanent link">&para;</a></h2>
+<h3 id="81-preparer-failures">8.1 Preparer Failures<a class="headerlink" href="#81-preparer-failures" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Impact</th>
+<th>Recovery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Preparer panics</td>
+<td><code>preparedTxs</code> channel closes</td>
+<td>VC service restarts; Coordinator resends unacknowledged batches</td>
+</tr>
+<tr>
+<td>Duplicate tx in batch</td>
+<td>Second occurrence skipped</td>
+<td>Preparer detects via <code>txIDToHeight</code> map</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-validator-failures">8.2 Validator Failures<a class="headerlink" href="#82-validator-failures" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Impact</th>
+<th>Recovery</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Validator panics</td>
+<td><code>validatedTxs</code> channel closes</td>
+<td>VC service restarts; batches re-validated from scratch</td>
+</tr>
+<tr>
+<td>Read validation error</td>
+<td>Batch fails</td>
+<td>Entire batch retried; idempotent because reads are re-validated</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-committer-failures">8.3 Committer Failures<a class="headerlink" href="#83-committer-failures" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Failure Point</th>
+<th>What Persists</th>
+<th>What Retries</th>
+<th>Why Correct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>After <code>insert_tx_status</code> but before commit</td>
+<td>Nothing (uncommitted)</td>
+<td>Full batch retry</td>
+<td>Transaction rolled back; <code>insert_tx_status</code> detects duplicates on retry</td>
+</tr>
+<tr>
+<td>During <code>insert_ns</code></td>
+<td>Nothing (uncommitted)</td>
+<td>Retry with reduced batch</td>
+<td>Violating keys returned; corresponding txs marked invalid</td>
+</tr>
+<tr>
+<td>During <code>update_ns</code></td>
+<td>Nothing (uncommitted)</td>
+<td>Retry</td>
+<td>Updates cannot conflict (versions pre-validated)</td>
+</tr>
+<tr>
+<td>Final commit fails</td>
+<td>Nothing</td>
+<td>Retry</td>
+<td>All changes in single transaction</td>
+</tr>
+</tbody>
+</table>
+<h3 id="84-duplicate-transaction-handling">8.4 Duplicate Transaction Handling<a class="headerlink" href="#84-duplicate-transaction-handling" title="Permanent link">&para;</a></h3>
+<p>Duplicates can arise from:</p>
+<ol>
+<li><strong>Coordinator resubmission</strong>: VC stream fails, Coordinator resends to another VC instance</li>
+<li><strong>Network issues</strong>: Same tx appears in multiple batches that get merged</li>
+<li><strong>True duplicates</strong>: Application submits same tx twice</li>
+</ol>
+<p>Handling strategy:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-36-1" name="__codelineno-36-1" href="#__codelineno-36-1"></a>1. Insert tx_status FIRST (before writes)
+<a id="__codelineno-36-2" name="__codelineno-36-2" href="#__codelineno-36-2"></a>   → Detects duplicates early via primary key constraint
+<a id="__codelineno-36-3" name="__codelineno-36-3" href="#__codelineno-36-3"></a>
+<a id="__codelineno-36-4" name="__codelineno-36-4" href="#__codelineno-36-4"></a>2. If duplicate found:
+<a id="__codelineno-36-5" name="__codelineno-36-5" href="#__codelineno-36-5"></a>   a. Rollback transaction
+<a id="__codelineno-36-6" name="__codelineno-36-6" href="#__codelineno-36-6"></a>   b. Query stored status from tx_status
+<a id="__codelineno-36-7" name="__codelineno-36-7" href="#__codelineno-36-7"></a>   c. If height matches: resubmission, reuse status
+<a id="__codelineno-36-8" name="__codelineno-36-8" href="#__codelineno-36-8"></a>   d. If height differs: true duplicate, return DUPLICATE_TXID
+<a id="__codelineno-36-9" name="__codelineno-36-9" href="#__codelineno-36-9"></a>
+<a id="__codelineno-36-10" name="__codelineno-36-10" href="#__codelineno-36-10"></a>3. Retry with corrected status
+</code></pre></div>
+<h3 id="85-vc-service-restart">8.5 VC Service Restart<a class="headerlink" href="#85-vc-service-restart" title="Permanent link">&para;</a></h3>
+<p>Recovery flow:</p>
+<ol>
+<li>VC service restarts with empty channels</li>
+<li>Coordinator detects broken stream via health check</li>
+<li>Coordinator resends unacknowledged batches to available VC instances</li>
+<li>VC service processes batches idempotently:</li>
+<li>Already-committed txs return existing status</li>
+<li>Uncommitted txs processed normally</li>
+</ol>
+<p>Key property:</p>
+<ul>
+<li><strong>VC is stateless</strong> regarding pipeline state</li>
+<li><strong>Database is source of truth</strong> for committed transactions</li>
+<li><strong>Coordinator tracks</strong> which batches are acknowledged</li>
+</ul>
+<h2 id="9-code-map">9. Code Map<a class="headerlink" href="#9-code-map" title="Permanent link">&para;</a></h2>
+<p>Open these files next to connect diagrams to implementation:</p>
+<h3 id="core-pipeline">Core Pipeline<a class="headerlink" href="#core-pipeline" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>service/vc/validator_committer_service.go</code> — gRPC service, stream handling, channel wiring, batching logic.</li>
+<li><code>service/vc/preparer.go</code> — Transaction preparation, write categorization, read extraction.</li>
+<li><code>service/vc/validator.go</code> — MVCC read validation, invalidation of transactions.</li>
+<li><code>service/vc/committer.go</code> — Blind write resolution, database commit, duplicate handling.</li>
+</ul>
+<h3 id="database-layer">Database Layer<a class="headerlink" href="#database-layer" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>service/vc/database.go</code> — Database connection, stored procedure calls, retry logic.</li>
+<li><code>service/vc/dbinit.go</code> — Table and stored procedure creation.</li>
+</ul>
+<h3 id="data-structures">Data Structures<a class="headerlink" href="#data-structures" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>preparedTransactions</code> (in <code>preparer.go</code>) — Read/write organization before validation.</li>
+<li><code>validatedTransactions</code> (in <code>validator.go</code>) — Valid writes after read validation.</li>
+<li><code>statesToBeCommitted</code> (in <code>database.go</code>) — Grouped writes for database commit.</li>
+</ul>
+<h3 id="tests">Tests<a class="headerlink" href="#tests" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>service/vc/preparer_test.go</code> — Preparer unit tests.</li>
+<li><code>service/vc/validator_test.go</code> — Validator unit tests.</li>
+<li><code>service/vc/committer_test.go</code> — Committer unit tests.</li>
+<li><code>service/vc/database_test.go</code> — Database operation tests.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

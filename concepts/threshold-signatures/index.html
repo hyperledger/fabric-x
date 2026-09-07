@@ -1,0 +1,2909 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Threshold signatures - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#threshold-signatures-in-fabric-x" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Threshold signatures
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../committer/docs/loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-threshold-signatures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Are Threshold Signatures?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What Are Threshold Signatures?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#traditional-vs-threshold-signatures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Traditional vs Threshold Signatures
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-tn-threshold-scheme" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The (t,n) Threshold Scheme
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The (t,n) Threshold Scheme">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#signing-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signing Process
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#bls-signature-aggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BLS Signature Aggregation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="BLS Signature Aggregation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bls-fundamentals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BLS Fundamentals
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aggregation-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Aggregation Visualization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advantages-over-individual-signatures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advantages Over Individual Signatures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advantages Over Individual Signatures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#privacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Privacy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#signature-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signature Size
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verification-speed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Verification Speed
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-in-fabric-x-endorsement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage in Fabric-X Endorsement
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage in Fabric-X Endorsement">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#endorsement-policy-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Endorsement Policy Integration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#transaction-endorsement-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Transaction Endorsement Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#benefits-for-fabric-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Benefits for Fabric-X
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cryptographic-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cryptographic Properties
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cryptographic Properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security-guarantees" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Guarantees
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bls12-381-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BLS12-381 Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Security Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pairing-based-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pairing-Based Verification
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#implementation-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Considerations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failure-modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Failure Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<h1 id="threshold-signatures-in-fabric-x">Threshold Signatures in Fabric-X<a class="headerlink" href="#threshold-signatures-in-fabric-x" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Threshold signatures enable a group of signers to collectively produce a single signature. Instead of requiring all participants to sign individually, any subset of size <code>t</code> or more from a group of <code>n</code> participants can generate a valid signature. This cryptographic primitive forms the foundation of Fabric-X's endorsement mechanism.</p>
+<h2 id="what-are-threshold-signatures">What Are Threshold Signatures?<a class="headerlink" href="#what-are-threshold-signatures" title="Permanent link">&para;</a></h2>
+<p>A threshold signature scheme allows distributed parties to share signing authority. The key property: <strong>any <code>t</code> out of <code>n</code> parties can sign, but fewer than <code>t</code> cannot</strong>. This cryptographic primitive distributes trust across multiple participants while maintaining a single, compact signature output. Unlike traditional multi-signature schemes where each signer produces an independent signature, threshold signatures mathematically combine partial signatures into one aggregated result that verifies against a single public key.</p>
+<h3 id="traditional-vs-threshold-signatures">Traditional vs Threshold Signatures<a class="headerlink" href="#traditional-vs-threshold-signatures" title="Permanent link">&para;</a></h3>
+<div class="mermaid">flowchart TB
+    subgraph Traditional["Traditional Multi-Signature"]
+        S1["Signer1"] --&gt; Sig1["σ₁"]
+        S2["Signer2"] --&gt; Sig2["σ₂"]
+        S3["Signer3"] --&gt; Sig3["σ₃"]
+        Sig1 --&gt; AllSigs["[σ₁, σ₂, σ₃]&lt;br/&gt;All signatures stored"]
+        Sig2 --&gt; AllSigs
+        Sig3 --&gt; AllSigs
+    end
+
+    subgraph Threshold["Threshold Signature (t=2, n=3)"]
+        TS1["Signer1"] --&gt; PS1["s₁&lt;br/&gt;Partial"]
+        TS2["Signer2"] --&gt; PS2["s₂&lt;br/&gt;Partial"]
+        TS3["Signer3"] --&gt; PS3["s₃&lt;br/&gt;Partial"]
+        PS1 --&gt; Combine["Combine"]
+        PS2 --&gt; Combine
+        Combine --&gt; AggSig["σ&lt;br/&gt;Single aggregated&lt;br/&gt;signature"]
+    end</div>
+<h2 id="the-tn-threshold-scheme">The (t,n) Threshold Scheme<a class="headerlink" href="#the-tn-threshold-scheme" title="Permanent link">&para;</a></h2>
+<h3 id="key-generation">Key Generation<a class="headerlink" href="#key-generation" title="Permanent link">&para;</a></h3>
+<p>During setup, a master secret key is split into <code>n</code> shares using <strong>Shamir's Secret Sharing</strong>. Each participant receives one share. No single party knows the complete secret key. This distribution happens through polynomial interpolation where the master key represents the constant term of a degree-(t-1) polynomial. Each party receives a point on this polynomial, and any t points suffice to reconstruct the original secret through Lagrange interpolation. The mathematical structure ensures that fewer than t shares reveal absolutely no information about the master key.</p>
+<div class="mermaid">flowchart TB
+    Master["Master SK (α)"]
+    Master --&gt;|Shamir Split| SK1["SK₁&lt;br/&gt;Party A"]
+    Master --&gt;|Shamir Split| SK2["SK₂&lt;br/&gt;Party B"]
+    Master --&gt;|Shamir Split| SK3["SK₃&lt;br/&gt;Party C"]
+    Master --&gt;|Shamir Split| SK4["SK₄&lt;br/&gt;Party D"]
+
+    note["Any 2 parties can reconstruct.&lt;br/&gt;1 party learns nothing."]
+    SK1 -.-&gt; note
+    SK2 -.-&gt; note</div>
+<h3 id="signing-process">Signing Process<a class="headerlink" href="#signing-process" title="Permanent link">&para;</a></h3>
+<p>The signing process unfolds in three sequential phases. First, during <strong>partial signature generation</strong>, each of the <code>t</code> participating parties independently signs the message using their secret share. Each party computes their partial signature locally without revealing their secret share to others. Second, during <strong>signature combination</strong>, these partial signatures are mathematically combined using Lagrange coefficients derived from the participant indices. This combination happens through elliptic curve addition, producing a single aggregated signature. Finally, during <strong>verification</strong>, the combined signature verifies against the single public key using standard BLS verification equations. The verifier needs only the aggregated public key and the final signature, remaining completely unaware of how many parties participated or which specific parties contributed.</p>
+<div class="mermaid">flowchart TB
+    M["Message M"]
+
+    subgraph Signers["Participating Signers (t=3)"]
+        P1["P₁"] --&gt; Sig1["σ₁"]
+        P2["P₂"] --&gt; Sig2["σ₂"]
+        P3["P₃"] --&gt; Sig3["σ₃"]
+    end
+
+    M --&gt; Signers
+    Sig1 --&gt; Combine["Combine()"]
+    Sig2 --&gt; Combine
+    Sig3 --&gt; Combine
+    Combine --&gt; Final["σ&lt;br/&gt;Final threshold signature"]</div>
+<h2 id="bls-signature-aggregation">BLS Signature Aggregation<a class="headerlink" href="#bls-signature-aggregation" title="Permanent link">&para;</a></h2>
+<p>Fabric-X uses <strong>BLS (Boneh-Lynn-Shacham)</strong> signatures for threshold operations. BLS provides unique properties essential for blockchain systems.</p>
+<h3 id="bls-fundamentals">BLS Fundamentals<a class="headerlink" href="#bls-fundamentals" title="Permanent link">&para;</a></h3>
+<p>BLS signatures operate on elliptic curve pairings, leveraging bilinear maps between two distinct groups. The scheme generates a key pair where the secret key is a scalar <code>sk ∈ ℤₚ</code> and the public key is computed as <code>pk = sk · G₂</code>, where G₂ represents the generator of the second group. To sign a message, the scheme computes <code>σ = sk · H(m)</code> where H is a hash-to-curve function that maps arbitrary messages to points on the elliptic curve. Verification uses the bilinear pairing equation <code>e(σ, G₂) = e(H(m), pk)</code>, which holds true if and only if the signature was produced with the correct secret key.</p>
+<h3 id="aggregation-properties">Aggregation Properties<a class="headerlink" href="#aggregation-properties" title="Permanent link">&para;</a></h3>
+<p>BLS signatures exhibit several powerful aggregation properties that make them ideal for threshold schemes. <strong>Linear aggregation</strong> allows multiple signatures to sum into a single signature through elliptic curve addition, expressed as <code>σ = σ₁ + σ₂ + ... + σₜ</code>. Public keys aggregate in the same manner, producing <code>pk = pk₁ + pk₂ + ... + pkₙ</code>. The scheme is <strong>deterministic</strong>, meaning the same message signed with the same key always produces the same signature without requiring randomness. This determinism eliminates the need for secure random number generation during signing. Perhaps most importantly, BLS produces <strong>short signatures</strong> consisting of a single group element, approximately 48 bytes when using the BLS12-381 curve.</p>
+<h3 id="aggregation-visualization">Aggregation Visualization<a class="headerlink" href="#aggregation-visualization" title="Permanent link">&para;</a></h3>
+<div class="mermaid">flowchart TB
+    Sig1["σ₁=48B"] --&gt; Add["Elliptic Curve&lt;br/&gt;Addition"]
+    Sig2["σ₂=48B"] --&gt; Add
+    Sig3["σ₃=48B"] --&gt; Add
+    Add --&gt; Result["σ = σ₁+σ₂+σ₃&lt;br/&gt;(48 bytes)&lt;br/&gt;Same size as one signature!"]</div>
+<h2 id="advantages-over-individual-signatures">Advantages Over Individual Signatures<a class="headerlink" href="#advantages-over-individual-signatures" title="Permanent link">&para;</a></h2>
+<h3 id="privacy">Privacy<a class="headerlink" href="#privacy" title="Permanent link">&para;</a></h3>
+<p>Threshold signatures provide substantial privacy advantages over traditional multi-signature schemes. In a traditional multi-signature setup, all signer identities are revealed in the signature data, the exact quorum size remains visible, and the specific coalition of signers becomes public knowledge. Threshold signatures fundamentally change this dynamic by providing <strong>signer ambiguity</strong>. Verifiers learn only that at least <code>t</code> parties signed, but cannot determine which specific <code>t</code> parties contributed their shares. Any valid subset of size t could have produced the signature, protecting participant privacy in sensitive transactions where the identity of signers might reveal confidential business relationships or decision-making patterns.</p>
+<h3 id="signature-size">Signature Size<a class="headerlink" href="#signature-size" title="Permanent link">&para;</a></h3>
+<p>The signature size advantage of threshold signatures becomes dramatic as the number of signers increases. Traditional ECDSA multi-signature schemes require storing each individual signature, resulting in 192 bytes for 3 signers, 640 bytes for 10 signers, and 6,400 bytes for 100 signers. In stark contrast, BLS threshold signatures maintain a constant size of 48 bytes regardless of whether 3, 10, or 100 signers participated. This <strong>constant signature size</strong> property holds true regardless of the threshold <code>t</code> or the total number of participants <code>n</code>, providing enormous bandwidth and storage savings in large-scale deployments.</p>
+<h3 id="verification-speed">Verification Speed<a class="headerlink" href="#verification-speed" title="Permanent link">&para;</a></h3>
+<p>Verification speed represents another critical advantage of threshold signatures over traditional multi-signature approaches. When verifying k individual ECDSA signatures, the verifier must perform k separate pairing operations, one for each signature against its corresponding public key. This linear scaling creates a significant computational burden as the number of signers increases. Threshold signatures collapse this complexity to a single pairing operation. The verifier checks the aggregated signature against the aggregated public key in constant time, regardless of how many parties contributed to the signature. This O(1) verification complexity translates directly to faster block validation, reduced computational costs, and improved overall system throughput. The bandwidth savings compound this benefit, as threshold signatures require constant bandwidth rather than the O(k × signature_size) bandwidth demanded by traditional multi-signature schemes.</p>
+<h2 id="usage-in-fabric-x-endorsement">Usage in Fabric-X Endorsement<a class="headerlink" href="#usage-in-fabric-x-endorsement" title="Permanent link">&para;</a></h2>
+<h3 id="endorsement-policy-integration">Endorsement Policy Integration<a class="headerlink" href="#endorsement-policy-integration" title="Permanent link">&para;</a></h3>
+<p>Fabric-X replaces traditional endorsement policies with threshold-based validation, fundamentally restructuring how transactions gain approval within the network. Instead of requiring explicit signatures from specific named peers, the system configures a threshold policy where any t out of n designated endorsing peers can validate a transaction.</p>
+<h3 id="transaction-endorsement-flow">Transaction Endorsement Flow<a class="headerlink" href="#transaction-endorsement-flow" title="Permanent link">&para;</a></h3>
+<p>The endorsement flow in Fabric-X uses an <strong>endorser service</strong> at each peer that handles partial signature aggregation:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                     Client Request                              │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│                     (submits proposal)                          │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>└──────────────────────────┬──────────────────────────────────────┘
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                           │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                           ▼
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>┌─────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│                   Endorser Service                              │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│  (running on each peer, handles partial signature aggregation) │
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>└──────────┬──────────────────────────────────────────────────────┘
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>           │
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>           │    Request endorsement from peers
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>           │    (n=5 configured endorsers)
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>           ▼
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>┌─────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│              Endorsement Peers (n=5)                            │
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌─────────┐│
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│  │  Peer 1  │ │  Peer 2  │ │  Peer 3  │ │  Peer 4  │ │ Peer 5  ││
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│  │ (Endorser│ │ (Endorser│ │ (Endorser│ │ (Endorser│ │(Endorser││
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│  │ Service) │ │ Service) │ │ Service) │ │ Service) │ │Service) ││
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│  └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬─────┘ └────┬────┘│
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│       │            │            │            │            │     │
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│       └────────────┴────────────┘            │            │     │
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│                 t=3 respond                  │            │     │
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│                (fastest responses)           │            │     │
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>└──────────────────────────────┬───────────────┴────────────┘     │
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>                               │                                  │
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>                               ▼                                  │
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>                    ┌──────────────────────┐                     │
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>                    │  Partial Signatures  │                     │
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>                    │   σ₁, σ₂, σ₃        │                     │
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>                    │  (each 48 bytes)    │                     │
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>                    └──────────┬───────────┘                     │
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>                               │                                  │
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>                               ▼                                  │
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>                    ┌──────────────────────┐                     │
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>                    │  AGGREGATION STEP   │  ← Happens in         │
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>                    │    Combine()         │    Endorser Service  │
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>                    │    (at the peers)   │    (NOT at client!)  │
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>                    └──────────┬───────────┘                     │
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>                               │                                  │
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>                               ▼                                  │
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>                    ┌──────────────────────┐                     │
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>                    │  Single Threshold    │                     │
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>                    │     Signature σ      │  ← 48 bytes total   │
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>                    │   (48 bytes)         │                     │
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>                    └──────────┬───────────┘                     │
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>                               │                                  │
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>                               ▼                                  │
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>                    ┌──────────────────────┐                     │
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>                    │   Return to Client   │                     │
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>                    └──────────┬───────────┘                     │
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>                               │                                  │
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>                               ▼                                  │
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>                    ┌──────────────────────┐                     │
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>                    │  Client submits tx   │                     │
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>                    │  with aggregated σ   │                     │
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a>                    └──────────┬───────────┘                     │
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a>                               │                                  │
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a>                               ▼                                  │
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>                    ┌──────────────────────┐                     │
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>                    │   Orderer Validates  │                     │
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a>                    │   (1 verification)   │                     │
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a>                    └──────────────────────┘                     │
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a>└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<p><strong>Key Points:</strong>
+- <strong>Aggregation happens in the Endorser Service</strong> at the peers, not at the client
+- The endorser service collects partial signatures from responding peers
+- The endorser service performs the <code>Combine()</code> operation to produce the single threshold signature
+- Client receives the final aggregated signature (48 bytes)
+- This design reduces client complexity and bandwidth requirements
+- Client never sees individual partial signatures, only the final result</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Transaction Endorsement Flow:
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>┌─────────────────────────────────────────────────────────────┐
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│                     Client Request                          │
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>└──────────────────────────┬──────────────────────────────────┘
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>                           │
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>                           ▼
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>         ┌─────────────────────────────────┐
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>         │    Endorsement Peers (n=5)      │
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>         │  ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ │
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>         │  │ P₁│ │ P₂│ │ P₃│ │ P₄│ │ P₅│ │
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>         │  └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ └─┬─┘ │
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>         │    │     │     │     │     │    │
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>         │    └─────┴─────┘     │     │    │
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>         │      t=3 respond     │     │    │
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>         └─────────────────────┼─────┼────┘
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>                               │     │
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>                               ▼     ▼
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>                    ┌──────────────────────┐
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>                    │  Partial Signatures  │
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>                    │   σ₁, σ₂, σ₃        │
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>                    └──────────┬───────────┘
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>                               │
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>                               ▼
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>                    ┌──────────────────────┐
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>                    │   Aggregate to σ     │
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>                    └──────────┬───────────┘
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>                               │
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>                               ▼
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>                    ┌──────────────────────┐
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>                    │  Single Threshold    │
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>                    │     Signature        │
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>                    └──────────┬───────────┘
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>                               │
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>                               ▼
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>                    ┌──────────────────────┐
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>                    │   Orderer Validates  │
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>                    │   (1 verification)   │
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>                    └──────────────────────┘
+</code></pre></div>
+<h3 id="policy-configuration">Policy Configuration<a class="headerlink" href="#policy-configuration" title="Permanent link">&para;</a></h3>
+<p>Endorsement policies specify threshold parameters through a structured configuration that defines the total number of endorsing peers and the required threshold. The configuration includes the threshold type designation, the total count n of endorsing peers authorized to participate, the threshold t representing the minimum number of partial signatures required, and the list of public key shares for all n participants. These public key shares are typically aggregated off-chain into a single public key that the orderer uses for verification, though the individual shares remain available for explicit verification if needed.</p>
+<h3 id="benefits-for-fabric-x">Benefits for Fabric-X<a class="headerlink" href="#benefits-for-fabric-x" title="Permanent link">&para;</a></h3>
+<p>Threshold signatures deliver four primary benefits to the Fabric-X architecture. <strong>Scalability</strong> emerges as orderers verify exactly one signature regardless of how complex the endorsement policy becomes, whether requiring 3 out of 5 peers or 50 out of 100 peers. <strong>Privacy</strong> protects the identity of specific endorsing peers, as the aggregated signature reveals only that the threshold was met, not which peers participated. <strong>Efficiency</strong> manifests through reduced block sizes due to constant signature size and faster verification through single pairing operations. <strong>Flexibility</strong> allows network administrators to adjust threshold parameters without modifying the underlying verification logic, enabling dynamic policy changes as network conditions or trust relationships evolve.</p>
+<h2 id="cryptographic-properties">Cryptographic Properties<a class="headerlink" href="#cryptographic-properties" title="Permanent link">&para;</a></h2>
+<h3 id="security-guarantees">Security Guarantees<a class="headerlink" href="#security-guarantees" title="Permanent link">&para;</a></h3>
+<p>Threshold signature schemes provide multiple layers of security guarantees essential for distributed systems. <strong>Unforgeability</strong> ensures that an adversary cannot produce a valid signature without controlling at least t secret shares, maintaining the fundamental threshold property even against computationally bounded attackers. <strong>Robustness</strong> guarantees that the protocol completes successfully even if some parties malfunction or behave incorrectly, provided at least t honest parties participate. <strong>Proactive security</strong> allows parties to periodically refresh their shares without changing the public key, limiting the window of opportunity for attackers who might compromise individual shares over time. <strong>Threshold security</strong> means the system degrades gracefully as parties become compromised, remaining fully secure as long as fewer than t parties are compromised and providing detection mechanisms once the threshold approaches.</p>
+<h3 id="bls12-381-parameters">BLS12-381 Parameters<a class="headerlink" href="#bls12-381-parameters" title="Permanent link">&para;</a></h3>
+<p>Fabric-X uses BLS12-381 curve for 128-bit security:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Curve Parameters:
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>┌─────────────────────────────────────────┐
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>│  Field: Fₚ where p = 400240955522...  │
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│  Curve: y² = x³ + 4                    │
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>│  Group Order: q = 524358751751...     │
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│  Embedding Degree: 12                  │
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│  Security Level: 128 bits              │
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>└─────────────────────────────────────────┘
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>Signature Size: 48 bytes (G₁ element)
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>Public Key Size: 96 bytes (G₂ element)
+</code></pre></div>
+<p><strong>Implementation Reference:</strong>
+- BLS signature operations: <code>fabric-x-common/crypto/bls/</code>
+- MSP integration: <code>fabric-x-common/msp/</code>
+- Threshold signature aggregation: See <code>fabric-x-endorser</code> platform implementation</p>
+<h3 id="security-comparison">Security Comparison<a class="headerlink" href="#security-comparison" title="Permanent link">&para;</a></h3>
+<p>When comparing security properties across different signature schemes, several attack vectors reveal important distinctions. For key compromise scenarios where fewer than t parties are compromised, both ECDSA multi-signature and BLS threshold schemes remain secure, as the attacker lacks sufficient shares to forge signatures. However, when k ≥ t parties are compromised, both schemes break down, though threshold signatures provide clearer security boundaries. Signature malleability presents another differentiator: ECDSA signatures can be malleated due to their probabilistic nature, while BLS signatures remain immutable due to their deterministic construction. Rogue key attacks, where an adversary chooses their public key strategically to cancel out other keys, pose a threat to naive multi-signature schemes but are mitigated in BLS threshold signatures through proper key aggregation protocols that require proof of possession.</p>
+<h3 id="pairing-based-verification">Pairing-Based Verification<a class="headerlink" href="#pairing-based-verification" title="Permanent link">&para;</a></h3>
+<p>The bilinear pairing enables efficient verification through an elegant mathematical equation. The verification checks whether <code>e(σ, G₂) = e(H(m), pk)</code>, where σ represents the threshold signature as an element of group G₁, G₂ serves as the generator of the second group, H(m) denotes the message hashed to a curve point in G₁, pk represents the aggregated public key in G₂, and e denotes the bilinear pairing that maps from G₁ × G₂ to the target group Gₜ. This equation holds true if and only if the signature was produced correctly. The pairing operation exhibits three critical properties that make verification possible. <strong>Bilinearity</strong> means that e(a·P, b·Q) = e(P, Q)^(ab) for any scalars a, b and points P, Q, enabling the algebraic manipulations that allow signature aggregation. <strong>Non-degeneracy</strong> ensures that e(G₁, G₂) ≠ 1, preventing trivial solutions. <strong>Computability</strong> guarantees that efficient algorithms exist to calculate the pairing in practical time, making the scheme usable in real-world systems.</p>
+<h2 id="implementation-considerations">Implementation Considerations<a class="headerlink" href="#implementation-considerations" title="Permanent link">&para;</a></h2>
+<h3 id="key-management">Key Management<a class="headerlink" href="#key-management" title="Permanent link">&para;</a></h3>
+<p>Implementing threshold signatures requires careful attention to key management throughout the system lifecycle. <strong>Distributed Key Generation (DKG)</strong> enables parties to jointly generate their secret shares without requiring a trusted dealer who knows the master secret. This eliminates a single point of failure and distributes trust among all participants from the very beginning. <strong>Share refresh</strong> protocols allow parties to periodically renew their shares while maintaining the same public key, limiting the damage from potential share compromise and enabling long-term key usage. <strong>Share recovery</strong> mechanisms permit lost or corrupted shares to be reconstructed from the remaining parties, provided at least t parties remain available to assist in the reconstruction process.</p>
+<h3 id="performance-optimization">Performance Optimization<a class="headerlink" href="#performance-optimization" title="Permanent link">&para;</a></h3>
+<p>Several optimization strategies can improve threshold signature performance in production deployments. <strong>Batch verification</strong> allows multiple signatures to be verified together in a single operation, reducing the amortized cost per signature at the expense of slightly higher latency for individual verifications. <strong>Pre-computation</strong> techniques cache expensive pairing results that can be reused across multiple verification operations, trading memory overhead for computational speed. <strong>Aggregated public keys</strong> reduce verification to a single key lookup, though this requires coordination among parties to compute and distribute the aggregated key. Each optimization involves trade-offs between computational cost, memory usage, latency, and coordination requirements that must be balanced according to specific deployment needs.</p>
+<h3 id="failure-modes">Failure Modes<a class="headerlink" href="#failure-modes" title="Permanent link">&para;</a></h3>
+<p>Understanding failure modes helps design robust threshold signature implementations. When <strong>insufficient signers</strong> participate, meaning fewer than t parties respond, the system simply cannot produce a valid signature. The transaction gets rejected or delayed until enough parties become available. This represents a liveness failure rather than a security failure. When a <strong>malicious signer</strong> provides an invalid partial signature, the combination protocol detects this during the aggregation phase. The system can identify which party submitted the invalid share and exclude that actor from the current signing round, potentially flagging them for investigation or removal from the signer set. <strong>Network partitions</strong> present a more complex challenge. The system must ensure that at least t parties reside in the same network partition for signing to proceed. If the partition divides signers such that no partition contains t parties, consensus becomes delayed until network connectivity restores. Proper network topology design and signer distribution across availability zones mitigates this risk.</p>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<p>For deeper exploration of threshold signatures and their cryptographic foundations, several key resources provide essential background. Boneh, Lynn, and Shacham's 2001 paper "Short Signatures from the Weil Pairing" introduced the BLS signature scheme that underpins modern threshold implementations. Shamir's seminal 1979 work "How to Share a Secret" established the secret sharing foundation that enables threshold key distribution. The BLS12-381 curve specification available at https://hackmd.io/@benjaminion/bls12-381 provides detailed parameters for the specific curve used in Fabric-X. Additional context on how threshold signatures integrate into the broader system architecture appears in the Fabric-X Architecture Documentation at <code>docs/architecture/overview.md</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>
