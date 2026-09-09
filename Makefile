@@ -64,9 +64,25 @@ $(BUILD_DIR)/%:
 	@GOBIN=$(abspath $(@D)) go install -tags "$(GO_TAGS)" -ldflags "$(GO_LDFLAGS)" -buildvcs=false $(pkgmap.$(@F))
 	@touch $@
 
+RELEASE_DIR ?= release
+GOOS   ?= $(shell go env GOOS)
+GOARCH ?= $(shell go env GOARCH)
+RELEASE_BIN_DIR = $(RELEASE_DIR)/$(GOOS)-$(GOARCH)/bin
+
+.PHONY: release-bins
+release-bins: $(TOOLS_EXES:%=$(RELEASE_BIN_DIR)/%) ## Cross-compiles all tools for $(GOOS)/$(GOARCH) into $(RELEASE_DIR)
+
+$(RELEASE_DIR)/%: GO_LDFLAGS = $(METADATA_VAR:%=-X $(PKGNAME)/common/metadata.%)
+$(RELEASE_DIR)/%:
+	@echo "Building $@"
+	@mkdir -p $(@D)
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) $(go_cmd) build -trimpath \
+		-tags "$(GO_TAGS)" -ldflags "$(GO_LDFLAGS)" -buildvcs=false \
+		-o $@ $(pkgmap.$(@F))
+
 .PHONY: clean
 clean: ## Cleans the build area
-	-@rm -rf $(BUILD_DIR)
+	-@rm -rf $(BUILD_DIR) $(RELEASE_DIR)
 
 # Run lint
 # TODO: fix existing lint issues (to find them, remove --new-from-rev=origin/main option)
