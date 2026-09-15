@@ -516,7 +516,7 @@ modified configuration.
 Both modes produce the same kind of `ConfigUpdate`. If the two inputs are identical the command
 produces an empty update and reports that there is nothing to do.
 
-##
+<br><br>
 #### JSON mode (default)
 
 The original is the config JSON decoded from `--current-block`; the modified is its edited copy.
@@ -552,7 +552,7 @@ fxadmin compute-update \
 | `--output`        |   yes    | Path to the output `ConfigUpdate` protobuf file                      |
 
 
-##
+<br><br>
 #### Block mode (`--pb`)
 
 Computes the delta directly from two config **block** files.
