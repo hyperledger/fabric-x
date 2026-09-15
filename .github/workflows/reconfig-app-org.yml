@@ -13,6 +13,22 @@
 name: Reconfig App Org Integration Test
 
 on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "mkdocs.yml"
+      - "LICENSE"
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "mkdocs.yml"
+      - "LICENSE"
+  schedule:
+    - cron: "0 3 * * *" # 03:00 UTC daily
   workflow_dispatch:
     inputs:
       fabric-x-ref:
@@ -27,6 +43,16 @@ on:
         description: "fabric-x-committer ref. Empty=use refs.conf default"
         required: false
         default: ""
+
+# Nothing here needs write access to the repo.
+permissions:
+  contents: read
+
+# Superseded PR runs are cancelled; runs on main are not, so every merged
+# commit still gets a result.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   reconfig-app-org:
@@ -58,6 +84,8 @@ jobs:
           args=()
           if [ -n "${INPUT_FABRIC_X_REF}" ]; then
             args+=("--fabric-x-ref=${INPUT_FABRIC_X_REF}")
+          elif [ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]; then
+             args+=("--fabric-x-local-path=${GITHUB_WORKSPACE}")
           fi
           if [ -n "${INPUT_ORDERER_REF}" ]; then
             args+=("--orderer-ref=${INPUT_ORDERER_REF}")
@@ -73,12 +101,27 @@ jobs:
       # Run TestReconfigAppOrg integration test.
       # ORDERER_IMAGE and COMMITTER_IMAGE are read by the test via
       # envOrDefault(), overriding the hardcoded tag defaults.
+      # `shell: bash` is required: it sets pipefail, without which the
+      # tee below would mask a test failure and the job would pass.
       # ---------------------------------------------------------------
       - name: Run TestReconfigAppOrg integration test
+        shell: bash
         env:
           ORDERER_IMAGE: ${{ steps.images.outputs.orderer_image }}
           COMMITTER_IMAGE: ${{ steps.images.outputs.committer_image }}
           SKIP_CLEANUP_PROMPT: "1"
-        run: ./integration/test/run-reconfig-test.sh
+        timeout-minutes: 25 # kills the hang, job stays alive
+        run: ./integration/test/run-reconfig-test.sh 2>&1 | tee reconfig-test.log
 
-      # Failure logs are emitted by testcontainers before cleanup.
+      # The test removes its temp artifacts directory in t.Cleanup, so the
+      # captured test output is the only durable record of a CI-only failure.
+      - name: Upload test log
+        # always(), not failure(): a timeout-minutes overrun cancels the job
+        # rather than failing it, and a hang is the likeliest bad outcome here.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reconfig-app-org-test-log
+          path: reconfig-test.log
+          if-no-files-found: warn
+          retention-days: 7

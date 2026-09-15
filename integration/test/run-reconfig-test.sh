@@ -32,7 +32,7 @@ fi
 source "${REFS_CONF}"
 
 export ORDERER_IMAGE="${ORDERER_IMAGE:-hyperledger/arma-4p1s:${ORDERER_REF}}"
-export COMMITTER_IMAGE="${COMMITTER_IMAGE:-hyperledger/committer-test-node:${ORDERER_REF}}"
+export COMMITTER_IMAGE="${COMMITTER_IMAGE:-hyperledger/committer-test-node:${COMMITTER_REF}}"
 
 echo "=== Running TestReconfigAppOrg ==="
 echo "  ORDERER_IMAGE:   ${ORDERER_IMAGE}"
