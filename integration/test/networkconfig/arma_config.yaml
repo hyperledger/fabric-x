@@ -126,7 +126,7 @@ Consensus:
     speedupviewchange: false
     leaderrotation: false
     decisionsperleader: 0
-    requestmaxbytes: 10240
+    requestmaxbytes: 1048576
     requestpoolsubmittimeout: 5s
 
 Batching:
