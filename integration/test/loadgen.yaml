@@ -62,15 +62,13 @@ orderer-client:
 load-profile:
   seed: 12345
   workers: 4
-  key:
-    size: 32
   block:
     max-size: 100
     min-size: 1
     preferred-rate: 2s
   transaction:
-    read-write-count:
-      const: 2
+    key-size: 32
+    read-write-count: 2
   policy:
     channel-id: mychannel
     # Orderer endpoints: separate broadcast (router) and deliver (assembler) per party.
