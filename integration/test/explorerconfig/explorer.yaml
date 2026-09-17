@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Explorer config for the fabric-x E2E integration test.
-# Connects to the committer sidecar (no TLS) and to the postgres service.
+# Connects to the committer sidecar (mtls, same credentials as loadgen) and to the postgres service.
 # Mounted at /config/explorer.yaml inside the explorer container.
 ---
 database:
@@ -22,7 +22,11 @@ sidecar:
       host: committer
       port: 4001
     tls:
-      mode: none
+      mode: mtls
+      cert-path: /artifacts/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.crt
+      key-path: /artifacts/peerOrganizations/peer-org-0/peers/loadgen.peer-org-0/tls/server.key
+      ca-cert-paths:
+        - /artifacts/peerOrganizations/peer-org-0/msp/tlscacerts/tlsca.peer-org-0-cert.pem
   start_block: 0
 
 buffer:

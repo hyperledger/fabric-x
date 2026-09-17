@@ -58,7 +58,7 @@ test: FORCE
 $(TOOLS_EXES): %: $(BUILD_DIR)/% ## Builds a native binary
 
 $(BUILD_DIR)/%: GO_LDFLAGS = $(METADATA_VAR:%=-X $(PKGNAME)/common/metadata.%)
-$(BUILD_DIR)/%:
+$(BUILD_DIR)/%: FORCE
 	@echo "Building $@"
 	@mkdir -p $(@D)
 	@GOBIN=$(abspath $(@D)) go install -tags "$(GO_TAGS)" -ldflags "$(GO_LDFLAGS)" -buildvcs=false $(pkgmap.$(@F))

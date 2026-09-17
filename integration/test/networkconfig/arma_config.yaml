@@ -126,7 +126,8 @@ Consensus:
     speedupviewchange: false
     leaderrotation: false
     decisionsperleader: 0
-    requestmaxbytes: 10240
+    # Must be >= Batching.RequestMaxBytes below (orderer bootstrap validation).
+    requestmaxbytes: 1048576
     requestpoolsubmittimeout: 5s
 
 Batching:
