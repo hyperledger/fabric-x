@@ -9,8 +9,6 @@
 .SUFFIXES:
 MAKEFLAGS += --no-builtin-rules
 
-BUILD_DIR ?= bin
-
 PKGNAME = github.com/hyperledger/fabric-x-common
 PKGNAME2 = github.com/hyperledger/fabric-x/tools
 
@@ -30,19 +28,31 @@ pkgmap.fxadmin		  := $(PKGNAME2)/fxadmin
 
 MAKEFLAGS += --jobs=16
 
-.PHONY: help
-# List all commands with documentation
-help: ## List all commands with documentation
-	@echo "Available commands:"
-	@awk 'BEGIN {FS = ":.*?## "}; /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
-
-.PHONY: tools
-tools: $(TOOLS_EXES) ## Builds all tools
-
 # Use gotestsum (same style as fabric-x-committer):
 # - compact output format
 # - does not rerun failed tests
 TEST_METHOD = $(go_cmd) tool gotestsum --rerun-fails=0 --format dots --packages "$(1)" -- -v -timeout 30m $(2)
+
+BUILD_DIR ?= bin
+RELEASE_DIR ?= release
+
+# Resolved on first use and then cached, so `go env` is never invoked for
+# targets that don't need it (help, lint, test) nor when GOOS/GOARCH are preset.
+GOOS   ?= $(eval GOOS := $(shell go env GOOS))$(GOOS)
+GOARCH ?= $(eval GOARCH := $(shell go env GOARCH))$(GOARCH)
+RELEASE_BIN_DIR = $(RELEASE_DIR)/$(GOOS)-$(GOARCH)/bin
+
+
+## List all commands with documentation
+.PHONY: help
+help:
+	@echo "Available commands:"
+	@awk '/^## / {doc = substr($$0, 4)} /^[a-zA-Z_-]+:/ && doc {split($$1, t, ":"); printf "\033[36m%-15s\033[0m %s\n", t[1], doc; doc = ""}' $(MAKEFILE_LIST)
+
+## Builds all tools
+.PHONY: tools
+tools: $(TOOLS_EXES)
+
 ## Run generate
 .PHONY: generate
 generate: FORCE
@@ -54,37 +64,36 @@ test: FORCE
 	@echo "Running Go unit tests..."
 	cd tools && $(call TEST_METHOD,./...)
 
+## Builds a native binary
 .PHONY: $(TOOLS_EXES)
-$(TOOLS_EXES): %: $(BUILD_DIR)/% ## Builds a native binary
+$(TOOLS_EXES): %: $(BUILD_DIR)/%
 
 $(BUILD_DIR)/%: GO_LDFLAGS = $(METADATA_VAR:%=-X $(PKGNAME)/common/metadata.%)
-$(BUILD_DIR)/%:
+$(BUILD_DIR)/%: FORCE
 	@echo "Building $@"
 	@mkdir -p $(@D)
 	@GOBIN=$(abspath $(@D)) go install -tags "$(GO_TAGS)" -ldflags "$(GO_LDFLAGS)" -buildvcs=false $(pkgmap.$(@F))
 	@touch $@
 
-RELEASE_DIR ?= release
-GOOS   ?= $(shell go env GOOS)
-GOARCH ?= $(shell go env GOARCH)
-RELEASE_BIN_DIR = $(RELEASE_DIR)/$(GOOS)-$(GOARCH)/bin
-
+## Cross-compiles all tools for $(GOOS)/$(GOARCH) into $(RELEASE_DIR)
 .PHONY: release-bins
-release-bins: $(TOOLS_EXES:%=$(RELEASE_BIN_DIR)/%) ## Cross-compiles all tools for $(GOOS)/$(GOARCH) into $(RELEASE_DIR)
+release-bins:
+	@$(MAKE) --no-print-directory GOOS=$(GOOS) GOARCH=$(GOARCH) $(TOOLS_EXES:%=$(RELEASE_BIN_DIR)/%)
 
 $(RELEASE_DIR)/%: GO_LDFLAGS = $(METADATA_VAR:%=-X $(PKGNAME)/common/metadata.%)
-$(RELEASE_DIR)/%:
+$(RELEASE_DIR)/%: FORCE
 	@echo "Building $@"
 	@mkdir -p $(@D)
-	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) $(go_cmd) build -trimpath \
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -trimpath \
 		-tags "$(GO_TAGS)" -ldflags "$(GO_LDFLAGS)" -buildvcs=false \
 		-o $@ $(pkgmap.$(@F))
 
+## Cleans the build area
 .PHONY: clean
-clean: ## Cleans the build area
+clean:
 	-@rm -rf $(BUILD_DIR) $(RELEASE_DIR)
 
-# Run lint
+## Run lint
 # TODO: fix existing lint issues (to find them, remove --new-from-rev=origin/main option)
 .PHONY: lint
 lint: FORCE

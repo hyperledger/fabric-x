@@ -21,6 +21,9 @@
 # Exit on error/unset var/pipeline failure.
 set -euo pipefail
 
+# Every path below is repo-root relative, so make the script work from anywhere.
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
 # Fail fast with a clear message if TARGET or RELEASE aren't set.
 : "${TARGET:?TARGET is required, e.g. TARGET=linux-amd64}"
 : "${RELEASE:?RELEASE is required, e.g. RELEASE=v1.0.0}"

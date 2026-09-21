@@ -25,7 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.extract.outputs.tag }}
-      version: ${{ steps.extract.outputs.version }}
     steps:
       - name: Extract and validate version from tag
         id: extract
@@ -34,7 +33,6 @@ jobs:
         run: |
           if [[ "${RAW_TAG}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
             echo "tag=${RAW_TAG}" >> "$GITHUB_OUTPUT"
-            echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
             echo "✅ Tag validated: ${RAW_TAG}"
           else
             echo "❌ Invalid tag format: ${RAW_TAG}. Expected format: v<semver>"
@@ -74,7 +72,6 @@ jobs:
         env:
           TARGET: ${{ matrix.os }}-${{ matrix.arch }}
           RELEASE: ${{ needs.prepare.outputs.tag }}
-          REVISION: ${{ github.sha }}
         run: ./scripts/create-binary-package.sh
 
       - name: Upload build artifact
@@ -107,6 +104,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.prepare.outputs.tag }}
+          prerelease: ${{ contains(needs.prepare.outputs.tag, '-') }}
           files: |
             dist/*.tar.gz
             dist/checksums.txt
