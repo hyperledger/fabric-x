@@ -1,0 +1,127 @@
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Reconfig App Org Integration Test workflow.
+#
+# Uses integration/test/build-e2e.sh to build the orderer and committer images,
+# then runs the TestReconfigAppOrg Go integration test.
+# All refs default to values in integration/test/refs.conf when not provided.
+#
+
+name: Reconfig App Org Integration Test
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "mkdocs.yml"
+      - "LICENSE"
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "mkdocs.yml"
+      - "LICENSE"
+  schedule:
+    - cron: "0 3 * * *" # 03:00 UTC daily
+  workflow_dispatch:
+    inputs:
+      fabric-x-ref:
+        description: "fabric-x ref. Empty=use refs.conf default"
+        required: false
+        default: ""
+      orderer-ref:
+        description: "fabric-x-orderer ref. Empty=use refs.conf default"
+        required: false
+        default: ""
+      committer-ref:
+        description: "fabric-x-committer ref. Empty=use refs.conf default"
+        required: false
+        default: ""
+
+# Nothing here needs write access to the repo.
+permissions:
+  contents: read
+
+# Superseded PR runs are cancelled; runs on main are not, so every merged
+# commit still gets a result.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  reconfig-app-org:
+    name: Reconfig App Org Integration Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout fabric-x
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      # ---------------------------------------------------------------
+      # Build orderer and committer images plus fabric-x tools.
+      # build-e2e.sh writes resolved image names to GITHUB_OUTPUT so
+      # the test step can reference them without parsing stdout.
+      # Explorer and loadgen are not needed for this test.
+      # ---------------------------------------------------------------
+      - name: Build images and tools
+        id: images
+        env:
+          INPUT_FABRIC_X_REF: ${{ inputs.fabric-x-ref }}
+          INPUT_ORDERER_REF: ${{ inputs.orderer-ref }}
+          INPUT_COMMITTER_REF: ${{ inputs.committer-ref }}
+        run: |
+          args=()
+          if [ -n "${INPUT_FABRIC_X_REF}" ]; then
+            args+=("--fabric-x-ref=${INPUT_FABRIC_X_REF}")
+          elif [ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]; then
+             args+=("--fabric-x-local-path=${GITHUB_WORKSPACE}")
+          fi
+          if [ -n "${INPUT_ORDERER_REF}" ]; then
+            args+=("--orderer-ref=${INPUT_ORDERER_REF}")
+          fi
+          if [ -n "${INPUT_COMMITTER_REF}" ]; then
+            args+=("--committer-ref=${INPUT_COMMITTER_REF}")
+          fi
+
+          ENABLE_EXPLORER=false ENABLE_LOADGEN=false \
+            ./integration/test/build-e2e.sh "${args[@]}"
+
+      # ---------------------------------------------------------------
+      # Run TestReconfigAppOrg integration test.
+      # ORDERER_IMAGE and COMMITTER_IMAGE are read by the test via
+      # envOrDefault(), overriding the hardcoded tag defaults.
+      # `shell: bash` is required: it sets pipefail, without which the
+      # tee below would mask a test failure and the job would pass.
+      # ---------------------------------------------------------------
+      - name: Run TestReconfigAppOrg integration test
+        shell: bash
+        env:
+          ORDERER_IMAGE: ${{ steps.images.outputs.orderer_image }}
+          COMMITTER_IMAGE: ${{ steps.images.outputs.committer_image }}
+          SKIP_CLEANUP_PROMPT: "1"
+        timeout-minutes: 25 # kills the hang, job stays alive
+        run: ./integration/test/run-reconfig-test.sh 2>&1 | tee reconfig-test.log
+
+      # The test removes its temp artifacts directory in t.Cleanup, so the
+      # captured test output is the only durable record of a CI-only failure.
+      - name: Upload test log
+        # always(), not failure(): a timeout-minutes overrun cancels the job
+        # rather than failing it, and a hang is the likeliest bad outcome here.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reconfig-app-org-test-log
+          path: reconfig-test.log
+          if-no-files-found: warn
+          retention-days: 7

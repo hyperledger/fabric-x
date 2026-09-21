@@ -31,6 +31,7 @@ RUN go build -o /tmp/bin/configtxgen ./tools/configtxgen
 RUN go build -o /tmp/bin/cryptogen ./tools/cryptogen
 RUN go build -o /tmp/bin/configtxlator ./tools/configtxlator
 RUN go build -o /tmp/bin/fxconfig ./tools/fxconfig
+RUN go build -o /tmp/bin/fxadmin ./tools/fxadmin
 RUN GOBIN=/tmp/bin go install github.com/IBM/idemix/tools/idemixgen@$IDEMIX_VERSION
 
 ###########################################
@@ -54,7 +55,7 @@ COPY --from=builder /tmp/bin/* /usr/local/bin/
 
 # OCI metadata labels
 LABEL org.opencontainers.image.created="${CREATED}" \
-    org.opencontainers.image.description="Fabric-X CLI tools (configtxgen, cryptogen, configtxlator, fxconfig) packaged in a UBI image." \
+    org.opencontainers.image.description="Fabric-X CLI tools (configtxgen, cryptogen, configtxlator, fxconfig, fxadmin) packaged in a UBI image." \
     org.opencontainers.image.licenses="Apache-2.0" \
     org.opencontainers.image.ref.name="ubi9/ubi-minimal" \
     org.opencontainers.image.revision="${REVISION}" \
