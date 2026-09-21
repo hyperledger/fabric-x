@@ -20,9 +20,6 @@ func (d *AdminApp) ListNamespaces(ctx context.Context) ([]NamespaceQueryResult, 
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		_ = qc.Close()
-	}()
 
 	res, err := qc.GetNamespacePolicies(ctx)
 	if err != nil {

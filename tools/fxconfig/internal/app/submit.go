@@ -28,9 +28,6 @@ func (d *AdminApp) SubmitTransaction(ctx context.Context, txID string, tx *appli
 	if err != nil {
 		return fmt.Errorf("failed to prepare submission: %w", err)
 	}
-	defer func() {
-		_ = sc.ordererClient.Close()
-	}()
 
 	if err := sc.ordererClient.Broadcast(ctx, sc.signingIdentity, txID, tx); err != nil {
 		return fmt.Errorf("failed to broadcast transaction: %w", err)
@@ -46,19 +43,12 @@ func (d *AdminApp) SubmitTransactionWithWait(ctx context.Context, txID string, t
 	if err != nil {
 		return UnknownStatus, fmt.Errorf("failed to prepare submission: %w", err)
 	}
-	defer func() {
-		_ = sc.ordererClient.Close()
-	}()
 
 	// get notification client
 	nc, err := d.NotificationProvider.Get()
 	if err != nil {
 		return UnknownStatus, fmt.Errorf("failed to get notification client: %w", err)
 	}
-
-	defer func() {
-		_ = nc.Close()
-	}()
 
 	subscription, err := nc.Subscribe(ctx, txID)
 	if err != nil {
