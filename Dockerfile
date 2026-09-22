@@ -8,14 +8,15 @@
 ###########################################
 # Stage 1: Build image
 ###########################################
-FROM golang:1.26 AS builder
+FROM golang:1.27 AS builder
 
-# Build environment variables
-ENV CGO_ENABLED=1
-ENV CGO_CFLAGS="-D_LARGEFILE64_SOURCE"
+# No tool here links against C, so keep the builds static and cgo-free.
+ENV CGO_ENABLED=0
 
 # Args
 ARG IDEMIX_VERSION=v0.0.2
+ARG VERSION=1.0
+ARG REVISION=1.0
 
 WORKDIR /go/src/github.com/hyperledger/fabric-x
 
@@ -26,12 +27,15 @@ RUN go mod download
 # Copy the rest of the source code
 COPY . .
 
+# Stamp the same version/commit metadata into the binaries as `make release-bins`.
+ENV GO_LDFLAGS="-X github.com/hyperledger/fabric-x-common/common/metadata.Version=${VERSION} -X github.com/hyperledger/fabric-x-common/common/metadata.CommitSHA=${REVISION}"
+
 # Build the binaries
-RUN go build -o /tmp/bin/configtxgen ./tools/configtxgen
-RUN go build -o /tmp/bin/cryptogen ./tools/cryptogen
-RUN go build -o /tmp/bin/configtxlator ./tools/configtxlator
-RUN go build -o /tmp/bin/fxconfig ./tools/fxconfig
-RUN go build -o /tmp/bin/fxadmin ./tools/fxadmin
+RUN go build -ldflags "${GO_LDFLAGS}" -o /tmp/bin/configtxgen ./tools/configtxgen
+RUN go build -ldflags "${GO_LDFLAGS}" -o /tmp/bin/cryptogen ./tools/cryptogen
+RUN go build -ldflags "${GO_LDFLAGS}" -o /tmp/bin/configtxlator ./tools/configtxlator
+RUN go build -ldflags "${GO_LDFLAGS}" -o /tmp/bin/fxconfig ./tools/fxconfig
+RUN go build -ldflags "${GO_LDFLAGS}" -o /tmp/bin/fxadmin ./tools/fxadmin
 RUN GOBIN=/tmp/bin go install github.com/IBM/idemix/tools/idemixgen@$IDEMIX_VERSION
 
 ###########################################
