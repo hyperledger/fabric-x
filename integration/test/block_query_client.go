@@ -67,7 +67,7 @@ func (c *BlockQueryClient) PullBlocks(t *testing.T, ctx context.Context) <-chan 
 	return blocksCh
 }
 
-func (c *BlockQueryClient) createClient(t *testing.T) (*committerpb.BlockQueryServiceClient, *grpc.ClientConn) {
+func (c *BlockQueryClient) createClient(t *testing.T) (*committerpb.SidecarServiceClient, *grpc.ClientConn) {
 	serverRootCAs := append([][]byte{}, c.TLSCACerts...)
 
 	// create a gRPC connection to the assembler
@@ -89,7 +89,7 @@ func (c *BlockQueryClient) createClient(t *testing.T) (*committerpb.BlockQuerySe
 	conn, err := grpcClient.Dial(c.Endpoint)
 	require.NoError(t, err, "failed to dial gRPC server")
 
-	blockClient := committerpb.NewBlockQueryServiceClient(conn)
+	blockClient := committerpb.NewSidecarServiceClient(conn)
 
 	return &blockClient, conn
 }
