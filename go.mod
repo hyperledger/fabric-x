@@ -19,8 +19,8 @@ require (
 	github.com/gorilla/handlers v1.5.2
 	github.com/hyperledger/fabric-lib-go v1.1.5-0.20260708100132-163bcc919208
 	github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7
-	github.com/hyperledger/fabric-x-committer v1.0.5
-	github.com/hyperledger/fabric-x-common v0.2.9-0.20260921173349-0565809ff4c3
+	github.com/hyperledger/fabric-x-committer v1.0.4
+	github.com/hyperledger/fabric-x-common v0.2.9-0.20260922085447-9281e8de391d
 	github.com/hyperledger/fabric-x-orderer v1.0.6-0.20260826133013-bd24df94707f
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0

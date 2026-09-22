@@ -27,7 +27,7 @@ type NotificationClient struct {
 	cfg    config.NotificationsConfig
 	closeF func()
 
-	notifyClient  committerpb.SidecarServiceClient
+	notifyClient  committerpb.NotifierClient
 	requestQueue  chan *committerpb.NotificationRequest
 	responseQueue chan *committerpb.NotificationResponse
 
@@ -51,7 +51,7 @@ func NewNotificationClient(cfg config.NotificationsConfig) (*NotificationClient,
 
 	nc := &NotificationClient{
 		cfg:          cfg,
-		notifyClient: committerpb.NewSidecarServiceClient(conn),
+		notifyClient: committerpb.NewNotifierClient(conn),
 		closeF: func() {
 			cancel()
 			_ = conn.Close()
