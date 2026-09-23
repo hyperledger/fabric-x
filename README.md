@@ -4,6 +4,8 @@ SPDX-License-Identifier: Apache-2.0
 
 # Fabric-X
 
+[![Reconfig App Org Integration Test](https://github.com/hyperledger/fabric-x/actions/workflows/reconfig-app-org.yml/badge.svg)](https://github.com/hyperledger/fabric-x/actions/workflows/reconfig-app-org.yml)
+
 ## Motivation
 
 The adoption of Distributed Ledger Technology (DLT) for critical financial infrastructures like digital assets and currencies (e.g., Central Bank Digital Currencies (CBDCs) , stablecoins, tokenized deposits, tokenized bonds/securities) is hindered by a significant performance gap. Permissioned blockchains such as Hyperledger Fabric, while conceptually suitable, are limited by architectural bottlenecks in their monolithic peer design and consensus mechanisms, preventing them from achieving the required scale.
