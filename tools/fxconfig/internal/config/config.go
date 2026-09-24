@@ -11,8 +11,11 @@ package config
 
 import (
 	"cmp"
+	"path/filepath"
 	"slices"
 	"time"
+
+	"github.com/hyperledger/fabric-lib-go/bccsp/factory"
 )
 
 // Config represents the complete fxconfig configuration.
@@ -51,8 +54,64 @@ type LoggingConfig struct {
 // MSPConfig contains MSP (Membership Service Provider) identity configuration.
 // It specifies which organization identity to use for signing transactions.
 type MSPConfig struct {
-	LocalMspID string `mapstructure:"localMspID" yaml:"localMspID,omitempty" desc:"MSP ID of the organization"`
-	ConfigPath string `mapstructure:"configPath" yaml:"configPath,omitempty" desc:"Path to MSP configuration directory"`
+	LocalMspID string      `mapstructure:"localMspID" yaml:"localMspID,omitempty" desc:"MSP ID of the organization"`
+	ConfigPath string      `mapstructure:"configPath" yaml:"configPath,omitempty" desc:"Path to MSP config directory"`
+	BCCSP      BCCSPConfig `mapstructure:"bccsp" yaml:"bccsp,omitempty"`
+}
+
+// BCCSPConfig contains BCCSP (crypto provider) settings for MSP instantiation.
+// Defaults to software-based provider with SHA2-256 and file keystore.
+// To use a PKCS#11 HSM, set PKCS11.Library (requires building with -tags pkcs11).
+type BCCSPConfig struct {
+	Default string            `mapstructure:"default" yaml:"default,omitempty"`
+	SW      BCCSPSWConfig     `mapstructure:"sw" yaml:"sw,omitempty"`
+	PKCS11  BCCSPPKCS11Config `mapstructure:"pkcs11" yaml:"pkcs11,omitempty"`
+}
+
+// BCCSPSWConfig contains software provider settings.
+type BCCSPSWConfig struct {
+	Security     int                     `mapstructure:"security" yaml:"security,omitempty"`
+	Hash         string                  `mapstructure:"hash" yaml:"hash,omitempty"`
+	FileKeyStore BCCSPFileKeyStoreConfig `mapstructure:"fileKeyStore" yaml:"fileKeyStore,omitempty"`
+}
+
+// BCCSPFileKeyStoreConfig contains key store options for the software provider.
+type BCCSPFileKeyStoreConfig struct {
+	KeyStorePath string `mapstructure:"keyStorePath" yaml:"keyStorePath,omitempty"`
+}
+
+// BCCSPPKCS11Config contains PKCS#11 HSM provider settings.
+// When Library is set (and the binary is built with -tags pkcs11), the signer
+// uses the HSM for key material instead of a file-based keystore.
+type BCCSPPKCS11Config struct {
+	Library        string `mapstructure:"library" yaml:"library,omitempty"`
+	Label          string `mapstructure:"label" yaml:"label,omitempty"`
+	Pin            string `mapstructure:"pin" yaml:"pin,omitempty"`
+	Hash           string `mapstructure:"hash" yaml:"hash,omitempty"`
+	Security       int    `mapstructure:"security" yaml:"security,omitempty"`
+	SoftwareVerify bool   `mapstructure:"softwareVerify" yaml:"softwareVerify,omitempty"`
+	Immutable      bool   `mapstructure:"immutable" yaml:"immutable,omitempty"`
+}
+
+// ToFactoryOpts converts fxconfig MSP BCCSP configuration into Fabric factory options.
+// If keyStorePath is not set, it defaults to <msp.configPath>/keystore.
+// If BCCSP.PKCS11.Library is set and the binary is built with -tags pkcs11, the
+// factory is configured for the PKCS#11 provider instead of SW.
+func (c MSPConfig) ToFactoryOpts() *factory.FactoryOpts {
+	opts := &factory.FactoryOpts{
+		Default: cmp.Or(c.BCCSP.Default, "SW"),
+		SW: &factory.SwOpts{
+			Security: cmp.Or(c.BCCSP.SW.Security, 256),
+			Hash:     cmp.Or(c.BCCSP.SW.Hash, "SHA2"),
+			FileKeystore: &factory.FileKeystoreOpts{
+				KeyStorePath: cmp.Or(c.BCCSP.SW.FileKeyStore.KeyStorePath, filepath.Join(c.ConfigPath, "keystore")),
+			},
+		},
+	}
+
+	applyPKCS11Opts(opts, c.BCCSP.PKCS11)
+
+	return opts
 }
 
 // TLSConfig specifies TLS settings for secure communication.
