@@ -1,0 +1,3113 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../architecture/">
+      
+      
+        <link rel="next" href="../coordinator/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Sidecar - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sidecar-middleware" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Sidecar
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-core-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Core Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-workflow-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Workflow Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Workflow Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#task-1-fetching-blocks-from-the-ordering-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 1. Fetching Blocks from the Ordering Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-2-relaying-blocks-to-the-coordinator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 2. Relaying Blocks to the Coordinator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-3-persisting-committed-block-in-the-file-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 3. Persisting Committed Block in the File System
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-delivering-committed-block-to-registered-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Delivering Committed Block to Registered Clients
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-notification-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Notification Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Notification Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#internal-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internal Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-failure-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Failure and Recovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Failure and Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-state-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. State Persistence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-restart-and-recovery-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. Restart and Recovery Procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notification-service-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notification Service Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-core-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Core Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-workflow-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Workflow Details
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Workflow Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#task-1-fetching-blocks-from-the-ordering-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 1. Fetching Blocks from the Ordering Service
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-2-relaying-blocks-to-the-coordinator" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 2. Relaying Blocks to the Coordinator
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#task-3-persisting-committed-block-in-the-file-system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Task 3. Persisting Committed Block in the File System
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-delivering-committed-block-to-registered-clients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Delivering Committed Block to Registered Clients
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-notification-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Notification Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Notification Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#internal-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Internal Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-failure-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Failure and Recovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Failure and Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-state-persistence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. State Persistence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-restart-and-recovery-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. Restart and Recovery Procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notification-service-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notification Service Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+<h1 id="sidecar-middleware">Sidecar Middleware<a class="headerlink" href="#sidecar-middleware" title="Permanent link">&para;</a></h1>
+<ol>
+<li><a href="#1-overview">Overview</a></li>
+<li><a href="#2-core-responsibilities">Core Responsibilities</a></li>
+<li><a href="#3-configuration">Configuration</a></li>
+<li><a href="#4-workflow-details">Workflow Details</a></li>
+<li><a href="#task-1-fetching-blocks-from-the-ordering-service">Task 1. Fetching Blocks from the Ordering Service</a></li>
+<li><a href="#task-2-relaying-blocks-to-the-coordinator">Task 2. Relaying Blocks to the Coordinator</a></li>
+<li><a href="#task-3-persisting-committed-block-in-the-file-system">Task 3. Persisting Committed Block in the File System</a></li>
+<li><a href="#5-delivering-committed-block-to-registered-clients">Delivering Committed Block to Registered Clients</a></li>
+<li><a href="#6-notification-service">Notification Service</a></li>
+<li><a href="#7-failure-and-recovery">Failure and Recovery</a></li>
+<li><a href="#a-state-persistence">A. State Persistence</a></li>
+<li><a href="#b-restart-and-recovery-procedure">B. Restart and Recovery Procedure</a></li>
+<li><a href="#notification-service-recovery">Notification Service Recovery</a></li>
+</ol>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>The Sidecar is a middleware component designed to operate between an Ordering Service and the Coordinator component.
+Its primary function is to reliably manage the flow of blocks, ensuring they are fetched, validated, persisted, and
+delivered to downstream clients.</p>
+<h2 id="2-core-responsibilities">2. Core Responsibilities<a class="headerlink" href="#2-core-responsibilities" title="Permanent link">&para;</a></h2>
+<p>The Sidecar performs four main tasks:</p>
+<ol>
+<li><strong>Fetch Blocks:</strong> Retrieves blocks sequentially from the Ordering Service.</li>
+<li><strong>Translate and Validate:</strong> Decode transactions to a committer transactions (<code>protoblocktx.Tx</code>), 
+    and filter malformed transactions.</li>
+<li><strong>Relay and Collect:</strong> Forwards fetched blocks to the Coordinator and receives feedback on transaction statuses
+    within those blocks.</li>
+<li><strong>Persist Committed Blocks:</strong> Stores blocks confirmed as committed by the Coordinator in a local, append-only file
+    store for durability and auditability.</li>
+<li><strong>Deliver to Clients:</strong> Delivers the committed blocks to registered client applications.</li>
+<li><strong>Notification:</strong> Notifies subscribers when transactions are committed or aborted, on a per-transaction ID basis.</li>
+</ol>
+<p>Note that the fourth task is executed only when users/clients creates a stream with the sidecar.</p>
+<h2 id="3-configuration">3. Configuration<a class="headerlink" href="#3-configuration" title="Permanent link">&para;</a></h2>
+<p>The Sidecar requires the following configuration settings, provided in a Yaml configuration file:</p>
+<ul>
+<li><em>Ordering Service Endpoints</em>: Address(es) of the ordering service node(s).</li>
+<li><em>Coordinator Endpoint</em>: Address of the coordinator service.</li>
+<li><em>Listen Address</em>: The local address and port (e.g., 0.0.0.0:7055) where the Sidecar 
+   will host its block delivery service, enabling clients to connect and receive 
+   committed blocks.</li>
+</ul>
+<p><em>Ordering Service Endpoint Precedence</em>: While ordering service endpoints can be 
+specified in Yaml configuration file, they can be overridden by the endpoints defined within 
+the channel's configuration block.</p>
+<p>A sample <code>sidecar.yaml</code> is located at <code>cmd/config/sample</code>. </p>
+<h2 id="4-workflow-details">4. Workflow Details<a class="headerlink" href="#4-workflow-details" title="Permanent link">&para;</a></h2>
+<p>We run three long-running tasks:</p>
+<p><em>Task 1</em>: Fetch blocks from the ordering service.
+<em>Task 2</em>: Relay blocks to the coordinator and receive statuses.
+<em>Task 3</em>: Commit blocks to the file system.</p>
+<p>We use two queues/channels to enable communication among these three tasks:</p>
+<ol>
+<li><code>blocksToBeCommitted</code> - Task 1 is the producer, while Task 2 is the consumer.</li>
+<li><code>committedBlocks</code> - Task 2 is the producer, while Task 3 is the consumer. (See note below)</li>
+</ol>
+<p>In this section, we provide an overview of each of these tasks in detail.</p>
+<h3 id="task-1-fetching-blocks-from-the-ordering-service">Task 1. Fetching Blocks from the Ordering Service<a class="headerlink" href="#task-1-fetching-blocks-from-the-ordering-service" title="Permanent link">&para;</a></h3>
+<p>The following code runs <em>Task 1</em> which fetches blocks from the ordering service and
+enqueue to <code>blockToBeCommitted</code> queues.</p>
+<p>From <a href="/service/sidecar/sidecar.go#L138">service/sidecar/sidecar.go</a></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">Go</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">      </span><span class="nx">logger</span><span class="p">.</span><span class="nx">Info</span><span class="p">(</span><span class="s">"Fetch blocks from the ordering service and write them on s.blockToBeCommitted."</span><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">      </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">ordererClient</span><span class="p">.</span><span class="nx">Deliver</span><span class="p">(</span><span class="nx">gCtx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">broadcastdeliver</span><span class="p">.</span><span class="nx">DeliverConfig</span><span class="p">{</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="nx">StartBlkNum</span><span class="p">:</span><span class="w"> </span><span class="kt">int64</span><span class="p">(</span><span class="nx">nextBlockNum</span><span class="p">),</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="nx">EndBlkNum</span><span class="p">:</span><span class="w">   </span><span class="nx">broadcastdeliver</span><span class="p">.</span><span class="nx">MaxBlockNum</span><span class="p">,</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="nx">OutputBlock</span><span class="p">:</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">blockToBeCommitted</span><span class="p">,</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">      </span><span class="p">})</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">Is</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Canceled</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">Wrap</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span><span class="w"> </span><span class="s">"context is canceled"</span><span class="p">)</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">errors</span><span class="p">.</span><span class="nx">Join</span><span class="p">(</span><span class="nx">connection</span><span class="p">.</span><span class="nx">ErrNonRetryable</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="p">})</span>
+</code></pre></div>
+<p>Next, we explain the code internals.</p>
+<p><strong>a. Creating An Orderer Client:</strong></p>
+<p>The Sidecar creates a gRPC client connection (<code>grpc.ClientConnInterface</code>) to the Orderer 
+using the IP addresses provided in the configuration. It creates an <code>AtomicBroadcastClient</code> 
+(a.k.a Orderer Client) using the <code>NewAtomicBroadcastClient()</code> function provided by the <code>fabric-protos-go</code> library 
+(<code>orderer/ab.pb.go</code>).</p>
+<p>From <a href="https://github.com/hyperledger/fabric-protos-go/blob/main/orderer/ab.pb.go">hyperledger/fabric-protos-go/orderer/ab.pb.go</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nx">NewAtomicBroadcastClient</span><span class="p">(</span><span class="nx">cc</span><span class="w"> </span><span class="nx">grpc</span><span class="p">.</span><span class="nx">ClientConnInterface</span><span class="p">)</span><span class="w"> </span><span class="nx">AtomicBroadcastClient</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">atomicBroadcastClient</span><span class="p">{</span><span class="nx">cc</span><span class="p">}</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="kd">type</span><span class="w"> </span><span class="nx">AtomicBroadcastClient</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">        </span><span class="c1">// broadcast receives a reply of Acknowledgement for each common.Envelope in order, indicating success or type of failure</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">        </span><span class="nx">Broadcast</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="p">...</span><span class="nx">grpc</span><span class="p">.</span><span class="nx">CallOption</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">AtomicBroadcast_BroadcastClient</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="c1">// deliver first requires an Envelope of type DELIVER_SEEK_INFO with Payload data as a mashaled SeekInfo message, then a stream of block replies is received.</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="nx">Deliver</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="p">...</span><span class="nx">grpc</span><span class="p">.</span><span class="nx">CallOption</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">AtomicBroadcast_DeliverClient</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="p">}</span>
+</code></pre></div></p>
+<p><strong>b. Initiating Block Delivery Stream:</strong></p>
+<p>The Sidecar calls the <code>Deliver()</code> method on the <code>AtomicBroadcastClient</code> to establish a 
+gRPC stream (<code>AtomicBroadcast_DeliverClient</code>) with the Ordering Service specifically 
+for receiving blocks. </p>
+<p>From <a href="https://github.com/hyperledger/fabric-protos-go/blob/main/orderer/ab.pb.go">hyperledger/fabric-protos-go/orderer/ab.pb.go</a></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="w">    </span><span class="kd">type</span><span class="w"> </span><span class="nx">AtomicBroadcast_DeliverClient</span><span class="w"> </span><span class="kd">interface</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">        </span><span class="nx">Send</span><span class="p">(</span><span class="o">*</span><span class="nx">common</span><span class="p">.</span><span class="nx">Envelope</span><span class="p">)</span><span class="w"> </span><span class="kt">error</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="nx">Recv</span><span class="p">()</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">DeliverResponse</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">        </span><span class="nx">grpc</span><span class="p">.</span><span class="nx">ClientStream</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>c. Requesting Blocks:</strong></p>
+<p>Within the stream, the Sidecar first calls the <code>Send()</code> method to send an Envelope containing a 
+<code>SeekInfo</code> message. This message specifies the range of blocks the Sidecar wants to receive. 
+For example, when the blockchain network is started for the first time, the Sidecar would 
+set the start position to block <code>0</code> and the stop position to <code>MaxUint64</code>. When the sidecar 
+restarts after a failure, it determines the next needed block number and sets the start block
+number accordingly. It always sets the <code>SeekBehavior</code> to <code>BLOCK_UNTIL_READY</code>.</p>
+<p>From <a href="https://github.com/hyperledger/fabric-protos-go/blob/main/orderer/ab.pb.go">hyperledger/fabric-protos-go/orderer/ab.pb.go</a> (illustrative fields)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="w">    </span><span class="nx">message</span><span class="w"> </span><span class="nx">SeekInfo</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">        </span><span class="nx">SeekPosition</span><span class="w"> </span><span class="nx">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w">         </span><span class="c1">// The position to start the deliver from</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">        </span><span class="nx">SeekPosition</span><span class="w"> </span><span class="nx">stop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w">          </span><span class="c1">// The position to stop the deliver</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">        </span><span class="nx">SeekBehavior</span><span class="w"> </span><span class="nx">behavior</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span><span class="w">      </span><span class="c1">// The behavior when a missing block is encountered</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">        </span><span class="nx">SeekErrorResponse</span><span class="w"> </span><span class="nx">error_response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4</span><span class="p">;</span><span class="w"> </span><span class="c1">// How to respond to errors</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="nx">SeekContentType</span><span class="w"> </span><span class="nx">content_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="c1">// Defines what type of content to deliver</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="nx">enum</span><span class="w"> </span><span class="nx">SeekBehavior</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">        </span><span class="nx">BLOCK_UNTIL_READY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Default behavior, block until the next block is available</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="nx">FAIL_IF_NOT_READY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="c1">// Respond with an error if the block is not found</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="w">    </span><span class="c1">// Simplified representation of SeekPosition (can specify oldest, newest, or a specific number)</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">    </span><span class="nx">message</span><span class="w"> </span><span class="nx">SeekPosition</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">      </span><span class="nx">oneof</span><span class="w"> </span><span class="nx">Type</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">        </span><span class="nx">SeekNewest</span><span class="w"> </span><span class="nx">newest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">        </span><span class="nx">SeekOldest</span><span class="w"> </span><span class="nx">oldest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">        </span><span class="nx">SeekSpecified</span><span class="w"> </span><span class="nx">specified</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">;</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">      </span><span class="p">}</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">    </span><span class="p">}</span>
+</code></pre></div></p>
+<p><strong>d. Receiving Blocks:</strong></p>
+<p>After sending the <code>SeekInfo</code>, the Sidecar continuously calls the <code>Recv()</code> method on the stream.
+The Ordering Service sends back <code>DeliverResponse</code> messages, each containing a block. If the Sidecar 
+requests a future block (one not yet created), the <code>Recv()</code> call will block until that block becomes 
+available on the Ordering Service.</p>
+<p><strong>e. Handoff for Processing:</strong></p>
+<p>Each block successfully received via <code>Recv()</code> is enqueued into an internal channel (e.g., <code>blocksToBeCommitted</code>).
+This channel acts as a buffer, passing the fetched blocks to the next component within the 
+Sidecar responsible for relaying them to the Coordinator.</p>
+<h3 id="task-2-relaying-blocks-to-the-coordinator">Task 2. Relaying Blocks to the Coordinator<a class="headerlink" href="#task-2-relaying-blocks-to-the-coordinator" title="Permanent link">&para;</a></h3>
+<p>The following code runs <em>Task 2</em> which relays the blocks present in 
+<code>blocksToBeCommitted</code> to coordinator and receive statuses.</p>
+<p>From <a href="/service/sidecar/sidecar.go#L152">service/sidecar/sidecar.go</a>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="w">    </span><span class="nx">relayService</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">newRelay</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">LastCommittedBlockSetInterval</span><span class="p">,</span><span class="w"> </span><span class="nx">metrics</span><span class="p">)</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">    </span><span class="p">...</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="p">...</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">Go</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">        </span><span class="nx">logger</span><span class="p">.</span><span class="nx">Info</span><span class="p">(</span><span class="s">"Relay the blocks to committer (from s.blockToBeCommitted) and receive the transaction status."</span><span class="p">)</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">relay</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="nx">gCtx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">relayRunConfig</span><span class="p">{</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">            </span><span class="nx">coordClient</span><span class="p">:</span><span class="w">                    </span><span class="nx">coordClient</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">            </span><span class="nx">nextExpectedBlockByCoordinator</span><span class="p">:</span><span class="w"> </span><span class="nx">nextBlockNum</span><span class="p">,</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">            </span><span class="nx">configUpdater</span><span class="p">:</span><span class="w">                  </span><span class="nx">s</span><span class="p">.</span><span class="nx">configUpdater</span><span class="p">,</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">            </span><span class="nx">incomingBlockToBeCommitted</span><span class="p">:</span><span class="w">     </span><span class="nx">s</span><span class="p">.</span><span class="nx">blockToBeCommitted</span><span class="p">,</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">            </span><span class="nx">outgoingCommittedBlock</span><span class="p">:</span><span class="w">         </span><span class="nx">s</span><span class="p">.</span><span class="nx">committedBlock</span><span class="p">,</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">        </span><span class="p">})</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="p">})</span>
+</code></pre></div></p>
+<p>Next, we explain the code internals.</p>
+<p><strong>a. Dequeueing Blocks</strong>: </p>
+<p>The component monitors and reads blocks from the <code>blocksToBeCommitted</code> input queue. This queue holds 
+blocks fetched from the ordering service that are pending processing and validation via the Coordinator.</p>
+<p><strong>b. Block Format Conversion</strong>: </p>
+<p>Each dequeued block, originally in the native Hyperledger Fabric format, is transformed into a standardized
+intermediate representation. This internal <code>Block</code> format shown below is defined by the protocol buffers in
+<code>api/protos/protocoordinatorservice</code>. </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Block</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="nx">Number</span><span class="w"> </span><span class="kt">uint64</span><span class="w">             </span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nx">Txs</span><span class="w">    </span><span class="p">[]</span><span class="o">*</span><span class="nx">protoblocktx</span><span class="p">.</span><span class="nx">Tx</span><span class="w"> </span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nx">TxsNum</span><span class="w"> </span><span class="p">[]</span><span class="kt">uint32</span><span class="w">           </span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">}</span>
+</code></pre></div>
+<p>This conversion facilitates easier processing and decouples the committer's internal logic from the nested Fabric block structures.</p>
+<p>This internal block will only contain well-formed committer transactions.
+I.e., the sidecar filters transactions that cannot be processed correctly.
+Following are a list of statuses that the sidecar filters by:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">enum</span><span class="w"> </span><span class="n">Status</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">   </span><span class="c1">// ...</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">   </span><span class="c1">// Cannot be stored in the state database because the TX ID cannot be extracted,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">   </span><span class="c1">// or the TX ID entry is already occupied.</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">   </span><span class="na">REJECTED_DUPLICATE_TX_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">;</span><span class="w">                     </span><span class="c1">// Transaction with the same ID has already been processed.</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">   </span><span class="na">MALFORMED_BAD_ENVELOPE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">101</span><span class="p">;</span><span class="w">                       </span><span class="c1">// Cannot unmarshal envelope.</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">   </span><span class="na">MALFORMED_MISSING_TX_ID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">102</span><span class="p">;</span><span class="w">                      </span><span class="c1">// Envelope is missing transaction ID.</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">   </span><span class="c1">// Stored in the state database. Prevents submitting a transaction with the same ID.</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">   </span><span class="na">MALFORMED_UNSUPPORTED_ENVELOPE_PAYLOAD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">103</span><span class="p">;</span><span class="w">       </span><span class="c1">// Unsupported envelope payload type.</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">   </span><span class="na">MALFORMED_BAD_ENVELOPE_PAYLOAD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">104</span><span class="p">;</span><span class="w">               </span><span class="c1">// Cannot unmarshal envelope's payload.</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">   </span><span class="na">MALFORMED_TX_ID_CONFLICT</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">105</span><span class="p">;</span><span class="w">                     </span><span class="c1">// Envelope's TX ID does not match the payload's TX ID.</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">   </span><span class="na">MALFORMED_EMPTY_NAMESPACES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">106</span><span class="p">;</span><span class="w">                   </span><span class="c1">// No namespaces provided.</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="w">   </span><span class="na">MALFORMED_DUPLICATE_NAMESPACE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">107</span><span class="p">;</span><span class="w">                </span><span class="c1">// Duplicate namespace detected.</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="w">   </span><span class="na">MALFORMED_NAMESPACE_ID_INVALID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">108</span><span class="p">;</span><span class="w">               </span><span class="c1">// Invalid namespace identifier.</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a><span class="w">   </span><span class="na">MALFORMED_BLIND_WRITES_NOT_ALLOWED</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">109</span><span class="p">;</span><span class="w">           </span><span class="c1">// Blind writes are not allowed in a namespace transaction.</span>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="w">   </span><span class="na">MALFORMED_NO_WRITES</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">110</span><span class="p">;</span><span class="w">                          </span><span class="c1">// No write operations in the transaction.</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="w">   </span><span class="na">MALFORMED_EMPTY_KEY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">111</span><span class="p">;</span><span class="w">                          </span><span class="c1">// Unset key detected.</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a><span class="w">   </span><span class="na">MALFORMED_DUPLICATE_KEY_IN_READ_WRITE_SET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">112</span><span class="p">;</span><span class="w">    </span><span class="c1">// Duplicate key in the read-write set.</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="w">   </span><span class="na">MALFORMED_MISSING_SIGNATURE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">113</span><span class="p">;</span><span class="w">                  </span><span class="c1">// Number of signatures does not match the number of namespaces.</span>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="w">   </span><span class="na">MALFORMED_NAMESPACE_POLICY_INVALID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">114</span><span class="p">;</span><span class="w">           </span><span class="c1">// Invalid namespace policy.</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a><span class="w">   </span><span class="na">MALFORMED_CONFIG_TX_INVALID</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">115</span><span class="p">;</span><span class="w">                  </span><span class="c1">// Invalid configuration transaction.</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a><span class="p">}</span>
+</code></pre></div></p>
+<p><strong>c. In-Flight Duplicate Transaction Detection</strong>: </p>
+<p>Before sending the block to the Coordinator, the relay component
+performs a crucial check for duplicate transaction IDs (txIDs). This specific check focuses on identifying 
+duplicates among the set of transactions currently being processed or "in-flight" (i.e., transactions 
+within the block being processed and potentially others recently sent to the coordinator but not yet fully committed).
+ - Important Distinction: Detecting duplicate txIDs against the already committed state (transactions persisted 
+   in the ledger) is explicitly handled by a separate component, referred to as the "vc service" (likely 
+   Validation/Commit Service), not by this relay component during this phase.</p>
+<p><strong>d. Pipelined Sending to Coordinator</strong>: </p>
+<p>The converted internal block representation is then sent to the Coordinator service for validation and consensus. 
+A key aspect of this process is its pipelined nature. The relay component sends blocks to the Coordinator 
+continuously as they become available from the blocksToBeCommitted queue, without waiting for the Coordinator
+to return the final commitment status of previously sent blocks. This approach maximizes throughput by keeping 
+the Coordinator busy.</p>
+<p><strong>e. Receiving and Correlating Transaction Statuses</strong>: </p>
+<p>As the Coordinator processes the transactions within the blocks it receives, it sends back status updates to the
+Sidecar's relay component. These statuses indicate the outcome of each transaction (e.g., committed, invalid). 
+Because of the pipelined sending, these statuses may arrive out of order relative to the block sending sequence 
+and might cover transactions spanning multiple blocks. The relay component is responsible for receiving these 
+statuses and correctly associating them with the corresponding transactions within the blocks it is tracking.
+The component maintains the state of each block sent to the Coordinator, collecting 
+the status updates for all transactions within that block using <code>blockWithStatus</code>.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="w">    </span><span class="nx">blockWithStatus</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">        </span><span class="nx">block</span><span class="w">         </span><span class="o">*</span><span class="nx">common</span><span class="p">.</span><span class="nx">Block</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">        </span><span class="nx">txStatus</span><span class="w">      </span><span class="p">[]</span><span class="nx">validationCode</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">        </span><span class="nx">txIDToTxIndex</span><span class="w"> </span><span class="kt">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">        </span><span class="nx">pendingCount</span><span class="w">  </span><span class="kt">int</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="p">}</span>
+</code></pre></div></p>
+<p><strong>f. Sequential Commitment Check</strong>: </p>
+<p>A block is only considered fully processed and ready for commitment when two conditions are met:</p>
+<ol>
+<li>Status updates for all transactions within that specific block have been received from the Coordinator.</li>
+<li>This block is the next block in the expected sequential order to be committed to the ledger. (e.g., if block 
+    5 was the last committed block, the component waits until all statuses for block 6 are received before considering block 6 ready).</li>
+</ol>
+<p><strong>g. Enqueueing Committed Blocks</strong>: </p>
+<p>When a block satisfies the criteria outlined in step f, the relay component first appends the collected
+transaction statuses within the metadata of the original Fabric block (sourced from <code>blocksToBeCommitted</code>). 
+Subsequently, this modified block is enqueued onto the <code>committedBlocks</code> output channel.</p>
+<h3 id="task-3-persisting-committed-block-in-the-file-system">Task 3. Persisting Committed Block in the File System<a class="headerlink" href="#task-3-persisting-committed-block-in-the-file-system" title="Permanent link">&para;</a></h3>
+<p>The following code runs <em>Task 3</em> which reads blocks present in the <code>committedBlocks</code>
+queue and store the block in the file system.</p>
+<p>From <a href="/service/sidecar/sidecar.go#L103">service/sidecar/sidecar.go</a></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="w">    </span><span class="nx">g</span><span class="p">.</span><span class="nx">Go</span><span class="p">(</span><span class="kd">func</span><span class="p">()</span><span class="w"> </span><span class="kt">error</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">ledgerService</span><span class="p">.</span><span class="nx">run</span><span class="p">(</span><span class="nx">gCtx</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">ledgerRunConfig</span><span class="p">{</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">            </span><span class="nx">IncomingCommittedBlock</span><span class="p">:</span><span class="w"> </span><span class="nx">s</span><span class="p">.</span><span class="nx">committedBlock</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">        </span><span class="p">})</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="p">})</span>
+</code></pre></div>
+<p>The <code>committedBlocks</code> channel signals to the downstream "ledger service" (also referred to as the 
+block delivery service) that a new block is confirmed as committed and ready for final handling. 
+The ledger service then:
+  - Reads the committed block from the <code>committedBlocks</code> channel.
+  - Appends the block data reliably to the local append-only file system store.</p>
+<p>We use Fabric block store package located at https://github.com/hyperledger/fabric/common/ledger/blkstorage
+to manage these blocks in the file system.</p>
+<h2 id="5-delivering-committed-block-to-registered-clients">5. Delivering Committed Block to Registered Clients<a class="headerlink" href="#5-delivering-committed-block-to-registered-clients" title="Permanent link">&para;</a></h2>
+<p>Similar to how the Sidecar connects to the Ordering Service to fetch blocks, Clients 
+can also connect to the Sidecar to fetch committed blocks. This is useful because 
+transactions are submitted asynchronously to the Ordering Service, and hence, the 
+Client needs to rely on the committed block stream to know whether their transaction 
+was committed or aborted. The txID, generated by the Client, is used for this lookup 
+within the blocks.</p>
+<p>The Client can use the <code>sidecarclient</code> package to initiate this delivery service
+with the Sidecar as follows</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="w">    </span><span class="nx">receivedBlocksFromLedgerService</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">(</span><span class="kt">chan</span><span class="w"> </span><span class="o">*</span><span class="nx">common</span><span class="p">.</span><span class="nx">Block</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="nx">deliverClient</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">sidecarclient</span><span class="p">.</span><span class="nx">New</span><span class="p">(</span><span class="nx">config</span><span class="p">)</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nx">deliverClient</span><span class="p">.</span><span class="nx">Deliver</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="o">&amp;</span><span class="nx">DeliverConfig</span><span class="p">{</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="nx">StartBlkNum</span><span class="p">:</span><span class="w"> </span><span class="nx">startBlkNum</span><span class="p">,</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">      </span><span class="nx">EndBlkNum</span><span class="p">:</span><span class="w">   </span><span class="nx">broadcastdeliver</span><span class="p">.</span><span class="nx">MaxBlockNum</span><span class="p">,</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">      </span><span class="nx">OutputBlock</span><span class="p">:</span><span class="w"> </span><span class="nx">receivedBlocksFromLedgerService</span><span class="p">,</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="c1">// blocking call</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="p">)</span>
+</code></pre></div>
+<p>The <code>receivedBlocksFromLedgerService</code> channel would hold the received committed blocks
+from the Sidecar.</p>
+<p>Next, we explain the internals of <code>sidecarclient</code>.</p>
+<p><strong>a. Creating a Sidecar Client:</strong></p>
+<p>The sidecarclient creates a gRPC client connection (<code>grpc.ClientConnInterface</code>) to the Sidecar
+using the IP:Port on which the ledger service (the Sidecar's block delivery service)
+is listening. It creates a <code>DeliverClient</code> using the <code>NewDeliverClient()</code> function 
+provided by the <code>fabric-protos-go`` library (</code>peer/events.pb.go`).</p>
+<p>From <a href="https://github.com/hyperledger/fabric-protos-go/blob/main/peer/events.pb.go">hyperledger/fabric-protos-go/peer/events.pb.go</a>
+  ```go
+    func NewDeliverClient(cc grpc.ClientConnInterface) DeliverClient {
+      return &amp;deliverClient{cc}
+    }</p>
+<div class="highlight"><pre><span></span><code>func (c *deliverClient) Deliver(ctx context.Context, opts ...grpc.CallOption) (Deliver_DeliverClient, error) {
+  stream, err := c.cc.NewStream(ctx, &amp;Deliver_ServiceDesc.Streams[0], Deliver_Deliver_FullMethodName, opts...)
+  if err != nil {
+    return nil, err
+  }
+  x := &amp;deliverDeliverClient{stream}
+  return x, nil
+}
+</code></pre></div>
+<p>```</p>
+<p><strong>b. Initiating Block Delivery Stream:</strong></p>
+<p>The sidecarclient calls the <code>Deliver()</code> method on the <code>DeliverClient</code> to establish a 
+gRPC stream (<code>Deliver_DeliverClient</code>) with the Sidecar for receiving blocks.</p>
+<p>From <a href="https://github.com/hyperledger/fabric-protos-go/blob/main/peer/events.pb.go">hyperledger/fabric-protos-go/peer/events.pb.go</a>
+  <code>go
+    type Deliver_DeliverClient interface {
+      Send(*common.Envelope) error
+      Recv() (*DeliverResponse, error)
+      grpc.ClientStream
+    }</code></p>
+<p><strong>c. Requesting Blocks:</strong></p>
+<p>Within the stream, the sidecarclient first calls the <code>Send()</code> method to send an Envelope containing a 
+<code>SeekInfo</code> message. This message specifies the range of blocks the user/client wants to receive. 
+The format of <code>SeekInfo</code> is the same as the one the used for Sidecar-to-Orderer delivery stream
+described in <a href="#fetching-blocks-from-the-ordering-service">Fetching Blocks From the Ordering Service</a>.</p>
+<p><strong>d. Receiving Blocks:</strong></p>
+<p>After sending the <code>SeekInfo</code>, the sidecarclient continuously calls the <code>Recv()</code> method on the stream.
+The Sidecar sends back <code>DeliverResponse</code> messages, each containing a committed block. 
+If the client requests a future block (one not yet committed), the <code>Recv()</code> call will 
+block until that block becomes available for delivery from the Sidecar.</p>
+<h2 id="6-notification-service">6. Notification Service<a class="headerlink" href="#6-notification-service" title="Permanent link">&para;</a></h2>
+<p>The Sidecar exposes a Notification Service that allows clients to subscribe to transaction status
+updates and receive asynchronous notifications when transactions are committed, rejected, or aborted.</p>
+<p>For client usage documentation including API definitions, code examples, and configuration,
+see <a href="../notification-service/">Notification Service — Client Usage Guide</a>.</p>
+<p>This section describes the internal architecture of the notification service.</p>
+<h3 id="internal-architecture">Internal Architecture<a class="headerlink" href="#internal-architecture" title="Permanent link">&para;</a></h3>
+<p>The notifier is implemented as a single-threaded event loop in <code>run()</code>
+(<a href="/service/sidecar/notify.go">service/sidecar/notify.go</a>). This design eliminates
+the need for locks — all subscription tracking, status dispatch, and timeout handling
+happen in a single goroutine via a <code>select</code> loop over three channels:</p>
+<ul>
+<li><strong><code>requestQueue</code></strong>: Subscription requests from client streams.</li>
+<li><strong><code>statusQueue</code></strong>: Transaction status batches from the relay service (which receives
+  them from the Coordinator). This includes statuses for committed, aborted, and
+  rejected transactions (e.g., <code>REJECTED_DUPLICATE_TX_ID</code>, <code>MALFORMED_BAD_ENVELOPE</code>).</li>
+<li><strong><code>timeoutQueue</code></strong>: Requests whose timeout timers have fired.</li>
+</ul>
+<p>Subscriptions are tracked in a <code>subscriptionMap</code> that maps each transaction ID to the
+set of <code>notificationRequest</code> objects watching it. When a status update arrives for a
+transaction ID — whether it is committed, aborted, or rejected — all subscribers watching
+that ID are notified and the entry is removed from the map.</p>
+<p>Each client stream gets its own buffered <code>streamEventQueue</code> channel. This per-stream
+buffer ensures that a slow consumer on one stream does not block status dispatch to
+other streams. The buffer size defaults to 100 and is derived from the
+<code>channel-buffer-size</code> configuration.</p>
+<p>Timeouts are managed using <code>time.AfterFunc</code> — each subscription request gets its own
+timer. When a timer fires, the request is moved to the <code>timeoutQueue</code>, and any
+remaining unmatched transaction IDs for that request are reported back to the client
+as <code>TimeoutTxIds</code>.</p>
+<h2 id="7-failure-and-recovery">7. Failure and Recovery<a class="headerlink" href="#7-failure-and-recovery" title="Permanent link">&para;</a></h2>
+<p>The Sidecar is designed for resilience, allowing it to recover from failures that might
+occur at any point during block processing. This recovery capability relies on persistently
+tracking the progress of committed blocks and maintaining up-to-date configuration in the
+state database.</p>
+<h3 id="a-state-persistence">A. State Persistence<a class="headerlink" href="#a-state-persistence" title="Permanent link">&para;</a></h3>
+<p>Resilience is achieved by ensuring the block number of the last fully committed block is 
+stored durably. The Sidecar periodically reports its commit progress to the Coordinator, 
+which is responsible for persisting this block number in a state database. The Coordinator 
+also typically manages access to the latest channel configuration block within the state 
+database.</p>
+<h3 id="b-restart-and-recovery-procedure">B. Restart and Recovery Procedure<a class="headerlink" href="#b-restart-and-recovery-procedure" title="Permanent link">&para;</a></h3>
+<p>When the Sidecar restarts after a failure, it follows these steps:</p>
+<p><strong>a. Connect to Coordinator</strong>: The Sidecar establishes a connection with the Coordinator service.</p>
+<p><strong>b. Fetch Latest Configuration</strong>: The Sidecar requests the most recent channel configuration 
+   block (config block) from the Coordinator. This configuration is fetched from the state 
+   database (via the Coordinator) to ensure the Sidecar uses the latest Ordering Service 
+   endpoints, especially if the network configuration has changed.</p>
+<p><strong>c. Fetch Next Expected Block Number</strong>: The Sidecar queries the Coordinator to determine
+   the block number of the next block it should process.</p>
+<p><strong>d. Local State Reconciliation</strong>: Using the next expected block number received from the Coordinator (<code>N</code>),
+   the Sidecar checks the block number of the latest block present in its local block store (<code>M</code>).</p>
+<p><strong>e. Fetch Missing Blocks</strong>: If the local store is behind (<code>M</code> &lt; <code>N-1</code>), the Sidecar connects to
+   the Ordering Service (using the up-to-date endpoints obtained from the fetched config block) 
+   and retrieves the missing blocks sequentially, starting from block <code>M+1</code> up to <code>N-1</code>.</p>
+<p><strong>f. Retrieve Transaction Statuses</strong>: To ensure data integrity for the recovered range, the
+   Sidecar retrieves the commit/abort statuses for transactions within the newly
+   fetched blocks. This status information is obtained by querying the state database via the Coordinator.</p>
+<p><strong>g. Resume Operation</strong>: Once the local block store is synchronized (missing blocks fetched)
+   and the transaction statuses for the recovered range are confirmed, the Sidecar seamlessly
+   resumes its standard block processing routines from block N+1.</p>
+<h3 id="notification-service-recovery">Notification Service Recovery<a class="headerlink" href="#notification-service-recovery" title="Permanent link">&para;</a></h3>
+<p>When a sidecar fails and restarts, the client should assume that no state is persisted at the sidecar and,
+therefore, needs to resubmit the transaction IDs of interest for which it has not yet received a status update.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>
