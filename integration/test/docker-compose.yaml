@@ -167,9 +167,13 @@ services:
   explorer:
     image: ${EXPLORER_IMAGE:-localhost/fabric-x-block-explorer}
     container_name: explorer
-    command: [ "start", "--config", "/config/explorer.yaml" ]
+    # start.sh ignores CMD args; it reads EXPLORER_CONFIG_PATH (default /home/explorer/config.yaml).
+    environment:
+      EXPLORER_CONFIG_PATH: /config/explorer.yaml
     volumes:
       - ./explorerconfig/explorer.yaml:/config/explorer.yaml
+      # TLS client credentials for the sidecar deliver stream (mtls).
+      - ${ARTIFACTS_DIR:-/tmp/fabric-x-test/artifacts}:/artifacts
     ports:
       - "8080:8080"
     depends_on:
