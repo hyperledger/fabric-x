@@ -162,6 +162,33 @@ func TestProvider_Get_ThreadSafety(t *testing.T) {
 	require.Equal(t, 1, callCount)
 }
 
+func TestProvider_Get_ThreadSafety_InitFailure(t *testing.T) {
+	t.Parallel()
+
+	validationErr := errors.New("init failure")
+	cfg := &mockConfig{validateErr: validationErr}
+	factory := func(*mockConfig) (*mockService, error) {
+		return &mockService{value: "test"}, nil
+	}
+
+	p := provider.New(factory, cfg, validation.Context{})
+
+	var wg sync.WaitGroup
+	numGoroutines := 20
+	wg.Add(numGoroutines)
+
+	for range numGoroutines {
+		go func() {
+			defer wg.Done()
+			svc, err := p.Get()
+			assert.Nil(t, svc)
+			assert.ErrorIs(t, err, validationErr)
+		}()
+	}
+
+	wg.Wait()
+}
+
 func TestProvider_Validate_Success(t *testing.T) {
 	t.Parallel()
 
