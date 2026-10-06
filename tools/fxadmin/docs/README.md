@@ -448,18 +448,17 @@ fxadmin modify party node --party 1 --role consenter \
 |------|:--------:|-------------|
 | `--party` | yes | Party ID |
 | `--role` | yes | `router \| batcher \| consenter \| assembler` |
-| `--shard` | if batcher | Batcher shard ID |
+| `--shard` | if batcher | Batcher shard ID. Required with `--role batcher`; an error with any other role |
 | `--host` | no | New host (unchanged if omitted) |
-| `--port` | no | New port (unchanged if omitted) |
+| `--port` | no | New port, 1–65535 (unchanged if omitted) |
 | `--tls-cert` | no | Path to new TLS certificate (unchanged if omitted) |
 | `--sign-cert` | no | Path to new signing certificate (unchanged if omitted) |
 | `--block` | yes | Config block to edit in place |
 
-Only `batcher` and `consenter` nodes have a signing certificate. Using
-`--sign-cert` with `--role router` or `--role assembler` is an error. Changing a
-`router` or `assembler` endpoint also updates that party's orderer-organization
-`Endpoints` value (the router is advertised as the `broadcast` address, the
-assembler as the `deliver` address).
+All four node roles have a signing certificate, so `--sign-cert` works with any
+`--role`. Changing a `router` or `assembler` endpoint also updates that party's
+orderer-organization `Endpoints` value (the router is advertised as the
+`broadcast` address, the assembler as the `deliver` address).
 
 ___
 
