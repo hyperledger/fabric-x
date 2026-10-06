@@ -1,0 +1,3212 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+      
+        <link rel="next" href="concepts/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="stylesheets/extra.css">
+    
+    <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#introduction" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Home
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="." class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabric-vs-fabric-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fabric vs Fabric-X
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperledger-fabric" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hyperledger Fabric
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperledger-fabric-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hyperledger Fabric-X
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hyperledger Fabric-X">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-innovations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Innovations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabric-x-ecosystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fabric-X Ecosystem
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#membership-and-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Membership and Identity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-model-and-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Model and Database
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-and-genesis-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration and Genesis Block
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ecosystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ecosystem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acknowledgement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acknowledgement
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="committer/docs/loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fabric-vs-fabric-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fabric vs Fabric-X
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperledger-fabric" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hyperledger Fabric
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperledger-fabric-x" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hyperledger Fabric-X
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hyperledger Fabric-X">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#architecture-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Overview
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-innovations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Innovations
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-characteristics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Characteristics
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fabric-x-ecosystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fabric-X Ecosystem
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#membership-and-identity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Membership and Identity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-model-and-database" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data Model and Database
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-and-genesis-block" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration and Genesis Block
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ecosystem" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ecosystem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#acknowledgement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Acknowledgement
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h1>
+<p>Generally, a blockchain is an immutable transaction ledger, maintained
+within a distributed network of <em>peer nodes</em>. These nodes each maintain a copy
+of the ledger by applying transactions that have been validated by a <em>consensus
+protocol</em>, grouped into blocks that include a hash that binds each block to the
+preceding block.</p>
+<p>The first and most widely recognized blockchain application is the
+<a href="https://en.wikipedia.org/wiki/Bitcoin">Bitcoin</a> cryptocurrency, though others
+have followed in its footsteps. Ethereum, an alternative cryptocurrency, took a
+different approach, integrating many of the same characteristics as Bitcoin but
+adding <em>smart contracts</em> to create a platform for distributed applications.
+Bitcoin and Ethereum fall into a class of blockchain that we would classify as
+<em>public permissionless</em> blockchain technology. Basically, these are public
+networks, open to anyone, where participants interact anonymously.</p>
+<p>As the popularity of Bitcoin, Ethereum, and a few other derivative technologies
+grew, interest in applying the underlying technology of the blockchain,
+distributed ledger, and distributed application platform to more innovative
+<em>enterprise</em> use cases also grew. However, many enterprise use cases require
+performance characteristics that permissionless blockchain technologies are
+unable (presently) to deliver. In addition, in many use cases, the identity of
+the participants is a hard requirement, such as in the case of financial
+transactions where Know-Your-Customer (KYC) and Anti-Money Laundering (AML)
+regulations must be followed.</p>
+<p>For enterprise use, we need to consider the following requirements:</p>
+<ul>
+<li>Participants must be identified/identifiable</li>
+<li>Networks need to be <em>permissioned</em></li>
+<li>High transaction throughput performance</li>
+<li>Low latency of transaction confirmation</li>
+<li>Privacy and confidentiality of transactions and data pertaining to business
+  transactions</li>
+</ul>
+<p>While many early blockchain platforms are currently being <em>adapted</em> for
+enterprise use, Hyperledger Fabric has been <em>designed</em> for enterprise use from
+the outset. To address enterprise requirements, we developed
+<a href="https://hyperledger-fabric.readthedocs.io/en/release-2.5">Hyperledger Fabric</a>.
+However, Fabric has performance limitations (~2,000 TPS) that make it unsuitable
+for tokenization use cases requiring higher throughput. Additionally, Fabric's
+rigid chaincode programming model lacks flexibility. Fabric-X addresses these
+limitations by removing chaincodes and introducing a flexible programming model
+using <a href="https://github.com/hyperledger-labs/fabric-smart-client">Fabric Smart Client (FSC)</a>
+views. The following sections describe the differences between Fabric-X and
+Fabric.</p>
+<hr />
+<h2 id="fabric-vs-fabric-x">Fabric vs Fabric-X<a class="headerlink" href="#fabric-vs-fabric-x" title="Permanent link">&para;</a></h2>
+<p>Fabric-X is an evolution of Hyperledger Fabric, designed for high-performance
+enterprise blockchain deployments. It keeps Fabric's core execute-order-validate-commit
+architecture while making significant architectural changes to achieve
+200,000+ TPS with horizontal scalability.</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Fabric</th>
+<th>Fabric-X</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Execution Model</strong></td>
+<td>execute-order-validate-commit</td>
+<td>execute-order-validate-commit</td>
+</tr>
+<tr>
+<td><strong>Endorsement Architecture</strong></td>
+<td>Chaincode (rigid, no access to local/external states, difficult custom logic per org)</td>
+<td>FSC Views or custom endorsers (local states, custom logic per organization)</td>
+</tr>
+<tr>
+<td><strong>Orderer Architecture</strong></td>
+<td>Monolithic orderer</td>
+<td>4 microservices (Router, Batcher, Consenter, Assembler) - batchers scale horizontally</td>
+</tr>
+<tr>
+<td><strong>Committer Architecture</strong></td>
+<td>Monolithic peer</td>
+<td>5 microservices (Sidecar, Coordinator, Verifier, Validator-Committer, Query Service) - verifier, validator-committer, query-service scale horizontally</td>
+</tr>
+<tr>
+<td><strong>Ordering</strong></td>
+<td>BFT/Raft</td>
+<td>Arma BFT (Byzantine Fault Tolerant)</td>
+</tr>
+<tr>
+<td><strong>Channels</strong></td>
+<td>Multi-channel</td>
+<td>Single channel with namespaces</td>
+</tr>
+<tr>
+<td><strong>Private Data</strong></td>
+<td>Supported</td>
+<td>Not implemented</td>
+</tr>
+<tr>
+<td><strong>Chaincode</strong></td>
+<td>Go/Java/Node.js</td>
+<td>No chaincodes; FSC views</td>
+</tr>
+<tr>
+<td><strong>TPS</strong></td>
+<td>~2,000</td>
+<td>200,000+ (horizontal scaling)</td>
+</tr>
+<tr>
+<td><strong>Query Service</strong></td>
+<td>Query System Chaincode in the peer</td>
+<td>Dedicated query service with view-based consistency</td>
+</tr>
+<tr>
+<td><strong>Membership Service</strong></td>
+<td>MSP-based</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><strong>Identity Management</strong></td>
+<td>X.509, Idemix</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><strong>Policies</strong></td>
+<td>Domain Specific Language (And/Or/NOutOf)</td>
+<td>Same</td>
+</tr>
+<tr>
+<td><strong>Read-Write Sets</strong></td>
+<td>Read set, Write set</td>
+<td>Read only set, Read-Write set, Blind write set</td>
+</tr>
+<tr>
+<td><strong>Data Model</strong></td>
+<td>Key-value-version</td>
+<td>Key-value-version</td>
+</tr>
+<tr>
+<td><strong>Database</strong></td>
+<td>LevelDB, CouchDB</td>
+<td>PostgreSQL, YugabyteDB</td>
+</tr>
+<tr>
+<td><strong>Configuration/Genesis Block</strong></td>
+<td>Standard config</td>
+<td>Almost the same, with extra Fabric-X parameters</td>
+</tr>
+</tbody>
+</table>
+<p>Fabric-X maintains: permissioned membership, MSP-backed identities, policies,
+immutable ledger, read/write sets, and execute-order-validate-commit transaction
+processing.</p>
+<hr />
+<h2 id="hyperledger-fabric">Hyperledger Fabric<a class="headerlink" href="#hyperledger-fabric" title="Permanent link">&para;</a></h2>
+<p>Hyperledger Fabric is an open-source enterprise-grade permissioned distributed
+ledger technology (DLT) platform, designed for use in enterprise contexts.
+It features execute-order-validate-commit architecture, MSP-based identity management,
+pluggable consensus (BFT/Raft), and smart contracts (chaincode) in
+general-purpose languages. For detailed documentation, see
+<a href="https://hyperledger-fabric.readthedocs.io/en/release-2.5">Hyperledger Fabric Documentation</a>.</p>
+<p>However, Fabric has performance limitations (~2,000 TPS) and a rigid chaincode
+programming model, making it unsuitable for high-throughput use cases like
+tokenization. Fabric-X addresses these limitations.</p>
+<h2 id="hyperledger-fabric-x">Hyperledger Fabric-X<a class="headerlink" href="#hyperledger-fabric-x" title="Permanent link">&para;</a></h2>
+<p>Fabric-X is built on Fabric's foundations but evolved for next-generation
+enterprise requirements. It achieves 200,000+ TPS through architectural
+innovation while maintaining Fabric's core principles: permissioned membership,
+MSP-backed identities, policy-based governance, and the execute-order-validate-commit
+model.</p>
+<h3 id="architecture-overview">Architecture Overview<a class="headerlink" href="#architecture-overview" title="Permanent link">&para;</a></h3>
+<p>Fabric-X decomposes the monolithic Fabric peer and orderer into microservices
+that scale independently. This architectural decomposition enables pipelined
+execution, horizontal scalability, and independent resource allocation for each
+component based on workload characteristics. The ordering service handles
+transaction ordering while the committer service handles validation and state
+management.</p>
+<p>The ordering service consists of four microservices that work together to
+achieve Byzantine fault tolerant consensus on transaction order. The committer
+service consists of five microservices that form a validation and commit
+pipeline, processing blocks in parallel while maintaining consistency guarantees.</p>
+<p><strong>Ordering Service (4 microservices)</strong>:</p>
+<ul>
+<li><strong>Routers</strong>: Accept client transactions, perform initial validation, and
+  dispatch to batcher shards using hashing</li>
+<li><strong>Batchers</strong>: Sharded services that bundle transactions into batches,
+  persist to disk for durability, and generate Batch Attestation Fragments
+  (BAFs) sent to consenters. A BAF is an attestation over the digest of a
+  batch, so consensus runs on batch digests rather than full transaction bytes.
+  Batcher shards scale horizontally to handle load</li>
+<li><strong>Consenters</strong>: Run SmartBFT consensus on batch attestations, providing
+  Byzantine fault tolerance against malicious nodes</li>
+<li><strong>Assemblers</strong>: Pull ordered batches, fuse with attestations, and construct
+  final blocks for distribution</li>
+</ul>
+<p><strong>Committer Service (5 microservices)</strong>:</p>
+<ul>
+<li><strong>Sidecar</strong>: Fetches blocks from the ordering service and feeds them into
+  the validation pipeline</li>
+<li><strong>Coordinator</strong>: Orchestrates validation by building dependency graphs,
+  enabling parallel transaction processing</li>
+<li><strong>Verifier</strong>: Validates signatures and enforces namespace policies</li>
+<li><strong>Validator-Committer</strong>: Performs MVCC validation, applies state updates,
+  and commits to the database (PostgreSQL/YugabyteDB)</li>
+<li><strong>Query Service</strong>: Provides read-only state access with view-based consistency
+  guarantees</li>
+</ul>
+<h3 id="key-innovations">Key Innovations<a class="headerlink" href="#key-innovations" title="Permanent link">&para;</a></h3>
+<p><strong>1. Execute-Order-Validate-Commit Model</strong></p>
+<p>Fabric-X uses the same execute-order-validate-commit model as Fabric, maintaining
+compatibility with Fabric's transaction processing semantics. Both platforms
+separate transaction execution from ordering, enabling parallel processing and
+eliminating non-determinism before consensus is reached.</p>
+<p>The model consists of four phases that ensure transaction correctness while
+maximizing throughput. The key difference in Fabric-X is the microservices
+implementation that enables horizontal scaling of each phase.</p>
+<ul>
+<li><strong>Execute/Endorse</strong>: FSC views or custom endorsers execute transaction logic
+  and produce read/write sets with endorsements</li>
+<li><strong>Order</strong>: Arma ordering service achieves BFT consensus on transaction order
+  and assembles blocks</li>
+<li><strong>Validate</strong>: Committer services verify signatures, policies, and MVCC
+  conflicts using dependency graph parallelism</li>
+<li><strong>Commit</strong>: Valid transactions are applied to the database; all transactions
+  (valid and invalid) are recorded in the ledger</li>
+</ul>
+<p>The following diagram shows a four-organization setup where each organization
+hosts an endorser, orderer, and committer. This mirrors a typical Fabric-X
+network where every organization participates in transaction endorsement,
+ordering, validation, commit, and query processing.</p>
+<p>Endorsers submit endorsed transactions to the ordering service. The orderers
+perform consensus to build blocks, and committers pull those blocks to validate
+and commit each transaction in the block.</p>
+<div class="mermaid">flowchart TB
+    subgraph Endorsers[Endorser Services]
+        direction LR
+        E1[Org 1 Endorser&lt;br/&gt;FSC View or Custom]
+        E2[Org 2 Endorser&lt;br/&gt;FSC View or Custom]
+        E3[Org 3 Endorser&lt;br/&gt;FSC View or Custom]
+        E4[Org 4 Endorser&lt;br/&gt;FSC View or Custom]
+    end
+
+    subgraph Ordering[Ordering Service]
+        direction LR
+        subgraph O1[Organization 1 Orderer Nodes]
+            direction TB
+            R1[Router] --&gt; B1[Batcher]
+            B1 -. BFT order .-&gt; CS1[Consenter]
+            CS1 -. blocks .-&gt; A1[Assembler]
+        end
+        subgraph O2[Organization 2 Orderer Nodes]
+            direction TB
+            R2[Router] --&gt; B2[Batcher]
+            B2 -. BFT order .-&gt; CS2[Consenter]
+            CS2 -. blocks .-&gt; A2[Assembler]
+        end
+        subgraph O3[Organization 3 Orderer Nodes]
+            direction TB
+            R3[Router] --&gt; B3[Batcher]
+            B3 -. BFT order .-&gt; CS3[Consenter]
+            CS3 -. blocks .-&gt; A3[Assembler]
+        end
+        subgraph O4[Organization 4 Orderer Nodes]
+            direction TB
+            R4[Router] --&gt; B4[Batcher]
+            B4 -. BFT order .-&gt; CS4[Consenter]
+            CS4 -. blocks .-&gt; A4[Assembler]
+        end
+    end
+
+    subgraph COrg1[Organization 1 Committer]
+        direction TB
+        S1[Sidecar] --&gt; CO1[Coordinator] --&gt; V1[Verifier] --&gt; VC1[Validator-Committer]
+        Q1[Query Service] --&gt; DB1[(Database)]
+        VC1 --&gt; DB1
+    end
+
+    subgraph COrg2[Organization 2 Committer]
+        direction TB
+        S2[Sidecar] --&gt; CO2[Coordinator] --&gt; V2[Verifier] --&gt; VC2[Validator-Committer]
+        Q2[Query Service] --&gt; DB2[(Database)]
+        VC2 --&gt; DB2
+    end
+
+    subgraph COrg3[Organization 3 Committer]
+        direction TB
+        S3[Sidecar] --&gt; CO3[Coordinator] --&gt; V3[Verifier] --&gt; VC3[Validator-Committer]
+        Q3[Query Service] --&gt; DB3[(Database)]
+        VC3 --&gt; DB3
+    end
+
+    subgraph COrg4[Organization 4 Committer]
+        direction TB
+        S4[Sidecar] --&gt; CO4[Coordinator] --&gt; V4[Verifier] --&gt; VC4[Validator-Committer]
+        Q4[Query Service] --&gt; DB4[(Database)]
+        VC4 --&gt; DB4
+    end
+
+    E1 --&gt; R1
+    E2 --&gt; R2
+    E3 --&gt; R3
+    E4 --&gt; R4
+
+    A1 --&gt; S1
+    A2 --&gt; S2
+    A3 --&gt; S3
+    A4 --&gt; S4
+
+    E1 -. reads .-&gt; Q1
+    E2 -. reads .-&gt; Q2
+    E3 -. reads .-&gt; Q3
+    E4 -. reads .-&gt; Q4</div>
+<p><strong>2. FSC-Based Endorsement</strong></p>
+<p>Fabric-X eliminates chaincodes in favor of a more flexible endorsement model
+based on the Fabric Smart Client (FSC) SDK. This approach removes the Docker
+container overhead associated with chaincode execution and enables richer,
+stateful application protocols that can maintain local state between transactions.</p>
+<p>FSC views provide a programming model where endorsement logic runs as part of
+the application process or as standalone services. This enables organization-specific
+custom logic, direct access to local state, and interactive protocols between
+parties before transaction submission. Custom endorsers can also be built for
+non-FSC clients, enabling integration with legacy systems while maintaining
+compatibility with the Fabric-X endorsement model.</p>
+<p>FSC views and custom endorsers can also provide fine-grained data privacy.
+Applications can store sensitive data locally, share it offline only with
+required participants, and commit only an anchor or digest to the blockchain.
+This keeps confidential payloads outside the shared ledger while preserving an
+auditable on-chain reference.</p>
+<ul>
+<li><strong>Fabric Smart Client (FSC) Views</strong>: Interactive protocols that define
+  endorsement logic, running as part of the application or as standalone
+  services. FSC views have access to local state and can implement complex,
+  organization-specific logic</li>
+<li><strong>Custom Endorsers</strong>: Standalone endorsement services for non-FSC clients,
+  enabling integration with legacy systems</li>
+</ul>
+<p><strong>3. Arma BFT Ordering</strong></p>
+<p>The Arma ordering service implements Byzantine fault tolerant consensus using
+the SmartBFT protocol, providing tolerance against malicious nodes while
+achieving high throughput. Unlike traditional monolithic orderers, Arma achieves
+horizontal scalability through a microservices architecture with sharded batchers
+that process transactions in parallel.</p>
+<p>Arma's design separates transaction intake, batching, consensus, and block
+assembly into distinct services. This separation enables pipelined execution,
+consensus on the digest of a batch rather than full transaction bytes, and a
+microservice deployment model. Together, these choices allow the system to
+achieve 200,000+ TPS with multiple orderer organizations participating in
+consensus. The deterministic transaction ordering ensures consistent block
+construction across all nodes in the network.</p>
+<ul>
+<li>Byzantine fault tolerance via SmartBFT consensus</li>
+<li>Horizontal scalability through sharded batchers</li>
+<li>200,000+ TPS with multiple orderer organizations</li>
+<li>Deterministic transaction ordering</li>
+</ul>
+<p><strong>4. Parallel Validation Pipeline</strong></p>
+<p>The committer service achieves high throughput by constructing dependency graphs
+that identify independent transactions, enabling parallel MVCC validation across
+multiple verifier and validator-committer instances. This approach dramatically
+improves validation throughput compared to sequential validation in traditional
+blockchain systems.</p>
+<p>The validation pipeline scales horizontally, with verifier, validator-committer,
+and query service instances that can be added or removed based on load. Direct
+integration with PostgreSQL or YugabyteDB provides efficient state management
+with optimized schema design and stored procedures for common operations.</p>
+<ul>
+<li>Dependency graph construction for identifying independent transactions</li>
+<li>Parallel MVCC validation across multiple verifier/validator instances</li>
+<li>Horizontal scaling of verifier, validator-committer, and query service</li>
+<li>Direct database integration (PostgreSQL/YugabyteDB) for efficient state
+  management</li>
+</ul>
+<p><strong>5. Single Channel with Namespaces</strong></p>
+<p>Unlike Fabric's multi-channel architecture, Fabric-X uses a single shared channel
+with namespaces for logical separation of application state and policies. This
+design simplifies network management by eliminating the operational overhead of
+creating and maintaining multiple channels while still providing isolation
+between applications.</p>
+<p>Namespaces provide logical scope for application state, endorsement policies,
+and validation policies. Each namespace operates independently with its own
+state database and policy configuration. Note that Fabric-X does not support
+private data collections; applications requiring confidentiality should implement
+application-level encryption before transaction data is ordered.</p>
+<ul>
+<li>One shared channel for all participants</li>
+<li>Namespaces for logical separation of application state and policies</li>
+<li>Simplified network management and reduced operational overhead</li>
+</ul>
+<h3 id="performance-characteristics">Performance Characteristics<a class="headerlink" href="#performance-characteristics" title="Permanent link">&para;</a></h3>
+<p>Fabric-X achieves 200,000+ TPS through architectural innovations that enable
+horizontal scaling and parallel processing. The microservices architecture allows
+independent scaling of batchers and committers based on workload characteristics,
+ensuring optimal resource utilization across the system.</p>
+<p>The combination of sharded ordering, parallel validation through dependency
+graphs, elimination of Docker container overhead, and efficient database
+integration enables Fabric-X to achieve order-of-magnitude performance
+improvements over traditional blockchain platforms. PostgreSQL and YugabyteDB
+provide robust, scalable storage with support for advanced features like
+stored procedures and distributed transactions.</p>
+<ul>
+<li><strong>Independent Scaling</strong>: Batchers and committers scale horizontally based
+  on load</li>
+<li><strong>Sharded Ordering</strong>: Multiple batcher shards process transactions in
+  parallel</li>
+<li><strong>Parallel Validation</strong>: Dependency graphs enable concurrent MVCC checks</li>
+<li><strong>No Container Overhead</strong>: FSC views run without Docker containers</li>
+<li><strong>Efficient Database</strong>: PostgreSQL/YugabyteDB with optimized schema and
+  stored procedures</li>
+</ul>
+<h3 id="fabric-x-ecosystem">Fabric-X Ecosystem<a class="headerlink" href="#fabric-x-ecosystem" title="Permanent link">&para;</a></h3>
+<p>Fabric-X is a collection of projects that provide the building blocks for
+enterprise blockchain applications. The Fabric Smart Client (FSC) provides the
+view SDK for implementing endorsement protocols, while fabric-x provides sample
+networks and the Fabric-X CLI tools such as configtxgen and cryptogen.</p>
+<p>The ecosystem includes the actual implementation of all major components:
+fabric-x-orderer for the Arma ordering service, fabric-x-committer for the
+validation and commit pipeline, and fabric-x-endorser for FSC-based endorsement
+frameworks. Additional tools and libraries support application development,
+network operations, and monitoring.</p>
+<ul>
+<li><strong>Fabric Smart Client (FSC)</strong>: View SDK for endorsement protocols (<a href="https://github.com/hyperledger-labs/fabric-smart-client">GitHub</a>)</li>
+<li><strong>fabric-x</strong>: Integration, samples, end-to-end tests, and CLI tools (<a href="https://github.com/hyperledger/fabric-x">GitHub</a>)</li>
+<li><strong>fabric-x-common</strong>: Shared MSP and protoutil libraries (<a href="https://github.com/hyperledger/fabric-x-common">GitHub</a>)</li>
+<li><strong>fabric-x-orderer</strong>: Arma ordering service implementation (<a href="https://github.com/hyperledger/fabric-x-orderer">GitHub</a>)</li>
+<li><strong>fabric-x-committer</strong>: Validation and commit pipeline services (<a href="https://github.com/hyperledger/fabric-x-committer">GitHub</a>)</li>
+<li><strong>fabric-x-endorser</strong>: FSC-based endorsement framework (<a href="https://github.com/hyperledger/fabric-x-endorser">GitHub</a>)</li>
+</ul>
+<h2 id="membership-and-identity">Membership and Identity<a class="headerlink" href="#membership-and-identity" title="Permanent link">&para;</a></h2>
+<p>Both Fabric and Fabric-X use MSP-based membership services with X.509 and Idemix
+identities. The identity management model is identical in both platforms,
+providing a consistent approach to participant authentication and authorization
+across the network. This compatibility ensures that existing Fabric identity
+infrastructure can be reused when migrating to Fabric-X.</p>
+<p>The Membership Service Provider (MSP) abstracts the underlying cryptographic
+mechanisms, allowing organizations to manage their identities using standard
+X.509 certificates or advanced Idemix credentials for enhanced privacy. Each
+organization in the network maintains its own MSP, defining the root certificate
+authorities and organizational units that constitute its membership.</p>
+<p>Fabric-X inherits Fabric's identity model without modification, meaning that
+tools and processes for identity generation, certificate rotation, and MSP
+configuration remain compatible. The cryptogen and configtxgen CLI tools in
+fabric-x can generate cryptographic material and configuration blocks using the
+same identity structures as Fabric.</p>
+<h2 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">&para;</a></h2>
+<p>Both platforms use the same Domain Specific Language (DSL) based on logical
+operators (And, Or, NOutOf) for defining endorsement and validation policies.
+This policy language provides a flexible yet simple mechanism for specifying
+which organizations must endorse transactions and what conditions must be met
+for validation.</p>
+<p>Policies in Fabric-X are defined at the namespace level, allowing different
+applications to have different endorsement requirements within the same channel.
+The policy DSL supports complex combinations, such as requiring endorsements
+from a subset of organizations or specific roles within organizations.</p>
+<p>The policy evaluation engine in Fabric-X is identical to Fabric's, ensuring
+consistent behavior across both platforms. Policies can be updated through
+configuration transactions, and the policy framework integrates seamlessly with
+the MSP-based identity system to enforce access control and transaction
+validation rules.</p>
+<h2 id="data-model-and-database">Data Model and Database<a class="headerlink" href="#data-model-and-database" title="Permanent link">&para;</a></h2>
+<p>Both Fabric and Fabric-X use a key-value-version data model, where each state
+key maintains a version number that is incremented on every write. This
+versioning enables MVCC (Multi-Version Concurrency Control) validation, ensuring
+that transactions only commit if their read sets remain valid at commit time.</p>
+<p>Fabric supports LevelDB for key-value storage and CouchDB for rich queries with
+JSON documents. Fabric-X uses PostgreSQL or YugabyteDB, providing better
+performance, horizontal scalability, and advanced database features. PostgreSQL
+offers robust ACID compliance, while YugabyteDB adds distributed SQL capabilities
+for multi-region deployments.</p>
+<p>The choice of PostgreSQL/YugabyteDB in Fabric-X enables optimized schema design,
+stored procedures for common operations, and efficient indexing strategies. The
+database layer is tightly integrated with the validator-committer service,
+reducing latency and improving throughput compared to Fabric's more abstracted
+storage layer.</p>
+<h2 id="configuration-and-genesis-block">Configuration and Genesis Block<a class="headerlink" href="#configuration-and-genesis-block" title="Permanent link">&para;</a></h2>
+<p>Fabric-X genesis blocks are almost identical to Fabric's, containing the
+configuration for the channel, organizations, MSPs, and policies. The genesis
+block structure follows the same format, ensuring compatibility with Fabric's
+configuration transaction model and tools.</p>
+<p>Fabric-X extends the genesis block with additional parameters required for the
+microservices architecture. These include router configuration (endpoint
+bindings, batcher discovery), batcher configuration (sharding strategy, disk
+paths), consenter configuration (SmartBFT parameters, peer lists), assembler
+configuration (block assembly parameters), and committer service configuration
+(database connection strings, service discovery endpoints).</p>
+<p>The configtxgen binary in fabric-x supports these additional Fabric-X parameters.
+Fabric-X configuration generation is not backward compatible with Fabric network
+configuration generation because Fabric-X introduces microservices-specific
+settings and deployment assumptions.</p>
+<h2 id="ecosystem">Ecosystem<a class="headerlink" href="#ecosystem" title="Permanent link">&para;</a></h2>
+<p>Fabric has a large ecosystem of tools for building, testing, and managing
+networks. See the <a href="https://lf-hyperledger.atlassian.net/wiki/spaces/fabric/pages/22839837/Ecosystem">Fabric Ecosystem</a>.</p>
+<p>Fabric-X is the collection of the following projects:</p>
+<ul>
+<li><strong>Fabric Smart Client (FSC)</strong>: View SDK for endorsement protocols (<a href="https://github.com/hyperledger-labs/fabric-smart-client">GitHub</a>)</li>
+<li><strong>fabric-x</strong>: Integration, samples, end-to-end tests, and CLI tools (<a href="https://github.com/hyperledger/fabric-x">GitHub</a>)</li>
+<li><strong>fabric-x-common</strong>: Shared MSP and protoutil libraries (<a href="https://github.com/hyperledger/fabric-x-common">GitHub</a>)</li>
+<li><strong>fabric-x-orderer</strong>: Arma ordering service implementation (<a href="https://github.com/hyperledger/fabric-x-orderer">GitHub</a>)</li>
+<li><strong>fabric-x-committer</strong>: Validation and commit pipeline services (<a href="https://github.com/hyperledger/fabric-x-committer">GitHub</a>)</li>
+<li><strong>fabric-x-endorser</strong>: FSC-based endorsement framework (<a href="https://github.com/hyperledger/fabric-x-endorser">GitHub</a>)</li>
+</ul>
+<h2 id="conclusion">Conclusion<a class="headerlink" href="#conclusion" title="Permanent link">&para;</a></h2>
+<p>Any serious evaluation of blockchain platforms should include Hyperledger Fabric
+in its short list. For high-performance enterprise use cases requiring
+200,000+ TPS with BFT consensus, Fabric-X extends Fabric with a microservices
+architecture, Arma ordering, and dedicated committer services.</p>
+<p>Combined, the differentiating capabilities of Fabric make it a highly scalable
+system for permissioned blockchains supporting flexible trust assumptions that
+enable the platform to support a wide range of industry use cases ranging from
+government, to finance, to supply-chain logistics, to healthcare and so much
+more. Fabric-X builds on these capabilities to meet the most demanding
+enterprise throughput requirements.</p>
+<h2 id="acknowledgement">Acknowledgement<a class="headerlink" href="#acknowledgement" title="Permanent link">&para;</a></h2>
+<p>The preceding is derived from
+<a href="https://eprint.iacr.org/2023/1717">"Fabric-X: Scaling Hyperledger Fabric for Asset Exchange"</a>:</p>
+<ul>
+<li>Elli Androulaki, IBM Research - Zurich</li>
+<li>Marcus Brandenburger, IBM Research - Zurich</li>
+<li>May Buzaglo, IBM Research - Haifa</li>
+<li>Angelo De Caro, IBM Research - Zurich</li>
+<li>Kaoutar Elkhiyaoui, IBM Research - Zurich</li>
+<li>Alexandros Filios, IBM Research - Zurich</li>
+<li>Liran Funaro, IBM Research - Haifa</li>
+<li>Yacov Manevich, IBM Research - Zurich</li>
+<li>Hagar Meir, IBM Research - Haifa</li>
+<li>Senthilnathan Natarajan, IBM Research - Haifa</li>
+<li>Manish Sethi, IBM Research - Thomas J. Watson Research Center</li>
+<li>Yoav Tock, IBM Research - Haifa</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": [], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,3133 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../coordinator-block-diagram/">
+      
+      
+        <link rel="next" href="../validator-committer-block-diagram/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Verifier - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#verifier-service-block-diagram" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Verifier
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-Level Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detailed-component-diagram-with-data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailed Component Diagram with Data Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-update-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Update Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signature-verification-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signature Verification Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batching-and-cutoff-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batching and Cutoff Logic
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concurrency-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concurrency Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-and-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics and Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Design Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-per-stream-executor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Per-Stream Executor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-atomic-verifiers-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Atomic Verifiers Map
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-config-tx-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Config TX Priority
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-just-in-time-policy-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Just-In-Time Policy Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-namespace-verification-independence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Namespace Verification Independence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-Level Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detailed-component-diagram-with-data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detailed Component Diagram with Data Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-update-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Update Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signature-verification-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signature Verification Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batching-and-cutoff-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batching and Cutoff Logic
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concurrency-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Concurrency Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-and-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Metrics and Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration Parameters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Design Decisions
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Design Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-per-stream-executor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Per-Stream Executor
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-atomic-verifiers-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Atomic Verifiers Map
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-config-tx-priority" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Config TX Priority
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-just-in-time-policy-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Just-In-Time Policy Updates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-namespace-verification-independence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Namespace Verification Independence
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+<h1 id="verifier-service-block-diagram">Verifier Service - Block Diagram<a class="headerlink" href="#verifier-service-block-diagram" title="Permanent link">&para;</a></h1>
+<p>This document provides a detailed block diagram of the verifier service components and how data flows between them.</p>
+<h2 id="high-level-architecture">High-Level Architecture<a class="headerlink" href="#high-level-architecture" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────────────────
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                           VERIFIER SERVICE
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│                        ┌────────────────┐
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│                        │  Coordinator   │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│                        │  (External)    │
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│                        └────────┬───────┘
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│                                 │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│                                 │ Multiple gRPC Streams
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│                                 │ (Load balanced)
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│                    ┌────────────┼────────────┐
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│                    │            │            │
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│                    ▼            ▼            ▼
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│         ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│         │  Verifier    │  │  Verifier    │  │  Verifier    │
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│         │  Server      │  │  Server      │  │  Server      │
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│         │  Instance 1  │  │  Instance 2  │  │  Instance N  │
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│         └──────┬───────┘  └──────┬───────┘  └──────┬───────┘
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│                │                 │                 │
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│                │ New Stream      │ New Stream      │ New Stream
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│                │ Creates         │ Creates         │ Creates
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│                ▼                 ▼                 ▼
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│         ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│         │ Parallel        │ │ Parallel        │ │ Parallel        │
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│         │ Executor        │ │ Executor        │ │ Executor        │
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│         │ (Stream 1)      │ │ (Stream 2)      │ │ (Stream N)      │
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│         │                 │ │                 │ │                 │
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│         │ - Verifier      │ │ - Verifier      │ │ - Verifier      │
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>│         │ - N Workers     │ │ - N Workers     │ │ - N Workers     │
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>│         │ - Batcher       │ │ - Batcher       │ │ - Batcher       │
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>│         └─────────────────┘ └─────────────────┘ └─────────────────┘
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>│
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>│
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>└─────────────────────────────────────────────────────────────────────────────
+</code></pre></div>
+<h2 id="detailed-component-diagram-with-data-flow">Detailed Component Diagram with Data Flow<a class="headerlink" href="#detailed-component-diagram-with-data-flow" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>                    ┌───────────────────┐
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>                    │   Coordinator     │
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>                    │     Service       │
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>                    └─────────┬─────────┘
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>                              │
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>                              │ Bidirectional gRPC Stream
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>                              │
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>┌─────────────────────────────┼─────────────────────────────────────────────────
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│ VERIFIER SERVICE            │
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│                             │
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│  ┌──────────────────────────▼──────────────────────────────────────────────┐
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│  │  VERIFIER SERVER (verifier_server.go)                                   │
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│  │                                                                         │
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│  │  Verifier is STATELESS. Each stream maintains its own policy state.     │
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│  │                                                                         │
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│  │  ┌────────────────────────────────────────────────────────────────────┐ │
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│  │  │  StartStream(stream Verifier_StartStreamServer)                    │ │
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│  │  │  - Creates new parallelExecutor for this stream                    │ │
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│  │  │  - Launches goroutines using errgroup:                             │ │
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│  │  │    • handleInputs()                                                │ │
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│  │  │    • handleOutputs()                                               │ │
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│  │  │    • handleCutoff()                                                │ │
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│  │  │    • handleChannelInput() × Parallelism (default: 4 workers)       │ │
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│  │  └────────────────────────────────────────────────────────────────────┘ │
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│  │                                                                         │
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│  │  ┌────────────────────────────────────────────────────────────────────┐ │
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│  │  │  handleInputs()                                                    │ │
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>│  │  │  ┌──────────────────────────────────────────────────────────────┐  │ │
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│  │  │  │  1. Receive VerifierBatch from coordinator                   │  │ │
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│  │  │  │     - Contains: Update + Requests[]                          │  │ │
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>│  │  │  │     - FIRST batch MUST include policy updates (piggybacked)  │  │ │
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│  │  │  │       to initialize the stream                               │  │ │
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>│  │  │  │                                                              │  │ │
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│  │  │  │  2. Update Policies (if Update present)                      │  │ │
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>│  │  │  │     executor.verifier.updatePolicies(batch.Update)           │  │ │
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│  │  │  │     - Config updates: MSP Manager, LifecycleEndorsement      │  │ │
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>│  │  │  │     - Namespace policies: MSP/Threshold rules                │  │ │
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>│  │  │  │                                                              │  │ │
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>│  │  │  │  3. Forward Requests to Executor                             │  │ │
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>│  │  │  │     for each request in batch.Requests:                      │  │ │
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>│  │  │  │       input.Write(request) → executor.inputCh                │  │ │
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>│  │  │  └──────────────────────────────────────────────────────────────┘  │ │
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>│  │  └────────────────┬───────────────────────────────────────────────────┘ │
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>│  │                   │                                                     │
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>│  │                   │ inputCh (buffered channel)                          │
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>│  │                   │ capacity = ChannelBufferSize × Parallelism          │
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>│  │                   │                                                     │
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>│  │  ┌────────────────▼───────────────────────────────────────────────────┐ │
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>│  │  │  PARALLEL EXECUTOR (parallel_executor.go)                          │ │
+<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>│  │  │                                                                    │ │
+<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>│  │  │  ┌───────────────────────────────────────────────────────────────┐ │ │
+<a id="__codelineno-1-52" name="__codelineno-1-52" href="#__codelineno-1-52"></a>│  │  │  │  handleChannelInput() [Worker 1..N]                           │ │ │
+<a id="__codelineno-1-53" name="__codelineno-1-53" href="#__codelineno-1-53"></a>│  │  │  │  ┌─────────────────────────────────────────────────────────┐  │ │ │
+<a id="__codelineno-1-54" name="__codelineno-1-54" href="#__codelineno-1-54"></a>│  │  │  │  │  Loop:                                                  │  │ │ │
+<a id="__codelineno-1-55" name="__codelineno-1-55" href="#__codelineno-1-55"></a>│  │  │  │  │    1. Read TxWithRef from inputCh                       │  │ │ │
+<a id="__codelineno-1-56" name="__codelineno-1-56" href="#__codelineno-1-56"></a>│  │  │  │  │    2. Call verifier.verifyRequest(tx)                   │  │ │ │
+<a id="__codelineno-1-57" name="__codelineno-1-57" href="#__codelineno-1-57"></a>│  │  │  │  │    3. Determine if config TX (isConfig flag)            │  │ │ │
+<a id="__codelineno-1-58" name="__codelineno-1-58" href="#__codelineno-1-58"></a>│  │  │  │  │    4. Write verificationOutput to outputSingleCh        │  │ │ │
+<a id="__codelineno-1-59" name="__codelineno-1-59" href="#__codelineno-1-59"></a>│  │  │  │  └─────────────────────────────────────────────────────────┘  │ │ │
+<a id="__codelineno-1-60" name="__codelineno-1-60" href="#__codelineno-1-60"></a>│  │  │  └────────────────┬──────────────────────────────────────────────┘ │ │
+<a id="__codelineno-1-61" name="__codelineno-1-61" href="#__codelineno-1-61"></a>│  │  │                   │                                                │ │
+<a id="__codelineno-1-62" name="__codelineno-1-62" href="#__codelineno-1-62"></a>│  │  │                   │ outputSingleCh (buffered channel)              │ │
+<a id="__codelineno-1-63" name="__codelineno-1-63" href="#__codelineno-1-63"></a>│  │  │                   │ capacity = ChannelBufferSize × Parallelism     │ │
+<a id="__codelineno-1-64" name="__codelineno-1-64" href="#__codelineno-1-64"></a>│  │  │                   │                                                │ │
+<a id="__codelineno-1-65" name="__codelineno-1-65" href="#__codelineno-1-65"></a>│  │  │  ┌────────────────▼──────────────────────────────────────────────┐ │ │
+<a id="__codelineno-1-66" name="__codelineno-1-66" href="#__codelineno-1-66"></a>│  │  │  │  handleCutoff()                                               │ │ │
+<a id="__codelineno-1-67" name="__codelineno-1-67" href="#__codelineno-1-67"></a>│  │  │  │  ┌─────────────────────────────────────────────────────────┐  │ │ │
+<a id="__codelineno-1-68" name="__codelineno-1-68" href="#__codelineno-1-68"></a>│  │  │  │  │  Batching Logic:                                        │  │ │ │
+<a id="__codelineno-1-69" name="__codelineno-1-69" href="#__codelineno-1-69"></a>│  │  │  │  │                                                         │  │ │ │
+<a id="__codelineno-1-70" name="__codelineno-1-70" href="#__codelineno-1-70"></a>│  │  │  │  │  outputBuffer []*TxStatus                               │  │ │ │
+<a id="__codelineno-1-71" name="__codelineno-1-71" href="#__codelineno-1-71"></a>│  │  │  │  │                                                         │  │ │ │
+<a id="__codelineno-1-72" name="__codelineno-1-72" href="#__codelineno-1-72"></a>│  │  │  │  │  Loop:                                                  │  │ │ │
+<a id="__codelineno-1-73" name="__codelineno-1-73" href="#__codelineno-1-73"></a>│  │  │  │  │    select:                                              │  │ │ │
+<a id="__codelineno-1-74" name="__codelineno-1-74" href="#__codelineno-1-74"></a>│  │  │  │  │      case &lt;-time.After(BatchTimeCutoff):                │  │ │ │
+<a id="__codelineno-1-75" name="__codelineno-1-75" href="#__codelineno-1-75"></a>│  │  │  │  │        if len(outputBuffer) &gt; 0:                        │  │ │ │
+<a id="__codelineno-1-76" name="__codelineno-1-76" href="#__codelineno-1-76"></a>│  │  │  │  │          emit batch                                     │  │ │ │
+<a id="__codelineno-1-77" name="__codelineno-1-77" href="#__codelineno-1-77"></a>│  │  │  │  │                                                         │  │ │ │
+<a id="__codelineno-1-78" name="__codelineno-1-78" href="#__codelineno-1-78"></a>│  │  │  │  │      case output := &lt;-outputSingleCh:                   │  │ │ │
+<a id="__codelineno-1-79" name="__codelineno-1-79" href="#__codelineno-1-79"></a>│  │  │  │  │        append to outputBuffer                           │  │ │ │
+<a id="__codelineno-1-80" name="__codelineno-1-80" href="#__codelineno-1-80"></a>│  │  │  │  │        if output.isConfig:                              │  │ │ │
+<a id="__codelineno-1-81" name="__codelineno-1-81" href="#__codelineno-1-81"></a>│  │  │  │  │          emit immediately (no batching)                 │  │ │ │
+<a id="__codelineno-1-82" name="__codelineno-1-82" href="#__codelineno-1-82"></a>│  │  │  │  │        else if len(buffer) &gt;= BatchSizeCutoff:          │  │ │ │
+<a id="__codelineno-1-83" name="__codelineno-1-83" href="#__codelineno-1-83"></a>│  │  │  │  │          emit batch                                     │  │ │ │
+<a id="__codelineno-1-84" name="__codelineno-1-84" href="#__codelineno-1-84"></a>│  │  │  │  └─────────────────────────────────────────────────────────┘  │ │ │
+<a id="__codelineno-1-85" name="__codelineno-1-85" href="#__codelineno-1-85"></a>│  │  │  └────────────────┬──────────────────────────────────────────────┘ │ │
+<a id="__codelineno-1-86" name="__codelineno-1-86" href="#__codelineno-1-86"></a>│  │  │                   │                                                │ │
+<a id="__codelineno-1-87" name="__codelineno-1-87" href="#__codelineno-1-87"></a>│  │  │                   │ outputCh (unbuffered channel)                  │ │
+<a id="__codelineno-1-88" name="__codelineno-1-88" href="#__codelineno-1-88"></a>│  │  │                   │                                                │ │
+<a id="__codelineno-1-89" name="__codelineno-1-89" href="#__codelineno-1-89"></a>│  │  └───────────────────┼────────────────────────────────────────────────┘ │
+<a id="__codelineno-1-90" name="__codelineno-1-90" href="#__codelineno-1-90"></a>│  │                      │                                                  │
+<a id="__codelineno-1-91" name="__codelineno-1-91" href="#__codelineno-1-91"></a>│  │  ┌───────────────────▼────────────────────────────────────────────────┐ │
+<a id="__codelineno-1-92" name="__codelineno-1-92" href="#__codelineno-1-92"></a>│  │  │  handleOutputs()                                                   │ │
+<a id="__codelineno-1-93" name="__codelineno-1-93" href="#__codelineno-1-93"></a>│  │  │  ┌──────────────────────────────────────────────────────────────┐  │ │
+<a id="__codelineno-1-94" name="__codelineno-1-94" href="#__codelineno-1-94"></a>│  │  │  │  Loop:                                                       │  │ │
+<a id="__codelineno-1-95" name="__codelineno-1-95" href="#__codelineno-1-95"></a>│  │  │  │    1. Read batch from outputCh                               │  │ │
+<a id="__codelineno-1-96" name="__codelineno-1-96" href="#__codelineno-1-96"></a>│  │  │  │    2. Update metrics (VerifierServerOutTxs)                  │  │ │
+<a id="__codelineno-1-97" name="__codelineno-1-97" href="#__codelineno-1-97"></a>│  │  │  │    3. Send TxStatusBatch to coordinator via stream.Send()    │  │ │
+<a id="__codelineno-1-98" name="__codelineno-1-98" href="#__codelineno-1-98"></a>│  │  │  └──────────────────────────────────────────────────────────────┘  │ │
+<a id="__codelineno-1-99" name="__codelineno-1-99" href="#__codelineno-1-99"></a>│  │  └────────────────────────────────────────────────────────────────────┘ │
+<a id="__codelineno-1-100" name="__codelineno-1-100" href="#__codelineno-1-100"></a>│  └─────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-1-101" name="__codelineno-1-101" href="#__codelineno-1-101"></a>│
+<a id="__codelineno-1-102" name="__codelineno-1-102" href="#__codelineno-1-102"></a>│  ┌─────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-1-103" name="__codelineno-1-103" href="#__codelineno-1-103"></a>│  │  VERIFIER CORE (verify.go)                                              │
+<a id="__codelineno-1-104" name="__codelineno-1-104" href="#__codelineno-1-104"></a>│  │                                                                         │
+<a id="__codelineno-1-105" name="__codelineno-1-105" href="#__codelineno-1-105"></a>│  │  ┌────────────────────────────────────────────────────────────────────┐ │
+<a id="__codelineno-1-106" name="__codelineno-1-106" href="#__codelineno-1-106"></a>│  │  │  verifier struct                                                   │ │
+<a id="__codelineno-1-107" name="__codelineno-1-107" href="#__codelineno-1-107"></a>│  │  │  - verifiers: atomic.Pointer[map[string]*NsVerifier]               │ │
+<a id="__codelineno-1-108" name="__codelineno-1-108" href="#__codelineno-1-108"></a>│  │  │  - bundle: *channelconfig.Bundle (MSP Manager)                     │ │
+<a id="__codelineno-1-109" name="__codelineno-1-109" href="#__codelineno-1-109"></a>│  │  └────────────────────────────────────────────────────────────────────┘ │
+<a id="__codelineno-1-110" name="__codelineno-1-110" href="#__codelineno-1-110"></a>│  │                                                                         │
+<a id="__codelineno-1-111" name="__codelineno-1-111" href="#__codelineno-1-111"></a>│  │  ┌────────────────────────────────────────────────────────────────────┐ │
+<a id="__codelineno-1-112" name="__codelineno-1-112" href="#__codelineno-1-112"></a>│  │  │  updatePolicies(update *VerifierUpdates)                           │ │
+<a id="__codelineno-1-113" name="__codelineno-1-113" href="#__codelineno-1-113"></a>│  │  │  ┌──────────────────────────────────────────────────────────────┐  │ │
+<a id="__codelineno-1-114" name="__codelineno-1-114" href="#__codelineno-1-114"></a>│  │  │  │  1. Update Bundle (if Config present)                        │  │ │
+<a id="__codelineno-1-115" name="__codelineno-1-115" href="#__codelineno-1-115"></a>│  │  │  │     - Parse config envelope                                  │  │ │
+<a id="__codelineno-1-116" name="__codelineno-1-116" href="#__codelineno-1-116"></a>│  │  │  │     - Create new channelconfig.Bundle                        │  │ │
+<a id="__codelineno-1-117" name="__codelineno-1-117" href="#__codelineno-1-117"></a>│  │  │  │     - Extract MSP Manager                                    │  │ │
+<a id="__codelineno-1-118" name="__codelineno-1-118" href="#__codelineno-1-118"></a>│  │  │  │                                                              │  │ │
+<a id="__codelineno-1-119" name="__codelineno-1-119" href="#__codelineno-1-119"></a>│  │  │  │  2. Create New Verifiers                                     │  │ │
+<a id="__codelineno-1-120" name="__codelineno-1-120" href="#__codelineno-1-120"></a>│  │  │  │     if Config:                                               │  │ │
+<a id="__codelineno-1-121" name="__codelineno-1-121" href="#__codelineno-1-121"></a>│  │  │  │       - Parse LifecycleEndorsement policy                    │  │ │
+<a id="__codelineno-1-122" name="__codelineno-1-122" href="#__codelineno-1-122"></a>│  │  │  │       - Create verifier for MetaNamespaceID                  │  │ │
+<a id="__codelineno-1-123" name="__codelineno-1-123" href="#__codelineno-1-123"></a>│  │  │  │     if NamespacePolicies:                                    │  │ │
+<a id="__codelineno-1-124" name="__codelineno-1-124" href="#__codelineno-1-124"></a>│  │  │  │       - For each policy item:                                │  │ │
+<a id="__codelineno-1-125" name="__codelineno-1-125" href="#__codelineno-1-125"></a>│  │  │  │         • Parse namespace policy                             │  │ │
+<a id="__codelineno-1-126" name="__codelineno-1-126" href="#__codelineno-1-126"></a>│  │  │  │         • Create NsVerifier                                  │  │ │
+<a id="__codelineno-1-127" name="__codelineno-1-127" href="#__codelineno-1-127"></a>│  │  │  │                                                              │  │ │
+<a id="__codelineno-1-128" name="__codelineno-1-128" href="#__codelineno-1-128"></a>│  │  │  │  3. Merge with Existing Verifiers                            │  │ │
+<a id="__codelineno-1-129" name="__codelineno-1-129" href="#__codelineno-1-129"></a>│  │  │  │     - Keep existing verifiers not in update                  │  │ │
+<a id="__codelineno-1-130" name="__codelineno-1-130" href="#__codelineno-1-130"></a>│  │  │  │     - Update MSP Manager for signature policies              │  │ │
+<a id="__codelineno-1-131" name="__codelineno-1-131" href="#__codelineno-1-131"></a>│  │  │  │     - Store new verifiers map atomically                     │  │ │
+<a id="__codelineno-1-132" name="__codelineno-1-132" href="#__codelineno-1-132"></a>│  │  │  └──────────────────────────────────────────────────────────────┘  │ │
+<a id="__codelineno-1-133" name="__codelineno-1-133" href="#__codelineno-1-133"></a>│  │  └────────────────────────────────────────────────────────────────────┘ │
+<a id="__codelineno-1-134" name="__codelineno-1-134" href="#__codelineno-1-134"></a>│  │                                                                         │
+<a id="__codelineno-1-135" name="__codelineno-1-135" href="#__codelineno-1-135"></a>│  │  ┌────────────────────────────────────────────────────────────────────┐ │
+<a id="__codelineno-1-136" name="__codelineno-1-136" href="#__codelineno-1-136"></a>│  │  │  verifyRequest(tx *TxWithRef) → *TxStatus                          │ │
+<a id="__codelineno-1-137" name="__codelineno-1-137" href="#__codelineno-1-137"></a>│  │  │  ┌──────────────────────────────────────────────────────────────┐  │ │
+<a id="__codelineno-1-138" name="__codelineno-1-138" href="#__codelineno-1-138"></a>│  │  │  │  Load current verifiers map (atomic read)                    │  │ │
+<a id="__codelineno-1-139" name="__codelineno-1-139" href="#__codelineno-1-139"></a>│  │  │  │                                                              │  │ │
+<a id="__codelineno-1-140" name="__codelineno-1-140" href="#__codelineno-1-140"></a>│  │  │  │  For each namespace in tx.Content.Namespaces:                │  │ │
+<a id="__codelineno-1-141" name="__codelineno-1-141" href="#__codelineno-1-141"></a>│  │  │  │    1. Skip ConfigNamespaceID (verified by orderer)           │  │ │
+<a id="__codelineno-1-142" name="__codelineno-1-142" href="#__codelineno-1-142"></a>│  │  │  │                                                              │  │ │
+<a id="__codelineno-1-143" name="__codelineno-1-143" href="#__codelineno-1-143"></a>│  │  │  │    2. Lookup namespace verifier                              │  │ │
+<a id="__codelineno-1-144" name="__codelineno-1-144" href="#__codelineno-1-144"></a>│  │  │  │       if not found:                                          │  │ │
+<a id="__codelineno-1-145" name="__codelineno-1-145" href="#__codelineno-1-145"></a>│  │  │  │         return ABORTED_SIGNATURE_INVALID                     │  │ │
+<a id="__codelineno-1-146" name="__codelineno-1-146" href="#__codelineno-1-146"></a>│  │  │  │                                                              │  │ │
+<a id="__codelineno-1-147" name="__codelineno-1-147" href="#__codelineno-1-147"></a>│  │  │  │    3. Verify namespace signatures                            │  │ │
+<a id="__codelineno-1-148" name="__codelineno-1-148" href="#__codelineno-1-148"></a>│  │  │  │       nsVerifier.VerifyNs(txID, tx, nsIndex)                 │  │ │
+<a id="__codelineno-1-149" name="__codelineno-1-149" href="#__codelineno-1-149"></a>│  │  │  │       if error:                                              │  │ │
+<a id="__codelineno-1-150" name="__codelineno-1-150" href="#__codelineno-1-150"></a>│  │  │  │         return ABORTED_SIGNATURE_INVALID                     │  │ │
+<a id="__codelineno-1-151" name="__codelineno-1-151" href="#__codelineno-1-151"></a>│  │  │  │                                                              │  │ │
+<a id="__codelineno-1-152" name="__codelineno-1-152" href="#__codelineno-1-152"></a>│  │  │  │  Return COMMITTED if all verifications pass                  │  │ │
+<a id="__codelineno-1-153" name="__codelineno-1-153" href="#__codelineno-1-153"></a>│  │  │  └──────────────────────────────────────────────────────────────┘  │ │
+<a id="__codelineno-1-154" name="__codelineno-1-154" href="#__codelineno-1-154"></a>│  │  └────────────────────────────────────────────────────────────────────┘ │
+<a id="__codelineno-1-155" name="__codelineno-1-155" href="#__codelineno-1-155"></a>│  └─────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-1-156" name="__codelineno-1-156" href="#__codelineno-1-156"></a>│
+<a id="__codelineno-1-157" name="__codelineno-1-157" href="#__codelineno-1-157"></a>│  ┌─────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-1-158" name="__codelineno-1-158" href="#__codelineno-1-158"></a>│  │  POLICY MANAGEMENT (policy/policy.go)                                   │
+<a id="__codelineno-1-159" name="__codelineno-1-159" href="#__codelineno-1-159"></a>│  │                                                                         │
+<a id="__codelineno-1-160" name="__codelineno-1-160" href="#__codelineno-1-160"></a>│  │  ┌────────────────────────────────────────────────────────────────────┐ │
+<a id="__codelineno-1-161" name="__codelineno-1-161" href="#__codelineno-1-161"></a>│  │  │  CreateNamespaceVerifier(pd, idDeserializer)                       │ │
+<a id="__codelineno-1-162" name="__codelineno-1-162" href="#__codelineno-1-162"></a>│  │  │  - Validates namespace ID (length, characters)                     │ │
+<a id="__codelineno-1-163" name="__codelineno-1-163" href="#__codelineno-1-163"></a>│  │  │  - Unmarshals NamespacePolicy proto                                │ │
+<a id="__codelineno-1-164" name="__codelineno-1-164" href="#__codelineno-1-164"></a>│  │  │  - Creates NsVerifier with policy and MSP Manager                  │ │
+<a id="__codelineno-1-165" name="__codelineno-1-165" href="#__codelineno-1-165"></a>│  │  └────────────────────────────────────────────────────────────────────┘ │
+<a id="__codelineno-1-166" name="__codelineno-1-166" href="#__codelineno-1-166"></a>│  │                                                                         │
+<a id="__codelineno-1-167" name="__codelineno-1-167" href="#__codelineno-1-167"></a>│  │  ┌────────────────────────────────────────────────────────────────────┐ │
+<a id="__codelineno-1-168" name="__codelineno-1-168" href="#__codelineno-1-168"></a>│  │  │  ParseLifecycleEndorsementPolicy(bundle)                           │ │
+<a id="__codelineno-1-169" name="__codelineno-1-169" href="#__codelineno-1-169"></a>│  │  │  - Extracts LifecycleEndorsement policy from channel config        │ │
+<a id="__codelineno-1-170" name="__codelineno-1-170" href="#__codelineno-1-170"></a>│  │  │  - Creates NsVerifier for MetaNamespaceID                          │ │
+<a id="__codelineno-1-171" name="__codelineno-1-171" href="#__codelineno-1-171"></a>│  │  └────────────────────────────────────────────────────────────────────┘ │
+<a id="__codelineno-1-172" name="__codelineno-1-172" href="#__codelineno-1-172"></a>│  └─────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-1-173" name="__codelineno-1-173" href="#__codelineno-1-173"></a>│
+<a id="__codelineno-1-174" name="__codelineno-1-174" href="#__codelineno-1-174"></a>└─────────────────────────────────────────────────────────────────────────────
+</code></pre></div>
+<h2 id="policy-update-flow">Policy Update Flow<a class="headerlink" href="#policy-update-flow" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>┌─────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>│                        POLICY UPDATE MECHANISM                              │
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>└─────────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>Coordinator sends VerifierBatch with Update:
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>  │
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>  ├─► Config Update (update.Config != nil)
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>  │   │
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>  │   ├─► Parse config envelope
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>  │   ├─► Create new channelconfig.Bundle
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>  │   ├─► Extract MSP Manager (identity deserializer)
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>  │   ├─► Parse LifecycleEndorsement policy
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>  │   └─► Create verifier for MetaNamespaceID
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>  │
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>  └─► Namespace Policy Update (update.NamespacePolicies != nil)
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>      │
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>      └─► For each PolicyItem:
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>          ├─► Validate namespace ID
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>          ├─► Unmarshal NamespacePolicy proto
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>          ├─► Determine policy type:
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>          │   ├─► MspRule: MSP-based signature policy
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>          │   └─► ThresholdRule: Threshold signature policy
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>          └─► Create NsVerifier for namespace
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>Merge with Existing Verifiers:
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>  │
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>  ├─► Keep existing verifiers not in update
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>  ├─► Update MSP Manager for signature policies (if Config update)
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>  └─► Store new verifiers map atomically
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>NOTE: Policy updates are applied just-in-time:
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>  - Sidecar waits for all preceding TXs to complete before submitting config TX
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>  - Verifier applies update immediately before processing next data TX
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>  - Ensures all subsequent TXs use the new configuration
+</code></pre></div>
+<h2 id="signature-verification-flow">Signature Verification Flow<a class="headerlink" href="#signature-verification-flow" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>┌─────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>│                    SIGNATURE VERIFICATION PROCESS                           │
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>└─────────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>Transaction arrives with multiple namespaces:
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  │
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  └─► For each namespace in TX:
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>      │
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>      ├─► Skip ConfigNamespaceID
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>      │   └─► Config TXs verified by ordering service
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>      │
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>      ├─► Lookup namespace verifier
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>      │   ├─► If not found: ABORTED_SIGNATURE_INVALID
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>      │   └─► If found: proceed to verification
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>      │
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>      └─► Verify namespace signatures
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>          │
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>          ├─► Extract namespace data (ASN1 encoding)
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>          │   └─► Includes: TxID, NsID, NsVersion, Read/ReadWrites/BlindWrites
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>          │
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>          ├─► Get endorsements for this namespace
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>          │   └─► tx.Endorsements[nsIndex]
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>          │
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>          └─► Apply policy verification:
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>              │
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>              ├─► MSP-Based Policy (MspRule)
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>              │   ├─► Deserialize creator identities
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>              │   ├─► Verify signatures using MSP
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>              │   └─► Evaluate policy (AND/OR/NOutOf)
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>              │
+<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a>              └─► Threshold Policy (ThresholdRule)
+<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a>                  └─► Verify threshold signature (ECDSA/EdDSA/BLS)
+<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a>
+<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a>Result:
+<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a>  ├─► All namespaces valid: COMMITTED
+<a id="__codelineno-3-36" name="__codelineno-3-36" href="#__codelineno-3-36"></a>  └─► Any namespace invalid: ABORTED_SIGNATURE_INVALID
+</code></pre></div>
+<h2 id="batching-and-cutoff-logic">Batching and Cutoff Logic<a class="headerlink" href="#batching-and-cutoff-logic" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>┌─────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>│                         BATCHING MECHANISM                                  │
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>└─────────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>Configuration (ExecutorConfig):
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  - BatchSizeCutoff: Minimum batch size (default: 50)
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>  - BatchTimeCutoff: Maximum wait time (default: 500ms)
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>  - Parallelism: Number of worker goroutines (default: 4)
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>  - ChannelBufferSize: Input/output buffer size (default: 50)
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>Batching Strategy:
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>  outputBuffer []*TxStatus
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>  │
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>  ├─► Regular Transaction Received
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a>  │   ├─► Append to outputBuffer
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>  │   ├─► If len(outputBuffer) &gt;= BatchSizeCutoff:
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>  │   │   └─► Emit batch immediately
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>  │   └─► Else: wait for more transactions or timeout
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>  │
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>  ├─► Config Transaction Received
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>  │   ├─► Append to outputBuffer
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>  │   └─► Emit batch immediately (no batching for config TXs)
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>  │
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>  └─► Timeout (BatchTimeCutoff elapsed)
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>      └─► If len(outputBuffer) &gt; 0:
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>          └─► Emit batch (even if below BatchSizeCutoff)
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>Rationale:
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>  - Regular TXs: Batching reduces gRPC overhead and improves throughput
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>  - Timeout: Prevents indefinite waiting when load is low
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>  - Config TXs: Config TXs are processed without other TXs. Nothing to batch it with.
+</code></pre></div>
+<h2 id="concurrency-model">Concurrency Model<a class="headerlink" href="#concurrency-model" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>┌─────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>│                        CONCURRENCY ARCHITECTURE                             │
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>└─────────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>Per-Stream Goroutines (using errgroup):
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  │
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  ├─► handleInputs() [1 goroutine]
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>  │   └─► Receives from gRPC stream, writes to inputCh
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>  │
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>  ├─► handleChannelInput() [N goroutines, N = Parallelism]
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>  │   └─► Reads from inputCh, verifies, writes to outputSingleCh
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>  │
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>  ├─► handleCutoff() [1 goroutine]
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>  │   └─► Reads from outputSingleCh, batches, writes to outputCh
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>  │
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>  └─► handleOutputs() [1 goroutine]
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>      └─► Reads from outputCh, sends to gRPC stream
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>Channel Flow:
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>  inputCh → [Workers] → outputSingleCh → [Batcher] → outputCh → gRPC
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>Synchronization:
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>  - Channels provide synchronization between goroutines
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>  - Atomic pointer for verifiers map (lock-free reads)
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>  - errgroup ensures all goroutines complete before stream closes
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>  - Context cancellation propagates to all goroutines
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a>Error Handling:
+<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>  - Any goroutine error cancels the entire stream
+<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>  - ErrUpdatePolicies: Invalid policy update (INVALID_ARGUMENT)
+<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>  - Other errors: Wrapped as CANCELLED
+</code></pre></div>
+<h2 id="metrics-and-monitoring">Metrics and Monitoring<a class="headerlink" href="#metrics-and-monitoring" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>┌─────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>│                              METRICS                                        │
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>└─────────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>Throughput Metrics:
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  - verifier_server_tx_in_total
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    └─► Counter: Total transactions received from coordinator
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>  - verifier_server_tx_out_total
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    └─► Counter: Total transaction statuses sent to coordinator
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>Active State Metrics:
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>  - verifier_server_grpc_active_streams
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>    └─► Gauge: Number of active gRPC streams
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>  - verifier_server_parallel_executor_active_requests
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>    └─► Gauge: Number of transactions currently being verified
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>Health Check:
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>  - gRPC health service (grpc_health_v1.Health)
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>    └─► Reports service health status
+</code></pre></div>
+<h2 id="configuration-parameters">Configuration Parameters<a class="headerlink" href="#configuration-parameters" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>┌─────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>│                         CONFIGURATION                                       │
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>└─────────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>Server Configuration:
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  - Server.Port: gRPC server port (default: 5001)
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>  - Server.TLS: TLS configuration for secure connections
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>Parallel Executor Configuration:
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>  - Parallelism: Number of verification workers (default: 4)
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    └─► Higher values: More concurrent verification
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    └─► Lower values: Less memory usage
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>  - BatchSizeCutoff: Minimum batch size (default: 50)
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>    └─► Higher values: Better throughput, higher latency
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>    └─► Lower values: Lower latency, more gRPC overhead
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>  - BatchTimeCutoff: Maximum wait time (default: 500ms)
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>    └─► Higher values: Better batching, higher latency
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>    └─► Lower values: Lower latency, less efficient batching
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>  - ChannelBufferSize: Buffer size per worker (default: 50)
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>    └─► Total capacity = ChannelBufferSize × Parallelism
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>    └─► Higher values: Better handling of load spikes
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>    └─► Lower values: Less memory usage, more backpressure
+</code></pre></div>
+<h2 id="key-design-decisions">Key Design Decisions<a class="headerlink" href="#key-design-decisions" title="Permanent link">&para;</a></h2>
+<h3 id="1-per-stream-executor">1. Per-Stream Executor<a class="headerlink" href="#1-per-stream-executor" title="Permanent link">&para;</a></h3>
+<p>Each gRPC stream gets its own <code>parallelExecutor</code> instance to ensure:
+- Responses are sent to the correct stream
+- No cross-stream interference
+- Clean resource cleanup on stream closure</p>
+<h3 id="2-atomic-verifiers-map">2. Atomic Verifiers Map<a class="headerlink" href="#2-atomic-verifiers-map" title="Permanent link">&para;</a></h3>
+<p>The verifiers map uses <code>atomic.Pointer</code> for lock-free reads:
+- Workers can read the current verifiers without blocking
+- Policy updates are atomic (all-or-nothing)
+- Temporary inconsistency is acceptable (coordinator ensures ordering)</p>
+<h3 id="3-config-tx-priority">3. Config TX Priority<a class="headerlink" href="#3-config-tx-priority" title="Permanent link">&para;</a></h3>
+<p>Config transactions bypass batching for immediate processing:
+- Ensures policy updates are applied as soon as possible
+- Prevents dependent data TXs from being delayed
+- Coordinator waits for config TX completion before sending dependent TXs</p>
+<h3 id="4-just-in-time-policy-updates">4. Just-In-Time Policy Updates<a class="headerlink" href="#4-just-in-time-policy-updates" title="Permanent link">&para;</a></h3>
+<p>Policy updates are applied immediately before processing the next data TX:
+- Sidecar ensures all preceding TXs are complete before submitting config TX
+- Verifier applies update in <code>handleInputs()</code> before forwarding requests
+- Guarantees all subsequent TXs use the new configuration</p>
+<h3 id="5-namespace-verification-independence">5. Namespace Verification Independence<a class="headerlink" href="#5-namespace-verification-independence" title="Permanent link">&para;</a></h3>
+<p>Each namespace in a transaction is verified independently:
+- Allows different namespaces to have different policies
+- Single invalid namespace invalidates the entire transaction
+- Supports multi-namespace transactions with heterogeneous policies</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

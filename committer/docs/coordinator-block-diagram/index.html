@@ -1,0 +1,3983 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../sidecar-block-diagram/">
+      
+      
+        <link rel="next" href="../verifier-block-diagram/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Coordinator - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#coordinator-architecture-and-block-diagram-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Coordinator
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-how-to-read-this-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. How to Read This Document
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-high-level-block-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. High-Level Block Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-coordinator-internal-block-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Coordinator Internal Block Diagram
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Coordinator Internal Block Diagram">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#channel-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Channel walkthrough
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-dependency-graph-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Dependency Graph Construction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Dependency Graph Construction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-why-the-graph-is-split-into-local-and-global-stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Why the Graph Is Split into Local and Global Stages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-transaction-node-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Transaction Node Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-dependency-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Dependency Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-worked-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Worked Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.4 Worked Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-independent-transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Independent transactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-later-read-depends-on-earlier-write" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Later read depends on earlier write
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-two-writes-to-same-key-across-different-batches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Two writes to same key across different batches
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-namespace-lifecycle-transaction-must-serialize-with-normal-traffic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 4: Namespace lifecycle transaction must serialize with normal traffic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-5-two-blocks-two-transactions-each-mixed-rw-wr-ww-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 5: Two blocks, two transactions each, mixed rw / wr / ww dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-how-transactions-become-free-again" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 How Transactions Become Free Again
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-failure-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Failure and Recovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Failure and Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-signature-verifier-service-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Signature Verifier Service Failure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.1 Signature Verifier Service Failure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#611-internal-architecture-of-signature-verifier-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1.1 Internal Architecture of Signature Verifier Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#612-failure-handling-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1.2 Failure Handling Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#613-key-design-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1.3 Key Design Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-validator-committer-service-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Validator-Committer Service Failure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.2 Validator-Committer Service Failure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#621-internal-architecture-of-validator-committer-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2.1 Internal Architecture of Validator-Committer Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#622-failure-handling-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2.2 Failure Handling Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#623-key-design-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2.3 Key Design Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-sidecar-stream-ends-mid-flight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Sidecar Stream Ends Mid-Flight
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-duplicate-or-late-status-after-reconnect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Duplicate or Late Status After Reconnect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-coordinator-restart-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 Coordinator Restart and Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#66-policy-reconstruction-on-startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.6 Policy Reconstruction on Startup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-code-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Code Map
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-how-to-read-this-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. How to Read This Document
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-high-level-block-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. High-Level Block Diagram
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-coordinator-internal-block-diagram" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Coordinator Internal Block Diagram
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Coordinator Internal Block Diagram">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#channel-walkthrough" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Channel walkthrough
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-dependency-graph-construction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Dependency Graph Construction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Dependency Graph Construction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-why-the-graph-is-split-into-local-and-global-stages" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Why the Graph Is Split into Local and Global Stages
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-transaction-node-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Transaction Node Model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-dependency-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Dependency Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-worked-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Worked Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.4 Worked Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-independent-transactions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Independent transactions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-later-read-depends-on-earlier-write" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Later read depends on earlier write
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-3-two-writes-to-same-key-across-different-batches" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 3: Two writes to same key across different batches
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-4-namespace-lifecycle-transaction-must-serialize-with-normal-traffic" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 4: Namespace lifecycle transaction must serialize with normal traffic
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-5-two-blocks-two-transactions-each-mixed-rw-wr-ww-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 5: Two blocks, two transactions each, mixed rw / wr / ww dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-how-transactions-become-free-again" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 How Transactions Become Free Again
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-failure-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Failure and Recovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Failure and Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-signature-verifier-service-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Signature Verifier Service Failure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.1 Signature Verifier Service Failure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#611-internal-architecture-of-signature-verifier-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1.1 Internal Architecture of Signature Verifier Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#612-failure-handling-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1.2 Failure Handling Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#613-key-design-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1.3 Key Design Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-validator-committer-service-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 Validator-Committer Service Failure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6.2 Validator-Committer Service Failure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#621-internal-architecture-of-validator-committer-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2.1 Internal Architecture of Validator-Committer Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#622-failure-handling-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2.2 Failure Handling Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#623-key-design-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2.3 Key Design Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-sidecar-stream-ends-mid-flight" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Sidecar Stream Ends Mid-Flight
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-duplicate-or-late-status-after-reconnect" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Duplicate or Late Status After Reconnect
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#65-coordinator-restart-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.5 Coordinator Restart and Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#66-policy-reconstruction-on-startup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.6 Policy Reconstruction on Startup
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-code-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Code Map
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+<h1 id="coordinator-architecture-and-block-diagram-guide">Coordinator Architecture and Block Diagram Guide<a class="headerlink" href="#coordinator-architecture-and-block-diagram-guide" title="Permanent link">&para;</a></h1>
+<ol>
+<li><a href="#1-overview">Overview</a></li>
+<li><a href="#2-how-to-read-this-document">How to Read This Document</a></li>
+<li><a href="#3-high-level-block-diagram">High-Level Block Diagram</a></li>
+<li><a href="#4-coordinator-internal-block-diagram">Coordinator Internal Block Diagram</a></li>
+<li><a href="#5-dependency-graph-construction">Dependency Graph Construction</a></li>
+<li><a href="#51-why-the-graph-is-split-into-local-and-global-stages">5.1 Why the Graph Is Split into Local and Global Stages</a></li>
+<li><a href="#52-transaction-node-model">5.2 Transaction Node Model</a></li>
+<li><a href="#53-dependency-types">5.3 Dependency Types</a></li>
+<li><a href="#54-worked-examples">5.4 Worked Examples</a></li>
+<li><a href="#55-how-transactions-become-free-again">5.5 How Transactions Become Free Again</a></li>
+<li><a href="#6-failure-and-recovery">Failure and Recovery</a></li>
+<li><a href="#7-code-map">Code Map</a></li>
+</ol>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>Coordinator service is runtime orchestrator for block processing inside committer pipeline. It accepts blocks from Sidecar, builds and maintains dependency graph for in-flight transactions, dispatches dependency-free work to Verifier services, forwards all transactions to Validator-Committer services, and returns final transaction status to Sidecar.</p>
+<p>Coordinator does <strong>not</strong> perform signature verification or database commit itself. Instead, it decides <strong>when</strong> transaction can move forward and <strong>where</strong> transaction should go next.</p>
+<p>Main responsibilities:</p>
+<ul>
+<li>receive streamed blocks from Sidecar</li>
+<li>split valid transactions into dependency-graph batches</li>
+<li>send dependency-free work to Verifier pool</li>
+<li>forward verified and prelim-invalid transactions to Validator-Committer pool</li>
+<li>feed final status back into dependency graph and back to Sidecar</li>
+<li>track namespace/config updates so future verification requests use fresh policy state</li>
+</ul>
+<h2 id="2-how-to-read-this-document">2. How to Read This Document<a class="headerlink" href="#2-how-to-read-this-document" title="Permanent link">&para;</a></h2>
+<p>Start with high-level block diagram if you need system shape. Then read internal coordinator block diagram to understand main components and five internal channels. Then read dependency graph examples to see why coordinator releases transactions in waves instead of strict block order.</p>
+<p>If you want implementation entry points after building mental model, jump to <a href="#7-code-map">Code Map</a>. For configuration fields, gRPC API surface, and existing service overview, also see <a href="../coordinator/"><code>docs/coordinator.md</code></a>.</p>
+<h2 id="3-high-level-block-diagram">3. High-Level Block Diagram<a class="headerlink" href="#3-high-level-block-diagram" title="Permanent link">&para;</a></h2>
+<p>At highest level, coordinator sits between Sidecar and two downstream service pools. Sidecar streams blocks in and receives transaction status back. Verifier services check signatures and structure. Validator-Committer services perform final validation, commit, status lookup, recovery reads, and policy/config recovery through state DB access.</p>
+<div class="mermaid">flowchart LR
+    S[Sidecar]
+    C[Coordinator]
+    V[Verifier Service Pool]
+    VC[Validator-Committer Service Pool]
+    DB[(State DB)]
+
+    S --&gt;|1. Blocks | C
+    C --&gt;|2. Dependency-free tx batches \npolicy/config updates | V
+    V --&gt;|3. Verification status back| C
+    C --&gt;|4. Tx batches | VC
+    DB --&gt;|5. Read states | VC
+    VC --&gt;|6. Commit state| DB
+    VC --&gt;|7. Final tx status | C
+    C --&gt;|8. Tx status batches | S</div>
+<p>Numbers show typical end-to-end flow through coordinator at high level:</p>
+<ol>
+<li><strong>Sidecar → Coordinator:</strong> Sidecar sends blocks over <code>BlockProcessing</code>.</li>
+<li><strong>Coordinator → Verifier:</strong> Coordinator sends dependency-free transaction batches plus pending policy/config deltas.</li>
+<li><strong>Verifier → Coordinator:</strong> Verifier services return verification status.</li>
+<li><strong>Coordinator → Validator-Committer:</strong> Coordinator sends transaction batches for final validation and commit.</li>
+<li><strong>Validator-Committer → State DB:</strong> Validator-Committer writes commit results.</li>
+<li><strong>State DB → Validator-Committer:</strong> Validator-Committer reads persisted status and recovery state.</li>
+<li><strong>Validator-Committer → Coordinator:</strong> Validator-Committer sends final transaction status back.</li>
+<li><strong>Coordinator → Sidecar:</strong> Coordinator returns <code>TxStatusBatch</code> messages.</li>
+</ol>
+<h2 id="4-coordinator-internal-block-diagram">4. Coordinator Internal Block Diagram<a class="headerlink" href="#4-coordinator-internal-block-diagram" title="Permanent link">&para;</a></h2>
+<p>Inside coordinator, control is split across five main components:</p>
+<ul>
+<li><code>Service</code> owns external gRPC surface and stream lifecycle.</li>
+<li><code>dependencygraph.Manager</code> decides which transactions are free to run.</li>
+<li><code>signatureVerifierManager</code> talks to Verifier service pool.</li>
+<li><code>validatorCommitterManager</code> talks to Validator-Committer pool and sends final results to two consumers.</li>
+<li><code>policyManager</code> stores latest namespace/config state for future verifier requests.</li>
+</ul>
+<p>Runtime path mostly moves forward. Two external pools sit outside coordinator: <code>signatureVerifierManager</code> talks to Verifier service pool, and <code>validatorCommitterManager</code> talks to Validator-Committer service pool. <code>Service</code> also sends rejected transactions directly to <code>validatorCommitterManager</code>, bypassing dependency-graph path.</p>
+<p>Two feedback loops matter most:</p>
+<ol>
+<li>final status flows from Validator-Committer manager back to dependency graph so blocked dependents can be released</li>
+<li>committed namespace/config changes flow into policy manager so later verifier requests carry fresh policy/config deltas</li>
+</ol>
+<div class="mermaid">flowchart LR
+    subgraph C[Coordinator]
+        SVC[Service]
+        LDC[local dependency constructor]
+        GDM[global dependency manager]
+        SVM[signatureVerifierManager]
+        VCM[validatorCommitterManager]
+        PM[policyManager]
+    end
+
+    VP[Verifier Service Pool]
+    VCP[Validator-Committer Service Pool]
+
+    SVC --&gt;|1. Valid tx batches| LDC
+    SVC --&gt;|2. Rejected or invalid tx nodes| VCM
+    LDC --&gt;|3. Tx nodes with local dependencies| GDM
+    GDM --&gt;|4. Dependency-free tx nodes| SVM
+    PM --&gt;|5. Policy/config deltas| SVM
+    SVM --&gt;|6. Dependency-free tx nodes\nplus policy/config deltas| VP
+    VP --&gt;|7. Verified or prelim-invalid tx nodes| SVM
+    SVM --&gt;|8. Verified or prelim-invalid tx nodes| VCM
+    VCM --&gt;|9. Tx nodes for final validation/commit| VCP
+    VCP --&gt;|10. Finalized tx nodes\nand final tx status| VCM
+    VCM --&gt;|11. Committed namespace/config updates| PM
+    VCM --&gt;|12. Finalized tx nodes| GDM
+    VCM --&gt;|13. Final TxStatusBatch messages| SVC</div>
+<h3 id="channel-walkthrough">Channel walkthrough<a class="headerlink" href="#channel-walkthrough" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Producer</th>
+<th>Consumer</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>coordinatorToDepGraphTxs</code></td>
+<td><code>Service</code></td>
+<td>dependency graph manager</td>
+<td>Valid transactions received from Sidecar, chunked into batches for dependency construction</td>
+</tr>
+<tr>
+<td><code>depGraphToSigVerifierFreeTxs</code></td>
+<td>global dependency manager</td>
+<td>signature verifier manager</td>
+<td>Transactions with no remaining dependencies</td>
+</tr>
+<tr>
+<td><code>sigVerifierToVCServiceValidatedTxs</code></td>
+<td>signature verifier manager</td>
+<td>validator-committer manager</td>
+<td>Transactions after signature/structural verification; prelim-invalid transactions still continue</td>
+</tr>
+<tr>
+<td><code>vcServiceToDepGraphValidatedTxs</code></td>
+<td>validator-committer manager</td>
+<td>global dependency manager</td>
+<td>Finalized transaction nodes used to remove edges and free dependents</td>
+</tr>
+<tr>
+<td><code>vcServiceToCoordinatorTxStatus</code></td>
+<td>validator-committer manager</td>
+<td><code>Service</code></td>
+<td>Final <code>TxStatusBatch</code> messages returned to Sidecar</td>
+</tr>
+</tbody>
+</table>
+<p>Component ownership in plain terms:</p>
+<ul>
+<li><code>Service</code> handles stream send/receive and counts waiting transactions.</li>
+<li>local dependency constructor computes <strong>within-batch</strong> dependencies in parallel.</li>
+<li>global dependency manager merges local results with already waiting transactions and tracks release of dependents.</li>
+<li>signature verifier manager retries verifier streams and requeues in-flight transactions on failure.</li>
+<li>validator-committer manager retries VC streams, fans status out to two destinations, and updates policy manager before dependents advance.</li>
+<li>policy manager versions namespace/config state and hands verifier managers only deltas they have not seen yet.</li>
+</ul>
+<h2 id="5-dependency-graph-construction">5. Dependency Graph Construction<a class="headerlink" href="#5-dependency-graph-construction" title="Permanent link">&para;</a></h2>
+<p>Dependency graph is coordinator feature that unlocks parallelism without losing deterministic outcomes. Later transactions may have to wait for earlier transactions if both touch same logical key or same namespace lifecycle state.</p>
+<h3 id="51-why-the-graph-is-split-into-local-and-global-stages">5.1 Why the Graph Is Split into Local and Global Stages<a class="headerlink" href="#51-why-the-graph-is-split-into-local-and-global-stages" title="Permanent link">&para;</a></h3>
+<p>Coordinator splits dependency work into two stages because it needs both throughput and ordering discipline.</p>
+<p><strong>Local stage</strong> (<code>local_dependency_constructor.go</code>):</p>
+<ul>
+<li>receives one transaction batch at time</li>
+<li>computes dependencies <strong>inside that batch only</strong></li>
+<li>runs multiple workers in parallel</li>
+<li>preserves output order using batch IDs and condition-variable gating, so global stage still sees batches in original order</li>
+</ul>
+<p><strong>Global stage</strong> (<code>global_dependency_manager.go</code>):</p>
+<ul>
+<li>receives locally processed batches in original order</li>
+<li>detects dependencies against transactions already waiting from earlier batches</li>
+<li>merges new read/write index data into global detector</li>
+<li>emits only transactions with zero remaining dependencies</li>
+<li>removes completed transactions and releases newly free dependents</li>
+</ul>
+<p>Short version:</p>
+<ul>
+<li>local stage = fast within-batch preprocessing</li>
+<li>global stage = authoritative waiting graph across all in-flight transactions</li>
+</ul>
+<h3 id="52-transaction-node-model">5.2 Transaction Node Model<a class="headerlink" href="#52-transaction-node-model" title="Permanent link">&para;</a></h3>
+<p>Coordinator does not track raw transactions directly in graph. It wraps each transaction in <code>TransactionNode</code>.</p>
+<p>Each node carries:</p>
+<ul>
+<li>transaction reference and namespace payload (<code>Tx</code>)</li>
+<li>endorsements needed by verifier stage</li>
+<li><code>dependsOnTxs</code>: coarse-grained set of earlier transactions that must finish first</li>
+<li><code>dependentTxs</code>: reverse edges used when freeing blocked transactions</li>
+<li>extracted read/write key sets for dependency detection</li>
+</ul>
+<p>Coordinator intentionally tracks <strong>coarse-grained dependency edges</strong> instead of labeling each stored edge as read-write, write-read, or write-write. That keeps graph logic simpler. Fine-grained type still matters conceptually for humans, but runtime release logic only needs to know whether dependency still exists.</p>
+<p>Read/write extraction rules matter:</p>
+<ul>
+<li>read-only keys go into read set</li>
+<li>blind writes go into write-only set</li>
+<li>read-write operations go into read-write set</li>
+<li>normal transactions also implicitly read namespace lifecycle key from meta-namespace so namespace policy/config changes serialize correctly with regular namespace traffic</li>
+</ul>
+<p>That last rule prevents namespace lifecycle transaction from racing with ordinary state updates in same namespace.</p>
+<h3 id="53-dependency-types">5.3 Dependency Types<a class="headerlink" href="#53-dependency-types" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Meaning</th>
+<th>Example</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>read-write</td>
+<td>later transaction reads key written by earlier transaction</td>
+<td><code>T1</code> writes <code>ns1:a</code>, <code>T2</code> reads <code>ns1:a</code></td>
+<td><code>T2</code> may have read stale value if <code>T1</code> commits, so <code>T2</code> must wait</td>
+</tr>
+<tr>
+<td>write-read</td>
+<td>later transaction writes key read by earlier transaction</td>
+<td><code>T1</code> reads <code>ns1:a</code>, <code>T2</code> writes <code>ns1:a</code></td>
+<td>preserves block-order semantics so later write does not jump ahead of earlier read</td>
+</tr>
+<tr>
+<td>write-write</td>
+<td>both transactions write same key</td>
+<td><code>T1</code> writes <code>ns1:a</code>, <code>T2</code> writes <code>ns1:a</code></td>
+<td>prevents later write from overtaking earlier write</td>
+</tr>
+</tbody>
+</table>
+<p>Important direction rule:</p>
+<ul>
+<li>edge always points from earlier transaction to later transaction (execution order)</li>
+<li>because execution flows forward in stream/block order, graph stays acyclic</li>
+<li>transaction with zero in-degree (no incoming edges) is dependency-free and can execute</li>
+</ul>
+<h3 id="54-worked-examples">5.4 Worked Examples<a class="headerlink" href="#54-worked-examples" title="Permanent link">&para;</a></h3>
+<h4 id="example-1-independent-transactions">Example 1: Independent transactions<a class="headerlink" href="#example-1-independent-transactions" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Tx</th>
+<th>Reads</th>
+<th>Writes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T1</code></td>
+<td><code>ns1:a</code></td>
+<td><code>ns1:x</code></td>
+</tr>
+<tr>
+<td><code>T2</code></td>
+<td><code>ns1:b</code></td>
+<td><code>ns1:c</code></td>
+</tr>
+</tbody>
+</table>
+<p>No shared keys. No namespace-lifecycle interaction. Both transactions have zero in-degree and are dependency-free immediately.</p>
+<div class="mermaid">flowchart LR
+    subgraph Example1[Independent]
+        T1[T1&lt;br/&gt;R:a W:x]
+        T2[T2&lt;br/&gt;R:b W:c]
+    end</div>
+<p>Result:</p>
+<ul>
+<li><code>T1</code> and <code>T2</code> can both move to Verifier stage immediately</li>
+<li>dependency graph does not need to serialize them</li>
+</ul>
+<h4 id="example-2-later-read-depends-on-earlier-write">Example 2: Later read depends on earlier write<a class="headerlink" href="#example-2-later-read-depends-on-earlier-write" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Tx</th>
+<th>Reads</th>
+<th>Writes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T1</code></td>
+<td>-</td>
+<td><code>ns1:a</code></td>
+</tr>
+<tr>
+<td><code>T2</code></td>
+<td><code>ns1:a</code></td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<p><code>T2</code> has read-write dependency on <code>T1</code>. Dependency arrow points from <code>T1</code> (older) to <code>T2</code> (newer), showing execution order.</p>
+<div class="mermaid">flowchart LR
+    subgraph Example2[RW Dependency]
+        T1[T1&lt;br/&gt;W:a]
+        T2[T2&lt;br/&gt;R:a]
+    end
+
+    T1 --&gt;|rw: a| T2</div>
+<ul>
+<li><code>T1</code>: zero in-degree → <strong>dependency-free</strong></li>
+<li><code>T2</code>: in-degree 1 → <strong>waiting</strong></li>
+</ul>
+<p>Result:</p>
+<ul>
+<li><code>T1</code> is free first</li>
+<li><code>T2</code> waits in graph</li>
+<li>after VC finalizes <code>T1</code>, graph removes edge and <code>T2</code> becomes free</li>
+</ul>
+<h4 id="example-3-two-writes-to-same-key-across-different-batches">Example 3: Two writes to same key across different batches<a class="headerlink" href="#example-3-two-writes-to-same-key-across-different-batches" title="Permanent link">&para;</a></h4>
+<p>Suppose first batch already contains <code>T1</code>, and second batch later introduces <code>T2</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Tx</th>
+<th>Batch</th>
+<th>Reads</th>
+<th>Writes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T1</code></td>
+<td><code>B1</code></td>
+<td>-</td>
+<td><code>ns1:a</code></td>
+</tr>
+<tr>
+<td><code>T2</code></td>
+<td><code>B2</code></td>
+<td>-</td>
+<td><code>ns1:a</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>T2</code> has write-write dependency on <code>T1</code>, even though they arrived in different batches. Dependency arrow points from <code>T1</code> (older) to <code>T2</code> (newer), showing execution order.</p>
+<div class="mermaid">flowchart LR
+    subgraph Example3[Cross-Batch WW]
+        subgraph B1[Batch B1]
+            T1[T1&lt;br/&gt;W:a]
+        end
+        subgraph B2[Batch B2]
+            T2[T2&lt;br/&gt;W:a]
+        end
+    end
+
+    T1 --&gt;|ww: a| T2</div>
+<ul>
+<li><code>T1</code>: zero in-degree → <strong>dependency-free</strong></li>
+<li><code>T2</code>: in-degree 1 → <strong>waiting</strong></li>
+</ul>
+<p>Result:</p>
+<ul>
+<li>local stage alone cannot resolve this because transactions are in different batches</li>
+<li>global stage detects dependency using waiting transaction index</li>
+<li><code>T2</code> stays blocked until <code>T1</code> is finalized</li>
+</ul>
+<h4 id="example-4-namespace-lifecycle-transaction-must-serialize-with-normal-traffic">Example 4: Namespace lifecycle transaction must serialize with normal traffic<a class="headerlink" href="#example-4-namespace-lifecycle-transaction-must-serialize-with-normal-traffic" title="Permanent link">&para;</a></h4>
+<p>Suppose <code>T1</code> updates regular state in <code>ns1</code>, <code>T2</code> changes namespace policy/config for <code>ns1</code>, and <code>T3</code> is a later normal transaction in <code>ns1</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Tx</th>
+<th>Reads</th>
+<th>Writes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>T1</code></td>
+<td>implicit meta read for <code>ns1</code></td>
+<td><code>ns1:asset1</code></td>
+</tr>
+<tr>
+<td><code>T2</code></td>
+<td>meta/config data</td>
+<td>namespace lifecycle update for <code>ns1</code></td>
+</tr>
+<tr>
+<td><code>T3</code></td>
+<td>implicit meta read for <code>ns1</code></td>
+<td><code>ns1:asset2</code></td>
+</tr>
+</tbody>
+</table>
+<p>Coordinator treats normal transactions as reading namespace lifecycle key in meta-namespace. This creates ordering edges: <code>T1</code> → <code>T2</code> → <code>T3</code>.</p>
+<div class="mermaid">flowchart LR
+    subgraph Example4[Namespace Lifecycle Serialization]
+        T1[T1&lt;br/&gt;state update]
+        T2[T2&lt;br/&gt;policy update]
+        T3[T3&lt;br/&gt;later state]
+    end
+
+    T1 --&gt;|lifecycle| T2
+    T2 --&gt;|lifecycle| T3</div>
+<ul>
+<li><code>T1</code>: zero in-degree → <strong>dependency-free</strong></li>
+<li><code>T2</code>: in-degree 1 (depends on <code>T1</code>) → <strong>waiting</strong></li>
+<li><code>T3</code>: in-degree 1 (depends on <code>T2</code>) → <strong>waiting</strong></li>
+</ul>
+<p>Result:</p>
+<ul>
+<li>lifecycle update cannot jump ahead of already waiting normal transaction in same namespace</li>
+<li>later normal transactions cannot verify against stale policy state</li>
+<li>once <code>T2</code> commits, policy manager updates before newly freed dependents move forward</li>
+</ul>
+<h4 id="example-5-two-blocks-two-transactions-each-mixed-rw-wr-ww-dependencies">Example 5: Two blocks, two transactions each, mixed <code>rw</code> / <code>wr</code> / <code>ww</code> dependencies<a class="headerlink" href="#example-5-two-blocks-two-transactions-each-mixed-rw-wr-ww-dependencies" title="Permanent link">&para;</a></h4>
+<p>Suppose coordinator receives two blocks in order, with two transactions per block.</p>
+<table>
+<thead>
+<tr>
+<th>Tx</th>
+<th>Block</th>
+<th>Reads</th>
+<th>Writes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>B1T1</code></td>
+<td><code>Block 1</code></td>
+<td><code>ns1:a</code></td>
+<td><code>ns1:b</code></td>
+</tr>
+<tr>
+<td><code>B1T2</code></td>
+<td><code>Block 1</code></td>
+<td><code>ns1:b</code></td>
+<td><code>ns1:c</code></td>
+</tr>
+<tr>
+<td><code>B2T1</code></td>
+<td><code>Block 2</code></td>
+<td><code>ns1:c</code></td>
+<td><code>ns1:a</code></td>
+</tr>
+<tr>
+<td><code>B2T2</code></td>
+<td><code>Block 2</code></td>
+<td><code>ns1:a</code>, <code>ns1:c</code></td>
+<td><code>ns1:b</code></td>
+</tr>
+</tbody>
+</table>
+<p>Derived dependencies (arrows show execution order from older to newer):</p>
+<ul>
+<li><code>B1T1 -&gt; B1T2</code> is <strong>rw</strong> on <code>ns1:b</code> because <code>B1T1</code> writes <code>b</code>, then <code>B1T2</code> reads <code>b</code></li>
+<li><code>B1T2 -&gt; B2T1</code> is <strong>rw</strong> on <code>ns1:c</code> because <code>B1T2</code> writes <code>c</code>, then <code>B2T1</code> reads <code>c</code></li>
+<li><code>B1T1 -&gt; B2T1</code> is <strong>wr</strong> on <code>ns1:a</code> because <code>B1T1</code> reads <code>a</code>, then <code>B2T1</code> writes <code>a</code></li>
+<li><code>B1T1 -&gt; B2T2</code> is <strong>ww</strong> on <code>ns1:b</code> because both write <code>b</code></li>
+<li><code>B1T2 -&gt; B2T2</code> is <strong>rw</strong> on <code>ns1:c</code> because <code>B1T2</code> writes <code>c</code>, then <code>B2T2</code> reads <code>c</code></li>
+<li><code>B2T1 -&gt; B2T2</code> is <strong>rw</strong> on <code>ns1:a</code> because <code>B2T1</code> writes <code>a</code>, then <code>B2T2</code> reads <code>a</code></li>
+</ul>
+<p>Initial dependency graph:</p>
+<div class="mermaid">flowchart LR
+    subgraph BLK1[Block 1]
+        B1T1[B1T1&lt;br/&gt;R:a W:b]
+        B1T2[B1T2&lt;br/&gt;R:b W:c]
+    end
+
+    subgraph BLK2[Block 2]
+        B2T1[B2T1&lt;br/&gt;R:c W:a]
+        B2T2[B2T2&lt;br/&gt;R:a,c W:b]
+    end
+
+    B1T1 --&gt;|rw: b| B1T2
+    B1T2 --&gt;|rw: c| B2T1
+    B1T1 --&gt;|wr: a| B2T1
+    B1T1 --&gt;|ww: b| B2T2
+    B1T2 --&gt;|rw: c| B2T2
+    B2T1 --&gt;|rw: a| B2T2</div>
+<p>What coordinator does with this graph:</p>
+<ul>
+<li><code>B1T1</code> has zero in-degree (no incoming edges), so it is free first</li>
+<li><code>B1T2</code> waits for <code>B1T1</code></li>
+<li><code>B2T1</code> waits for both <code>B1T1</code> and <code>B1T2</code></li>
+<li><code>B2T2</code> waits for <code>B1T1</code>, <code>B1T2</code>, and <code>B2T1</code></li>
+</ul>
+<p>Important runtime rule:</p>
+<ul>
+<li><strong>Verifier completion alone does not free dependents</strong></li>
+<li>graph updates only after <strong>Validator-Committer returns final status</strong> for transaction node</li>
+</ul>
+<p>Graph update sequence after VC finalization:</p>
+<ol>
+<li><strong><code>B1T1</code> finalized</strong></li>
+<li>remove node <code>B1T1</code> from dependency detector</li>
+<li>remove edges <code>B1T1 -&gt; B1T2</code>, <code>B1T1 -&gt; B2T1</code>, <code>B1T1 -&gt; B2T2</code></li>
+<li><code>B1T2</code> now has zero remaining dependencies, so coordinator emits <code>B1T2</code></li>
+<li><code>B2T1</code> still waits on <code>B1T2</code></li>
+<li><code>B2T2</code> still waits on <code>B1T2</code> and <code>B2T1</code></li>
+</ol>
+<div class="mermaid">flowchart LR
+    B1T2[B1T2&lt;br/&gt;free]
+    B2T1[B2T1&lt;br/&gt;waits on B1T2]
+    B2T2[B2T2&lt;br/&gt;waits on B1T2 and B2T1]
+
+    B1T2 --&gt;|rw: c| B2T1
+    B1T2 --&gt;|rw: c| B2T2
+    B2T1 --&gt;|rw: a| B2T2</div>
+<ol>
+<li><strong><code>B1T2</code> finalized</strong></li>
+<li>remove node <code>B1T2</code></li>
+<li>remove edges <code>B1T2 -&gt; B2T1</code> and <code>B1T2 -&gt; B2T2</code></li>
+<li><code>B2T1</code> now has zero remaining dependencies, so coordinator emits <code>B2T1</code></li>
+<li><code>B2T2</code> still waits on <code>B2T1</code></li>
+</ol>
+<div class="mermaid">flowchart LR
+    B2T1[B2T1&lt;br/&gt;free]
+    B2T2[B2T2&lt;br/&gt;waits on B2T1]
+
+    B2T1 --&gt;|rw: a| B2T2</div>
+<ol>
+<li><strong><code>B2T1</code> finalized</strong></li>
+<li>remove node <code>B2T1</code></li>
+<li>remove edge <code>B2T2 -&gt; B2T1</code></li>
+<li>
+<p><code>B2T2</code> now has zero remaining dependencies, so coordinator emits <code>B2T2</code></p>
+</li>
+<li>
+<p><strong><code>B2T2</code> finalized</strong></p>
+</li>
+<li>graph becomes empty for this example</li>
+<li>all four transactions have reached final status</li>
+</ol>
+<p>Resulting execution order:</p>
+<ul>
+<li>graph allows only <code>B1T1</code> first</li>
+<li>then <code>B1T2</code></li>
+<li>then <code>B2T1</code></li>
+<li>then <code>B2T2</code></li>
+</ul>
+<p>Even though there are two blocks, graph is built across all in-flight transactions, not reset per block. That is why <code>Block 2</code> transactions can depend on <code>Block 1</code> transactions, and why later transactions are released only when all earlier conflicting transactions have final VC status.</p>
+<h3 id="55-how-transactions-become-free-again">5.5 How Transactions Become Free Again<a class="headerlink" href="#55-how-transactions-become-free-again" title="Permanent link">&para;</a></h3>
+<p>Freeing is driven by final status from Validator-Committer stage, not by verifier completion.</p>
+<p>Release loop:</p>
+<ol>
+<li>Validator-Committer manager receives final status from VC service.</li>
+<li>It maps returned status back to stored <code>TransactionNode</code>.</li>
+<li>It updates <code>policyManager</code> first if committed transaction changed namespace/config state.</li>
+<li>It sends finalized nodes to global dependency manager over <code>vcServiceToDepGraphValidatedTxs</code>.</li>
+<li>Global dependency manager removes completed transaction read/write keys from dependency detector.</li>
+<li>For each dependent transaction, graph removes one edge from <code>dependsOnTxs</code>.</li>
+<li>Any dependent that now has zero remaining dependencies becomes free.</li>
+<li>Newly freed transactions are emitted to verifier manager over <code>depGraphToSigVerifierFreeTxs</code>.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>VC final status
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>   |
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>   v
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>remove finished node from graph
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>   |
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>   v
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>update dependent nodes
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>   |
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>   +--&gt; still has dependencies -&gt; keep waiting
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>   |
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>   `--&gt; zero dependencies -&gt; emit to Verifier stage
+</code></pre></div>
+<h2 id="6-failure-and-recovery">6. Failure and Recovery<a class="headerlink" href="#6-failure-and-recovery" title="Permanent link">&para;</a></h2>
+<p>Coordinator is designed to survive stream breaks, worker-service failures, and process restarts. Critical theme: in-flight work may be retried, but final state remains correct because VC path is idempotent and duplicate late responses are tolerated.</p>
+<h3 id="61-signature-verifier-service-failure">6.1 Signature Verifier Service Failure<a class="headerlink" href="#61-signature-verifier-service-failure" title="Permanent link">&para;</a></h3>
+<h4 id="611-internal-architecture-of-signature-verifier-manager">6.1.1 Internal Architecture of Signature Verifier Manager<a class="headerlink" href="#611-internal-architecture-of-signature-verifier-manager" title="Permanent link">&para;</a></h4>
+<p>The <code>signatureVerifierManager</code> manages communication with multiple signature verifier service instances. It maintains:</p>
+<ul>
+<li><strong>Multiple verifier clients</strong>: One <code>signatureVerifier</code> instance per verifier service endpoint</li>
+<li><strong>In-flight transaction tracking</strong>: Each verifier tracks transactions currently being validated in <code>txBeingValidated</code> map</li>
+<li><strong>Retry and requeue mechanism</strong>: On stream failure, pending transactions are requeued for retry</li>
+</ul>
+<div class="mermaid">flowchart LR
+    subgraph SVM[Signature Verifier Manager]
+        IQ[Input Queue]
+        subgraph SV1[Verifier Client 1]
+            TB1[txBeingValidated]
+            S1[Stream]
+        end
+        subgraph SV2[Verifier Client 2]
+            TB2[txBeingValidated]
+            S2[Stream]
+        end
+        subgraph SVN[Verifier Client N]
+            TBN[txBeingValidated]
+            SN[Stream]
+        end
+        OQ[Output Queue]
+    end
+
+    IQ --&gt;|tx batches| SV1
+    IQ --&gt;|tx batches| SV2
+    IQ --&gt;|tx batches| SVN
+    S1 -.-&gt;|sends/recvs| VP1[Verifier Service 1]
+    S2 -.-&gt;|sends/recvs| VP2[Verifier Service 2]
+    SN -.-&gt;|sends/recvs| VPN[Verifier Service N]
+    SV1 --&gt;|verified txs| OQ
+    SV2 --&gt;|verified txs| OQ
+    SVN --&gt;|verified txs| OQ</div>
+<h4 id="612-failure-handling-flow">6.1.2 Failure Handling Flow<a class="headerlink" href="#612-failure-handling-flow" title="Permanent link">&para;</a></h4>
+<p>When a verifier stream fails:</p>
+<ol>
+<li><strong>Detect failure</strong>: <code>sendTransactionsAndForwardStatus()</code> returns error when <code>stream.Recv()</code> or <code>stream.Send()</code> fails</li>
+<li><strong>Trigger recovery</strong>: <code>recoverPendingTransactions()</code> is called via deferred callback</li>
+<li><strong>Requeue pending transactions</strong>: All transactions in <code>txBeingValidated</code> are written back to input queue</li>
+<li><strong>Reconnect</strong>: <code>retry.Sustain()</code> loop creates new stream and resumes processing</li>
+</ol>
+<div class="mermaid">flowchart TD
+    Start[Stream Active] --&gt; Send[Send Tx Batch]
+    Send --&gt; Recv[Receive Status]
+    Recv --&gt; Success{Success?}
+    Success --&gt;|Yes| Forward[Forward to Output Queue]
+    Forward --&gt; Send
+    Success --&gt;|No| Fail[Stream Failed]
+    Fail --&gt; Lock[Lock txBeingValidated]
+    Lock --&gt; Collect[Collect Pending Txs]
+    Collect --&gt; Delete[Clear txBeingValidated]
+    Delete --&gt; Requeue[Requeue to Input Queue]
+    Requeue --&gt; Retry[Retry Sustain Loop]
+    Retry --&gt; NewStream[Create New Stream]
+    NewStream --&gt; Send</div>
+<h4 id="613-key-design-properties">6.1.3 Key Design Properties<a class="headerlink" href="#613-key-design-properties" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Idempotent requeue</strong>: Transactions can be safely re-sent to any verifier instance</li>
+<li><strong>No data loss</strong>: <code>txBeingValidated</code> map ensures all in-flight transactions are recovered</li>
+<li><strong>Parallel retry</strong>: Multiple verifier clients retry independently</li>
+<li><strong>Policy freshness</strong>: Each requeued transaction gets latest policy/config deltas on retry</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Failure point</th>
+<th>What stays in memory</th>
+<th>What is retried or rebuilt</th>
+<th>What persists</th>
+<th>Why result stays correct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>verifier stream or verifier server fails</td>
+<td><code>signatureVerifier.txBeingValidated</code> still tracks in-flight nodes for that verifier instance</td>
+<td>manager reconnects using sustained retry loop and requeues pending transactions from <code>txBeingValidated</code></td>
+<td>nothing new must persist at verifier stage</td>
+<td>verifier stage is retry-safe because transactions are re-enqueued and revalidated</td>
+</tr>
+</tbody>
+</table>
+<p>Key detail:</p>
+<ul>
+<li>verifier manager stores in-flight nodes by transaction height</li>
+<li>on failure, <code>recoverPendingTransactions()</code> pushes them back into input queue</li>
+<li>later verifier stream can resend them with latest policy/config deltas</li>
+</ul>
+<h3 id="62-validator-committer-service-failure">6.2 Validator-Committer Service Failure<a class="headerlink" href="#62-validator-committer-service-failure" title="Permanent link">&para;</a></h3>
+<h4 id="621-internal-architecture-of-validator-committer-manager">6.2.1 Internal Architecture of Validator-Committer Manager<a class="headerlink" href="#621-internal-architecture-of-validator-committer-manager" title="Permanent link">&para;</a></h4>
+<p>The <code>validatorCommitterManager</code> manages communication with multiple validator-committer service instances. It maintains:</p>
+<ul>
+<li><strong>Common client</strong>: Single load-balanced connection for system operations (setup, recovery reads)</li>
+<li><strong>Multiple VC clients</strong>: One <code>validatorCommitter</code> instance per VC service endpoint</li>
+<li><strong>In-flight transaction tracking</strong>: Each VC tracks transactions by txID in <code>txBeingValidated</code> sync map</li>
+<li><strong>Retry and requeue mechanism</strong>: On stream failure, pending transactions are requeued for retry</li>
+<li><strong>Dual output fan-out</strong>: Forwards results to both dependency graph (for releasing dependents) and coordinator (for status feedback to Sidecar)</li>
+</ul>
+<div class="mermaid">flowchart LR
+    subgraph VCM[Validator-Committer Manager]
+        IQ[Input Queue]
+        CC[Common Client]
+        subgraph VC1[VC Client 1]
+            TB1[txBeingValidated]
+            S1[Stream]
+        end
+        subgraph VC2[VC Client 2]
+            TB2[txBeingValidated]
+            S2[Stream]
+        end
+        subgraph VCN[VC Client N]
+            TBN[txBeingValidated]
+            SN[Stream]
+        end
+        OQ1[Output to Dep Graph]
+        OQ2[Output to Coordinator]
+    end
+
+    IQ --&gt;|tx batches| VC1
+    IQ --&gt;|tx batches| VC2
+    IQ --&gt;|tx batches| VCN
+    CC -.-&gt;|recovery reads| DB[(State DB)]
+    S1 -.-&gt;|sends/recvs| VCP1[VC Service 1]
+    S2 -.-&gt;|sends/recvs| VCP2[VC Service 2]
+    SN -.-&gt;|sends/recvs| VCPN[VC Service N]
+    VC1 --&gt;|tx nodes| OQ1
+    VC1 --&gt;|status| OQ2
+    VC2 --&gt;|tx nodes| OQ1
+    VC2 --&gt;|status| OQ2
+    VCN --&gt;|tx nodes| OQ1
+    VCN --&gt;|status| OQ2</div>
+<h4 id="622-failure-handling-flow">6.2.2 Failure Handling Flow<a class="headerlink" href="#622-failure-handling-flow" title="Permanent link">&para;</a></h4>
+<p>When a VC stream fails:</p>
+<ol>
+<li><strong>Detect failure</strong>: <code>sendTransactionsAndForwardStatus()</code> returns error when <code>stream.Recv()</code> or <code>stream.Send()</code> fails</li>
+<li><strong>Trigger recovery</strong>: <code>recoverPendingTransactions()</code> is called via deferred callback</li>
+<li><strong>Requeue pending transactions</strong>: All transactions in <code>txBeingValidated</code> are written back to input queue</li>
+<li><strong>Reconnect</strong>: <code>retry.Sustain()</code> loop creates new stream and resumes processing</li>
+</ol>
+<div class="mermaid">flowchart TD
+    Start[Stream Active] --&gt; Send[Send Tx Batch]
+    Send --&gt; Recv[Receive Status]
+    Recv --&gt; Success{Success?}
+    Success --&gt;|Yes| Lookup[Lookup txBeingValidated]
+    Lookup --&gt; Update[Update Policy Manager]
+    Update --&gt; Fanout[Fan-out: Dep Graph + Coordinator]
+    Fanout --&gt; Send
+    Success --&gt;|No| Fail[Stream Failed]
+    Fail --&gt; Load[Load txBeingValidated]
+    Load --&gt; Clear[Clear txBeingValidated]
+    Clear --&gt; Requeue[Requeue to Input Queue]
+    Requeue --&gt; Retry[Retry Sustain Loop]
+    Retry --&gt; NewStream[Create New Stream]
+    NewStream --&gt; Send</div>
+<h4 id="623-key-design-properties">6.2.3 Key Design Properties<a class="headerlink" href="#623-key-design-properties" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Idempotent replay</strong>: VC commit path detects already-committed transactions and returns existing status</li>
+<li><strong>No data loss</strong>: <code>txBeingValidated</code> sync map ensures all in-flight transactions are recovered</li>
+<li><strong>Parallel retry</strong>: Multiple VC clients retry independently</li>
+<li><strong>Duplicate tolerance</strong>: Late/duplicate responses are dropped if txID no longer tracked</li>
+<li><strong>Policy freshness</strong>: Policy manager updated before dependents are released</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Failure point</th>
+<th>What stays in memory</th>
+<th>What is retried or rebuilt</th>
+<th>What persists</th>
+<th>Why result stays correct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VC stream or VC server fails</td>
+<td><code>validatorCommitter.txBeingValidated</code> still tracks in-flight nodes for that VC instance</td>
+<td>manager reconnects using sustained retry loop and requeues pending transactions from <code>txBeingValidated</code></td>
+<td>any transaction already committed by VC stays in DB</td>
+<td>replay is safe because VC path can detect already committed transaction status</td>
+</tr>
+</tbody>
+</table>
+<p>Key detail:</p>
+<ul>
+<li>VC manager tracks in-flight nodes by transaction ID</li>
+<li>if stream fails, <code>recoverPendingTransactions()</code> requeues nodes</li>
+<li>some of those transactions may already have committed before failure; duplicate replay is tolerated</li>
+</ul>
+<h3 id="63-sidecar-stream-ends-mid-flight">6.3 Sidecar Stream Ends Mid-Flight<a class="headerlink" href="#63-sidecar-stream-ends-mid-flight" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Failure point</th>
+<th>What stays in memory</th>
+<th>What is retried or rebuilt</th>
+<th>What persists</th>
+<th>Why result stays correct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>BlockProcessing</code> stream between Sidecar and Coordinator ends</td>
+<td>coordinator managers, internal queues, and already received transaction batches may still exist</td>
+<td>Sidecar can reconnect and resume later block delivery</td>
+<td>VC-persisted transaction status and last committed block data stay in DB</td>
+<td>block processing is decoupled from stream after receipt; received work can continue downstream</td>
+</tr>
+</tbody>
+</table>
+<p>Key detail:</p>
+<ul>
+<li>stream-specific goroutines end with stream</li>
+<li>but blocks already received by coordinator may still be forwarded and processed</li>
+<li>status may accumulate in coordinator queue even if stream itself has ended</li>
+</ul>
+<h3 id="64-duplicate-or-late-status-after-reconnect">6.4 Duplicate or Late Status After Reconnect<a class="headerlink" href="#64-duplicate-or-late-status-after-reconnect" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Failure point</th>
+<th>What stays in memory</th>
+<th>What is retried or rebuilt</th>
+<th>What persists</th>
+<th>Why result stays correct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>coordinator receives delayed or duplicate VC response after retry/reconnect</td>
+<td>first successful lookup removes matching node from <code>txBeingValidated</code></td>
+<td>duplicate response is effectively ignored because lookup no longer finds tracked node</td>
+<td>committed status already stored in DB</td>
+<td>same transaction can be submitted more than once, but only first tracked response updates in-memory release path</td>
+</tr>
+</tbody>
+</table>
+<p>Key detail:</p>
+<ul>
+<li><code>getTxsAndUpdatePolicies()</code> loads and deletes tracked node once</li>
+<li>if later duplicate status arrives, node is no longer in <code>txBeingValidated</code></li>
+<li>duplicate status is dropped from status batch before downstream processing</li>
+</ul>
+<h3 id="65-coordinator-restart-and-recovery">6.5 Coordinator Restart and Recovery<a class="headerlink" href="#65-coordinator-restart-and-recovery" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Failure point</th>
+<th>What stays in memory</th>
+<th>What is retried or rebuilt</th>
+<th>What persists</th>
+<th>Why result stays correct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>coordinator process restarts</td>
+<td>in-memory graph and queues are lost</td>
+<td>coordinator rebuilds runtime state from startup recovery calls and new Sidecar delivery</td>
+<td>last committed block, transaction status, namespace policies, and config transaction stay in DB</td>
+<td>replay after restart is safe because VC commit path is idempotent and returns existing status for already processed transaction</td>
+</tr>
+</tbody>
+</table>
+<p>Restart flow:</p>
+<ol>
+<li>validator-committer manager becomes ready</li>
+<li>coordinator recovers namespace policies and latest config transaction through VC common client</li>
+<li>policy manager is rebuilt before coordinator signals ready</li>
+<li>Sidecar asks which block should come next and resumes delivery</li>
+<li>replayed transactions are safe because VC can return existing status instead of re-committing</li>
+</ol>
+<h3 id="66-policy-reconstruction-on-startup">6.6 Policy Reconstruction on Startup<a class="headerlink" href="#66-policy-reconstruction-on-startup" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Failure point</th>
+<th>What stays in memory</th>
+<th>What is retried or rebuilt</th>
+<th>What persists</th>
+<th>Why result stays correct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>coordinator starts with empty in-memory policy manager</td>
+<td>empty policy manager exists only temporarily</td>
+<td>startup recovery reads persisted namespace policies and config transaction, then rebuilds policy manager versions</td>
+<td>namespace policies and config transaction are stored in DB through VC path</td>
+<td>verifier requests after readiness always see recovered policy/config baseline, then only later deltas</td>
+</tr>
+</tbody>
+</table>
+<p>Key detail:</p>
+<ul>
+<li>startup calls <code>recoverPolicyManagerFromStateDB()</code> before coordinator signals ready</li>
+<li>policy manager stores versions internally and returns only deltas newer than verifier has already seen</li>
+<li>this avoids pushing full policy snapshot on every verifier request once startup baseline is loaded</li>
+</ul>
+<h2 id="7-code-map">7. Code Map<a class="headerlink" href="#7-code-map" title="Permanent link">&para;</a></h2>
+<p>Open these files next if you want to connect diagrams back to implementation:</p>
+<ul>
+<li><code>service/coordinator/coordinator.go</code> — external gRPC service, stream handling, channel wiring, and coordinator startup lifecycle.</li>
+<li><code>service/coordinator/dependencygraph/manager.go</code> — top-level dependency graph module that runs local and global stages.</li>
+<li><code>service/coordinator/dependencygraph/local_dependency_constructor.go</code> — within-batch dependency construction and batch-order preservation logic.</li>
+<li><code>service/coordinator/dependencygraph/global_dependency_manager.go</code> — waiting-graph maintenance, release of freed dependents, and output of dependency-free work.</li>
+<li><code>service/coordinator/dependencygraph/dependency_detector.go</code> — read/write index structure that detects read-write, write-read, and write-write relationships.</li>
+<li><code>service/coordinator/dependencygraph/transaction_node.go</code> — node model, dependency sets, and namespace lifecycle key treatment.</li>
+<li><code>service/coordinator/signature_verifier_manager.go</code> — verifier stream management, pending-policy fetch, retry, and requeue of in-flight verification work.</li>
+<li><code>service/coordinator/validator_committer_manager.go</code> — VC stream management, final-status fan-out, policy updates, and duplicate-response handling.</li>
+<li><code>service/coordinator/policy_manager.go</code> — in-memory versioned store for namespace policies and config transaction updates.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>
