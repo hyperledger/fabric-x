@@ -455,10 +455,35 @@ fxadmin modify party node --party 1 --role consenter \
 | `--sign-cert` | no | Path to new signing certificate (unchanged if omitted) |
 | `--block` | yes | Config block to edit in place |
 
-All four node roles have a signing certificate, so `--sign-cert` works with any
-`--role`. Changing a `router` or `assembler` endpoint also updates that party's
-orderer-organization `Endpoints` value (the router is advertised as the
-`broadcast` address, the assembler as the `deliver` address).
+**What else changes in the block**
+
+The command updates the node in the shared config. Some nodes parameters also appear in other places of
+the block, and the command updates those too:
+
+| Role | Also updated |
+|------|--------------|
+| `router` | A new host or port updates the party's `broadcast` address in its orderer org's `Endpoints`. |
+| `assembler` | A new host or port updates the party's `deliver` address in its orderer org's `Endpoints`. |
+| `consenter` | Its entry in the consenter mapping (the `Orderers` value) gets the same host, port and certificates. A new signing certificate also updates the `BlockValidation` policy. |
+| `batcher` | Nothing else. |
+
+**When the command fails**
+
+The command leaves the block unchanged if:
+
+- No field to change is given.
+- The party, or the batcher's shard, is not in the block.
+- A certificate path does not exist, or the file there is not a PEM certificate.
+- A router or assembler endpoint changes, but no orderer org lists the party's `broadcast` or
+  `deliver` address.
+
+**Checked by the orderer on submission**
+
+- A new TLS certificate must be issued by one of the party's `TLSCACerts`.
+- A new signing certificate must be issued by one of the party's `CACerts`.
+- Neither certificate may be expired.
+- A config update can change only one party. You can make several changes to the same party in
+  one `next.pb`, but not changes to two parties.
 
 ___
 
