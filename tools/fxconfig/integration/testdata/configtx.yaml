@@ -138,6 +138,12 @@ Application: &ApplicationDefaults
     LifecycleEndorsement:
       Type: Signature
       Rule: AND ('Org1MSP.member')
+    SnapshotEndorsement:
+      Type: Signature
+      Rule: AND ('Org1MSP.member')
+    CheckpointEndorsement:
+      Type: Signature
+      Rule: AND ('Org1MSP.member')
     Endorsement:
       Type: ImplicitMeta
       Rule: ANY Endorsement
@@ -160,6 +166,12 @@ Profiles:
         LifecycleEndorsement:
           Type: Signature
           Rule: AND ('Org1MSP.member')
+        SnapshotEndorsement:
+          Type: Signature
+          Rule: AND ('Org1MSP.member')
+        CheckpointEndorsement:
+          Type: Signature
+          Rule: AND ('Org1MSP.member')
         Endorsement:
           Type: ImplicitMeta
           Rule: ANY Endorsement
@@ -178,6 +190,12 @@ Profiles:
           Type: ImplicitMeta
           Rule: ANY Admins
         LifecycleEndorsement:
+          Type: Signature
+          Rule: AND ('Org1MSP.member', 'Org2MSP.member')
+        SnapshotEndorsement:
+          Type: Signature
+          Rule: AND ('Org1MSP.member', 'Org2MSP.member')
+        CheckpointEndorsement:
           Type: Signature
           Rule: AND ('Org1MSP.member', 'Org2MSP.member')
         Endorsement:
