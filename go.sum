@@ -263,10 +263,10 @@ github.com/hyperledger/fabric-lib-go v1.1.5 h1:9GY8NEqyuRlJRDVgFRTcpSad/q7yiJD8+
 github.com/hyperledger/fabric-lib-go v1.1.5/go.mod h1:H30DO/EzSAtSIIzWZGXotV/M+RN0xIjFv22dPgtk4bc=
 github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7 h1:sQ5qv8vQQfwewa1JlCiSCC8dLElmaU2/frLolpgibEY=
 github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7/go.mod h1:bJnwzfv03oZQeCc863pdGTDgf5nmCy6Za3RAE7d2XsQ=
-github.com/hyperledger/fabric-x-committer v1.0.6 h1:6IYpi8iqYHPiB851Zt2rRGv6TxTpV6x/17Dv8J47tms=
-github.com/hyperledger/fabric-x-committer v1.0.6/go.mod h1:M9vSJUDNNfbaL6QqVRFqwfnm85lOxDIwXedav2O25Uc=
-github.com/hyperledger/fabric-x-common v0.2.11 h1:E3rUH7zGcgMNiCsRRZ8OtfxR2a7mXlJxBjnsppWoFkA=
-github.com/hyperledger/fabric-x-common v0.2.11/go.mod h1:RBL32bDQaqWlerialpNYH6DIVq3yFDUTokIKwejFlaU=
+github.com/hyperledger/fabric-x-committer v1.0.7 h1:n+8q7xTgcZyFVS9zwXolWvIoWIH/3kkSc3B/ri2nt6A=
+github.com/hyperledger/fabric-x-committer v1.0.7/go.mod h1:zYjvDCt+a/YfVm9djmqJXaIklA4Hj4SO7kxGo9twP/0=
+github.com/hyperledger/fabric-x-common v0.2.12 h1:IcJAj7K/QRMdDX2og3Ry/01ulVHv/YCX8ATSwa+b8/A=
+github.com/hyperledger/fabric-x-common v0.2.12/go.mod h1:RBL32bDQaqWlerialpNYH6DIVq3yFDUTokIKwejFlaU=
 github.com/hyperledger/fabric-x-orderer v1.0.7 h1:lmukYdp26NxD+i28MgzvmeBMV5Ygj04zqPao3Vs0vks=
 github.com/hyperledger/fabric-x-orderer v1.0.7/go.mod h1:bqLicnSy8iGXLo2zr0F4GKhTJo+Mna0JyO1iEtoiHXI=
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
