@@ -195,7 +195,10 @@ ORDERER_DIR="${BUILD_DIR}/fabric-x-orderer"
 checkout_source "${ORDERER_REPO}" "${ORDERER_REF}" "${ORDERER_DIR}" "${ORDERER_LOCAL_PATH:-}" "fabric-x-orderer"
 
 echo "Building ${ORDERER_IMAGE_NAME} image from ${ORDERER_DIR}..."
-docker build -t "localhost/${ORDERER_IMAGE_NAME}" -f "${ORDERER_DIR}/node/examples/all-in-one/Dockerfile" "${ORDERER_DIR}"
+# Orderer v1.0.7 moved node/examples/ to examples/; keep older refs working.
+ORDERER_DOCKERFILE="${ORDERER_DIR}/examples/all-in-one/Dockerfile"
+[ -f "${ORDERER_DOCKERFILE}" ] || ORDERER_DOCKERFILE="${ORDERER_DIR}/node/examples/all-in-one/Dockerfile"
+docker build -t "localhost/${ORDERER_IMAGE_NAME}" -f "${ORDERER_DOCKERFILE}" "${ORDERER_DIR}"
 # Tag with the exact name run-e2e.sh resolves from refs.conf, so no pull is needed.
 ORDERER_IMAGE="docker.io/hyperledger/${ORDERER_IMAGE_NAME}:${ORDERER_REF}"
 docker tag "localhost/${ORDERER_IMAGE_NAME}" "${ORDERER_IMAGE}"

@@ -292,6 +292,12 @@ Application: &ApplicationDefaults
         LifecycleEndorsement:
             Type: ImplicitMeta
             Rule: "MAJORITY Endorsement"
+        SnapshotEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        CheckpointEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
         Endorsement:
             Type: ImplicitMeta
             Rule: "MAJORITY Endorsement"
@@ -338,6 +344,12 @@ Application: &ApplicationDefaults
             Type: ImplicitMeta
             Rule: "MAJORITY Admins"
         LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        SnapshotEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        CheckpointEndorsement:
             Type: ImplicitMeta
             Rule: "MAJORITY Endorsement"
         Endorsement:

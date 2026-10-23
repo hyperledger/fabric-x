@@ -122,7 +122,11 @@ func setupTestEnv(t *testing.T) (string, tc.ComposeStack, context.Context) {
 	numOfParties, numOfShards := networkStats(t, configPath)
 	t.Logf("Running test with %d parties and %d shards", numOfParties, numOfShards)
 
-	armageddon.NewCLI().Run([]string{"generate", "--config", configPath, "--output", symlinkTarget, "--sampleConfigPath", "./ordererconfig/configtx.yaml"})
+	// --noOUs keeps admincerts-based identities, matching ExtendConfigAndCrypto(..., false) below.
+	armageddon.NewCLI().Run([]string{
+		"generate", "--config", configPath, "--output", symlinkTarget,
+		"--sampleConfigPath", "./ordererconfig/configtx.yaml", "--noOUs",
+	})
 	setupArtifacts(t, artifactsDir, symlinkTarget, numOfParties)
 
 	baseCtx := context.Background()
@@ -257,7 +261,7 @@ func submitPeerOrgReconfig(t *testing.T, artifactsDir string, compose tc.Compose
 
 	// Extend the network configuration to add peer-org-1 and generate its crypto materials.
 	network.Peers = append(network.Peers, "peer-org-1")
-	testutil.ExtendConfigAndCrypto(&network, artifactsDir, true)
+	testutil.ExtendConfigAndCrypto(&network, artifactsDir, true, false)
 
 	peerOrg1MSP := filepath.Join(artifactsDir, "crypto", "peerOrganizations", "peer-org-1", "msp")
 	caCerts, err := os.ReadFile(filepath.Join(peerOrg1MSP, "cacerts", "peer-org-1-CA-cert.pem"))

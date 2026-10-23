@@ -87,8 +87,8 @@ Code and more details can be found under [Fabric-X-Committer Github repository](
 
 | Tool          | Version      | Install                                                                     |
 | ------------- | ------------ | --------------------------------------------------------------------------- |
-| Go            | **1.26+**    | <https://go.dev/dl>                                                         |
-| golangci-lint | **v2.11.4+** | `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.11.4` |
+| Go            | **1.27.3+**  | <https://go.dev/dl>                                                         |
+| golangci-lint | **v2.15.0+** | `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0` |
 | Docker        | 20.x+        | <https://docs.docker.com/get-docker>                                        |
 | GNU Make      | any          | `sudo apt install make`                                                     |
 
@@ -103,6 +103,10 @@ To set up the network yourself, follow the tutorial in the [Fabric-X Ansible Col
 | v0.0.21 |  v0.1.7  |       v0.5.5       |  v1.5.15  |       v0.8.2        |           v0.0.1         |
 | v0.0.23 |  v0.1.9  |       v0.6.3       |  v1.5.15  |          -          |              -           |
 | v1.0.3  |  v1.0.4  |       v0.8.8       |  v1.5.20  |       v0.15.0       |              -           |
+| v1.0.7  |  v1.0.6  |         -          |     -     |          -          |              -           |
+
+The current `fxconfig` needs committer v1.0.6 or later for `--wait` and other sidecar calls.
+Older committers reject them with `Unimplemented: unknown service committerpb.SidecarService`.
 
 ## Fabric-X workshop series
 
