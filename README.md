@@ -103,7 +103,7 @@ To set up the network yourself, follow the tutorial in the [Fabric-X Ansible Col
 | v0.0.21 |  v0.1.7  |       v0.5.5       |  v1.5.15  |       v0.8.2        |           v0.0.1         |
 | v0.0.23 |  v0.1.9  |       v0.6.3       |  v1.5.15  |          -          |              -           |
 | v1.0.3  |  v1.0.4  |       v0.8.8       |  v1.5.20  |       v0.15.0       |              -           |
-| v1.0.7  |  v1.0.6  |         -          |     -     |          -          |              -           |
+| v1.0.7  |  v1.0.7  |         -          |     -     |          -          |              -           |
 
 The current `fxconfig` needs committer v1.0.6 or later for `--wait` and other sidecar calls.
 Older committers reject them with `Unimplemented: unknown service committerpb.SidecarService`.
