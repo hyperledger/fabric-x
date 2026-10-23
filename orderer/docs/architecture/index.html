@@ -1,0 +1,2857 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../../../concepts/transaction-flow/">
+      
+      
+        <link rel="next" href="../../../committer/docs/architecture/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Orderer Architecture Overview - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#fabric-x-orderer-architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Orderer Architecture Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-party-processing-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-Party Processing Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-party-transaction-to-block-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Party Transaction-to-Block Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Design Principles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-system-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. System Components
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-end-to-end-transaction-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. End-to-End Transaction Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Data Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-configuration-and-membership" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Configuration and Membership
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-state-persistence-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. State, Persistence, and Recovery
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-scaling-and-fault-tolerance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Scaling and Fault Tolerance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-client-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Client APIs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Observability
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-implementation-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Implementation Map
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../committer/docs/loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-party-processing-path" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-Party Processing Path
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multi-party-transaction-to-block-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Party Transaction-to-Block Flow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-design-principles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Design Principles
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-system-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. System Components
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-end-to-end-transaction-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. End-to-End Transaction Flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-data-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Data Model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-configuration-and-membership" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Configuration and Membership
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-state-persistence-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. State, Persistence, and Recovery
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-scaling-and-fault-tolerance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Scaling and Fault Tolerance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-client-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Client APIs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-observability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Observability
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-implementation-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Implementation Map
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+<h1 id="fabric-x-orderer-architecture">Fabric-X Orderer Architecture<a class="headerlink" href="#fabric-x-orderer-architecture" title="Permanent link">&para;</a></h1>
+<ol>
+<li><a href="#1-overview">Overview</a></li>
+<li><a href="#2-design-principles">Design Principles</a></li>
+<li><a href="#3-system-components">System Components</a></li>
+<li><a href="#4-end-to-end-transaction-flow">End-to-End Transaction Flow</a></li>
+<li><a href="#5-data-model">Data Model</a></li>
+<li><a href="#6-configuration-and-membership">Configuration and Membership</a></li>
+<li><a href="#7-state-persistence-and-recovery">State, Persistence, and Recovery</a></li>
+<li><a href="#8-scaling-and-fault-tolerance">Scaling and Fault Tolerance</a></li>
+<li><a href="#9-client-apis">Client APIs</a></li>
+<li><a href="#10-observability">Observability</a></li>
+<li><a href="#11-implementation-map">Implementation Map</a></li>
+</ol>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>Fabric-X Orderer is a Byzantine Fault Tolerant ordering service based on the Arma protocol. 
+The main objective of the Arma protocol is performance: its goal is to order a large volume of transactions per second while maintaining a reasonable transaction latency.
+This is achieved by employing three design principles:</p>
+<ul>
+<li>Separation of transaction dissemination from consensus</li>
+<li>Parallelism through pipelining and sharding</li>
+<li>Small transactions by stripping certificates from transactions and keeping predefined full signer identities in an in-memory cache</li>
+</ul>
+<p>The system is composed of four node roles. <strong>Routers</strong> accept transaction submissions, verify them, and forward them to batchers. <strong>Batchers</strong> create, persist and replicate batches, and send batch attestation fragments (small messages with a batch digest) to consenters. <strong>Consenters</strong> order batch attestation fragments through SmartBFT, producing a totally ordered stream of batch attestations. Finally, <strong>assemblers</strong> collate the small totally ordered batch attestations with full batches pulled from the batchers, and create the final Fabric-compatible block ledger.</p>
+<p>Arma separates transaction dissemination, batch replication, and payload persistence from consensus. Consensus orders batch attestations and other batch metadata instead of full transaction payloads, which keeps the critical BFT path fast and lets batching and storage scale by using additional hardware through the use of parallelism and sharding.</p>
+<p>For simplicity, this document first explains the flow within a single Arma party. It then expands the same flow to the multi-party topology, where routers, batchers, consenters, and assemblers cooperate across parties for censorship resistance, BFT ordering, and block availability.</p>
+<h3 id="single-party-processing-path">Single-Party Processing Path<a class="headerlink" href="#single-party-processing-path" title="Permanent link">&para;</a></h3>
+<p><img alt="Single-party Arma orderer processing path" src="figures/orderer-single-party.png" /></p>
+<p>An Arma party is analogous to one HLF v3 Ordering Service (OS) node. In Fabric v3 an ordering node is a single process. In contrast, in Arma, it is not one process; it contains 4 role nodes: a router (R), one or more batchers (B), a consenter (C), and an assembler (A). </p>
+<p>Endorsing clients (E) submit transactions to the router using the Fabric broadcast API. The router is the party-local entry point: it receives client envelopes, applies the configured request checks, maps each valid transaction to a shard, and forwards the transaction to the batcher of its own party in that shard. This keeps the client-facing interface compatible with Fabric while allowing Arma to split work internally across shard-local batchers.</p>
+<p>Batchers are responsible for creating batches of transactions, which later turn into blocks. They aggregate transactions into batches such as B1 and B2, persist them, and replicate them among the batchers in the shard. Batchers then compute batch attestation fragments over those batches, such as BAF1 and BAF2. A BAF is a short signed message (a batch digest and some metadata) attesting to a stored batch. The batch payloads remain in the batcher; they are not carried through the consensus bottleneck path. Only compact messages, including digests and some metadata that identify stored batches, are sent toward the consensus cluster. This separation lets large transaction envelopes use scalable storage and retrieval paths while consensus handles smaller ordering records.</p>
+<p>The consensus cluster collects BAFs from all parties in the shard. Once enough BAFs have been received for a particular batch, a batch attestaion (BA) is emitted. The ordering cluster emits a total order of batch attestations (BAs), and also serves as the controller of the entire system, in particular of the inter shard behavior.</p>
+<p>The assembler consumes the ordered BAs from consensus and the corresponding batches from the shards. For each ordered BA, the assembler fetches or receives the referenced batch payload, checks that the payload matches the ordered metadata, and assembles HLF blocks according to the order induced by consensus. Once assembled, the HLF blocks are available for the scalable committer (SC) to pull through the Fabric deliver API. In this single-party view, the important idea is that payload handling and ordering proceed separately and in parallel, and meet again only at assembly time.</p>
+<h3 id="multi-party-transaction-to-block-flow">Multi-Party Transaction-to-Block Flow<a class="headerlink" href="#multi-party-transaction-to-block-flow" title="Permanent link">&para;</a></h3>
+<p>The single-party view above shows how one Arma party separates payload handling from metadata ordering. In a full deployment, multiple Arma parties run the same roles and cooperate to arrive at the same ordered HLF blocks. The multi-party flow below shows how routers, batchers, consenters, and assemblers interact across parties.</p>
+<p><img alt="Multi-party Arma orderer topology" src="figures/orderer-multi-party.png" /></p>
+<p>In the multi-party topology, a correct endorsing client (E) tries to submit a TX to all parties instead of trusting one party. Each party has a router, shard-local batchers, a consenter, and an assembler. Submitting to all routers improves censorship resistance because no single router or party can silently suppress the transaction without other parties seeing it. Routers validate incoming Fabric <code>common.Envelope</code> messages, apply request rules, and dispatch each valid TX to a shard according to the shard mapper H<sub>r</sub>, implemented as CRC64 over the request payload. Because every router uses the same shard mapper and shard configuration, each router consistently forwards the same request to the same shard.</p>
+<p>After routing, the transaction enters the batcher layer for the selected shard. Each shard has one primary batcher for the current term and secondary batchers in other parties. The primary batcher in a shard, for example B2s3 in shard 3, bundles transactions into a batch, persists the batch locally, and serves it through the batcher <code>Deliver</code> path. Secondary batchers pull the primary batch through <code>Deliver</code>, verify it, persist local copies, send their own BAFs, and acknowledge the primary. This pull-and-ack flow keeps enough replicated payload state so assemblers can later retrieve ordered batches even if one party is unavailable.</p>
+<p>Batchers that persist a batch send a batch attestation fragment (BAF) to the consensus cluster. A BAF is compact signed metadata attesting that the signer persisted a batch with a specific digest and batch metadata. This is the boundary between payload replication and BFT ordering: full transaction payloads stay in the batcher storage path, while BAFs, digests, and control events enter the consenter path. Consenters therefore order references to stored batches rather than carrying complete transaction envelopes through SmartBFT.</p>
+<p>Upon receiving a threshold of BAFs for a batch, the consensus cluster emits a total order of batch attestations (BAs). Consenters exchange SmartBFT messages with one another and agree on the sequence of BAs and control events. The output of consensus is the same logical order for all parties. At this point, Arma knows the global order of batches, but an HLF block cannot yet be appended until an assembler has matched each ordered BA with the corresponding batch payload.</p>
+<p>Assembler nodes collate two streams: the ordered BA stream from consensus and the matching batches fetched from the batcher shards. For each ordered BA, an assembler retrieves the referenced batch, verifies the relationship between ordered metadata and payload content, places the batch at the next ledger height, and appends an HLF block to its local ledger. Multiple assemblers can perform this materialization independently, giving block consumers more places to read from without changing the order agreed by consensus.</p>
+<p>The scalable committer (SC) reads HLF blocks from assemblers through the Fabric <code>Deliver</code> API. The final block contains ordered transaction envelopes, but transaction validity is still decided downstream by the committer. The orderer guarantees total order, availability of ordered payloads, and Fabric-compatible block delivery. It may perform request admissibility and signature checks at router or batcher boundaries, but it does not perform the committer's endorsement validation, MVCC checks, namespace policy decisions, or commit decisions.</p>
+<p>Finally, the multi-party flow includes a control path for primary batcher problems. If a batcher suspects primary misbehavior, for example B4s3 in shard 3, it may complain to the consensus cluster. Given enough distinct complaints, consensus can exert control and change the primary of a shard. This control path lets the system recover from faulty or slow shard primaries while preserving the same high-level split: transaction payloads move through routers and batchers, ordering metadata moves through consenters, and assemblers join both paths into HLF blocks.</p>
+<h2 id="2-design-principles">2. Design Principles<a class="headerlink" href="#2-design-principles" title="Permanent link">&para;</a></h2>
+<p>The architecture focuses on keeping transaction payload work outside the consensus bottleneck path while preserving total order and BFT safety. Arma treats consensus as a scarce resource: consenters should spend their time ordering compact batch metadata and control events, while routers, batchers, and assemblers handle high-volume data movement and storage.</p>
+<p>The goals below follow from that separation. Each goal preserves Fabric compatibility at the system boundary while allowing Fabric-X Orderer to scale the internal data plane independently from the BFT ordering plane.</p>
+<p>Key principles:</p>
+<ol>
+<li><strong>Parallelism through Pipelining:</strong> Request processing is handled via a pipeline of server roles, where each stage executes a dedicated part of the total processing load.</li>
+<li><strong>Parallelism through Sharding:</strong> Add batcher shards to increase transaction intake, disk bandwidth, and batch creation capacity.</li>
+<li><strong>Separate ordering from data dissemination:</strong> Ordering is done on small messages, BAFs and BAs, whereas full transaction data in the form of blocks flows in a parallel path.</li>
+<li><strong>BFT ordering:</strong> Use SmartBFT among consenters to establish total order over batch attestations (BAs).</li>
+<li><strong>Small transactions:</strong> The transaction does not carry the certificate (identity) of endorsers and submitting client. Instead, it carries a short identifier which references to the full identity. The full identity is predefined and stored in memory. </li>
+<li><strong>Fabric compatibility:</strong> Expose Fabric Atomic Broadcast <code>Broadcast</code> and <code>Deliver</code> APIs at the client edge.</li>
+</ol>
+<p>Together these goals define the responsibility boundary of the orderer. The orderer makes transactions available in a deterministic block order; it does not decide final application validity. Downstream committers can therefore scale validation and commit logic without requiring consenters to process full transaction semantics.</p>
+<h2 id="3-system-components">3. System Components<a class="headerlink" href="#3-system-components" title="Permanent link">&para;</a></h2>
+<p>Fabric-X Orderer is split into role-specific services so each part can be scaled, secured, and operated according to its workload. Routers and assemblers face clients and block consumers, respectively, while batchers and consenters are internal services that move payloads and ordering metadata between parties.</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+<th>Main package</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Router</td>
+<td>Accepts client transactions, applies request rules, maps requests to shards, and forwards to batchers.</td>
+<td><a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/node/router"><code>node/router</code></a></td>
+</tr>
+<tr>
+<td>Batcher</td>
+<td>Collects requests, forms batches, persists batches, replicate batches, serves batches for assembler pull, and sends batch attestation fragments to consenters.</td>
+<td><a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/node/batcher"><code>node/batcher</code></a></td>
+</tr>
+<tr>
+<td>Consenter</td>
+<td>Runs SmartBFT consensus to order batch attestations and configuration decisions.</td>
+<td><a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/node/consensus"><code>node/consensus</code></a></td>
+</tr>
+<tr>
+<td>Assembler</td>
+<td>Reads ordered attestations, pulls batches from batchers, and writes Fabric-compatible blocks.</td>
+<td><a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/node/assembler"><code>node/assembler</code></a></td>
+</tr>
+</tbody>
+</table>
+<p>Routers and assemblers form the public client boundary. Batchers and consenters are internal ordering-service roles. </p>
+<p>Each role is intentionally narrow. Routers decide where a request should go, batchers make payloads durable and attestable, consenters decide total order, and assemblers materialize ordered metadata into blocks. </p>
+<h2 id="4-end-to-end-transaction-flow">4. End-to-End Transaction Flow<a class="headerlink" href="#4-end-to-end-transaction-flow" title="Permanent link">&para;</a></h2>
+<p>This section summarizes the normal data path described above. Control, configuration, failure handling, and reconfiguration paths are covered in the role-specific documents. The normal path starts at Fabric <code>Broadcast</code>, crosses the internal Arma pipeline, and ends at Fabric <code>Deliver</code>.</p>
+<ol>
+<li>Client opens a <code>Broadcast</code> stream to one or more routers. A correct client is expected to submit to try and submit to all routers, however it can stop trying after succesfully submiting to 2F+1 routers.</li>
+<li>Router receives <code>common.Envelope</code> messages, applies request rules, and maps each request to a shard.</li>
+<li>Router forwards the request to the batcher that belong to its party within that shard.</li>
+<li>Primary batcher inspects requests, inserts them into the request pool, cuts batches, persists batch payloads, and serves batches through <code>Deliver</code> for secondary pull.</li>
+<li>Secondary batchers pull primary batches through <code>Deliver</code>, verify them, persist local copies, send BAFs, and acknowledge the primary.</li>
+<li>Batchers emit batch attestation fragments (BAFs) and control events to consenters.</li>
+<li>Consenters run SmartBFT and produce a total order of batch attestations (BAs).</li>
+<li>Assembler consumes ordered batch attestations from consenters and fetches referenced batches from batchers.</li>
+<li>Assembler collates batch attestations and full batches into ordered HLF blocks and appends them to its local ledger.</li>
+<li>Client or committer opens a <code>Deliver</code> stream to an assembler and reads committed orderer blocks.</li>
+</ol>
+<p>The list is linear, but implementation is pipelined. Routers can keep accepting requests while batchers cut earlier requests, consenters order previous attestations, and assemblers prefetch already-ordered batches. This pipelining is important for throughput because no single stage must wait for an entire transaction lifecycle before processing the next item.</p>
+<p>This flow means consensus never needs to carry full transaction payloads in the common case. It orders metadata that points assemblers to batch payloads already stored by batchers. If a batch is ordered before a local assembler has the payload, the assembler waits for or fetches the matching batch rather than changing the decided order.</p>
+<h2 id="5-data-model">5. Data Model<a class="headerlink" href="#5-data-model" title="Permanent link">&para;</a></h2>
+<p>Core data items move through the pipeline. Each item exists at a different layer of abstraction: requests are client inputs, batches are payload containers, BAFs and batch attestations are ordering metadata, and blocks are the Fabric-compatible output read by committers.</p>
+<ul>
+<li><strong>Request:</strong> Client-submitted Fabric <code>common.Envelope</code> plus routing and validation metadata.</li>
+<li><strong>Batch:</strong> Ordered group of requests created by a batcher shard and persisted in batcher storage.</li>
+<li><strong>BAF:</strong> Batch Attestation Fragment. Signed metadata attesting to a stored batch digest and related batch metadata, sent from batchers to consenters.</li>
+<li><strong>Batch Attestation:</strong> Consensus-ordered metadata identifying a batch digest, shard, sequence, primary, and attesting signers in global order.</li>
+<li><strong>Block:</strong> Fabric-compatible block assembled from ordered batch metadata and fetched transaction payloads.</li>
+</ul>
+<p>The digest relationship between these data items is central to correctness. Consenters order compact references, and assemblers later check that fetched payloads match those references before writing blocks. This lets the system avoid moving payloads through consensus without losing linkage between ordered metadata and actual transaction bytes.</p>
+<p>The orderer does not decide final transaction validity. Invalid-by-application transactions can still appear in ordered blocks and are later handled by the committer. This is the same broad separation used by Fabric ordering services: ordering decides sequence and availability, while validation and commit decide ledger effects.</p>
+<h2 id="6-configuration-and-membership">6. Configuration and Membership<a class="headerlink" href="#6-configuration-and-membership" title="Permanent link">&para;</a></h2>
+<p>Each node is configured by two pieces of information: the shared configuration, which is encoded in a configuration block; and a local configuration which is stored in a local YAML file.</p>
+<p>Every node loads <code>config.NodeLocalConfig</code> from YAML. Local configuration a process which party it belongs to, where it listens, where it stores state, and which identity it uses. 
+The same binary can run different roles depending on which role is specified in the command starting the process. The server running a specific role then expects some role specific sections in the local config.</p>
+<p>Common sections include:</p>
+<ul>
+<li><code>General</code>: listen address, TLS, keepalive/backoff, bootstrap, MSP identity, and logging.</li>
+<li><code>FileStore</code>: local path for ledgers, databases, WALs, and role state.</li>
+<li>Role-specific section: exactly one of <code>Router</code>, <code>Batcher</code>, <code>Consensus</code>, or <code>Assembler</code>.</li>
+</ul>
+<p>Network-wide membership comes from the shared configuration, which is encoded in a config block. To boostrap a network, all nodes must be given the same genesis block. The path to the genesis block is referenced by <code>General.Bootstrap</code> key. 
+All nodes in a deployment must use the same genesis block configuration.</p>
+<p>Like in Fabric, the configuration block is part of the ledger, and can be changed only through a configuration transaction.</p>
+<p>Configuration generation is typically handled by <a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/cmd/armageddon/README.md"><code>armageddon</code></a>. Generated files reduce accidental mismatch between parties, but operators still need to distribute identical genesis/configuration inputs and correct local identities to every node.</p>
+<h2 id="7-state-persistence-and-recovery">7. State, Persistence, and Recovery<a class="headerlink" href="#7-state-persistence-and-recovery" title="Permanent link">&para;</a></h2>
+<p>Persistence is role-specific, but every role uses local state to restart without forgetting already processed configuration or ordering progress. Durable state is what lets a node recover without replaying the entire deployment from genesis or asking another role to reconstruct private local progress.</p>
+<ul>
+<li>Routers store configuration state and the last replicated consensus decition in a WAL (Write Ahead Log) under the local file store.</li>
+<li>Batchers persist batches in an array of ledgers, configuration state, and the last replicated consensus decision in a WAL.</li>
+<li>Consenters persist SmartBFT messages in a WAL and decision blocks (including configuration) in a ledger.</li>
+<li>Assemblers persist the final block ledger and recover from metadata stored in each block.</li>
+</ul>
+<p>On restart, a node reloads local config, reads bootstrap/shared configuration, reopens local stores, and resumes from persisted state. Recovery depends on the role: routers resume decision tracking, batchers reopen batch storage, consenters rebuild consensus state, and assemblers scan/reopen the output ledger.</p>
+<p>The important recovery invariant is monotonic progress. Nodes should not forget ordered decisions, already-persisted batches, or block heights they have exposed to consumers. Role-specific WALs, ledgers, and stores protect that invariant while allowing the system to continue after process restarts or host failures.</p>
+<h2 id="8-scaling-and-fault-tolerance">8. Scaling and Fault Tolerance<a class="headerlink" href="#8-scaling-and-fault-tolerance" title="Permanent link">&para;</a></h2>
+<p>Arma scales by separating work across roles and shards. The highest-volume data path is handled by routers, batchers, and assemblers, while the BFT path remains focused on compact metadata and control events.
+The resource demands of the different server roles are not the same:</p>
+<ul>
+<li>Provision routers with strong compute and networking capabilities. Storage requirements are very small.</li>
+<li>Provision batchers and assemblers with a fast, high-end, large storage system. High IOPS and bandwith is required, as well as the ability to hold all the blocks for a long period of time. The batchers and assemblers also need a strong network.</li>
+<li>Provision batcher shards to scale transaction intake and batch storage. The number of shards cannot be changed or reconfigured in the current version.</li>
+<li>Consensus nodes need less resources, as they process and store a much smaller volume of messages.</li>
+</ul>
+<p>Fault tolerance comes from deploying several parties. Each party is assumed to be an administrative unit (an organization) in which the subcomponents trust each other. 
+In the Arma protocol, a party is the basic unit of failure: if any element of the party has failed, we consider the entire party as faulty.
+Different parties may belong to different organizations that do not trust each other.</p>
+<p>The Arma protocol can tolerate <strong>F=Floor(N/3)</strong> failures, where <strong>N</strong> is the number of parties. That is, in order to tolerate <strong>F</strong> failures, one must deploy <strong>N &gt;= 3F+1</strong> parties.
+Arma provides tolerance against Byzantine failures, i.e., arbitrary deviations from the protocol, which includes crashes as well as malicious behavior.</p>
+<p>Thus, the minimal deployment which supports fault tolerance has 4 parties. The recommended minimal production deployment has 7 parties, as this allows to bring one party down for maintenance while tolerating one extra unplanned failure.</p>
+<p>Production deployments should enable TLS/mTLS and use identical genesis/configuration inputs across all parties. Correct configuration and certificate material are part of fault tolerance: a node with wrong membership or trust roots may be alive but unable to participate safely in routing, attestation, consensus, or delivery.</p>
+<h2 id="9-client-apis">9. Client APIs<a class="headerlink" href="#9-client-apis" title="Permanent link">&para;</a></h2>
+<p>Routers implement Fabric Atomic Broadcast <code>Broadcast</code>. Assemblers implement Fabric Atomic Broadcast <code>Deliver</code>. These APIs preserve the client-facing shape expected by Fabric applications and committers while hiding Arma's internal sharding and BFT metadata flow.</p>
+<p>Batchers and consenters expose internal gRPC services used by other orderer roles. These internal services carry routed requests, batch data, control events, consensus messages, and decision streams. They are not intended as general client submission or block-consumption APIs.</p>
+<p>Operationally, clients should submit transactions to routers and read ordered blocks from assemblers. Internal services should be protected by node-to-node TLS/mTLS and treated as part of the ordering-service control plane and data plane, not as application-facing endpoints.</p>
+<h2 id="10-observability">10. Observability<a class="headerlink" href="#10-observability" title="Permanent link">&para;</a></h2>
+<p>Each role defines metrics in its package-level <code>metrics.go</code> file. Monitoring bind settings are controlled by <code>Operations.ListenAddress</code> and <code>Operations.ListenPort</code>. Periodic metrics logging is controlled by <code>Metrics.MetricsLogInterval</code>.</p>
+<p>Useful bottleneck signals include router submission/stream behavior, batcher request-pool pressure, consenter BAF/decision throughput, and assembler fetch/cache/collation progress. These signals should be read together because backpressure often appears downstream first and then propagates upstream.</p>
+<p>For example, slow assembler fetches may indicate missing or slow batcher data, while low consenter decision throughput may indicate BAF threshold delays or consensus pressure. Router rejection rates, batcher mempool size, and assembler collation lag together give a clearer picture than any single metric alone.</p>
+<h2 id="11-implementation-map">11. Implementation Map<a class="headerlink" href="#11-implementation-map" title="Permanent link">&para;</a></h2>
+<p>The role-specific documents contain deeper operational and implementation details. Start with this architecture document for the overall flow, then use the links below to inspect startup behavior, APIs, metrics, and failure handling for each service.</p>
+<ul>
+<li>Router details: <a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/node/router"><code>node/router</code></a></li>
+<li>Batcher details: <a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/node/batcher"><code>node/batcher</code></a></li>
+<li>Consenter details: <a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/node/consensus"><code>node/consensus</code></a></li>
+<li>Assembler details: <a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/node/assembler"><code>node/assembler</code></a></li>
+<li>Deployment guide: <a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/deployment/README.md">../deployment/README.md</a></li>
+<li>Configuration generator: <a href="https://github.com/hyperledger/fabric-x-orderer/blob/main/cmd/armageddon/README.md">../cmd/armageddon/README.md</a></li>
+</ul>
+<p>For code navigation, map role names directly to top-level packages under <code>node/</code>. Configuration generation and deployment files are useful when checking how role-level concepts become concrete endpoints, certificates, local paths, and bootstrap material.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

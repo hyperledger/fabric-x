@@ -1,0 +1,3483 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../validator-committer/">
+      
+      
+        <link rel="next" href="../sidecar-block-diagram/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Query Service - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#query-service" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Query Service
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-view-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. View Management
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-api-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. API Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. API Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#beginview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BeginView
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#endview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EndView
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getrows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GetRows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getnamespacepolicies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GetNamespacePolicies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getconfigtransaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GetConfigTransaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Performance Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-pooling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Pooling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-and-query-batching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View and Query Batching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batching-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batching Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lock-free-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lock-Free Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-batching-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Batching Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-management-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Management Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#implementation-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-1-view-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1. View Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-query-batching-and-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2. Query Batching and Execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-3-result-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3. Result Distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lock-free-design_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lock-Free Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-handling-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling and Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Overview
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-view-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. View Management
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-api-operations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. API Operations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. API Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#beginview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        BeginView
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#endview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        EndView
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getrows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GetRows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getnamespacepolicies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GetNamespacePolicies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getconfigtransaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GetConfigTransaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Performance Optimization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-pooling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Pooling
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-and-query-batching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View and Query Batching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batching-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Batching Strategy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lock-free-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lock-Free Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Configuration
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Server Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Configuration
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-batching-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Query Batching Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#view-management-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        View Management Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connection-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#implementation-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Implementation Flow
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Implementation Flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#stage-1-view-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 1. View Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-2-query-batching-and-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 2. Query Batching and Execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stage-3-result-distribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stage 3. Result Distribution
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lock-free-design_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Lock-Free Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#error-handling-and-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Error Handling and Recovery
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+Copyright IBM Corp. All Rights Reserved.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
+<h1 id="query-service">Query Service<a class="headerlink" href="#query-service" title="Permanent link">&para;</a></h1>
+<ol>
+<li><a href="#1-overview">Overview</a><ul>
+<li><a href="#core-responsibilities">Core Responsibilities</a></li>
+</ul>
+</li>
+<li><a href="#2-view-management">View Management</a></li>
+<li><a href="#3-api-operations">API Operations</a><ul>
+<li><a href="#beginview">BeginView</a></li>
+<li><a href="#endview">EndView</a></li>
+<li><a href="#getrows">GetRows</a></li>
+<li><a href="#getnamespacepolicies">GetNamespacePolicies</a></li>
+<li><a href="#getconfigtransaction">GetConfigTransaction</a></li>
+</ul>
+</li>
+<li><a href="#4-performance-optimization">Performance Optimization</a><ul>
+<li><a href="#connection-pooling">Connection Pooling</a></li>
+<li><a href="#view-and-query-batching">View and Query Batching</a></li>
+<li><a href="#batching-strategy">Batching Strategy</a></li>
+<li><a href="#lock-free-design">Lock-Free Design</a></li>
+</ul>
+</li>
+<li><a href="#5-configuration">Configuration</a></li>
+<li><a href="#6-implementation">Implementation</a><ul>
+<li><a href="#implementation-flow">Implementation Flow</a></li>
+<li><a href="#lock-free-design">Lock-Free Design</a></li>
+<li><a href="#error-handling-and-recovery">Error Handling and Recovery</a></li>
+</ul>
+</li>
+</ol>
+<h2 id="1-overview">1. Overview<a class="headerlink" href="#1-overview" title="Permanent link">&para;</a></h2>
+<p>The Query Service is a component of the Fabric-X Committer architecture that provides efficient, consistent read-only access to the state database. It implements a view-based query mechanism that allows clients to retrieve data with specific isolation guarantees while optimizing database access through sophisticated batching techniques.</p>
+<h3 id="core-responsibilities">Core Responsibilities<a class="headerlink" href="#core-responsibilities" title="Permanent link">&para;</a></h3>
+<p>The Query Service performs several key functions:</p>
+<ol>
+<li><strong>Namespace Access</strong>: Provides access to data across different namespaces.</li>
+<li><strong>Configuration Access</strong>: Retrieves system configuration and policy information.</li>
+<li><strong>Efficient Data Retrieval</strong>: Optimizes database access by batching multiple queries and views together.</li>
+<li><strong>Efficient View Management</strong>: Creates and manages read-only transactions (AKA views) with configurable isolation levels and timeouts.</li>
+</ol>
+<h2 id="2-view-management">2. View Management<a class="headerlink" href="#2-view-management" title="Permanent link">&para;</a></h2>
+<p>The Query Service implements a view-based query model that allows clients to:</p>
+<ol>
+<li>Begin a view with specific isolation requirements</li>
+<li>Execute multiple queries within the context of that view</li>
+<li>End the view when finished</li>
+</ol>
+<p>A views represents a read-only transaction that provide access to the database with configurable isolation levels:</p>
+<ul>
+<li><strong>Read Uncommitted</strong>: Lowest isolation level, may read uncommitted changes</li>
+<li><strong>Read Committed</strong>: Only reads committed data, but may see changes during the view</li>
+<li><strong>Repeatable Read</strong>: Ensures the same data is returned for repeated reads</li>
+<li><strong>Serializable</strong>: Highest isolation level, ensures transactions are completely isolated</li>
+</ul>
+<p>Consistent access is provided only with <strong>Repeatable Read</strong> and <strong>Serializable</strong>.</p>
+<p>Views can also be configured as deferred or non-deferred, affecting transaction behavior. In deferred mode, constraint violations and conflicts are checked only at transaction commit time, potentially allowing operations that would otherwise fail immediately. In non-deferred mode, these checks happen at the time of each operation, causing immediate failures when violations occur. This parameter allows applications to balance between early error detection and performance optimization.</p>
+<h2 id="3-api-operations">3. API Operations<a class="headerlink" href="#3-api-operations" title="Permanent link">&para;</a></h2>
+<p>The Query Service implements the <code>QueryServiceServer</code> interface defined in the Protocol Buffers API:</p>
+<h3 id="beginview">BeginView<a class="headerlink" href="#beginview" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">BeginView</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="w"> </span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">ViewParameters</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+<p>Begins a new view with the specified parameters, including isolation level and timeout. Returns a view identifier that can be used for subsequent queries.
+It may create a new read-only database transation, or reuse an existing one.
+See <a href="#6-performance-optimization">6. Performance Optimization</a> below.</p>
+<h3 id="endview">EndView<a class="headerlink" href="#endview" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">EndView</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">view</span><span class="w"> </span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">View</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+<p>Ends a previously created view, releasing any associated resources.</p>
+<h3 id="getrows">GetRows<a class="headerlink" href="#getrows" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">GetRows</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">query</span><span class="w"> </span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">Query</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">Rows</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+<p>Retrieves rows from the database based on the specified query parameters. The query includes:</p>
+<ul>
+<li>A view identifier</li>
+<li>A list of namespaces to query</li>
+<li>For each namespace, a list of keys to retrieve</li>
+</ul>
+<h3 id="getnamespacepolicies">GetNamespacePolicies<a class="headerlink" href="#getnamespacepolicies" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">GetNamespacePolicies</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">Empty</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">protoblocktx</span><span class="p">.</span><span class="nx">NamespacePolicies</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+<p>Retrieves the policies associated with all namespaces from the metadata namespace.</p>
+<h3 id="getconfigtransaction">GetConfigTransaction<a class="headerlink" href="#getconfigtransaction" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">GetConfigTransaction</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">Empty</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">protoblocktx</span><span class="p">.</span><span class="nx">ConfigTransaction</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span>
+</code></pre></div>
+<p>Retrieves the current configuration transaction from the config namespace.</p>
+<h2 id="4-performance-optimization">4. Performance Optimization<a class="headerlink" href="#4-performance-optimization" title="Permanent link">&para;</a></h2>
+<h3 id="connection-pooling">Connection Pooling<a class="headerlink" href="#connection-pooling" title="Permanent link">&para;</a></h3>
+<p>The Query Service uses a connection pool to efficiently manage database connections:</p>
+<ol>
+<li><strong>Connection Reuse</strong>: Connections are reused across multiple queries to reduce overhead. </li>
+<li><strong>Connection Limits</strong>: The pool size is configurable to prevent resource exhaustion.</li>
+<li><strong>Transaction Management</strong>: Transactions are created and managed as needed.</li>
+</ol>
+<h3 id="view-and-query-batching">View and Query Batching<a class="headerlink" href="#view-and-query-batching" title="Permanent link">&para;</a></h3>
+<p>To optimize database access, the Query Service implements a sophisticated batching mechanism:</p>
+<ol>
+<li><strong>View Aggregation</strong>: Multiple views are aggregated into a single read-only database transaction based on the view parameters and timing to reduce number of active database transactions and reduce the number of states the database have to maintain.</li>
+<li><strong>Request Aggregation</strong>: Multiple client requests are aggregated into batches based on namespace and timing to reduce number of round-trip to the database and reduce the number of tranactions the database have to manage.</li>
+<li><strong>Concurrent Processing</strong>: Batches are processed concurrently to maximize throughput.</li>
+<li><strong>Result Distribution</strong>: Results are distributed back to the appropriate clients.</li>
+</ol>
+<h3 id="batching-strategy">Batching Strategy<a class="headerlink" href="#batching-strategy" title="Permanent link">&para;</a></h3>
+<p>The Query Service employs a sophisticated batching strategy to optimize database access:</p>
+<ol>
+<li><strong>Time-Based Batching</strong>: Queries and views are collected over a configurable time window before being executed.</li>
+<li><strong>Parameter-Based Grouping</strong>: Queries and views with similar parameters (isolation level, deferred status) are grouped together.</li>
+<li><strong>Namespace Separation</strong>: Queries are separated by namespace to allow for parallel processing.</li>
+</ol>
+<h3 id="lock-free-design">Lock-Free Design<a class="headerlink" href="#lock-free-design" title="Permanent link">&para;</a></h3>
+<p>To minimize contention and maximize throughput, the Query Service uses lock-free data structures:</p>
+<ol>
+<li><strong>Concurrent Maps</strong>: For storing view and batch information.</li>
+<li><strong>Atomic Operations</strong>: For updating counters and state.</li>
+<li><strong>Channel-Based Communication</strong>: For signaling between components.</li>
+</ol>
+<h2 id="5-configuration">5. Configuration<a class="headerlink" href="#5-configuration" title="Permanent link">&para;</a></h2>
+<p>The Query Service configuration is designed to optimize database access by efficiently batching queries while maintaining performance and resource constraints. The configuration is defined in a YAML file with the following key parameters:</p>
+<h3 id="server-configuration">Server Configuration<a class="headerlink" href="#server-configuration" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Server</strong>: Network configuration for the gRPC server, including address and port.</li>
+</ul>
+<h3 id="database-configuration">Database Configuration<a class="headerlink" href="#database-configuration" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Database</strong>: Parameters for connecting to the underlying database, including:</li>
+<li>Connection string</li>
+<li>Credentials</li>
+<li>Connection pool settings</li>
+<li>Timeout settings</li>
+</ul>
+<h3 id="query-batching-parameters">Query Batching Parameters<a class="headerlink" href="#query-batching-parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>MinBatchKeys</strong>: Minimum number of keys required to trigger a batch query execution. When a batch contains at least this many keys, it becomes eligible for execution.</li>
+<li><strong>MaxBatchWait</strong>: Maximum time a batch will wait for additional keys before being executed, even if it hasn't reached MinBatchKeys. This ensures queries don't wait indefinitely.</li>
+</ul>
+<h3 id="view-management-parameters">View Management Parameters<a class="headerlink" href="#view-management-parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>ViewAggregationWindow</strong>: Time window during which views with identical parameters will be batched together. Views created within this window that have the same isolation level and deferred status will share database resources.</li>
+<li><strong>MaxAggregatedViews</strong>: Maximum number of views that can be aggregated together in a single batch. This prevents excessive resource consumption.</li>
+<li><strong>MaxViewTimeout</strong>: Maximum allowed lifetime for a view. This includes the time required to execute the last query in the view. If a query is executed after this timeout expires, it will be aborted.</li>
+</ul>
+<h3 id="connection-management">Connection Management<a class="headerlink" href="#connection-management" title="Permanent link">&para;</a></h3>
+<p>The number of database connections should be carefully configured based on the view parameters. The recommended minimum number of connections can be calculated as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>(MaxViewTimeout / ViewAggregationWindow) * &lt;number-of-used-view-configuration-permutations&gt;
+</code></pre></div>
+<p>Where the number of view configuration permutations is determined by the isolation levels and deferred status options in use (maximum of 8 permutations: 4 isolation levels × 2 deferred options).</p>
+<p>If there are insufficient database connections available, queries will wait until a connection becomes available, which may exceed the MaxBatchWait time.</p>
+<p>A sample configuration structure is defined in the <code>Config</code> type within the query package:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Config</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">   </span><span class="nx">Server</span><span class="w">                </span><span class="o">*</span><span class="nx">connection</span><span class="p">.</span><span class="nx">ServerConfig</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">   </span><span class="nx">Monitoring</span><span class="w">            </span><span class="o">*</span><span class="nx">connection</span><span class="p">.</span><span class="nx">ServerConfig</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">   </span><span class="nx">Database</span><span class="w">              </span><span class="o">*</span><span class="nx">vc</span><span class="p">.</span><span class="nx">DatabaseConfig</span><span class="w">     </span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">   </span><span class="nx">MinBatchKeys</span><span class="w">          </span><span class="kt">int</span><span class="w">                    </span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">   </span><span class="nx">MaxBatchWait</span><span class="w">          </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w">          </span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">   </span><span class="nx">ViewAggregationWindow</span><span class="w"> </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w">         </span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="w">   </span><span class="nx">MaxAggregatedViews</span><span class="w">    </span><span class="kt">int</span><span class="w">                    </span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="w">   </span><span class="nx">MaxViewTimeout</span><span class="w">        </span><span class="nx">time</span><span class="p">.</span><span class="nx">Duration</span><span class="w">         </span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="w">   </span><span class="c1">// MaxRequestKeys is the maximum number of keys allowed in a single query request.</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="w">   </span><span class="c1">// This applies to both GetRows (total keys across all namespaces) and</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="w">   </span><span class="c1">// GetTransactionStatus (number of transaction IDs).</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="w">   </span><span class="c1">// Set to 0 to disable the limit.</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="w">   </span><span class="nx">MaxRequestKeys</span><span class="w"> </span><span class="kt">int</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="6-implementation">6. Implementation<a class="headerlink" href="#6-implementation" title="Permanent link">&para;</a></h2>
+<p>The Query Service consists of several key components:</p>
+<ul>
+<li><strong>Service</strong>: The main entry point that implements the gRPC <code>QueryServiceServer</code> interface. It handles incoming requests, manages views, and coordinates query execution.</li>
+<li><strong>ViewsBatcher</strong>: The component that manages views and batches queries for efficient database access. It uses lock-free data structures to minimize contention and maximize throughput.</li>
+<li><strong>ViewHolder</strong>: Represents a client's view of the database with specific isolation requirements. Each view has a unique ID and parameters that determine its behavior.</li>
+<li><strong>Batcher</strong>: Aggregates queries with similar parameters to optimize database access. Multiple views with the same parameters may share a batcher.</li>
+<li><strong>NamespaceQueryBatch</strong>: Collects keys to be queried within a specific namespace. Once a batch reaches a certain size or age, it is executed as a single database query.</li>
+</ul>
+<h3 id="implementation-flow">Implementation Flow<a class="headerlink" href="#implementation-flow" title="Permanent link">&para;</a></h3>
+<p>The Query Service operates with the following three stages.</p>
+<h4 id="stage-1-view-management">Stage 1. View Management<a class="headerlink" href="#stage-1-view-management" title="Permanent link">&para;</a></h4>
+<p>View management provides clients with configurable isolation levels to the database.
+This stage is optional as the client can call <code>GetRows()</code> with <code>nil</code> view.
+Using <code>nil</code> view does not offer any consistency between future calls to <code>GetRows()</code>.</p>
+<p><strong>a. View Creation:</strong></p>
+<p>When a client calls <code>BeginView()</code>, the service:</p>
+<ol>
+<li>Validates the requested timeout, capping it at the configured maximum if necessary</li>
+<li>Generates a unique UUID for the view</li>
+<li>Creates a new <code>viewHolder</code> with the specified parameters</li>
+<li>Stores the view in the <code>viewIDToViewHolder</code> map</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">q</span><span class="w"> </span><span class="o">*</span><span class="nx">Service</span><span class="p">)</span><span class="w"> </span><span class="nx">BeginView</span><span class="p">(</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">    </span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="w"> </span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">ViewParameters</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">View</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">    </span><span class="c1">// ...</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="c1">// Validate and cap timeout.</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">params</span><span class="p">.</span><span class="nx">TimeoutMilliseconds</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">||</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">        </span><span class="kt">int64</span><span class="p">(</span><span class="nx">params</span><span class="p">.</span><span class="nx">TimeoutMilliseconds</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">q</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">MaxViewTimeout</span><span class="p">.</span><span class="nx">Milliseconds</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">        </span><span class="nx">params</span><span class="p">.</span><span class="nx">TimeoutMilliseconds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kt">uint64</span><span class="p">(</span><span class="nx">q</span><span class="p">.</span><span class="nx">config</span><span class="p">.</span><span class="nx">MaxViewTimeout</span><span class="p">.</span><span class="nx">Milliseconds</span><span class="p">())</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">    </span><span class="c1">// Generate unique view ID and create view.</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="c1">// We try again if we have view-id collision.</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">        </span><span class="nx">viewID</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">getUUID</span><span class="p">()</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">q</span><span class="p">.</span><span class="nx">batcher</span><span class="p">.</span><span class="nx">makeView</span><span class="p">(</span><span class="nx">viewID</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="o">&amp;</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">View</span><span class="p">{</span><span class="nx">Id</span><span class="p">:</span><span class="w"> </span><span class="nx">viewID</span><span class="p">},</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>b. View Parameters:</strong></p>
+<p>Each view is configured with specific parameters:</p>
+<ol>
+<li>
+<p><strong>Isolation Level</strong>: Determines the consistency guarantees for the view</p>
+<ul>
+<li>Read Uncommitted (0): Lowest isolation, may read uncommitted changes</li>
+<li>Read Committed (1): Only reads committed data</li>
+<li>Repeatable Read (2): Ensures the same data is returned for repeated reads</li>
+<li>Serializable (3): (default) Highest isolation, ensures transactions are completely isolated</li>
+</ul>
+</li>
+<li>
+<p><strong>Deferred Status</strong>: Controls when isolation level violations are checked</p>
+<ul>
+<li>Non-deferred (false): Checks happen immediately for each operation</li>
+<li>Deferred (true): (default) Checks happen only at transaction commit time</li>
+</ul>
+</li>
+<li>
+<p><strong>Timeout</strong>: Maximum lifetime for the view</p>
+<ul>
+<li>If omitted, it defaults to the maximum value defined in the service configuration</li>
+</ul>
+</li>
+</ol>
+<p><strong>c. View Aggregation:</strong></p>
+<p>To optimize resource usage, views with identical parameters created within the <code>ViewAggregationWindow</code> are batched together:</p>
+<ol>
+<li>The service calculates a parameter key based on the isolation level and deferred status</li>
+<li>It checks if a batcher already exists for these parameters</li>
+<li>If a batcher exists and is within the aggregation window, the view is associated with it</li>
+<li>Otherwise, a new batcher is created</li>
+</ol>
+<p><strong>d. View Termination:</strong></p>
+<p>When a client calls <code>EndView()</code> or when a view times out:</p>
+<ol>
+<li>The view is removed from the <code>viewIDToViewHolder</code> map</li>
+<li>If the view was the last reference to its batcher, the batcher is cleaned up</li>
+<li>Any resources associated with the view are released</li>
+</ol>
+<h4 id="stage-2-query-batching-and-execution">Stage 2. Query Batching and Execution<a class="headerlink" href="#stage-2-query-batching-and-execution" title="Permanent link">&para;</a></h4>
+<p>Query batching is an optimization that allows the service to minimize database access by combining multiple queries into a single operation.</p>
+<p><strong>a. Query Assignment:</strong></p>
+<p>When a client calls <code>GetRows()</code>, the service:</p>
+<ol>
+<li>Retrieves the view associated with the provided view ID</li>
+<li>For each namespace in the query:<ul>
+<li>Gets or creates a <code>namespaceQueryBatch</code> for that namespace</li>
+<li>Adds the requested keys to the batch</li>
+<li>Returns a reference to the batch to the client</li>
+</ul>
+</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">q</span><span class="w"> </span><span class="o">*</span><span class="nx">Service</span><span class="p">)</span><span class="w"> </span><span class="nx">assignRequest</span><span class="p">(</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">query</span><span class="w"> </span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">Query</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="o">*</span><span class="nx">namespaceQueryBatch</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="c1">// ...</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="nx">batcher</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">q</span><span class="p">.</span><span class="nx">batcher</span><span class="p">.</span><span class="nx">getBatcher</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">query</span><span class="p">.</span><span class="nx">View</span><span class="p">)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="nx">batches</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="o">*</span><span class="nx">namespaceQueryBatch</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">query</span><span class="p">.</span><span class="nx">Namespaces</span><span class="p">))</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">ns</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">query</span><span class="p">.</span><span class="nx">Namespaces</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">        </span><span class="nx">batches</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">batcher</span><span class="p">.</span><span class="nx">addNamespaceKeys</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span><span class="w"> </span><span class="nx">ns</span><span class="p">.</span><span class="nx">NsId</span><span class="p">,</span><span class="w"> </span><span class="nx">ns</span><span class="p">.</span><span class="nx">Keys</span><span class="p">)</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">batches</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>b. Batch Execution Triggers:</strong></p>
+<p>A batch is executed when either of these conditions is met:</p>
+<ol>
+<li>The batch reaches <code>MinBatchKeys</code> keys</li>
+<li>The batch has been waiting for <code>MaxBatchWait</code> duration</li>
+</ol>
+<p><strong>c. Database Query Execution:</strong></p>
+<p>When a batch is ready for execution:</p>
+<ol>
+<li>The batcher acquires a database connection from the pool</li>
+<li>It constructs a SQL query that retrieves all keys in the batch in a single operation</li>
+<li>The query is executed with the appropriate isolation level</li>
+<li>Results are stored in the batch for distribution to clients</li>
+</ol>
+<p><strong>d. Concurrent Batch Management:</strong></p>
+<p>Multiple batches can be in different stages simultaneously:</p>
+<ol>
+<li>Some batches may be collecting keys</li>
+<li>Others may be waiting to reach the minimum batch size</li>
+<li>Some may be executing database queries</li>
+<li>Others may be distributing results to clients</li>
+</ol>
+<p>The service uses lock-free data structures to manage this concurrency efficiently.</p>
+<h4 id="stage-3-result-distribution">Stage 3. Result Distribution<a class="headerlink" href="#stage-3-result-distribution" title="Permanent link">&para;</a></h4>
+<p>Once a batch query completes, the results need to be distributed to the clients that requested them.</p>
+<p><strong>a. Result Storage:</strong></p>
+<p>When a batch query completes:</p>
+<ol>
+<li>The results are parsed from the database response</li>
+<li>They are stored in a map keyed by the key bytes</li>
+<li>The batch is marked as finalized</li>
+</ol>
+<p><strong>b. Client Notification:</strong></p>
+<p>Clients waiting for results are notified through a combination of:</p>
+<ol>
+<li>Mutex-protected state changes</li>
+<li>Context cancellation for error cases</li>
+<li>Direct result access for successful queries</li>
+</ol>
+<p><strong>c. Result Retrieval:</strong></p>
+<p>When <code>waitForRows()</code> is called on a batch:</p>
+<ol>
+<li>If the batch is already finalized, results are returned immediately</li>
+<li>Otherwise, the client waits until the batch is finalized or the context is canceled</li>
+<li>Once finalized, the client extracts only the results for the keys it requested</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">func</span><span class="w"> </span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="o">*</span><span class="nx">namespaceQueryBatch</span><span class="p">)</span><span class="w"> </span><span class="nx">waitForRows</span><span class="p">(</span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">keys</span><span class="w"> </span><span class="p">[][]</span><span class="kt">byte</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">Row</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span><span class="c1">// Wait for batch to be finalized or context to be canceled.</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="k">select</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="o">&lt;-</span><span class="nx">b</span><span class="p">.</span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Done</span><span class="p">():</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="c1">// Query completed.</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">    </span><span class="c1">// ...</span>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">    </span><span class="c1">// Extract results for requested keys</span>
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">    </span><span class="nx">res</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">make</span><span class="p">([]</span><span class="o">*</span><span class="nx">protoqueryservice</span><span class="p">.</span><span class="nx">Row</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">keys</span><span class="p">))</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">keys</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="c1">// Get result for this key from the batch results.</span>
+<a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">row</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">q</span><span class="p">.</span><span class="nx">result</span><span class="p">[</span><span class="kt">string</span><span class="p">(</span><span class="nx">key</span><span class="p">)];</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">row</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="w">            </span><span class="nx">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">append</span><span class="p">(</span><span class="nx">res</span><span class="p">,</span><span class="w"> </span><span class="nx">row</span><span class="p">)</span>
+<a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">rows</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="lock-free-design_1">Lock-Free Design<a class="headerlink" href="#lock-free-design_1" title="Permanent link">&para;</a></h3>
+<p>The Query Service uses lock-free data structures to minimize contention and maximize throughput.</p>
+<p><strong>a. Concurrent Maps:</strong></p>
+<p>The service uses specialized concurrent maps for:</p>
+<ol>
+<li>Mapping view IDs to view holders</li>
+<li>Mapping view parameters to batchers</li>
+<li>Mapping namespaces to query batches</li>
+</ol>
+<p>These maps allow multiple goroutines to access and modify the maps concurrently without blocking.</p>
+<p><strong>b. Update-or-Create Pattern:</strong></p>
+<p>A key pattern used throughout the service is the <code>mapUpdateOrCreate</code> function, which:</p>
+<ol>
+<li>Attempts to load an existing value from a map</li>
+<li>If found, tries to update it using a provided function</li>
+<li>If not found or update fails, creates a new value</li>
+<li>Uses atomic compare-and-swap operations to ensure consistency</li>
+</ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">func</span><span class="w"> </span><span class="nx">mapUpdateOrCreate</span><span class="p">[</span><span class="nx">K</span><span class="p">,</span><span class="w"> </span><span class="nx">V</span><span class="w"> </span><span class="kt">any</span><span class="p">](</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">    </span><span class="nx">ctx</span><span class="w"> </span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span><span class="w"> </span><span class="nx">m</span><span class="w"> </span><span class="o">*</span><span class="nx">utils</span><span class="p">.</span><span class="nx">SyncMap</span><span class="p">[</span><span class="nx">K</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="nx">V</span><span class="p">],</span><span class="w"> </span><span class="nx">key</span><span class="w"> </span><span class="nx">K</span><span class="p">,</span><span class="w"> </span><span class="nx">methods</span><span class="w"> </span><span class="nx">updateOrCreate</span><span class="p">[</span><span class="nx">V</span><span class="p">],</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">V</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nx">val</span><span class="p">,</span><span class="w"> </span><span class="nx">loaded</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">Load</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">        </span><span class="c1">// If there is a value, and we can update it, then return it.</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">loaded</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">val</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nx">methods</span><span class="p">.</span><span class="nx">update</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nx">val</span><span class="p">,</span><span class="w"> </span><span class="kc">nil</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">            </span><span class="p">}</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a>
+<a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">        </span><span class="c1">// Otherwise, let's try to assign a new value.</span>
+<a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">        </span><span class="nx">newVal</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">methods</span><span class="p">.</span><span class="nx">create</span><span class="p">()</span>
+<a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">assigned</span><span class="w"> </span><span class="kt">bool</span>
+<a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">!</span><span class="nx">loaded</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">            </span><span class="nx">val</span><span class="p">,</span><span class="w"> </span><span class="nx">loaded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">LoadOrStore</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">newVal</span><span class="p">)</span>
+<a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a><span class="w">            </span><span class="nx">assigned</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">!</span><span class="nx">loaded</span>
+<a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nx">assigned</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">CompareAndSwap</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">val</span><span class="p">,</span><span class="w"> </span><span class="nx">newVal</span><span class="p">);</span><span class="w"> </span><span class="o">!</span><span class="nx">assigned</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a><span class="w">            </span><span class="c1">// If the CAS failed, we need to load the new value.</span>
+<a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="w">            </span><span class="nx">val</span><span class="p">,</span><span class="w"> </span><span class="nx">loaded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">m</span><span class="p">.</span><span class="nx">Load</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span>
+<a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a>
+<a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nx">assigned</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a><span class="w">            </span><span class="nx">methods</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="nx">newVal</span><span class="p">)</span>
+<a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="w">            </span><span class="nx">val</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newVal</span>
+<a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a><span class="w">            </span><span class="nx">loaded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-10-28" name="__codelineno-10-28" href="#__codelineno-10-28"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-10-29" name="__codelineno-10-29" href="#__codelineno-10-29"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-10-30" name="__codelineno-10-30" href="#__codelineno-10-30"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">Err</span><span class="p">()</span>
+<a id="__codelineno-10-31" name="__codelineno-10-31" href="#__codelineno-10-31"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>c. Minimal Locking:</strong></p>
+<p>When locks are necessary, they are used with minimal scope:</p>
+<ol>
+<li>Fine-grained locks protect only the specific data being modified</li>
+<li>Operations that don't modify shared state are performed outside lock sections</li>
+<li>Long-running operations like database queries are performed without holding locks</li>
+</ol>
+<h3 id="error-handling-and-recovery">Error Handling and Recovery<a class="headerlink" href="#error-handling-and-recovery" title="Permanent link">&para;</a></h3>
+<p>The Query Service is designed to handle various error conditions gracefully.</p>
+<p><strong>a. View Timeout Handling:</strong></p>
+<p>Each view has a context with a timeout based on the client's request:</p>
+<ol>
+<li>When a view times out, its context is canceled</li>
+<li>All operations associated with the view receive context cancellation errors</li>
+<li>Resources associated with the view are cleaned up</li>
+</ol>
+<p><strong>b. Database Connection Failures:</strong></p>
+<p>If a database connection fails:</p>
+<ol>
+<li>The affected batch is marked as failed</li>
+<li>Clients waiting for results receive an error</li>
+<li>The service continues processing other batches</li>
+<li>New connection attempts are made for subsequent operations</li>
+</ol>
+<p><strong>c. Invalid View Handling:</strong></p>
+<p>If a client attempts to use an invalid or expired view:</p>
+<ol>
+<li>The service returns <code>ErrInvalidOrStaleView</code></li>
+<li>The client can create a new view and retry the operation</li>
+</ol>
+<p><strong>d. Graceful Shutdown:</strong></p>
+<p>When the service is shutting down:</p>
+<ol>
+<li>The main context is canceled</li>
+<li>All view contexts are canceled</li>
+<li>In-flight operations are allowed to complete or time out</li>
+<li>Database connections are properly closed</li>
+</ol>
+<p>This comprehensive error handling ensures the service remains stable and recovers gracefully from failures.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../../../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>

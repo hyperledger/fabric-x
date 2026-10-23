@@ -1,0 +1,3005 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Enterprise-grade permissioned distributed ledger with horizontal scalability">
+      
+      
+        <meta name="author" content="Hyperledger Fabric-X Contributors">
+      
+      
+      
+        <link rel="prev" href="../concepts/ledger/ledger/">
+      
+      
+        <link rel="next" href="../concepts/transaction-flow/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Index - Fabric-X Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#fabric-x-architecture-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Fabric-X Documentation" class="md-header__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Fabric-X Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Index
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Fabric-X Documentation" class="md-nav__button md-logo" aria-label="Fabric-X Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Fabric-X Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Key Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/blockchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Blockchain Basics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/network/network/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/identity/identity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Identity Management
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/membership/membership/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Membership (MSP)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/policies/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/ledger/ledger/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ledger
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Topics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Topics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-architectural-innovations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Architectural Innovations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Constraints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-level-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-Level Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architectural-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architectural Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#major-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Major Components
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Major Components">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-arma-ordering-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Arma Ordering Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Arma Ordering Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#component-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vc-internal-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VC Internal Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/transaction-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transaction Flow
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Ordering Service Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Ordering Service Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../orderer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Orderer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Architecture Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/sidecar/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/coordinator/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/verification-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/validator-committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/query-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query Service
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Committer
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/sidecar-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sidecar
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/coordinator-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coordinator
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/verifier-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Verifier
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/validator-committer-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validator-Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/query-block-diagram/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Query
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/core-concurrency-pattern/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concurrency Pattern
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorials/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Deployment
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    None
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/deployment-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/logging/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Logging
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/metrics_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/tls-configurations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer TLS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/performance-tuning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer Performance Tuning
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CLI Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/cryptogen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cryptogen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/configtxgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configtxgen
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/fxconfig/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Fxconfig
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../orderer/docs/cli/arma/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arma
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../orderer/docs/cli/armageddon/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Armageddon
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/cli/committer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Committer
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Application Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../apps/index_placeholder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Index placeholder
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Load Testing
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Load Testing
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../committer/docs/loadgen-artifacts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loadgen artifacts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Faq
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-topics" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architecture Topics
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Architecture Topics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-architectural-innovations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Architectural Innovations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#design-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Constraints
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#high-level-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-Level Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#architectural-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Architectural Layers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#major-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Major Components
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Major Components">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-arma-ordering-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Arma Ordering Service
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Arma Ordering Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#component-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vc-internal-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VC Internal Structure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<h1 id="fabric-x-architecture-reference">Fabric-X Architecture Reference<a class="headerlink" href="#fabric-x-architecture-reference" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Fabric-X represents a fundamental re-architecture of Hyperledger Fabric, designed from the ground up for <strong>mission-critical enterprise workloads</strong> requiring Byzantine Fault Tolerance, horizontal scalability, and high throughput. This document provides a comprehensive architectural reference covering system design, major components, interaction patterns, and guiding principles.</p>
+<h2 id="architecture-topics">Architecture Topics<a class="headerlink" href="#architecture-topics" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="transaction-flow/">Detailed Transaction Architecture</a> — end-to-end transaction-flow diagrams and service interactions.</li>
+<li><a href="../orderer/docs/architecture/">Arma Ordering</a> — ordering-service architecture.</li>
+<li>Router — client request admission and routing.</li>
+<li>Batcher — transaction batching and batch data service.</li>
+<li>Consenter — BFT ordering decisions.</li>
+<li>Assembler — block assembly and delivery.</li>
+<li><a href="../committer/docs/architecture/">Committer Pipeline</a> — validation and commit architecture.</li>
+<li><a href="../committer/docs/sidecar/">Sidecar</a> — block ingestion and delivery.</li>
+<li><a href="../committer/docs/coordinator/">Coordinator</a> — dependency analysis and orchestration.</li>
+<li><a href="../committer/docs/verification-service/">Verifier</a> — signature and namespace-policy verification.</li>
+<li><a href="../committer/docs/validator-committer/">Validator-Committer</a> — MVCC validation and database commit.</li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">Performance Note</p>
+<p>Fabric-X is designed for high-throughput deployments. Actual throughput depends on workload, hardware, shard count, database, and network conditions. Run benchmarks for deployment-specific numbers.</p>
+</div>
+<h3 id="key-architectural-innovations">Key Architectural Innovations<a class="headerlink" href="#key-architectural-innovations" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Innovation</th>
+<th>Fabric Classic</th>
+<th>Fabric-X</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Ordering Service</strong></td>
+<td>Monolithic orderer</td>
+<td><strong>Arma</strong>: 4 microservices (Router, Batcher, Consenter, Assembler)</td>
+<td>Horizontal scalability, BFT consensus</td>
+</tr>
+<tr>
+<td><strong>Commitment</strong></td>
+<td>Monolithic peer</td>
+<td><strong>Pipeline services</strong>: Sidecar, Coordinator, Verifier, Validator-Committer</td>
+<td>Parallel validation and independent scaling</td>
+</tr>
+<tr>
+<td><strong>Endorsement</strong></td>
+<td>Fabric peer execution path</td>
+<td><strong>FSC views</strong> or custom endorsers (native processes)</td>
+<td>Native-process endorsement path</td>
+</tr>
+<tr>
+<td><strong>Consensus</strong></td>
+<td>Raft (Crash Fault Tolerant)</td>
+<td><strong>SmartBFT</strong> (Byzantine Fault Tolerant)</td>
+<td>Tolerates malicious nodes</td>
+</tr>
+<tr>
+<td><strong>Network Model</strong></td>
+<td>Multi-channel complexity</td>
+<td><strong>Single channel + namespaces</strong></td>
+<td>Simplified operations, logical isolation</td>
+</tr>
+<tr>
+<td><strong>Storage</strong></td>
+<td>Peer-local state database</td>
+<td><strong>Sharded PostgreSQL/YugabyteDB</strong></td>
+<td>Horizontal scalability, rich queries</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="design-constraints">Design Constraints<a class="headerlink" href="#design-constraints" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Constraint</th>
+<th>Status</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>mTLS</strong></td>
+<td>Mandatory</td>
+<td>All inter-node communication requires mutual TLS. External TLS (<code>TLS.Enabled</code>) affects only external APIs, but internal mTLS is always enforced.</td>
+</tr>
+<tr>
+<td><strong>Single Channel</strong></td>
+<td>Architectural choice</td>
+<td>Namespaces replace channels for logical isolation. Multi-channel not supported.</td>
+</tr>
+<tr>
+<td><strong>No Private Data Collections</strong></td>
+<td>Not implemented</td>
+<td>Use namespace isolation + application-level encryption instead.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="system-architecture">System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="high-level-architecture">High-Level Architecture<a class="headerlink" href="#high-level-architecture" title="Permanent link">&para;</a></h3>
+<div class="mermaid">flowchart TB
+    subgraph network["FABRIC-X NETWORK (Single Channel + Namespaces)"]
+        direction TB
+        subgraph client["CLIENT LAYER"]
+            FSC["FSC App&lt;br/&gt;(FSC View)"]
+            Custom["Custom App&lt;br/&gt;(REST/gRPC)"]
+            SDK["SDK Client&lt;br/&gt;(Go/Node)"]
+        end
+
+        submit["Transaction Submit"]
+
+        subgraph arma["ARMA / ORDERERX (one party view)"]
+            R1["R1&lt;br/&gt;Router"]
+            B1S1["B1s1&lt;br/&gt;Batcher Shard 1"]
+            B1S2["B1s2&lt;br/&gt;Batcher Shard 2"]
+            C1["C1&lt;br/&gt;Consenter"]
+            OtherC["Other consenters&lt;br/&gt;(SmartBFT cluster)"]
+            A1["A1&lt;br/&gt;Assembler"]
+            R1 --&gt;|"Hr(tx)"| B1S1
+            R1 --&gt;|"Hr(tx)"| B1S2
+            B1S1 --&gt;|BAF digest| C1
+            B1S2 --&gt;|BAF digest| C1
+            C1 &lt;--&gt;|consensus on digests| OtherC
+            C1 --&gt;|ordered BA list| A1
+            B1S1 -. batches .-&gt; A1
+            B1S2 -. batches .-&gt; A1
+        end
+
+        subgraph committer["COMMITTER PIPELINE"]
+            Sidecar["Sidecar&lt;br/&gt;(Delivery)"]
+            Coordinator["Coordinator&lt;br/&gt;(Dependency Graph)"]
+            Verifier["Verifier&lt;br/&gt;(Signatures/Policy)"]
+            VC["VC&lt;br/&gt;(Validator/Committer)"]
+            Sidecar --&gt; Coordinator
+            Coordinator --&gt; Verifier
+            Verifier --&gt; VC
+        end
+
+        DB[("PostgreSQL / YugabyteDB")]
+        QueryService["Query Service"]
+    end
+
+    FSC --&gt; submit
+    Custom --&gt; submit
+    SDK --&gt; submit
+    submit --&gt; R1
+    A1 --&gt;|HLF blocks| Sidecar
+    VC --&gt; DB
+    QueryService -. reads .-&gt; DB
+
+    style network fill:#f5f5f5,stroke:#333
+    style client fill:#e3f2fd,stroke:#333
+    style arma fill:#fff3e0,stroke:#333
+    style committer fill:#e8f5e9,stroke:#333</div>
+<h3 id="architectural-layers">Architectural Layers<a class="headerlink" href="#architectural-layers" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Components</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Client</strong></td>
+<td>FSC Apps, Custom Apps, SDKs</td>
+<td>Transaction submission, state queries</td>
+</tr>
+<tr>
+<td><strong>Ordering</strong></td>
+<td>Arma (Router, Batcher, Consenter, Assembler)</td>
+<td>Transaction ordering, BFT consensus, block assembly</td>
+</tr>
+<tr>
+<td><strong>Commitment</strong></td>
+<td>Pipeline (Sidecar, Coordinator, Verifier, Validator-Committer (VC))</td>
+<td>Parallel validation, policy enforcement, state updates</td>
+</tr>
+<tr>
+<td><strong>Query</strong></td>
+<td>Query Service</td>
+<td>Client state queries (NOT in validation pipeline)</td>
+</tr>
+<tr>
+<td><strong>Storage</strong></td>
+<td>Sharded PostgreSQL/YugabyteDB</td>
+<td>World state persistence, transaction log</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="major-components">Major Components<a class="headerlink" href="#major-components" title="Permanent link">&para;</a></h2>
+<h3 id="1-arma-ordering-service">1. Arma Ordering Service<a class="headerlink" href="#1-arma-ordering-service" title="Permanent link">&para;</a></h3>
+<p><strong>Purpose:</strong> Byzantine Fault Tolerant ordering service that receives transactions, reaches consensus on their order, and produces blocks.</p>
+<p><strong>Architecture:</strong> each Arma party replaces one traditional OS node and contains a router, one batcher per shard, a consenter, and an assembler. Parties run <code>3f + 1</code> SmartBFT consenters to tolerate <code>f</code> Byzantine parties. Arma separates full transaction dissemination from consensus by ordering compact batch digests.</p>
+<div class="mermaid">flowchart TB
+    E["Client / Endorser"] --&gt;|tx| R1
+    E --&gt;|tx| R2
+    E --&gt;|tx| R3
+
+    subgraph P1["Party 1"]
+        R1["R1&lt;br/&gt;Router"]
+        B1S1["B1s1&lt;br/&gt;Batcher S1"]
+        B1S2["B1s2&lt;br/&gt;Batcher S2"]
+        C1["C1&lt;br/&gt;Consenter"]
+        A1["A1&lt;br/&gt;Assembler"]
+        R1 --&gt;|"Hr(tx)"| B1S1
+        R1 --&gt;|"Hr(tx)"| B1S2
+        B1S1 --&gt;|BAF| C1
+        B1S2 --&gt;|BAF| C1
+        C1 --&gt;|ordered BA list| A1
+    end
+
+    subgraph P2["Party 2"]
+        R2["R2&lt;br/&gt;Router"]
+        B2S1["B2s1&lt;br/&gt;Batcher S1"]
+        B2S2["B2s2&lt;br/&gt;Batcher S2"]
+        C2["C2&lt;br/&gt;Consenter"]
+        A2["A2&lt;br/&gt;Assembler"]
+        R2 --&gt;|"Hr(tx)"| B2S1
+        R2 --&gt;|"Hr(tx)"| B2S2
+        B2S1 --&gt;|BAF| C2
+        B2S2 --&gt;|BAF| C2
+        C2 --&gt;|ordered BA list| A2
+    end
+
+    subgraph P3["Party 3"]
+        R3["R3&lt;br/&gt;Router"]
+        B3S1["B3s1&lt;br/&gt;Batcher S1"]
+        B3S2["B3s2&lt;br/&gt;Batcher S2"]
+        C3["C3&lt;br/&gt;Consenter"]
+        A3["A3&lt;br/&gt;Assembler"]
+        R3 --&gt;|"Hr(tx)"| B3S1
+        R3 --&gt;|"Hr(tx)"| B3S2
+        B3S1 --&gt;|BAF| C3
+        B3S2 --&gt;|BAF| C3
+        C3 --&gt;|ordered BA list| A3
+    end
+
+    B1S1 &lt;--&gt;|shard 1 batcher comms| B2S1
+    B2S1 &lt;--&gt;|shard 1 batcher comms| B3S1
+    B1S2 &lt;--&gt;|shard 2 batcher comms| B2S2
+    B2S2 &lt;--&gt;|shard 2 batcher comms| B3S2
+
+    C1 &lt;--&gt;|SmartBFT| C2
+    C2 &lt;--&gt;|SmartBFT| C3
+    C1 &lt;--&gt;|SmartBFT| C3
+
+    B1S1 -. batches .-&gt; A1
+    B1S2 -. batches .-&gt; A1
+    B2S1 -. batches .-&gt; A1
+    B2S2 -. batches .-&gt; A1
+    B3S1 -. batches .-&gt; A1
+    B3S2 -. batches .-&gt; A1
+
+    B1S1 -. batches .-&gt; A2
+    B1S2 -. batches .-&gt; A2
+    B2S1 -. batches .-&gt; A2
+    B2S2 -. batches .-&gt; A2
+    B3S1 -. batches .-&gt; A2
+    B3S2 -. batches .-&gt; A2
+
+    B1S1 -. batches .-&gt; A3
+    B1S2 -. batches .-&gt; A3
+    B2S1 -. batches .-&gt; A3
+    B2S2 -. batches .-&gt; A3
+    B3S1 -. batches .-&gt; A3
+    B3S2 -. batches .-&gt; A3
+
+    A1 --&gt;|HLF blocks| SC["Sidecar / Committer"]
+    A2 --&gt;|HLF blocks| SC
+    A3 --&gt;|HLF blocks| SC
+
+    style P1 fill:#e3f2fd,stroke:#333
+    style P2 fill:#e8f5e9,stroke:#333
+    style P3 fill:#fff3e0,stroke:#333</div>
+<h4 id="component-responsibilities">Component Responsibilities<a class="headerlink" href="#component-responsibilities" title="Permanent link">&para;</a></h4>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Role</th>
+<th>Key Responsibilities</th>
+<th>Performance Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Router</strong></td>
+<td>Entry point</td>
+<td>Validate transactions, authenticate clients, compute deterministic <code>Hr(tx)</code> shard mapping</td>
+<td>Horizontally scalable</td>
+</tr>
+<tr>
+<td><strong>Batcher</strong></td>
+<td>Transaction grouping</td>
+<td>Batch per shard, persist batches, disseminate primary batches to secondaries, generate BAFs</td>
+<td>Scales by shard count</td>
+</tr>
+<tr>
+<td><strong>Consenter</strong></td>
+<td>Consensus</td>
+<td>Run SmartBFT on BAF digests, order Batch Attestations, order complaint votes</td>
+<td>BFT finality</td>
+</tr>
+<tr>
+<td><strong>Assembler</strong></td>
+<td>Block assembly</td>
+<td>Pull ordered metadata from own consenter, fetch batches from shard batchers, construct Fabric blocks</td>
+<td>Parallel block assembly</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Note:</strong> BAF (Batch Attestation Fragment) is an internal Arma structure used for consensus. It is not exposed to the Committer pipeline.</p>
+</blockquote>
+<h4 id="vc-internal-structure">VC Internal Structure<a class="headerlink" href="#vc-internal-structure" title="Permanent link">&para;</a></h4>
+<p>The Validator-Committer (VC) service consists of three internal components:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Preparer</strong></td>
+<td>Prepares transactions for validation, checks namespace policies</td>
+</tr>
+<tr>
+<td><strong>Validator</strong></td>
+<td>Performs MVCC conflict detection, validates read-write sets</td>
+</tr>
+<tr>
+<td><strong>Committer</strong></td>
+<td>Commits validated transactions to database, updates world state</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright 2026 Hyperledger Fabric-X Contributors
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+      
+        <script src="../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>
