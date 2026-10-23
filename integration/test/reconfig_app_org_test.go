@@ -257,7 +257,7 @@ func submitPeerOrgReconfig(t *testing.T, artifactsDir string, compose tc.Compose
 
 	// Extend the network configuration to add peer-org-1 and generate its crypto materials.
 	network.Peers = append(network.Peers, "peer-org-1")
-	testutil.ExtendConfigAndCrypto(&network, artifactsDir, true)
+	testutil.ExtendConfigAndCrypto(&network, artifactsDir, true, false)
 
 	peerOrg1MSP := filepath.Join(artifactsDir, "crypto", "peerOrganizations", "peer-org-1", "msp")
 	caCerts, err := os.ReadFile(filepath.Join(peerOrg1MSP, "cacerts", "peer-org-1-CA-cert.pem"))

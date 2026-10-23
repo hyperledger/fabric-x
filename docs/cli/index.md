@@ -21,10 +21,10 @@ Fabric-X includes the following CLI tools:
 
 | Component | Go Version |
 |-----------|------------|
-| fabric-x | 1.26+ |
-| fabric-x-committer | 1.26+ |
-| fabric-x-orderer | 1.25.5+ |
-| fabric-x-common | 1.25.5+ |
+| fabric-x | 1.27.3+ |
+| fabric-x-committer | 1.27.3+ |
+| fabric-x-orderer | 1.27.3+ |
+| fabric-x-common | 1.27.3+ |
 
 ## Command Structure
 
