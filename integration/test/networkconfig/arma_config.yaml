@@ -12,6 +12,7 @@ Parties:
       - ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/msp/tlscacerts/tlsca.orderer-org-1-cert.pem
     RouterConfig:
       TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/router.orderer-org-1/tls/server.crt
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/router.orderer-org-1/msp/signcerts/router.orderer-org-1-cert.pem
       Host: 127.0.0.1
       Port: 6022
     BatchersConfig:
@@ -27,6 +28,7 @@ Parties:
       Port: 6025
     AssemblerConfig:
       TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/assembler.orderer-org-1/tls/server.crt
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-1/orderers/party1/assembler.orderer-org-1/msp/signcerts/assembler.orderer-org-1-cert.pem
       Host: 127.0.0.1
       Port: 6023
 
@@ -37,6 +39,7 @@ Parties:
       - ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/msp/tlscacerts/tlsca.orderer-org-2-cert.pem
     RouterConfig:
       TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/router.orderer-org-2/tls/server.crt
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/router.orderer-org-2/msp/signcerts/router.orderer-org-2-cert.pem
       Host: 127.0.0.1
       Port: 6122
     BatchersConfig:
@@ -52,6 +55,7 @@ Parties:
       Port: 6125
     AssemblerConfig:
       TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/assembler.orderer-org-2/tls/server.crt
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-2/orderers/party2/assembler.orderer-org-2/msp/signcerts/assembler.orderer-org-2-cert.pem
       Host: 127.0.0.1
       Port: 6123
 
@@ -62,6 +66,7 @@ Parties:
       - ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/msp/tlscacerts/tlsca.orderer-org-3-cert.pem
     RouterConfig:
       TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/router.orderer-org-3/tls/server.crt
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/router.orderer-org-3/msp/signcerts/router.orderer-org-3-cert.pem
       Host: 127.0.0.1
       Port: 6222
     BatchersConfig:
@@ -77,6 +82,7 @@ Parties:
       Port: 6225
     AssemblerConfig:
       TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/assembler.orderer-org-3/tls/server.crt
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-3/orderers/party3/assembler.orderer-org-3/msp/signcerts/assembler.orderer-org-3-cert.pem
       Host: 127.0.0.1
       Port: 6223
 
@@ -87,6 +93,7 @@ Parties:
       - ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/msp/tlscacerts/tlsca.orderer-org-4-cert.pem
     RouterConfig:
       TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/router.orderer-org-4/tls/server.crt
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/router.orderer-org-4/msp/signcerts/router.orderer-org-4-cert.pem
       Host: 127.0.0.1
       Port: 6322
     BatchersConfig:
@@ -102,6 +109,7 @@ Parties:
       Port: 6325
     AssemblerConfig:
       TLSCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/assembler.orderer-org-4/tls/server.crt
+      SignCert: ARTIFACTS_DIR/ordererOrganizations/orderer-org-4/orderers/party4/assembler.orderer-org-4/msp/signcerts/assembler.orderer-org-4-cert.pem
       Host: 127.0.0.1
       Port: 6323
 
