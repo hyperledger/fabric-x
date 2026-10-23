@@ -46,7 +46,7 @@ fxconfig namespace list [flags]
 - `--output=<path>` - Save transaction to file (`.json` extension)
 - `--endorse` - Sign transaction with local MSP identity
 - `--submit` - Submit endorsed transaction to ordering service
-- `--wait` - Block until transaction commits (requires notification service)
+- `--wait` - Block until transaction commits (requires notification service; committer v1.0.6 or later)
 
 **Policy Examples:**
 - Single org: `--policy="OR('Org1MSP.member')"`

@@ -122,7 +122,11 @@ func setupTestEnv(t *testing.T) (string, tc.ComposeStack, context.Context) {
 	numOfParties, numOfShards := networkStats(t, configPath)
 	t.Logf("Running test with %d parties and %d shards", numOfParties, numOfShards)
 
-	armageddon.NewCLI().Run([]string{"generate", "--config", configPath, "--output", symlinkTarget, "--sampleConfigPath", "./ordererconfig/configtx.yaml"})
+	// --noOUs keeps admincerts-based identities, matching ExtendConfigAndCrypto(..., false) below.
+	armageddon.NewCLI().Run([]string{
+		"generate", "--config", configPath, "--output", symlinkTarget,
+		"--sampleConfigPath", "./ordererconfig/configtx.yaml", "--noOUs",
+	})
 	setupArtifacts(t, artifactsDir, symlinkTarget, numOfParties)
 
 	baseCtx := context.Background()
