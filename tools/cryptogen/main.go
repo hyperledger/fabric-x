@@ -59,8 +59,8 @@ func main() {
 	}
 
 	if err != nil {
-		fmt.Printf("error executing command %s\n%s", cmd, err)
-		os.Exit(-1)
+		fmt.Fprintf(os.Stderr, "error executing command %s\n%s\n", cmd, err)
+		os.Exit(1)
 	}
 }
 
