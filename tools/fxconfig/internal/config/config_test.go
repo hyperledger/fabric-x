@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package config
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -195,4 +196,48 @@ func TestConfig_ResolveTLS_ServiceOverrides(t *testing.T) {
 
 	require.Equal(t, []string{"parent-ca.pem"}, cfg.Queries.TLS.RootCertPaths)
 	require.Equal(t, []string{"parent-ca.pem"}, cfg.Notifications.TLS.RootCertPaths)
+}
+
+func TestMSPConfigToFactoryOpts_Defaults(t *testing.T) {
+	t.Parallel()
+
+	mspCfg := MSPConfig{
+		ConfigPath: "/tmp/msp",
+	}
+
+	opts := mspCfg.ToFactoryOpts()
+
+	require.Equal(t, "SW", opts.Default)
+	require.NotNil(t, opts.SW)
+	require.Equal(t, 256, opts.SW.Security)
+	require.Equal(t, "SHA2", opts.SW.Hash)
+	require.NotNil(t, opts.SW.FileKeystore)
+	require.Equal(t, filepath.Join("/tmp/msp", "keystore"), opts.SW.FileKeystore.KeyStorePath)
+}
+
+func TestMSPConfigToFactoryOpts_Overrides(t *testing.T) {
+	t.Parallel()
+
+	mspCfg := MSPConfig{
+		ConfigPath: "/tmp/msp",
+		BCCSP: BCCSPConfig{
+			Default: "SW",
+			SW: BCCSPSWConfig{
+				Security: 384,
+				Hash:     "SHA3",
+				FileKeyStore: BCCSPFileKeyStoreConfig{
+					KeyStorePath: "/custom/keystore",
+				},
+			},
+		},
+	}
+
+	opts := mspCfg.ToFactoryOpts()
+
+	require.Equal(t, "SW", opts.Default)
+	require.NotNil(t, opts.SW)
+	require.Equal(t, 384, opts.SW.Security)
+	require.Equal(t, "SHA3", opts.SW.Hash)
+	require.NotNil(t, opts.SW.FileKeystore)
+	require.Equal(t, "/custom/keystore", opts.SW.FileKeystore.KeyStorePath)
 }
