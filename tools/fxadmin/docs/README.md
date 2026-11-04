@@ -377,26 +377,137 @@ fxadmin modify app known-certs remove --org peer1 --cert known1.pem --block next
 
 **modify party add**
 
-Add a new ARMA party and its orderer organization, if it does not already exist.
+Add a new ARMA party together with its new orderer organization.
 
 ```bash
 fxadmin modify party add --party=party5.yaml --block next.pb
 ```
 
-`party.yaml` is the orderer's shared-config party entry, with
-certificate paths:
+`party5.yaml` is the party definition. It has two sections, each written in the structure
+`fxadmin decode` shows:
+
+- `Party`: the party's entry in the ARMA shared config
+  (`channel_group.groups.Orderer.values.ConsensusType.value.metadata.PartiesConfig`).
+- `Org`: the config group of the party's orderer organization
+  (`channel_group.groups.Orderer.groups.<org>`), plus a `Name` key with the org's key under
+  `Orderer`.
+
+The command copies both sections into the block as they are, and fills in nothing.
+
+**Certificates.** Give every certificate and CRL as the path of its PEM file. A relative path is
+relative to the directory of `party5.yaml`. Only the first PEM block of each file is stored, so a
+file that also holds a private key is safe to use.
 
 ```yaml
-# party.yaml
-PartyID: 5
-CACerts:    [crypto/.../org5/ca/ca-cert.pem]
-TLSCACerts: [crypto/.../org5/tlsca/tlsca-cert.pem]
-RouterConfig:    { Host: 127.0.0.1, Port: 8053, TLSCert: .../router/tls.crt }
-BatchersConfig:
-  - { ShardID: 1, Host: 127.0.0.1, Port: 8054, SignCert: .../b1/sign.crt, TLSCert: .../b1/tls.crt }
-  - { ShardID: 2, Host: 127.0.0.1, Port: 8055, SignCert: .../b2/sign.crt, TLSCert: .../b2/tls.crt }
-ConsenterConfig: { Host: 127.0.0.1, Port: 8052, SignCert: .../c/sign.crt, TLSCert: .../c/tls.crt }
-AssemblerConfig: { Host: 127.0.0.1, Port: 8051, TLSCert: .../a/tls.crt }
+# party5.yaml
+Party:                               # → Orderer ConsensusType metadata: PartiesConfig[]
+  PartyID: 5                         # must be MaxPartyID + 1 of the block
+  CACerts:                           # the org's CA certificates
+    - crypto/org5/ca/ca-cert.pem
+  TLSCACerts:                        # the org's TLS CA certificates
+    - crypto/org5/tlsca/tlsca-cert.pem
+  RouterConfig:
+    host: router.org5.com
+    port: 7050
+    tls_cert: crypto/org5/router/tls/server.crt
+    sign_cert: crypto/org5/router/msp/signcerts/cert.pem
+  BatchersConfig:                    # one per shard; shard IDs start at 1
+    - shardID: 1
+      host: batcher1.org5.com
+      port: 7070
+      sign_cert: crypto/org5/batcher1/msp/signcerts/cert.pem
+      tls_cert: crypto/org5/batcher1/tls/server.crt
+  ConsenterConfig:
+    host: consenter.org5.com
+    port: 7052
+    sign_cert: crypto/org5/consenter/msp/signcerts/cert.pem
+    tls_cert: crypto/org5/consenter/tls/server.crt
+  AssemblerConfig:
+    host: assembler.org5.com
+    port: 7060
+    tls_cert: crypto/org5/assembler/tls/server.crt
+    sign_cert: crypto/org5/assembler/msp/signcerts/cert.pem
+Org:                                 # → Orderer/groups/<Name>
+  Name: org5                         # the org's key under Orderer
+  version: "0"
+  mod_policy: Admins
+  groups: {}
+  policies:                          # Readers, Writers, Admins, Endorsement
+    Readers:
+      version: "0"
+      mod_policy: Admins
+      policy:
+        type: 1                      # 1 = SIGNATURE
+        value:                       # OR('org5.member')
+          version: 0
+          identities:
+            - principal_classification: ROLE
+              principal: { msp_identifier: org5, role: MEMBER }
+          rule: { n_out_of: { "n": 1, rules: [ { signed_by: 0 } ] } }
+    Writers:
+      version: "0"
+      mod_policy: Admins
+      policy:
+        type: 1
+        value:                       # OR('org5.member')
+          version: 0
+          identities:
+            - principal_classification: ROLE
+              principal: { msp_identifier: org5, role: MEMBER }
+          rule: { n_out_of: { "n": 1, rules: [ { signed_by: 0 } ] } }
+    Admins:
+      version: "0"
+      mod_policy: Admins
+      policy:
+        type: 1
+        value:                       # OR('org5.admin')
+          version: 0
+          identities:
+            - principal_classification: ROLE
+              principal: { msp_identifier: org5, role: ADMIN }
+          rule: { n_out_of: { "n": 1, rules: [ { signed_by: 0 } ] } }
+    Endorsement:
+      version: "0"
+      mod_policy: Admins
+      policy:
+        type: 1
+        value:                       # OR('org5.member')
+          version: 0
+          identities:
+            - principal_classification: ROLE
+              principal: { msp_identifier: org5, role: MEMBER }
+          rule: { n_out_of: { "n": 1, rules: [ { signed_by: 0 } ] } }
+  values:
+    MSP:
+      version: "0"
+      mod_policy: Admins
+      value:
+        type: 0                      # 0 = FABRIC
+        config:                      # FabricMSPConfig
+          name: org5                 # MSP ID; also the msp_id of the party's consenter
+          root_certs:                # the org's CA certificates
+            - crypto/org5/ca/ca-cert.pem
+          intermediate_certs: []
+          admins:                    # the org's admin certificates
+            - crypto/org5/users/Admin/msp/signcerts/cert.pem
+          revocation_list: []
+          signing_identity: null
+          organizational_unit_identifiers: []
+          crypto_config:
+            signature_hash_family: SHA2
+            identity_identifier_hash_function: SHA256
+          tls_root_certs:            # the org's TLS CA certificates; must be the party's TLSCACerts
+            - crypto/org5/tlsca/tlsca-cert.pem
+          tls_intermediate_certs: []
+          fabric_node_ous: null
+          known_certs: []
+    Endpoints:
+      version: "0"
+      mod_policy: Admins
+      value:
+        addresses:                   # the party's router (broadcast) and assembler (deliver)
+          - id=5,msp-id=org5,broadcast,router.org5.com:7050
+          - id=5,msp-id=org5,deliver,assembler.org5.com:7060
 ```
 
 **Flags**
@@ -405,6 +516,50 @@ AssemblerConfig: { Host: 127.0.0.1, Port: 8051, TLSCert: .../a/tls.crt }
 |------|:--------:|-------------|
 | `--party` | yes | Path to the party definition YAML |
 | `--block` | yes | Config block to edit in place |
+
+**What else changes in the block**
+
+The command also updates the parts of the block that must agree with the new party:
+
+| Element | Change |
+|---------|--------|
+| Shared config `MaxPartyID` | Set to the new `PartyID`. |
+| Consenter mapping (the `Orderers` value) | A new entry for the party's consenter. Its host, port and certificates come from `ConsenterConfig`, and its `msp_id` from the org's MSP `name`. |
+| `BlockValidation` policy | Recomputed as a BFT quorum over all the consenters' signing certificates. Its version and `mod_policy` are kept. |
+
+**When the command fails**
+
+The command leaves the block unchanged if:
+
+- `party5.yaml` cannot be parsed, has no `Party` or `Org` section, or `Org` has no `Name`.
+- A key of `Party` or `Org` is not a field of the block structure.
+- A certificate or CRL path does not exist, or the first PEM block of the file is not a
+  `CERTIFICATE` (or an `X509 CRL`, for `revocation_list`).
+- An orderer org with the same `Name` is already in the block. Adding a party to an existing org is
+  not supported.
+- `Party` has no `ConsenterConfig`, or `Org` has no Fabric MSP with a `name`.
+- The `host` of a node in `Party` (router, batcher, consenter or assembler) is not a valid host.
+  It must follow the same rules as `modify party node --host`; see **Host format** under
+  **modify party node**.
+- An address in the org's `Endpoints` value cannot be parsed, or its host is not a valid host
+  under the same rules.
+- The edited config is not a valid channel config. This also catches an org certificate or CRL
+  that cannot be parsed.
+
+**Checked by the orderer on submission**
+
+fxadmin does not check these rules before it writes the block, so a mistake is reported only when
+the transaction is submitted. Checking them earlier is tracked in
+[fabric-x-common#233](https://github.com/hyperledger/fabric-x-common/issues/233).
+
+- `PartyID` must be the block's `MaxPartyID + 1`.
+- The party's node certificates must be valid certificates, issued by its `CACerts` and
+  `TLSCACerts`, and none may be expired.
+- The org's MSP `tls_root_certs` must be the party's `TLSCACerts`.
+- No two nodes, of this party or another, may have signing certificates with the same public key.
+- The org's `Endpoints` must include both a `broadcast` and a `deliver` address.
+- A config update can change only one party. Don't add a party and change another one in the same
+  `next.pb`.
 
 ---
 
@@ -449,7 +604,7 @@ fxadmin modify party node --party 1 --role consenter \
 | `--party` | yes | Party ID |
 | `--role` | yes | `router \| batcher \| consenter \| assembler` |
 | `--shard` | if batcher | Batcher shard ID. Required with `--role batcher`; an error with any other role |
-| `--host` | no | New host (unchanged if omitted) |
+| `--host` | no | New host: a host name or an IP address, without a port; IPv6 without brackets (unchanged if omitted) |
 | `--port` | no | New port, 1–65535 (unchanged if omitted) |
 | `--tls-cert` | no | Path to new TLS certificate (unchanged if omitted) |
 | `--sign-cert` | no | Path to new signing certificate (unchanged if omitted) |
@@ -459,6 +614,18 @@ All four node roles have a signing certificate, so `--sign-cert` works with any
 `--role`. Changing a `router` or `assembler` endpoint also updates that party's
 orderer-organization `Endpoints` value (the router is advertised as the
 `broadcast` address, the assembler as the `deliver` address).
+
+**Host format.** `--host` takes an IP address or a host name, without a port:
+
+- An IPv4 address (`10.0.0.5`) or an IPv6 address (`2001:db8::7`). Give IPv6 without
+  brackets; the `Endpoints` value adds them, for example `[2001:db8::7]:7050`. An IPv6
+  zone (`fe80::1%eth0`) is rejected.
+- A host name: labels joined by `.`, each of up to 63 ASCII letters, digits and `-`, not
+  starting or ending with `-`, and at most 253 characters in total. `_` and non-English
+  letters are rejected, for example `orderer_1.example.com`.
+- Digits and dots that are not a valid IPv4 address, such as `300.1.1.1`, are rejected.
+
+A rejected host leaves the block unchanged.
 
 ___
 
