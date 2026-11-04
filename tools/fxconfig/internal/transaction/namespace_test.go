@@ -28,32 +28,36 @@ func TestCreateNamespacesTx(t *testing.T) {
 	}
 
 	tests := []struct {
-		name        string
-		nsPolicy    *applicationpb.NamespacePolicy
-		nsID        string
-		nsVersion   int
-		description string
+		name          string
+		nsPolicy      *applicationpb.NamespacePolicy
+		nsID          string
+		nsVersion     int
+		metaNsVersion uint64
+		description   string
 	}{
 		{
-			name:        "create new namespace (version -1)",
-			nsPolicy:    nsPolicy,
-			nsID:        "new-namespace",
-			nsVersion:   -1,
-			description: "Should create transaction for new namespace",
+			name:          "create new namespace (version -1)",
+			nsPolicy:      nsPolicy,
+			nsID:          "new-namespace",
+			nsVersion:     -1,
+			metaNsVersion: 0,
+			description:   "Should create transaction for new namespace",
 		},
 		{
-			name:        "update existing namespace (version 0)",
-			nsPolicy:    nsPolicy,
-			nsID:        "existing-namespace",
-			nsVersion:   0,
-			description: "Should create transaction for namespace update",
+			name:          "update existing namespace (version 0)",
+			nsPolicy:      nsPolicy,
+			nsID:          "existing-namespace",
+			nsVersion:     0,
+			metaNsVersion: 1,
+			description:   "Should create transaction for namespace update",
 		},
 		{
-			name:        "update existing namespace (version 5)",
-			nsPolicy:    nsPolicy,
-			nsID:        "existing-namespace",
-			nsVersion:   5,
-			description: "Should create transaction for namespace update with higher version",
+			name:          "update existing namespace (version 5)",
+			nsPolicy:      nsPolicy,
+			nsID:          "existing-namespace",
+			nsVersion:     5,
+			metaNsVersion: 9,
+			description:   "Should create transaction for namespace update with higher version",
 		},
 	}
 
@@ -61,14 +65,14 @@ func TestCreateNamespacesTx(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			result := CreateNamespacesTx(tt.nsPolicy, tt.nsID, tt.nsVersion)
+			result := CreateNamespacesTx(tt.nsPolicy, tt.nsID, tt.nsVersion, tt.metaNsVersion)
 
 			require.NotNil(t, result, tt.description)
 			require.Len(t, result.Namespaces, 1, "Should have one namespace entry")
 
 			ns := result.Namespaces[0]
 			require.Equal(t, "_meta", ns.NsId, "Should target meta-namespace")
-			require.Equal(t, uint64(0), ns.NsVersion, "Meta-namespace version should be 0")
+			require.Equal(t, tt.metaNsVersion, ns.NsVersion, "Meta-namespace version should match input")
 			require.Len(t, ns.ReadWrites, 1, "Should have one read-write entry")
 
 			rw := ns.ReadWrites[0]
