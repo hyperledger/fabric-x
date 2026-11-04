@@ -538,6 +538,11 @@ The command leaves the block unchanged if:
 - An orderer org with the same `Name` is already in the block. Adding a party to an existing org is
   not supported.
 - `Party` has no `ConsenterConfig`, or `Org` has no Fabric MSP with a `name`.
+- The `host` of a node in `Party` (router, batcher, consenter or assembler) is not a valid host.
+  It must follow the same rules as `modify party node --host`; see **Host format** under
+  **modify party node**.
+- An address in the org's `Endpoints` value cannot be parsed, or its host is not a valid host
+  under the same rules.
 - The edited config is not a valid channel config. This also catches an org certificate or CRL
   that cannot be parsed.
 
@@ -599,7 +604,7 @@ fxadmin modify party node --party 1 --role consenter \
 | `--party` | yes | Party ID |
 | `--role` | yes | `router \| batcher \| consenter \| assembler` |
 | `--shard` | if batcher | Batcher shard ID. Required with `--role batcher`; an error with any other role |
-| `--host` | no | New host (unchanged if omitted) |
+| `--host` | no | New host: a host name or an IP address, without a port; IPv6 without brackets (unchanged if omitted) |
 | `--port` | no | New port, 1–65535 (unchanged if omitted) |
 | `--tls-cert` | no | Path to new TLS certificate (unchanged if omitted) |
 | `--sign-cert` | no | Path to new signing certificate (unchanged if omitted) |
@@ -609,6 +614,18 @@ All four node roles have a signing certificate, so `--sign-cert` works with any
 `--role`. Changing a `router` or `assembler` endpoint also updates that party's
 orderer-organization `Endpoints` value (the router is advertised as the
 `broadcast` address, the assembler as the `deliver` address).
+
+**Host format.** `--host` takes an IP address or a host name, without a port:
+
+- An IPv4 address (`10.0.0.5`) or an IPv6 address (`2001:db8::7`). Give IPv6 without
+  brackets; the `Endpoints` value adds them, for example `[2001:db8::7]:7050`. An IPv6
+  zone (`fe80::1%eth0`) is rejected.
+- A host name: labels joined by `.`, each of up to 63 ASCII letters, digits and `-`, not
+  starting or ending with `-`, and at most 253 characters in total. `_` and non-English
+  letters are rejected, for example `orderer_1.example.com`.
+- Digits and dots that are not a valid IPv4 address, such as `300.1.1.1`, are rejected.
+
+A rejected host leaves the block unchanged.
 
 ___
 
