@@ -21,12 +21,17 @@ import (
 )
 
 type mockQueryClient struct {
-	policies *applicationpb.NamespacePolicies
-	err      error
+	policies      *applicationpb.NamespacePolicies
+	configVersion uint64
+	err           error
 }
 
 func (m *mockQueryClient) GetNamespacePolicies(_ context.Context) (*applicationpb.NamespacePolicies, error) {
 	return m.policies, m.err
+}
+
+func (m *mockQueryClient) GetConfigVersion(_ context.Context) (uint64, error) {
+	return m.configVersion, m.err
 }
 
 func (*mockQueryClient) Close() error { return nil }

@@ -7,7 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 package v1
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
+
+	"github.com/hyperledger/fabric-x-common/api/committerpb"
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
 )
 
 // NewNsRootCommand returns the namespace command group.
@@ -33,4 +38,13 @@ endorsement policies. Each namespace has:
 	)
 
 	return cmd
+}
+
+// requireCommitted returns an error unless the transaction status is COMMITTED,
+// so that commands waiting for finality exit non-zero on failure.
+func requireCommitted(status app.TxStatus) error {
+	if status != int(committerpb.Status_COMMITTED) {
+		return fmt.Errorf("transaction failed with status: %s", committerpb.Status_name[int32(status)]) //nolint:gosec
+	}
+	return nil
 }

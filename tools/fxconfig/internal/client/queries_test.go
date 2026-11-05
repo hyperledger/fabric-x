@@ -24,6 +24,7 @@ import (
 // mockQueryServiceClient implements committerpb.QueryServiceClient for testing.
 type mockQueryServiceClient struct {
 	policies *applicationpb.NamespacePolicies
+	config   *applicationpb.ConfigTransaction
 	err      error
 }
 
@@ -59,12 +60,12 @@ func (*mockQueryServiceClient) EndView(
 	return nil, nil
 }
 
-func (*mockQueryServiceClient) GetConfigTransaction(
+func (m *mockQueryServiceClient) GetConfigTransaction(
 	_ context.Context,
 	_ *emptypb.Empty,
 	_ ...grpc.CallOption,
 ) (*applicationpb.ConfigTransaction, error) {
-	return nil, nil
+	return m.config, m.err
 }
 
 func (*mockQueryServiceClient) GetTransactionStatus(
@@ -110,6 +111,31 @@ func TestQueryClient_GetNamespacePolicies_Success(t *testing.T) {
 	result, err := qc.GetNamespacePolicies(t.Context())
 	require.NoError(t, err)
 	require.Equal(t, expected, result)
+}
+
+func TestQueryClient_GetConfigVersion_NilClient(t *testing.T) {
+	t.Parallel()
+
+	qc := &QueryClient{cfg: config.QueriesConfig{}}
+	_, err := qc.GetConfigVersion(t.Context())
+	require.Error(t, err)
+}
+
+func TestQueryClient_GetConfigVersion_Error(t *testing.T) {
+	t.Parallel()
+
+	qc := newTestQueryClient(&mockQueryServiceClient{err: errors.New("rpc error")})
+	_, err := qc.GetConfigVersion(t.Context())
+	require.ErrorContains(t, err, "rpc error")
+}
+
+func TestQueryClient_GetConfigVersion_Success(t *testing.T) {
+	t.Parallel()
+
+	qc := newTestQueryClient(&mockQueryServiceClient{config: &applicationpb.ConfigTransaction{Version: 3}})
+	v, err := qc.GetConfigVersion(t.Context())
+	require.NoError(t, err)
+	require.Equal(t, uint64(3), v)
 }
 
 func TestQueryClient_Close_CallsCloseFunc(t *testing.T) {

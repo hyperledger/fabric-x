@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
@@ -84,4 +85,47 @@ func TestNsUpdateCommandRun_NoTx(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, printerOut.String(), "Transaction status: STATUS_UNSPECIFIED")
 	mockApp.AssertExpectations(t)
+}
+
+func TestUpdateCommand_WaitNotCommitted(t *testing.T) {
+	t.Parallel()
+
+	mockApp := &testApp{}
+	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).
+		Return(nil, int(committerpb.Status_ABORTED_MVCC_CONFLICT), nil)
+
+	var printerOut bytes.Buffer
+	cmd := newNsUpdateCommand(&CLIContext{
+		App:     mockApp,
+		Printer: cliio.NewCLIPrinter(&printerOut, &printerOut, cliio.FormatTable),
+	})
+	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
+	require.NoError(t, cmd.Flags().Set("version", "0"))
+	require.NoError(t, cmd.Flags().Set("wait", "true"))
+
+	err := cmd.RunE(cmd, []string{"my-namespace"})
+
+	require.EqualError(t, err, "transaction failed with status: ABORTED_MVCC_CONFLICT")
+	require.Contains(t, printerOut.String(), "Transaction status: ABORTED_MVCC_CONFLICT")
+	mockApp.AssertExpectations(t)
+}
+
+func TestUpdateCommand_WaitCommitted(t *testing.T) {
+	t.Parallel()
+
+	mockApp := &testApp{}
+	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).
+		Return(nil, int(committerpb.Status_COMMITTED), nil)
+
+	var printerOut bytes.Buffer
+	cmd := newNsUpdateCommand(&CLIContext{
+		App:     mockApp,
+		Printer: cliio.NewCLIPrinter(&printerOut, &printerOut, cliio.FormatTable),
+	})
+	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
+	require.NoError(t, cmd.Flags().Set("version", "0"))
+	require.NoError(t, cmd.Flags().Set("wait", "true"))
+
+	require.NoError(t, cmd.RunE(cmd, []string{"my-namespace"}))
+	require.Contains(t, printerOut.String(), "Transaction status: COMMITTED")
 }

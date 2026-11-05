@@ -61,14 +61,14 @@ func TestCreateNamespacesTx(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			result := CreateNamespacesTx(tt.nsPolicy, tt.nsID, tt.nsVersion)
+			result := CreateNamespacesTx(tt.nsPolicy, tt.nsID, tt.nsVersion, 7)
 
 			require.NotNil(t, result, tt.description)
 			require.Len(t, result.Namespaces, 1, "Should have one namespace entry")
 
 			ns := result.Namespaces[0]
 			require.Equal(t, "_meta", ns.NsId, "Should target meta-namespace")
-			require.Equal(t, uint64(0), ns.NsVersion, "Meta-namespace version should be 0")
+			require.Equal(t, uint64(7), ns.NsVersion, "Meta-namespace version should be the config version")
 			require.Len(t, ns.ReadWrites, 1, "Should have one read-write entry")
 
 			rw := ns.ReadWrites[0]

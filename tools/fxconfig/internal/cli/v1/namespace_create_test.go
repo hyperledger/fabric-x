@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hyperledger/fabric-x-common/api/applicationpb"
+	"github.com/hyperledger/fabric-x-common/api/committerpb"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/app"
 	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/cli/v1/cliio"
 )
@@ -140,4 +141,45 @@ func (t *testApp) SubmitTransactionWithWait(
 ) (app.TxStatus, error) {
 	args := t.Called(ctx, txID, tx)
 	return args.Int(0), args.Error(1)
+}
+
+func TestCreateCommand_WaitNotCommitted(t *testing.T) {
+	t.Parallel()
+
+	mockApp := &testApp{}
+	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).
+		Return(nil, int(committerpb.Status_ABORTED_MVCC_CONFLICT), nil)
+
+	var printerOut bytes.Buffer
+	cmd := newNsCreateCommand(&CLIContext{
+		App:     mockApp,
+		Printer: cliio.NewCLIPrinter(&printerOut, &printerOut, cliio.FormatTable),
+	})
+	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
+	require.NoError(t, cmd.Flags().Set("wait", "true"))
+
+	err := cmd.RunE(cmd, []string{"my-namespace"})
+
+	require.EqualError(t, err, "transaction failed with status: ABORTED_MVCC_CONFLICT")
+	require.Contains(t, printerOut.String(), "Transaction status: ABORTED_MVCC_CONFLICT")
+	mockApp.AssertExpectations(t)
+}
+
+func TestCreateCommand_WaitCommitted(t *testing.T) {
+	t.Parallel()
+
+	mockApp := &testApp{}
+	mockApp.On("DeployNamespace", mock.Anything, mock.Anything).
+		Return(nil, int(committerpb.Status_COMMITTED), nil)
+
+	var printerOut bytes.Buffer
+	cmd := newNsCreateCommand(&CLIContext{
+		App:     mockApp,
+		Printer: cliio.NewCLIPrinter(&printerOut, &printerOut, cliio.FormatTable),
+	})
+	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
+	require.NoError(t, cmd.Flags().Set("wait", "true"))
+
+	require.NoError(t, cmd.RunE(cmd, []string{"my-namespace"}))
+	require.Contains(t, printerOut.String(), "Transaction status: COMMITTED")
 }

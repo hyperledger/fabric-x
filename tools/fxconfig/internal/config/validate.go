@@ -40,6 +40,15 @@ func (c *OrdererConfig) Validate(vctx validation.Context) error {
 	return c.EndpointServiceConfig.Validate(vctx)
 }
 
+// Validate validates query service configuration.
+// The error names the config key, since namespace create/update now require this section.
+func (c *QueriesConfig) Validate(vctx validation.Context) error {
+	if err := c.EndpointServiceConfig.Validate(vctx); err != nil {
+		return fmt.Errorf("invalid queries configuration (queries.address / FXCONFIG_QUERIES_ADDRESS): %w", err)
+	}
+	return nil
+}
+
 // Validate validates service endpoint configuration.
 // Checks address, timeout, and TLS settings for a given service.
 func (c *EndpointServiceConfig) Validate(vctx validation.Context) error {
@@ -117,6 +126,9 @@ func errorIfZeroDuration(d time.Duration, errMsg string) error {
 }
 
 func validateEndpoint(endpoint string) error {
+	if endpoint == "" {
+		return errors.New("must not be empty")
+	}
 	host, port, err := net.SplitHostPort(endpoint)
 	if err != nil {
 		return err

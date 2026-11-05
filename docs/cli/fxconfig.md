@@ -120,7 +120,11 @@ Policy Syntax:
 Transaction Lifecycle Flags:
   --endorse  Collect endorsement from local MSP
   --submit   Submit transaction to ordering service
-  --wait     Wait for transaction finalization (implies --submit)
+  --wait     Wait for transaction finalization (implies --submit); exits
+             non-zero if the transaction is not committed
+
+The query service must be configured: the transaction is built against the
+current channel config version.
 
 Examples:
   # Create namespace with single org policy (save to file)
@@ -199,6 +203,10 @@ Use 'fxconfig namespace list' to find the current version number.
 
 Version numbers increment with each successful update. If the version you
 specify doesn't match the current version, the update will fail.
+
+The query service must be configured: the transaction is built against the
+current channel config version. With --wait, the command exits non-zero if
+the transaction is not committed.
 
 Examples:
   # Update namespace policy (check version first with 'list')

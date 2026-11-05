@@ -12,13 +12,17 @@ import (
 	"github.com/hyperledger/fabric-x-common/protoutil"
 )
 
-// CreateNamespacesTx builds a transaction to create or update a namespace policy.
-// Writes to the meta-namespace. Use version -1 for create, >= 0 for update.
-func CreateNamespacesTx(nsPolicy *applicationpb.NamespacePolicy, nsID string, nsVersion int) *applicationpb.Tx {
+// CreateNamespacesTx builds a transaction to create or update a namespace policy in the meta-namespace.
+//
+// nsVersion is the version of the namespace policy being replaced: -1 for create, >= 0 for update.
+// metaNsVersion is the version of the latest committed channel config; the committer rejects a
+// meta-namespace write with ABORTED_MVCC_CONFLICT unless its NsVersion matches that version.
+func CreateNamespacesTx(
+	nsPolicy *applicationpb.NamespacePolicy, nsID string, nsVersion int, metaNsVersion uint64,
+) *applicationpb.Tx {
 	writeToMetaNs := &applicationpb.TxNamespace{
-		NsId: committerpb.MetaNamespaceID,
-		// TODO: we need the correct version of the metaNamespaceID
-		NsVersion:  0,
+		NsId:       committerpb.MetaNamespaceID,
+		NsVersion:  metaNsVersion,
 		ReadWrites: make([]*applicationpb.ReadWrite, 0, 1),
 	}
 
