@@ -60,6 +60,25 @@ func (qc *QueryClient) GetNamespacePolicies(ctx context.Context) (*applicationpb
 	return res, nil
 }
 
+// GetConfigVersion returns the version of the latest committed channel config transaction.
+// Transactions writing to the meta-namespace must carry this version as their NsVersion.
+// The request is bounded by the configured connection timeout.
+func (qc *QueryClient) GetConfigVersion(ctx context.Context) (uint64, error) {
+	if qc.client == nil {
+		return 0, errors.New("require client")
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, qc.cfg.ConnectionTimeout)
+	defer cancel()
+
+	res, err := qc.client.GetConfigTransaction(ctx, &emptypb.Empty{})
+	if err != nil {
+		return 0, fmt.Errorf("getConfigTransaction error: %w", err)
+	}
+
+	return res.GetVersion(), nil
+}
+
 // Close terminates the gRPC connection to the query service.
 func (qc *QueryClient) Close() error {
 	if qc.closeF != nil {

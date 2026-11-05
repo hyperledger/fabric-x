@@ -8,8 +8,11 @@ package config
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/hyperledger/fabric-x/tools/fxconfig/internal/validation"
 )
 
 // TestErrorIfEmpty tests the errorIfEmpty helper function.
@@ -75,4 +78,16 @@ func TestErrorIfEmpty(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestQueriesConfigValidate_EmptyAddress checks that a missing query service address
+// produces an error naming the config key and its environment variable.
+func TestQueriesConfigValidate_EmptyAddress(t *testing.T) {
+	t.Parallel()
+
+	c := &QueriesConfig{EndpointServiceConfig: EndpointServiceConfig{ConnectionTimeout: time.Second}}
+	err := c.Validate(validation.NewValidationContext())
+	require.EqualError(t, err,
+		"invalid queries configuration (queries.address / FXCONFIG_QUERIES_ADDRESS): "+
+			"invalid address: must not be empty")
 }

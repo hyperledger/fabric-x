@@ -41,7 +41,11 @@ Policy Syntax:
 Transaction Lifecycle Flags:
   --endorse  Collect endorsement from local MSP
   --submit   Submit transaction to ordering service
-  --wait     Wait for transaction finalization (implies --submit)
+  --wait     Wait for transaction finalization (implies --submit); exits
+             non-zero if the transaction is not committed
+
+The query service must be configured: the transaction is built against the
+current channel config version.
 
 Examples:
   # Create namespace with single org policy (save to file)
@@ -82,6 +86,9 @@ Examples:
 				ctx.Printer.Print(
 					fmt.Sprintf("Transaction status: %s", committerpb.Status_name[int32(status)]), //nolint:gosec
 				)
+				if namespace.wait {
+					return requireCommitted(status)
+				}
 				return nil
 			}
 

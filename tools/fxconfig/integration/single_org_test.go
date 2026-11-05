@@ -454,6 +454,27 @@ func TestSingleOrgScenarios(t *testing.T) {
 		require.Contains(t, nss, Namespace{Name: ns, Version: 1})
 	})
 
+	// Regression test for https://github.com/hyperledger/fabric-x/issues/189:
+	// a waited update that aborts must fail the command instead of exiting 0.
+	t.Run("update_stale_version_wait_fails", func(t *testing.T) {
+		t.Parallel()
+
+		ns := "s8_update_stale_version_wait"
+
+		_, err := fxconfig(t, "namespace", "create", ns, configArg, policyArg, endorseArg, submitArg, waitArg)
+		require.NoError(t, err)
+
+		_, err = fxconfig(t,
+			"namespace", "update", ns, configArg, policyArg, "--version=5", endorseArg, submitArg, waitArg)
+		require.EqualError(t, err, "transaction failed with status: ABORTED_MVCC_CONFLICT")
+
+		stdOut, err := fxconfig(t, "namespace", "list", configArg)
+		require.NoError(t, err)
+		nss, err := parseNamespaceList(stdOut)
+		require.NoError(t, err)
+		require.Contains(t, nss, Namespace{Name: ns, Version: 0})
+	})
+
 	t.Run("update_output_then_tx_endorse_submit", func(t *testing.T) {
 		t.Parallel()
 

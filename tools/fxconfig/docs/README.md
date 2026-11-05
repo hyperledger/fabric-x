@@ -39,14 +39,20 @@ fxconfig namespace update <name> [flags]
 fxconfig namespace list [flags]
 ```
 
+`create` and `update` query the committer's query service (`queries` section) for the current
+channel config version, which every namespace transaction must carry. Configure the query service
+even when only writing the transaction to a file with `--output`. The transaction is bound to that
+config version: if the channel config changes before it is committed, it aborts with
+`ABORTED_MVCC_CONFLICT` and must be re-created.
+
 **Common Flags:**
 - `--policy=<DSL>` - Endorsement policy DSL string
 - `--policy=threshold:<path>` - Threshold ECDSA policy from PEM file
-- `--version=<int>` - Version number (update only; create defaults to 0)
+- `--version=<int>` - Current version of the namespace policy being replaced (update only, see `namespace list`)
 - `--output=<path>` - Save transaction to file (`.json` extension)
 - `--endorse` - Sign transaction with local MSP identity
 - `--submit` - Submit endorsed transaction to ordering service
-- `--wait` - Block until transaction commits (requires notification service; committer v1.0.6 or later)
+- `--wait` - Block until transaction is finalized and exit non-zero unless it is committed (requires notification service; committer v1.0.6 or later)
 
 **Policy Examples:**
 - Single org: `--policy="OR('Org1MSP.member')"`
@@ -337,7 +343,8 @@ fxconfig tx submit \
 ## Exit Codes
 
 - `0` - Success
-- `1` - Error (validation failure, connection error, etc.)
+- `1` - Error (validation failure, connection error, etc.), or with `--wait`, the transaction finalized
+  with a status other than `COMMITTED` (the status is printed first)
 
 ## Error Handling
 
@@ -407,6 +414,21 @@ ls -la /path/to/tls/
 ls -la /path/to/msp/
 fxconfig info | grep -i msp
 ```
+
+**Query service not configured:**
+
+```bash
+# Error: cannot get channel config version from query service: invalid queries configuration
+#   (queries.address / FXCONFIG_QUERIES_ADDRESS): invalid address: must not be empty
+# namespace create/update need the query service; set it in the config file or via:
+FXCONFIG_QUERIES_ADDRESS=localhost:7001 fxconfig namespace create ...
+```
+
+**Transaction status `ABORTED_MVCC_CONFLICT`:**
+
+The namespace policy version passed with `--version` is not the current one (check with
+`fxconfig namespace list`), or the channel config changed between building the transaction and
+committing it. Re-create the transaction and submit again.
 
 **Policy validation errors:**
 

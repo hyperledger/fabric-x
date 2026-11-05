@@ -40,6 +40,8 @@ type OrdererProvider interface {
 type QueryClient interface {
 	// GetNamespacePolicies fetches current namespace policy configurations.
 	GetNamespacePolicies(ctx context.Context) (*applicationpb.NamespacePolicies, error)
+	// GetConfigVersion fetches the version of the latest committed channel config.
+	GetConfigVersion(ctx context.Context) (uint64, error)
 	// Close releases resources held by the client.
 	Close() error
 }
