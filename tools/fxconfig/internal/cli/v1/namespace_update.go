@@ -40,12 +40,18 @@ Use 'fxconfig namespace list' to find the current version number.
 Version numbers increment with each successful update. If the version you
 specify doesn't match the current version, the update will fail.
 
+Dry-run validates the update and previews the generated transaction without
+submitting it to the ordering service.
+
 Examples:
   # Update namespace policy (check version first with 'list')
   fxconfig namespace update hello \
     --policy="OR('Org2MSP.member')" \
     --version=0 \
     --endorse --submit --wait
+
+	# Preview a namespace update without submitting
+	fxconfig namespace update payments --config updated.yaml --dry-run
 
   # Change from single-org to multi-org policy
   fxconfig namespace update hello \
@@ -70,6 +76,7 @@ Examples:
 				Endorse: namespace.endorse,
 				Submit:  namespace.submit,
 				Wait:    namespace.wait,
+				DryRun:  namespace.dryRun,
 			}
 
 			res, status, err := ctx.App.DeployNamespace(cmd.Context(), &input)
@@ -82,6 +89,17 @@ Examples:
 					fmt.Sprintf("Transaction status: %s", committerpb.Status_name[int32(status)]), //nolint:gosec
 				)
 				return nil
+			}
+
+			if input.DryRun {
+				printDryRun(cmd, ctx, dryRunPreview{
+					operation: "update",
+					namespace: args[0],
+					txID:      res.TxID,
+				})
+				if output == "" {
+					return nil
+				}
 			}
 
 			o, err := ctx.IOTransactionCodec.Encode(res.TxID, res.Tx)

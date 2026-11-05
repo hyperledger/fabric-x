@@ -7,6 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 package v1
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -33,4 +35,26 @@ endorsement policies. Each namespace has:
 	)
 
 	return cmd
+}
+
+type dryRunPreview struct {
+	operation string
+	namespace string
+	txID      string
+}
+
+func printDryRun(cmd *cobra.Command, ctx *CLIContext, preview dryRunPreview) {
+	message := fmt.Sprintf(
+		"=== DRY RUN ===\n\nNamespace operation prepared successfully.\n\n"+
+			"Namespace: %s\nOperation: %s\nTxID: %s\n\nTransaction was NOT submitted.\n",
+		preview.namespace,
+		preview.operation,
+		preview.txID,
+	)
+	if ctx.Printer != nil {
+		ctx.Printer.Print(message)
+		return
+	}
+
+	_, _ = fmt.Fprint(cmd.OutOrStdout(), message)
 }

@@ -33,6 +33,9 @@ func TestNewCreateCommand(t *testing.T) {
 
 	policy := cmd.Flag("policy")
 	require.NotNil(t, policy, "policy flag should exist")
+
+	dryRun := cmd.Flag("dry-run")
+	require.NotNil(t, dryRun, "dry-run flag should exist")
 }
 
 func TestNewCreateCommandRun_TxReturned(t *testing.T) {
@@ -82,6 +85,39 @@ func TestNewCreateCommandRun_NoTx(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Contains(t, printerOut.String(), "Transaction status: STATUS_UNSPECIFIED")
+	mockApp.AssertExpectations(t)
+}
+
+func TestNewCreateCommandRun_DryRun(t *testing.T) {
+	t.Parallel()
+
+	mockApp := &testApp{}
+	deployOut := &app.DeployNamespaceOutput{
+		TxID: "tx-dry-run",
+		Tx:   &applicationpb.Tx{},
+	}
+	mockApp.On("DeployNamespace", mock.Anything, mock.MatchedBy(func(input *app.DeployNamespaceInput) bool {
+		return input != nil && input.DryRun && input.NsID == "my-namespace"
+	})).Return(deployOut, app.UnknownStatus, nil)
+
+	var printerOut, printerErr bytes.Buffer
+	printer := cliio.NewCLIPrinter(&printerOut, &printerErr, cliio.FormatTable)
+	cmd := newNsCreateCommand(&CLIContext{
+		App:     mockApp,
+		Printer: printer,
+	})
+	cmd.SetOut(&printerOut)
+	require.NoError(t, cmd.Flags().Set("policy", "OR('Org1MSP.member')"))
+	require.NoError(t, cmd.Flags().Set("dry-run", "true"))
+
+	err := cmd.RunE(cmd, []string{"my-namespace"})
+
+	require.NoError(t, err)
+	require.Contains(t, printerOut.String(), "=== DRY RUN ===")
+	require.Contains(t, printerOut.String(), "Namespace: my-namespace")
+	require.Contains(t, printerOut.String(), "Operation: create")
+	require.Contains(t, printerOut.String(), "TxID: tx-dry-run")
+	require.Contains(t, printerOut.String(), "Transaction was NOT submitted.")
 	mockApp.AssertExpectations(t)
 }
 
